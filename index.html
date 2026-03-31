@@ -1,502 +1,452 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QuantEdge · Market Probability Engine</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#050810;--bg3:#0d1220;--panel:#0a0f1e;--border:#1a2340;--border-bright:#1e3060;
-    --accent:#00d4ff;--accent2:#0090cc;--green:#00ff88;--red:#ff3355;
-    --yellow:#ffcc00;--text:#c8d8f0;--text-dim:#5a7090;--text-bright:#e8f4ff;
-    --glow:0 0 20px rgba(0,212,255,0.15);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-  .container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:16px;}
-  .header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 24px;border-bottom:1px solid var(--border);margin-bottom:20px;}
-  .logo{display:flex;align-items:baseline;gap:10px;}
-  .logo-main{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--accent);letter-spacing:3px;text-shadow:0 0 30px rgba(0,212,255,0.5);}
-  .logo-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-  .header-right{display:flex;align-items:center;gap:16px;}
-  .timestamp{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);}
-  .refresh-btn{background:transparent;border:1px solid var(--border-bright);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;padding:8px 18px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
-  .refresh-btn:hover{background:rgba(0,212,255,0.08);border-color:var(--accent);}
-  .refresh-btn:disabled{opacity:0.4;cursor:not-allowed;}
-  .bias-hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;background:var(--panel);border:1px solid var(--border);padding:24px 28px;margin-bottom:20px;position:relative;overflow:hidden;}
-  .bias-hero::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;transition:background 0.5s;background:var(--yellow);}
-  .bias-hero.bullish::before{background:var(--green);}
-  .bias-hero.bearish::before{background:var(--red);}
-  .bias-score-wrap{text-align:center;}
-  .bias-number{font-family:'Rajdhani',sans-serif;font-size:72px;font-weight:700;line-height:1;}
-  .bias-label{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;margin-top:4px;}
-  .bias-info{display:flex;flex-direction:column;gap:8px;}
-  .bias-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;color:var(--text-bright);letter-spacing:1px;}
-  .bias-desc{font-size:13px;color:var(--text-dim);line-height:1.6;max-width:600px;}
-  .signal-bar-wrap{display:flex;align-items:center;gap:10px;margin-top:4px;}
-  .signal-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
-  .signal-bar-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
-  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px;}
-  @media(max-width:900px){.grid-3{grid-template-columns:1fr 1fr;}}
-  @media(max-width:600px){.grid-3,.grid-2{grid-template-columns:1fr;}.bias-hero{grid-template-columns:1fr;}}
-  .panel{background:var(--panel);border:1px solid var(--border);padding:16px 18px;}
-  .panel-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-  .panel-title::after{content:'';flex:1;height:1px;background:var(--border);}
-  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(26,35,64,0.5);}
-  .metric-row:last-child{border-bottom:none;}
-  .metric-name{font-size:12px;color:var(--text-dim);letter-spacing:1px;}
-  .metric-value{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--text-bright);}
-  .metric-signal{font-family:'Share Tech Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;}
-  .sig-bull{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
-  .sig-bear{background:rgba(255,51,85,0.1);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
-  .sig-neut{background:rgba(255,204,0,0.1);color:var(--yellow);border:1px solid rgba(255,204,0,0.2);}
-  .big-stat{text-align:center;padding:8px 0;}
-  .big-stat-value{font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:700;line-height:1;}
-  .big-stat-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-top:4px;}
-  .big-stat-change{font-family:'Share Tech Mono',monospace;font-size:12px;margin-top:6px;}
-  .signal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-  .signal-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
-  .signal-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:bold;}
-  .dot-bull{background:rgba(0,255,136,0.15);color:var(--green);border:1.5px solid var(--green);}
-  .dot-bear{background:rgba(255,51,85,0.15);color:var(--red);border:1.5px solid var(--red);}
-  .dot-neut{background:rgba(255,204,0,0.1);color:var(--yellow);border:1.5px solid var(--yellow);}
-  .signal-dot-name{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);text-align:center;line-height:1.3;}
-  .ai-panel{background:var(--panel);border:1px solid var(--border);padding:18px 20px;margin-bottom:16px;}
-  .ai-content{font-size:13px;line-height:1.8;color:var(--text);min-height:80px;}
-  .ai-thinking{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:12px;}
-  .dots-anim::after{content:'';animation:dots 1.5s infinite;}
-  @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
-  .ai-ask-wrap{display:flex;gap:10px;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
-  .ai-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text-bright);font-family:'Exo 2',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
-  .ai-input:focus{border-color:var(--accent2);}
-  .ai-input::placeholder{color:var(--text-dim);}
-  .ai-btn{background:transparent;border:1px solid var(--accent2);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;padding:8px 16px;cursor:pointer;text-transform:uppercase;white-space:nowrap;}
-  .ai-btn:disabled{opacity:0.4;cursor:not-allowed;}
-  .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;}
-  .status-live{background:var(--green);animation:pulse 2s infinite;}
-  .status-stale{background:var(--yellow);}
-  .status-err{background:var(--red);}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:20px;transition:opacity 0.5s;}
-  .loading-overlay.hidden{opacity:0;pointer-events:none;}
-  .loader-logo{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:var(--accent);letter-spacing:6px;text-shadow:0 0 40px rgba(0,212,255,0.6);}
-  .loader-bar-outer{width:280px;height:2px;background:var(--border);}
-  .loader-bar-inner{height:100%;background:var(--accent);width:0%;transition:width 0.3s ease;}
-  .loader-status{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-  .footer{border-top:1px solid var(--border);padding:12px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-  .footer-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);}
-  .data-source-tag{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);background:var(--bg3);border:1px solid var(--border);padding:2px 6px;border-radius:2px;}
-  .error-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);margin-top:4px;}
+:root {
+  --bg:#050810; --bg3:#0d1220; --panel:#0a0f1e; --border:#1a2340;
+  --accent:#00d4ff; --accent2:#0090cc; --green:#00ff88; --red:#ff3355;
+  --yellow:#ffcc00; --text:#c8d8f0; --text-dim:#5a7090; --text-bright:#e8f4ff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Exo 2',sans-serif; font-weight:300; min-height:100vh; }
+body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+.wrap { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:16px; }
+
+/* HEADER */
+.hdr { display:flex; align-items:center; justify-content:space-between; padding:12px 0 20px; border-bottom:1px solid var(--border); margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.logo-main { font-family:'Rajdhani',sans-serif; font-size:26px; font-weight:700; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.4); }
+.logo-sub { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:2px; }
+.hdr-right { display:flex; align-items:center; gap:12px; }
+.clock { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); }
+.btn { background:transparent; border:1px solid #1e3060; color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:600; letter-spacing:2px; padding:7px 16px; cursor:pointer; text-transform:uppercase; }
+.btn:hover { background:rgba(0,212,255,0.08); }
+.btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* STATUS BAR */
+.status-bar { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); padding:8px 12px; background:var(--panel); border:1px solid var(--border); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+.dot-green { background:var(--green); animation:pulse 2s infinite; }
+.dot-yellow { background:var(--yellow); }
+.dot-red { background:var(--red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* BIAS HERO */
+.bias-hero { background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--yellow); padding:20px 24px; margin-bottom:16px; display:grid; grid-template-columns:120px 1fr; gap:20px; align-items:center; }
+.bias-hero.bull { border-left-color:var(--green); }
+.bias-hero.bear { border-left-color:var(--red); }
+.score-num { font-family:'Rajdhani',sans-serif; font-size:64px; font-weight:700; line-height:1; color:var(--yellow); text-align:center; }
+.score-lbl { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--yellow); text-align:center; margin-top:2px; }
+.bias-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:600; color:var(--text-bright); }
+.bias-desc { font-size:13px; color:var(--text-dim); line-height:1.6; margin-top:4px; }
+.bar-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+.bar-track { flex:1; height:5px; background:var(--bg3); border-radius:3px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:3px; transition:width 0.6s; }
+.counts { display:flex; gap:12px; margin-top:6px; font-family:'Share Tech Mono',monospace; font-size:10px; }
+
+/* GRID */
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; }
+.g2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
+@media(max-width:800px){ .g3{grid-template-columns:1fr 1fr;} }
+@media(max-width:500px){ .g3,.g2{grid-template-columns:1fr;} .bias-hero{grid-template-columns:1fr;} }
+
+/* PANEL */
+.panel { background:var(--panel); border:1px solid var(--border); padding:14px 16px; }
+.ptitle { font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:600; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.big-val { font-family:'Rajdhani',sans-serif; font-size:38px; font-weight:700; line-height:1; text-align:center; color:var(--text-bright); }
+.big-sub { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:2px; text-align:center; margin-top:2px; }
+.big-chg { font-family:'Share Tech Mono',monospace; font-size:11px; text-align:center; margin-top:4px; }
+.mrow { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(26,35,64,0.4); }
+.mrow:last-child { border-bottom:none; }
+.mname { font-size:11px; color:var(--text-dim); }
+.mval { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--text-bright); }
+.tag { font-family:'Share Tech Mono',monospace; font-size:9px; padding:2px 7px; border-radius:2px; }
+.bull-tag { background:rgba(0,255,136,0.1); color:var(--green); border:1px solid rgba(0,255,136,0.2); }
+.bear-tag { background:rgba(255,51,85,0.1); color:var(--red); border:1px solid rgba(255,51,85,0.2); }
+.neut-tag { background:rgba(255,204,0,0.1); color:var(--yellow); border:1px solid rgba(255,204,0,0.2); }
+
+/* SIGNAL DOTS */
+.sig-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.sig-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.sig-dot { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; }
+.sdot-bull { background:rgba(0,255,136,0.15); color:var(--green); border:1.5px solid var(--green); }
+.sdot-bear { background:rgba(255,51,85,0.15); color:var(--red); border:1.5px solid var(--red); }
+.sdot-neut { background:rgba(255,204,0,0.1); color:var(--yellow); border:1.5px solid var(--yellow); }
+.sig-name { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--text-dim); text-align:center; }
+
+/* AI */
+.ai-panel { background:var(--panel); border:1px solid var(--border); padding:16px 18px; margin-bottom:14px; }
+.ai-text { font-size:13px; line-height:1.8; color:var(--text); min-height:60px; }
+.ai-input-row { display:flex; gap:8px; margin-top:12px; border-top:1px solid var(--border); padding-top:12px; }
+.ai-inp { flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text-bright); font-family:'Exo 2',sans-serif; font-size:13px; padding:7px 11px; outline:none; }
+.ai-inp::placeholder { color:var(--text-dim); }
+
+/* FOOTER */
+.footer { border-top:1px solid var(--border); padding:10px 0; margin-top:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+.fnote { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); }
+.ftag { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--text-dim); background:var(--bg3); border:1px solid var(--border); padding:1px 5px; }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loader-logo">QUANTEDGE</div>
-  <div class="loader-bar-outer"><div class="loader-bar-inner" id="loaderBar"></div></div>
-  <div class="loader-status" id="loaderStatus">INITIALIZING...</div>
-</div>
-
-<div class="container">
-  <div class="header">
-    <div class="logo">
+  <div class="hdr">
+    <div>
       <div class="logo-main">QUANTEDGE</div>
       <div class="logo-sub">MARKET PROBABILITY ENGINE</div>
     </div>
-    <div class="header-right">
-      <div class="timestamp"><span class="status-dot status-live" id="statusDot"></span><span id="timestampEl">--:--:-- PT</span></div>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ REFRESH</button>
+    <div class="hdr-right">
+      <div class="clock"><span class="dot dot-green"></span><span id="clk">--:--:-- PT</span></div>
+      <button class="btn" id="rfBtn" onclick="loadAll()">↻ REFRESH</button>
     </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <span class="dot dot-yellow"></span><span id="statusMsg">Loading market data...</span>
   </div>
 
   <div class="bias-hero" id="biasHero">
-    <div class="bias-score-wrap">
-      <div class="bias-number" id="biasNumber" style="color:var(--yellow)">--</div>
-      <div class="bias-label" id="biasLabel" style="color:var(--yellow)">LOADING</div>
+    <div>
+      <div class="score-num" id="scoreNum">--</div>
+      <div class="score-lbl" id="scoreLbl">LOADING</div>
     </div>
-    <div class="bias-info">
+    <div>
       <div class="bias-title" id="biasTitle">Market Bias Score</div>
-      <div class="bias-desc" id="biasDesc">Fetching market data...</div>
-      <div class="signal-bar-wrap">
-        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);min-width:30px">BULL</span>
-        <div class="signal-bar"><div class="signal-bar-fill" id="bullBar" style="width:0%;background:var(--green)"></div></div>
-        <div class="signal-bar"><div class="signal-bar-fill" id="bearBar" style="width:0%;background:var(--red)"></div></div>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);min-width:30px;text-align:right">BEAR</span>
+      <div class="bias-desc" id="biasDesc">Fetching data...</div>
+      <div class="bar-row">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green)">BULL</span>
+        <div class="bar-track"><div class="bar-fill" id="bullBar" style="width:0%;background:var(--green)"></div></div>
+        <div class="bar-track"><div class="bar-fill" id="bearBar" style="width:0%;background:var(--red)"></div></div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red)">BEAR</span>
       </div>
-      <div style="display:flex;gap:16px;margin-top:4px">
-        <span id="bullCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)">▲ 0 bullish</span>
-        <span id="bearCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red)">▼ 0 bearish</span>
-        <span id="neutCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yellow)">◆ 0 neutral</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="panel">
-      <div class="panel-title">S&P 500 / ES</div>
-      <div class="big-stat">
-        <div class="big-stat-value" id="spxValue" style="color:var(--text-bright)">--</div>
-        <div class="big-stat-label">SPY ETF</div>
-        <div class="big-stat-change" id="spxChange">--</div>
-      </div>
-      <div style="margin-top:12px">
-        <div class="metric-row"><span class="metric-name">DAY CHANGE %</span><span class="metric-value" id="spxChangePct">--</span></div>
-        <div class="metric-row"><span class="metric-name">SESSION BIAS</span><span id="spxSignal" class="metric-signal sig-neut">--</span></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">VIX · Volatility (VIXY)</div>
-      <div class="big-stat">
-        <div class="big-stat-value" id="vixValue" style="color:var(--text-bright)">--</div>
-        <div class="big-stat-label">VIXY PRICE</div>
-        <div class="big-stat-change" id="vixChange">--</div>
-      </div>
-      <div style="margin-top:12px">
-        <div class="metric-row"><span class="metric-name">VOL SIGNAL</span><span id="vixRegime" class="metric-signal sig-neut">--</span></div>
-        <div class="metric-row"><span class="metric-name">DAY MOVE</span><span id="vixSignal" class="metric-signal sig-neut">--</span></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">DXY · Dollar (UUP)</div>
-      <div class="big-stat">
-        <div class="big-stat-value" id="dxyValue" style="color:var(--text-bright)">--</div>
-        <div class="big-stat-label">UUP ETF</div>
-        <div class="big-stat-change" id="dxyChange">--</div>
-      </div>
-      <div style="margin-top:12px">
-        <div class="metric-row"><span class="metric-name">DAY CHANGE %</span><span class="metric-value" id="dxyChangePct">--</span></div>
-        <div class="metric-row"><span class="metric-name">DXY SIGNAL</span><span id="dxySignal" class="metric-signal sig-neut">--</span></div>
+      <div class="counts">
+        <span id="bC" style="color:var(--green)">▲ 0</span>
+        <span id="beC" style="color:var(--red)">▼ 0</span>
+        <span id="nC" style="color:var(--yellow)">◆ 0</span>
       </div>
     </div>
   </div>
 
-  <div class="grid-2">
+  <div class="g3">
     <div class="panel">
-      <div class="panel-title">Rates · IEF (7-10Y Treasury)</div>
-      <div class="big-stat" style="padding-bottom:8px">
-        <div class="big-stat-value" id="yieldValue" style="color:var(--text-bright)">--</div>
-        <div class="big-stat-label">IEF PRICE</div>
-        <div class="big-stat-change" id="yieldChange">--</div>
-      </div>
-      <div>
-        <div class="metric-row"><span class="metric-name">RATE SIGNAL</span><span id="yieldSignal" class="metric-signal sig-neut">--</span></div>
-        <div class="metric-row"><span class="metric-name">RATE PRESSURE</span><span id="yieldPressure" class="metric-value">--</span></div>
+      <div class="ptitle">S&P 500 · SPY</div>
+      <div class="big-val" id="spyVal">--</div>
+      <div class="big-sub">SPY ETF</div>
+      <div class="big-chg" id="spyChg">--</div>
+      <div style="margin-top:10px">
+        <div class="mrow"><span class="mname">CHANGE %</span><span class="mval" id="spyPct">--</span></div>
+        <div class="mrow"><span class="mname">BIAS</span><span id="spyTag" class="tag neut-tag">--</span></div>
       </div>
     </div>
     <div class="panel">
-      <div class="panel-title">Risk Sentiment · HYG vs LQD</div>
-      <div class="big-stat" style="padding-bottom:8px">
-        <div class="big-stat-value" id="hygValue" style="color:var(--text-bright)">--</div>
-        <div class="big-stat-label">HYG (HIGH YIELD)</div>
-        <div class="big-stat-change" id="hygChange">--</div>
+      <div class="ptitle">Volatility · VIXY</div>
+      <div class="big-val" id="vixyVal">--</div>
+      <div class="big-sub">VIXY ETF</div>
+      <div class="big-chg" id="vixyChg">--</div>
+      <div style="margin-top:10px">
+        <div class="mrow"><span class="mname">CHANGE %</span><span class="mval" id="vixyPct">--</span></div>
+        <div class="mrow"><span class="mname">SIGNAL</span><span id="vixyTag" class="tag neut-tag">--</span></div>
       </div>
-      <div>
-        <div class="metric-row"><span class="metric-name">CREDIT SIGNAL</span><span id="hygSignal" class="metric-signal sig-neut">--</span></div>
-        <div class="metric-row"><span class="metric-name">RISK APPETITE</span><span id="riskAppetite" class="metric-value">--</span></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Dollar · UUP</div>
+      <div class="big-val" id="uupVal">--</div>
+      <div class="big-sub">UUP ETF</div>
+      <div class="big-chg" id="uupChg">--</div>
+      <div style="margin-top:10px">
+        <div class="mrow"><span class="mname">CHANGE %</span><span class="mval" id="uupPct">--</span></div>
+        <div class="mrow"><span class="mname">SIGNAL</span><span id="uupTag" class="tag neut-tag">--</span></div>
       </div>
     </div>
   </div>
 
-  <div class="panel" style="margin-bottom:16px">
-    <div class="panel-title">Signal Matrix</div>
-    <div class="signal-grid" id="signalGrid"></div>
+  <div class="g2">
+    <div class="panel">
+      <div class="ptitle">Rates · IEF (7-10Y Treasury)</div>
+      <div class="big-val" id="iefVal">--</div>
+      <div class="big-sub">IEF ETF · UP = YIELDS FALLING</div>
+      <div class="big-chg" id="iefChg">--</div>
+      <div style="margin-top:10px">
+        <div class="mrow"><span class="mname">SIGNAL</span><span id="iefTag" class="tag neut-tag">--</span></div>
+        <div class="mrow"><span class="mname">PRESSURE</span><span id="iefPres" class="mval">--</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Credit Risk · HYG</div>
+      <div class="big-val" id="hygVal">--</div>
+      <div class="big-sub">HIGH YIELD · UP = RISK-ON</div>
+      <div class="big-chg" id="hygChg">--</div>
+      <div style="margin-top:10px">
+        <div class="mrow"><span class="mname">SIGNAL</span><span id="hygTag" class="tag neut-tag">--</span></div>
+        <div class="mrow"><span class="mname">APPETITE</span><span id="hygApp" class="mval">--</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px">
+    <div class="ptitle">Signal Matrix</div>
+    <div class="sig-grid" id="sigGrid"></div>
   </div>
 
   <div class="ai-panel">
-    <div class="panel-title">Claude AI · Market Analysis</div>
-    <div class="ai-content" id="aiContent">
-      <div class="ai-thinking"><span class="status-dot status-stale"></span><span class="dots-anim">Waiting for market data</span></div>
-    </div>
-    <div class="ai-ask-wrap">
-      <input class="ai-input" id="aiQuestion" type="text" placeholder="Ask about ES bias, trade setup, market conditions..." />
-      <button class="ai-btn" id="aiAskBtn" onclick="askClaude()">ASK AI</button>
+    <div class="ptitle">Claude AI · Analysis</div>
+    <div class="ai-text" id="aiText"><span style="color:var(--text-dim)">Waiting for data...</span></div>
+    <div class="ai-input-row">
+      <input class="ai-inp" id="aiQ" type="text" placeholder="Ask about ES bias, trade setup, market conditions...">
+      <button class="btn" id="aiBtn" onclick="ask()">ASK</button>
     </div>
   </div>
 
   <div class="footer">
-    <div class="footer-note">FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE · TRADE AT YOUR OWN RISK</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <span class="data-source-tag">Finnhub</span>
-      <span class="data-source-tag">SPY · VIXY · UUP · IEF · HYG</span>
-      <span class="data-source-tag">Claude AI</span>
-    </div>
+    <div class="fnote">FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE</div>
+    <div style="display:flex;gap:4px"><span class="ftag">Finnhub</span><span class="ftag">SPY·VIXY·UUP·IEF·HYG</span><span class="ftag">Claude AI</span></div>
   </div>
-</div>
 
+</div>
 <script>
 const KEY = 'd75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90';
-const BASE = 'https://finnhub.io/api/v1';
+const FH = 'https://finnhub.io/api/v1/quote?token=' + KEY + '&symbol=';
+const D = {};
+const sigs = {};
 
-// ETFs available on Finnhub free tier
-// SPY = S&P 500, VIXY = VIX short-term futures, UUP = Dollar Index
-// IEF = 7-10Y Treasuries (inverse of yield), HYG = High Yield Credit
-
-const state = { spy:null, vixy:null, uup:null, ief:null, hyg:null, signals:{} };
-
-function updateClock() {
-  document.getElementById('timestampEl').textContent =
+// Clock
+setInterval(() => {
+  document.getElementById('clk').textContent =
     new Date().toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour12:false}) + ' PT';
-}
-setInterval(updateClock,1000); updateClock();
+}, 1000);
 
-function setProgress(pct,msg){
-  document.getElementById('loaderBar').style.width=pct+'%';
-  document.getElementById('loaderStatus').textContent=msg;
+function setStatus(msg, color) {
+  document.getElementById('statusMsg').textContent = msg;
+  const dot = document.querySelector('#statusBar .dot');
+  dot.className = 'dot ' + (color==='green'?'dot-green':color==='red'?'dot-red':'dot-yellow');
 }
-function hideLoader(){ document.getElementById('loadingOverlay').classList.add('hidden'); }
 
-async function q(symbol) {
-  const r = await fetch(`${BASE}/quote?symbol=${symbol}&token=${KEY}`);
-  if(!r.ok) throw new Error(`${r.status}`);
+async function fq(sym) {
+  const r = await fetch(FH + sym);
   const d = await r.json();
-  if(!d.c || d.c===0) throw new Error(`No data: ${symbol}`);
-  return { price:d.c, prev:d.pc, change:d.d, changePct:d.dp };
+  if (!d.c || d.c === 0) throw new Error('no data');
+  return { p: d.c, pc: d.pc, ch: d.d, pct: d.dp };
 }
 
 async function loadAll() {
-  const btn = document.getElementById('refreshBtn');
-  btn.disabled = true;
-  document.getElementById('loadingOverlay').classList.remove('hidden');
-  document.getElementById('loadingOverlay').style.opacity='1';
-  document.getElementById('loadingOverlay').style.pointerEvents='auto';
+  document.getElementById('rfBtn').disabled = true;
+  setStatus('Fetching market data...', 'yellow');
 
-  let loaded = 0;
-  const symbols = [
-    ['spy','SPY',10,'FETCHING SPY (S&P 500 proxy)...'],
-    ['vixy','VIXY',25,'FETCHING VIXY (VIX proxy)...'],
-    ['uup','UUP',40,'FETCHING UUP (Dollar proxy)...'],
-    ['ief','IEF',60,'FETCHING IEF (Rates proxy)...'],
-    ['hyg','HYG',78,'FETCHING HYG (Credit/Risk)...'],
+  const pairs = [
+    ['spy','SPY'], ['vixy','VIXY'], ['uup','UUP'], ['ief','IEF'], ['hyg','HYG']
   ];
 
-  for (const [key, sym, pct, msg] of symbols) {
-    setProgress(pct, msg);
-    try { state[key] = await q(sym); }
-    catch(e) { console.warn(`Failed ${sym}:`, e.message); state[key] = null; }
+  let loaded = 0;
+  for (const [k, sym] of pairs) {
+    try {
+      D[k] = await fq(sym);
+      loaded++;
+      setStatus(`Loaded ${loaded}/5: ${sym}`, 'yellow');
+    } catch(e) {
+      D[k] = null;
+      console.warn(sym, e.message);
+    }
   }
 
-  setProgress(90,'COMPUTING SIGNALS...');
-  computeSignals();
-  setProgress(96,'RENDERING...');
-  renderAll();
-  setProgress(100,'COMPLETE');
-  setTimeout(hideLoader,400);
-  setTimeout(()=>{ btn.disabled=false; },500);
-  document.getElementById('statusDot').className='status-dot status-live';
-  runAutoAnalysis();
+  computeSigs();
+  render();
+
+  const anyData = Object.values(D).some(v => v !== null);
+  if (anyData) {
+    setStatus(`Data loaded · ${new Date().toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour12:false})} PT · 15min delayed`, 'green');
+    runAI();
+  } else {
+    setStatus('No data returned — market may be closed or API limit reached', 'red');
+  }
+
+  document.getElementById('rfBtn').disabled = false;
 }
 
-function computeSignals() {
-  const s = {};
+function f(n, d=2) { return n == null ? '--' : n.toFixed(d); }
+function fc(n) { if (n == null) return '--'; return (n >= 0 ? '+' : '') + n.toFixed(2); }
+function clr(n) { return n == null ? 'var(--text)' : n > 0 ? 'var(--green)' : n < 0 ? 'var(--red)' : 'var(--text)'; }
 
-  // SPY momentum
-  if (state.spy) {
-    const pc = state.spy.changePct;
-    s.spy = pc>1.5?{label:'SPY↑',dir:'bull',reason:`SPY +${pc.toFixed(2)}% strong`}
-      :pc>0.3?{label:'SPY↑',dir:'bull',reason:`SPY +${pc.toFixed(2)}% positive`}
-      :pc>-0.3?{label:'SPY',dir:'neut',reason:`SPY flat ${pc.toFixed(2)}%`}
-      :pc>-1.5?{label:'SPY↓',dir:'bear',reason:`SPY ${pc.toFixed(2)}% weak`}
-      :{label:'SPY↓',dir:'bear',reason:`SPY ${pc.toFixed(2)}% strong sell`};
-  }
-
-  // VIXY — higher VIXY = more fear = bearish
-  if (state.vixy) {
-    const vc = state.vixy.changePct;
-    s.vixy = vc>8?{label:'VIXY↑',dir:'bear',reason:`VIXY spiked +${vc.toFixed(1)}% — fear rising`}
-      :vc>3?{label:'VIXY↑',dir:'neut',reason:`VIXY up ${vc.toFixed(1)}% — caution`}
-      :vc>-3?{label:'VIXY',dir:'neut',reason:`VIXY flat ${vc.toFixed(1)}%`}
-      :vc>-8?{label:'VIXY↓',dir:'bull',reason:`VIXY down ${vc.toFixed(1)}% — fear fading`}
-      :{label:'VIXY↓',dir:'bull',reason:`VIXY crushed ${vc.toFixed(1)}% — risk-on`};
-  }
-
-  // UUP — Dollar ETF. Higher dollar = bearish for equities
-  if (state.uup) {
-    const dc = state.uup.changePct;
-    s.uup = dc>0.4?{label:'UUP↑',dir:'bear',reason:`Dollar +${dc.toFixed(2)}% — headwind for ES`}
-      :dc>0.1?{label:'UUP↑',dir:'neut',reason:`Dollar slightly up ${dc.toFixed(2)}%`}
-      :dc>-0.1?{label:'UUP',dir:'neut',reason:`Dollar flat ${dc.toFixed(2)}%`}
-      :dc>-0.4?{label:'UUP↓',dir:'bull',reason:`Dollar soft ${dc.toFixed(2)}% — ES tailwind`}
-      :{label:'UUP↓',dir:'bull',reason:`Dollar weak ${dc.toFixed(2)}% — strong ES tailwind`};
-  }
-
-  // IEF — Treasury ETF. IEF UP = yields falling = bullish for stocks
-  if (state.ief) {
-    const ic = state.ief.changePct;
-    s.ief = ic>0.3?{label:'IEF↑',dir:'bull',reason:`IEF +${ic.toFixed(2)}% — yields falling, bullish`}
-      :ic>0.1?{label:'IEF↑',dir:'bull',reason:`IEF up ${ic.toFixed(2)}% — rates easing`}
-      :ic>-0.1?{label:'IEF',dir:'neut',reason:`IEF flat — rates stable`}
-      :ic>-0.3?{label:'IEF↓',dir:'bear',reason:`IEF ${ic.toFixed(2)}% — yields rising`}
-      :{label:'IEF↓',dir:'bear',reason:`IEF ${ic.toFixed(2)}% — yields surging, bearish`};
-  }
-
-  // HYG — High yield credit. HYG UP = risk appetite = bullish
-  if (state.hyg) {
-    const hc = state.hyg.changePct;
-    s.hyg = hc>0.3?{label:'HYG↑',dir:'bull',reason:`HYG +${hc.toFixed(2)}% — credit risk-on`}
-      :hc>0.1?{label:'HYG↑',dir:'bull',reason:`HYG up — mild risk appetite`}
-      :hc>-0.1?{label:'HYG',dir:'neut',reason:`HYG flat — neutral credit`}
-      :hc>-0.3?{label:'HYG↓',dir:'bear',reason:`HYG ${hc.toFixed(2)}% — credit stress`}
-      :{label:'HYG↓',dir:'bear',reason:`HYG ${hc.toFixed(2)}% — risk-off credit`};
-  }
-
-  state.signals = s;
+function setTag(id, dir) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (dir === 'bull') { el.textContent = 'BULLISH'; el.className = 'tag bull-tag'; }
+  else if (dir === 'bear') { el.textContent = 'BEARISH'; el.className = 'tag bear-tag'; }
+  else { el.textContent = 'NEUTRAL'; el.className = 'tag neut-tag'; }
 }
 
-function f(n,d=2){return n==null?'--':n.toFixed(d);}
-function fc(n){if(n==null)return'--';return(n>=0?'+':'')+n.toFixed(2);}
-function clr(n){if(n==null)return'var(--text)';return n>0?'var(--green)':n<0?'var(--red)':'var(--text)';}
-function setSig(id,dir,bull,bear,neut){
-  const el=document.getElementById(id);
-  if(!el)return;
-  const map={bull:[bull,'sig-bull'],bear:[bear,'sig-bear'],neut:[neut,'sig-neut']};
-  const [txt,cls]=map[dir]||[neut,'sig-neut'];
-  el.textContent=txt; el.className='metric-signal '+cls;
+function computeSigs() {
+  if (D.spy) {
+    const p = D.spy.pct;
+    sigs.spy = { label:'SPY', dir: p>1.5?'bull':p>0.3?'bull':p<-1.5?'bear':p<-0.3?'bear':'neut', reason:`SPY ${fc(p)}%` };
+  }
+  if (D.vixy) {
+    const p = D.vixy.pct;
+    sigs.vixy = { label:'VIXY', dir: p>8?'bear':p>3?'bear':p<-8?'bull':p<-3?'bull':'neut', reason:`VIXY ${fc(p)}%` };
+  }
+  if (D.uup) {
+    const p = D.uup.pct;
+    sigs.uup = { label:'UUP', dir: p>0.4?'bear':p>0.1?'neut':p<-0.4?'bull':p<-0.1?'bull':'neut', reason:`Dollar ${fc(p)}%` };
+  }
+  if (D.ief) {
+    const p = D.ief.pct;
+    sigs.ief = { label:'IEF', dir: p>0.3?'bull':p>0.1?'bull':p<-0.3?'bear':p<-0.1?'bear':'neut', reason:`IEF ${fc(p)}%` };
+  }
+  if (D.hyg) {
+    const p = D.hyg.pct;
+    sigs.hyg = { label:'HYG', dir: p>0.3?'bull':p>0.1?'bull':p<-0.3?'bear':p<-0.1?'bear':'neut', reason:`HYG ${fc(p)}%` };
+  }
 }
 
-function renderAll() {
+function render() {
   // SPY
-  if(state.spy){
-    document.getElementById('spxValue').textContent=f(state.spy.price);
-    document.getElementById('spxValue').style.color=clr(state.spy.change);
-    document.getElementById('spxChange').textContent=`${fc(state.spy.change)} (${fc(state.spy.changePct)}%)`;
-    document.getElementById('spxChange').style.color=clr(state.spy.change);
-    document.getElementById('spxChangePct').textContent=`${fc(state.spy.changePct)}%`;
-    document.getElementById('spxChangePct').style.color=clr(state.spy.changePct);
-    const pc=state.spy.changePct;
-    setSig('spxSignal',pc>0.3?'bull':pc<-0.3?'bear':'neut','BULLISH','BEARISH','NEUTRAL');
+  if (D.spy) {
+    document.getElementById('spyVal').textContent = f(D.spy.p);
+    document.getElementById('spyVal').style.color = clr(D.spy.ch);
+    document.getElementById('spyChg').textContent = fc(D.spy.ch) + ' (' + fc(D.spy.pct) + '%)';
+    document.getElementById('spyChg').style.color = clr(D.spy.ch);
+    document.getElementById('spyPct').textContent = fc(D.spy.pct) + '%';
+    document.getElementById('spyPct').style.color = clr(D.spy.pct);
+    setTag('spyTag', D.spy.pct > 0.3 ? 'bull' : D.spy.pct < -0.3 ? 'bear' : 'neut');
   }
-
   // VIXY
-  if(state.vixy){
-    document.getElementById('vixValue').textContent=f(state.vixy.price);
-    document.getElementById('vixValue').style.color=state.vixy.changePct>3?'var(--red)':state.vixy.changePct<-3?'var(--green)':'var(--yellow)';
-    document.getElementById('vixChange').textContent=`${fc(state.vixy.change)} (${fc(state.vixy.changePct)}%)`;
-    document.getElementById('vixChange').style.color=clr(-state.vixy.change);
-    const vc=state.vixy.changePct;
-    setSig('vixRegime',vc>3?'bear':vc<-3?'bull':'neut','FEAR FALLING','FEAR RISING','STABLE');
-    setSig('vixSignal',vc>5?'bear':vc<-5?'bull':'neut','VIX CRUSH','VIX SPIKE','FLAT');
+  if (D.vixy) {
+    document.getElementById('vixyVal').textContent = f(D.vixy.p);
+    document.getElementById('vixyVal').style.color = D.vixy.pct > 3 ? 'var(--red)' : D.vixy.pct < -3 ? 'var(--green)' : 'var(--yellow)';
+    document.getElementById('vixyChg').textContent = fc(D.vixy.ch) + ' (' + fc(D.vixy.pct) + '%)';
+    document.getElementById('vixyChg').style.color = clr(-D.vixy.ch);
+    document.getElementById('vixyPct').textContent = fc(D.vixy.pct) + '%';
+    document.getElementById('vixyPct').style.color = clr(-D.vixy.pct);
+    setTag('vixyTag', D.vixy.pct > 3 ? 'bear' : D.vixy.pct < -3 ? 'bull' : 'neut');
   }
-
   // UUP
-  if(state.uup){
-    document.getElementById('dxyValue').textContent=f(state.uup.price,2);
-    document.getElementById('dxyChange').textContent=`${fc(state.uup.change)} (${fc(state.uup.changePct)}%)`;
-    document.getElementById('dxyChange').style.color=clr(state.uup.change);
-    document.getElementById('dxyChangePct').textContent=`${fc(state.uup.changePct)}%`;
-    document.getElementById('dxyChangePct').style.color=clr(state.uup.changePct);
-    const dc=state.uup.changePct;
-    setSig('dxySignal',dc>0.1?'bear':dc<-0.1?'bull':'neut','WEAK $','STRONG $','FLAT');
+  if (D.uup) {
+    document.getElementById('uupVal').textContent = f(D.uup.p);
+    document.getElementById('uupChg').textContent = fc(D.uup.ch) + ' (' + fc(D.uup.pct) + '%)';
+    document.getElementById('uupChg').style.color = clr(D.uup.ch);
+    document.getElementById('uupPct').textContent = fc(D.uup.pct) + '%';
+    document.getElementById('uupPct').style.color = clr(D.uup.pct);
+    setTag('uupTag', D.uup.pct > 0.1 ? 'bear' : D.uup.pct < -0.1 ? 'bull' : 'neut');
   }
-
   // IEF
-  if(state.ief){
-    document.getElementById('yieldValue').textContent=f(state.ief.price,2);
-    document.getElementById('yieldChange').textContent=`${fc(state.ief.change)} (${fc(state.ief.changePct)}%)`;
-    document.getElementById('yieldChange').style.color=clr(state.ief.change);
-    const ic=state.ief.changePct;
-    setSig('yieldSignal',ic>0.1?'bull':ic<-0.1?'bear':'neut','YIELDS FALLING','YIELDS RISING','STABLE');
-    const yp=document.getElementById('yieldPressure');
-    yp.textContent=ic>0.1?'↓ FALLING':ic<-0.1?'↑ RISING':'→ STABLE';
-    yp.style.color=ic>0.1?'var(--green)':ic<-0.1?'var(--red)':'var(--yellow)';
+  if (D.ief) {
+    document.getElementById('iefVal').textContent = f(D.ief.p);
+    document.getElementById('iefChg').textContent = fc(D.ief.ch) + ' (' + fc(D.ief.pct) + '%)';
+    document.getElementById('iefChg').style.color = clr(D.ief.ch);
+    setTag('iefTag', D.ief.pct > 0.1 ? 'bull' : D.ief.pct < -0.1 ? 'bear' : 'neut');
+    const ip = document.getElementById('iefPres');
+    ip.textContent = D.ief.pct > 0.1 ? '↓ FALLING' : D.ief.pct < -0.1 ? '↑ RISING' : '→ STABLE';
+    ip.style.color = D.ief.pct > 0.1 ? 'var(--green)' : D.ief.pct < -0.1 ? 'var(--red)' : 'var(--yellow)';
   }
-
   // HYG
-  if(state.hyg){
-    document.getElementById('hygValue').textContent=f(state.hyg.price,2);
-    document.getElementById('hygChange').textContent=`${fc(state.hyg.change)} (${fc(state.hyg.changePct)}%)`;
-    document.getElementById('hygChange').style.color=clr(state.hyg.change);
-    const hc=state.hyg.changePct;
-    setSig('hygSignal',hc>0.1?'bull':hc<-0.1?'bear':'neut','RISK-ON','RISK-OFF','NEUTRAL');
-    const ra=document.getElementById('riskAppetite');
-    ra.textContent=hc>0.1?'APPETITE HIGH':hc<-0.1?'RISK AVERSE':'NEUTRAL';
-    ra.style.color=hc>0.1?'var(--green)':hc<-0.1?'var(--red)':'var(--yellow)';
+  if (D.hyg) {
+    document.getElementById('hygVal').textContent = f(D.hyg.p);
+    document.getElementById('hygChg').textContent = fc(D.hyg.ch) + ' (' + fc(D.hyg.pct) + '%)';
+    document.getElementById('hygChg').style.color = clr(D.hyg.ch);
+    setTag('hygTag', D.hyg.pct > 0.1 ? 'bull' : D.hyg.pct < -0.1 ? 'bear' : 'neut');
+    const ha = document.getElementById('hygApp');
+    ha.textContent = D.hyg.pct > 0.1 ? 'HIGH' : D.hyg.pct < -0.1 ? 'LOW' : 'NEUTRAL';
+    ha.style.color = D.hyg.pct > 0.1 ? 'var(--green)' : D.hyg.pct < -0.1 ? 'var(--red)' : 'var(--yellow)';
   }
 
   // Signal dots
-  const sigs=Object.values(state.signals);
-  const grid=document.getElementById('signalGrid');
-  grid.innerHTML='';
-  sigs.forEach(s=>{
-    const cls=s.dir==='bull'?'dot-bull':s.dir==='bear'?'dot-bear':'dot-neut';
-    const icon=s.dir==='bull'?'▲':s.dir==='bear'?'▼':'◆';
-    grid.innerHTML+=`<div class="signal-dot-wrap" title="${s.reason}"><div class="signal-dot ${cls}">${icon}</div><div class="signal-dot-name">${s.label}</div></div>`;
+  const sv = Object.values(sigs);
+  const grid = document.getElementById('sigGrid');
+  grid.innerHTML = '';
+  sv.forEach(s => {
+    const cls = s.dir==='bull'?'sdot-bull':s.dir==='bear'?'sdot-bear':'sdot-neut';
+    const icon = s.dir==='bull'?'▲':s.dir==='bear'?'▼':'◆';
+    grid.innerHTML += `<div class="sig-wrap"><div class="sig-dot ${cls}">${icon}</div><div class="sig-name">${s.label}</div></div>`;
   });
 
   // Bias score
-  const bull=sigs.filter(s=>s.dir==='bull').length;
-  const bear=sigs.filter(s=>s.dir==='bear').length;
-  const neut=sigs.filter(s=>s.dir==='neut').length;
-  const total=sigs.length||1;
-  const score=Math.round(((bull-bear)/total)*100);
-  document.getElementById('biasNumber').textContent=(score>0?'+':'')+score;
-  document.getElementById('bullCount').textContent=`▲ ${bull} bullish`;
-  document.getElementById('bearCount').textContent=`▼ ${bear} bearish`;
-  document.getElementById('neutCount').textContent=`◆ ${neut} neutral`;
-  document.getElementById('bullBar').style.width=(bull/total*100)+'%';
-  document.getElementById('bearBar').style.width=(bear/total*100)+'%';
+  const bull = sv.filter(s=>s.dir==='bull').length;
+  const bear = sv.filter(s=>s.dir==='bear').length;
+  const neut = sv.filter(s=>s.dir==='neut').length;
+  const total = sv.length || 1;
+  const score = Math.round(((bull - bear) / total) * 100);
 
-  const hero=document.getElementById('biasHero');
-  const numEl=document.getElementById('biasNumber');
-  const lblEl=document.getElementById('biasLabel');
-  hero.className='bias-hero';
-  if(score>=40){hero.classList.add('bullish');numEl.style.color=lblEl.style.color='var(--green)';lblEl.textContent='BULLISH';document.getElementById('biasTitle').textContent='Strong Bullish Bias';document.getElementById('biasDesc').textContent=`${bull} of ${total} signals bullish. Conditions favor long setups on ES/MES.`;}
-  else if(score>=15){hero.classList.add('bullish');numEl.style.color=lblEl.style.color='var(--green)';lblEl.textContent='LEANING BULL';document.getElementById('biasTitle').textContent='Mild Bullish Bias';document.getElementById('biasDesc').textContent=`${bull} bullish vs ${bear} bearish. Moderate tailwind for longs.`;}
-  else if(score<=-40){hero.classList.add('bearish');numEl.style.color=lblEl.style.color='var(--red)';lblEl.textContent='BEARISH';document.getElementById('biasTitle').textContent='Strong Bearish Bias';document.getElementById('biasDesc').textContent=`${bear} of ${total} signals bearish. Risk-off. Favor shorts or stay flat.`;}
-  else if(score<=-15){hero.classList.add('bearish');numEl.style.color=lblEl.style.color='var(--red)';lblEl.textContent='LEANING BEAR';document.getElementById('biasTitle').textContent='Mild Bearish Bias';document.getElementById('biasDesc').textContent=`${bear} bearish vs ${bull} bullish. Headwinds present.`;}
-  else{numEl.style.color=lblEl.style.color='var(--yellow)';lblEl.textContent='NEUTRAL';document.getElementById('biasTitle').textContent='Mixed / Neutral Conditions';document.getElementById('biasDesc').textContent=`${bull} bull, ${bear} bear, ${neut} neutral. No clear edge — wait for confirmation.`;}
-}
+  document.getElementById('scoreNum').textContent = (score > 0 ? '+' : '') + score;
+  document.getElementById('bC').textContent = '▲ ' + bull + ' bull';
+  document.getElementById('beC').textContent = '▼ ' + bear + ' bear';
+  document.getElementById('nC').textContent = '◆ ' + neut + ' neut';
+  document.getElementById('bullBar').style.width = (bull/total*100) + '%';
+  document.getElementById('bearBar').style.width = (bear/total*100) + '%';
 
-function buildCtx() {
-  const sigs=Object.values(state.signals);
-  const bull=sigs.filter(s=>s.dir==='bull').length,bear=sigs.filter(s=>s.dir==='bear').length;
-  const score=Math.round(((bull-bear)/(sigs.length||1))*100);
-  return `Live ETF market data ${new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles'})} PT:
-SPY (S&P proxy): ${state.spy?f(state.spy.price)+' ('+fc(state.spy.changePct)+'%)':'N/A'}
-VIXY (VIX proxy): ${state.vixy?f(state.vixy.price)+' ('+fc(state.vixy.changePct)+'%)':'N/A'}
-UUP (Dollar proxy): ${state.uup?f(state.uup.price)+' ('+fc(state.uup.changePct)+'%)':'N/A'}
-IEF (Rates proxy): ${state.ief?f(state.ief.price)+' ('+fc(state.ief.changePct)+'%)':'N/A'}
-HYG (Credit/Risk): ${state.hyg?f(state.hyg.price)+' ('+fc(state.hyg.changePct)+'%)':'N/A'}
-Bias Score: ${score>0?'+':''}${score}/100
-Signals: ${sigs.map(s=>s.label+':'+s.dir.toUpperCase()).join(', ')}`;
-}
+  const hero = document.getElementById('biasHero');
+  const sn = document.getElementById('scoreNum');
+  const sl = document.getElementById('scoreLbl');
+  hero.className = 'bias-hero';
 
-async function runAutoAnalysis() {
-  await callClaude(`You are a professional ES/MES futures trader. Based on this live ETF market data, give a concise 3-4 sentence trading bias for today's session. Note: VIXY is VIX futures ETF (higher = more fear), IEF is treasury ETF (higher = yields falling = bullish), HYG is high yield credit (higher = risk-on). Be direct and actionable. No disclaimers.\n\n${buildCtx()}`);
-}
-
-async function askClaude() {
-  const qEl=document.getElementById('aiQuestion');
-  const ques=qEl.value.trim();
-  if(!ques)return;
-  qEl.value='';
-  await callClaude(`You are a professional ES/MES futures trader. Market data:\n\n${buildCtx()}\n\nQuestion: ${ques}\n\nAnswer concisely. No disclaimers.`);
-}
-
-async function callClaude(prompt) {
-  const el=document.getElementById('aiContent'),btn=document.getElementById('aiAskBtn');
-  btn.disabled=true;
-  el.innerHTML='<div class="ai-thinking"><span class="status-dot status-stale"></span><span class="dots-anim">Analyzing</span></div>';
-  try {
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await r.json();
-    const text=data.content?.map(b=>b.text||'').join('')||'No response.';
-    el.innerHTML=`<div style="line-height:1.8">${text.replace(/\n/g,'<br>')}</div>`;
-  } catch(e) {
-    el.innerHTML=`<div style="color:var(--red)">AI unavailable: ${e.message}</div>`;
+  if (score >= 30) {
+    hero.classList.add('bull');
+    sn.style.color = sl.style.color = 'var(--green)';
+    sl.textContent = 'BULLISH';
+    document.getElementById('biasTitle').textContent = 'Bullish Bias';
+    document.getElementById('biasDesc').textContent = bull + ' of ' + total + ' signals bullish. Favor long setups on ES/MES.';
+  } else if (score <= -30) {
+    hero.classList.add('bear');
+    sn.style.color = sl.style.color = 'var(--red)';
+    sl.textContent = 'BEARISH';
+    document.getElementById('biasTitle').textContent = 'Bearish Bias';
+    document.getElementById('biasDesc').textContent = bear + ' of ' + total + ' signals bearish. Risk-off. Favor shorts or stay flat.';
+  } else {
+    sn.style.color = sl.style.color = 'var(--yellow)';
+    sl.textContent = 'NEUTRAL';
+    document.getElementById('biasTitle').textContent = 'Mixed / Neutral';
+    document.getElementById('biasDesc').textContent = bull + ' bull, ' + bear + ' bear, ' + neut + ' neutral. No clear edge.';
   }
-  btn.disabled=false;
 }
 
-window.addEventListener('DOMContentLoaded', loadAll);
-</script>
+function ctx() {
+  const sv = Object.values(sigs);
+  const bull = sv.filter(s=>s.dir==='bull').length;
+  const bear = sv.filter(s=>s.dir==='bear').length;
+  const score = Math.round(((bull-bear)/(sv.length||1))*100);
+  return `Market data ${new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles'})} PT:
+SPY: ${D.spy ? f(D.spy.p)+' ('+fc(D.spy.pct)+'%)' : 'N/A'}
+VIXY (VIX proxy): ${D.vixy ? f(D.vixy.p)+' ('+fc(D.vixy.pct)+'%)' : 'N/A'}
+UUP (Dollar): ${D.uup ? f(D.uup.p)+' ('+fc(D.uup.pct)+'%)' : 'N/A'}
+IEF (Rates, up=yields falling): ${D.ief ? f(D.ief.p)+' ('+fc(D.ief.pct)+'%)' : 'N/A'}
+HYG (Credit, up=risk-on): ${D.hyg ? f(D.hyg.p)+' ('+fc(D.hyg.pct)+'%)' : 'N/A'}
+Bias: ${score>0?'+':''}${score}/100 | Signals: ${sv.map(s=>s.label+':'+s.dir).join(', ')}`;
+}
 
+async function runAI() {
+  await callAI('You are a professional ES/MES futures trader. Give a concise 3-4 sentence trading bias for today based on this data. Direct and actionable. No disclaimers.\n\n' + ctx());
+}
+
+async function ask() {
+  const q = document.getElementById('aiQ').value.trim();
+  if (!q) return;
+  document.getElementById('aiQ').value = '';
+  await callAI('Futures trader context:\n\n' + ctx() + '\n\nQuestion: ' + q + '\n\nAnswer concisely.');
+}
+
+async function callAI(prompt) {
+  const el = document.getElementById('aiText');
+  const btn = document.getElementById('aiBtn');
+  btn.disabled = true;
+  el.innerHTML = '<span style="color:var(--text-dim)">Analyzing...</span>';
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+    });
+    const d = await r.json();
+    const t = d.content?.map(b => b.text || '').join('') || 'No response.';
+    el.innerHTML = t.replace(/\n/g, '<br>');
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--red)">AI unavailable: ' + e.message + '</span>';
+  }
+  btn.disabled = false;
+}
+
+// Auto-load on start
+loadAll();
+</script>
 </body>
 </html>
