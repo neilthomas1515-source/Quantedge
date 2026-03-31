@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantEdge · Market Probability Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #090d18;
+    --bg3: #0d1220;
+    --panel: #0a0f1e;
+    --border: #1a2340;
+    --border-bright: #1e3060;
+    --accent: #00d4ff;
+    --accent2: #0090cc;
+    --green: #00ff88;
+    --green2: #00cc66;
+    --red: #ff3355;
+    --red2: #cc1133;
+    --yellow: #ffcc00;
+    --orange: #ff8800;
+    --text: #c8d8f0;
+    --text-dim: #5a7090;
+    --text-bright: #e8f4ff;
+    --glow: 0 0 20px rgba(0,212,255,0.15);
+    --glow-green: 0 0 20px rgba(0,255,136,0.15);
+    --glow-red: 0 0 20px rgba(255,51,85,0.15);
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Exo 2’, sans-serif;
+font-weight: 300;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Grid background */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+pointer-events: none;
+z-index: 0;
+}
+
+.container {
+position: relative;
+z-index: 1;
+max-width: 1400px;
+margin: 0 auto;
+padding: 16px;
+}
+
+/* HEADER */
+.header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px 0 24px;
+border-bottom: 1px solid var(–border);
+margin-bottom: 20px;
+}
+
+.logo {
+display: flex;
+align-items: baseline;
+gap: 10px;
+}
+
+.logo-main {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 28px;
+font-weight: 700;
+color: var(–accent);
+letter-spacing: 3px;
+text-shadow: 0 0 30px rgba(0,212,255,0.5);
+}
+
+.logo-sub {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+letter-spacing: 2px;
+}
+
+.header-right {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.timestamp {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+}
+
+.refresh-btn {
+background: transparent;
+border: 1px solid var(–border-bright);
+color: var(–accent);
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 2px;
+padding: 8px 18px;
+cursor: pointer;
+transition: all 0.2s;
+text-transform: uppercase;
+}
+
+.refresh-btn:hover {
+background: rgba(0,212,255,0.08);
+border-color: var(–accent);
+box-shadow: var(–glow);
+}
+
+.refresh-btn:disabled {
+opacity: 0.4;
+cursor: not-allowed;
+}
+
+/* BIAS SCORE — main hero */
+.bias-hero {
+display: grid;
+grid-template-columns: auto 1fr;
+gap: 24px;
+align-items: center;
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 24px 28px;
+margin-bottom: 20px;
+position: relative;
+overflow: hidden;
+}
+
+.bias-hero::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0;
+width: 4px; height: 100%;
+background: var(–accent);
+transition: background 0.5s;
+}
+
+.bias-hero.bullish::before { background: var(–green); }
+.bias-hero.bearish::before { background: var(–red); }
+.bias-hero.neutral::before { background: var(–yellow); }
+
+.bias-score-wrap {
+text-align: center;
+}
+
+.bias-number {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 72px;
+font-weight: 700;
+line-height: 1;
+transition: color 0.5s;
+}
+
+.bias-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 12px;
+letter-spacing: 3px;
+margin-top: 4px;
+transition: color 0.5s;
+}
+
+.bias-info {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.bias-title {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 20px;
+font-weight: 600;
+color: var(–text-bright);
+letter-spacing: 1px;
+}
+
+.bias-desc {
+font-size: 13px;
+color: var(–text-dim);
+line-height: 1.6;
+max-width: 600px;
+}
+
+.signal-bar-wrap {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-top: 4px;
+}
+
+.signal-bar {
+flex: 1;
+height: 6px;
+background: var(–bg3);
+border-radius: 3px;
+overflow: hidden;
+}
+
+.signal-bar-fill {
+height: 100%;
+border-radius: 3px;
+transition: width 0.8s ease, background 0.5s;
+}
+
+.signal-bar-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+color: var(–text-dim);
+white-space: nowrap;
+min-width: 60px;
+text-align: right;
+}
+
+/* GRID LAYOUT */
+.grid-3 {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 16px;
+margin-bottom: 16px;
+}
+
+.grid-2 {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 16px;
+margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+.grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+.grid-3, .grid-2 { grid-template-columns: 1fr; }
+.bias-hero { grid-template-columns: 1fr; }
+}
+
+/* PANEL */
+.panel {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 16px 18px;
+position: relative;
+}
+
+.panel-title {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 3px;
+color: var(–text-dim);
+text-transform: uppercase;
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.panel-title::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+/* METRIC ROW */
+.metric-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid rgba(26,35,64,0.5);
+}
+
+.metric-row:last-child { border-bottom: none; }
+
+.metric-name {
+font-size: 12px;
+color: var(–text-dim);
+letter-spacing: 1px;
+}
+
+.metric-value {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 14px;
+font-weight: 400;
+color: var(–text-bright);
+}
+
+.metric-signal {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+padding: 2px 8px;
+border-radius: 2px;
+}
+
+.sig-bull { background: rgba(0,255,136,0.1); color: var(–green); border: 1px solid rgba(0,255,136,0.2); }
+.sig-bear { background: rgba(255,51,85,0.1); color: var(–red); border: 1px solid rgba(255,51,85,0.2); }
+.sig-neut { background: rgba(255,204,0,0.1); color: var(–yellow); border: 1px solid rgba(255,204,0,0.2); }
+
+/* BIG STAT */
+.big-stat {
+text-align: center;
+padding: 8px 0;
+}
+
+.big-stat-value {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 42px;
+font-weight: 700;
+line-height: 1;
+}
+
+.big-stat-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+color: var(–text-dim);
+letter-spacing: 2px;
+margin-top: 4px;
+}
+
+.big-stat-change {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 12px;
+margin-top: 6px;
+}
+
+/* VX TERM STRUCTURE */
+.term-bars {
+display: flex;
+align-items: flex-end;
+gap: 6px;
+height: 70px;
+margin-top: 8px;
+}
+
+.term-bar-wrap {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+height: 100%;
+justify-content: flex-end;
+}
+
+.term-bar {
+width: 100%;
+border-radius: 2px 2px 0 0;
+transition: height 0.5s ease, background 0.5s;
+min-height: 4px;
+}
+
+.term-bar-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 9px;
+color: var(–text-dim);
+}
+
+.term-bar-val {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 9px;
+color: var(–text);
+}
+
+/* SIGNAL GRID */
+.signal-grid {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 8px;
+}
+
+.signal-dot-wrap {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 5px;
+}
+
+.signal-dot {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+font-weight: bold;
+transition: all 0.4s;
+}
+
+.dot-bull { background: rgba(0,255,136,0.15); color: var(–green); border: 1.5px solid var(–green); box-shadow: 0 0 12px rgba(0,255,136,0.2); }
+.dot-bear { background: rgba(255,51,85,0.15); color: var(–red); border: 1.5px solid var(–red); box-shadow: 0 0 12px rgba(255,51,85,0.2); }
+.dot-neut { background: rgba(255,204,0,0.1); color: var(–yellow); border: 1.5px solid var(–yellow); }
+.dot-na { background: rgba(90,112,144,0.1); color: var(–text-dim); border: 1.5px solid var(–border); }
+
+.signal-dot-name {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 8px;
+color: var(–text-dim);
+text-align: center;
+line-height: 1.3;
+}
+
+/* AI ANALYSIS */
+.ai-panel {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 18px 20px;
+margin-bottom: 16px;
+}
+
+.ai-content {
+font-size: 13px;
+line-height: 1.8;
+color: var(–text);
+min-height: 80px;
+}
+
+.ai-thinking {
+display: flex;
+align-items: center;
+gap: 10px;
+color: var(–text-dim);
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 12px;
+}
+
+.dots-anim::after {
+content: ‘’;
+animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+0% { content: ‘’; }
+25% { content: ‘.’; }
+50% { content: ‘..’; }
+75% { content: ‘…’; }
+}
+
+.ai-ask-wrap {
+display: flex;
+gap: 10px;
+margin-top: 14px;
+border-top: 1px solid var(–border);
+padding-top: 14px;
+}
+
+.ai-input {
+flex: 1;
+background: var(–bg3);
+border: 1px solid var(–border);
+color: var(–text-bright);
+font-family: ‘Exo 2’, sans-serif;
+font-size: 13px;
+padding: 8px 12px;
+outline: none;
+transition: border-color 0.2s;
+}
+
+.ai-input:focus {
+border-color: var(–accent2);
+}
+
+.ai-input::placeholder { color: var(–text-dim); }
+
+.ai-btn {
+background: transparent;
+border: 1px solid var(–accent2);
+color: var(–accent);
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 2px;
+padding: 8px 16px;
+cursor: pointer;
+transition: all 0.2s;
+text-transform: uppercase;
+white-space: nowrap;
+}
+
+.ai-btn:hover {
+background: rgba(0,212,255,0.08);
+box-shadow: var(–glow);
+}
+
+.ai-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* STATUS */
+.status-dot {
+width: 6px;
+height: 6px;
+border-radius: 50%;
+display: inline-block;
+margin-right: 4px;
+}
+
+.status-live { background: var(–green); box-shadow: 0 0 8px var(–green); animation: pulse 2s infinite; }
+.status-stale { background: var(–yellow); }
+.status-err { background: var(–red); }
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.4; }
+}
+
+/* LOADING OVERLAY */
+.loading-overlay {
+position: fixed;
+inset: 0;
+background: var(–bg);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 100;
+gap: 20px;
+transition: opacity 0.5s;
+}
+
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.loader-logo {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 36px;
+font-weight: 700;
+color: var(–accent);
+letter-spacing: 6px;
+text-shadow: 0 0 40px rgba(0,212,255,0.6);
+}
+
+.loader-bar-outer {
+width: 280px;
+height: 2px;
+background: var(–border);
+}
+
+.loader-bar-inner {
+height: 100%;
+background: var(–accent);
+width: 0%;
+transition: width 0.3s ease;
+box-shadow: 0 0 10px var(–accent);
+}
+
+.loader-status {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+letter-spacing: 2px;
+}
+
+/* FOOTER */
+.footer {
+border-top: 1px solid var(–border);
+padding: 12px 0;
+margin-top: 8px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.footer-note {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+color: var(–text-dim);
+}
+
+.data-source-tag {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 9px;
+color: var(–text-dim);
+background: var(–bg3);
+border: 1px solid var(–border);
+padding: 2px 6px;
+border-radius: 2px;
+}
+</style>
+
+</head>
+<body>
+
+<!-- Loading Overlay -->
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader-logo">QUANTEDGE</div>
+  <div class="loader-bar-outer"><div class="loader-bar-inner" id="loaderBar"></div></div>
+  <div class="loader-status" id="loaderStatus">INITIALIZING...</div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-main">QUANTEDGE</div>
+      <div class="logo-sub">MARKET PROBABILITY ENGINE</div>
+    </div>
+    <div class="header-right">
+      <div class="timestamp">
+        <span class="status-dot status-live" id="statusDot"></span>
+        <span id="timestampEl">--:--:-- PT</span>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ REFRESH</button>
+    </div>
+  </div>
+
+  <!-- BIAS HERO -->
+
+  <div class="bias-hero neutral" id="biasHero">
+    <div class="bias-score-wrap">
+      <div class="bias-number" id="biasNumber" style="color: var(--yellow)">--</div>
+      <div class="bias-label" id="biasLabel" style="color: var(--yellow)">LOADING</div>
+    </div>
+    <div class="bias-info">
+      <div class="bias-title" id="biasTitle">Market Bias Score</div>
+      <div class="bias-desc" id="biasDesc">Fetching market data and computing signal scores...</div>
+      <div class="signal-bar-wrap">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);min-width:30px">BULL</span>
+        <div class="signal-bar">
+          <div class="signal-bar-fill" id="bullBar" style="width:0%;background:var(--green)"></div>
+        </div>
+        <div class="signal-bar">
+          <div class="signal-bar-fill" id="bearBar" style="width:0%;background:var(--red)"></div>
+        </div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--red);min-width:30px;text-align:right">BEAR</span>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:4px">
+        <span id="bullCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)">▲ 0 bullish</span>
+        <span id="bearCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red)">▼ 0 bearish</span>
+        <span id="neutCount" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yellow)">◆ 0 neutral</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: SPX, VIX, DXY -->
+
+  <div class="grid-3">
+    <div class="panel">
+      <div class="panel-title">S&P 500 / ES</div>
+      <div class="big-stat">
+        <div class="big-stat-value" id="spxValue" style="color:var(--text-bright)">--</div>
+        <div class="big-stat-label">SPX SPOT</div>
+        <div class="big-stat-change" id="spxChange">--</div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="metric-row">
+          <span class="metric-name">DAY CHANGE %</span>
+          <span class="metric-value" id="spxChangePct">--</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">SESSION BIAS</span>
+          <span id="spxSignal" class="metric-signal sig-neut">NEUTRAL</span>
+        </div>
+      </div>
+    </div>
+
+```
+<div class="panel">
+  <div class="panel-title">VIX · Volatility</div>
+  <div class="big-stat">
+    <div class="big-stat-value" id="vixValue" style="color:var(--text-bright)">--</div>
+    <div class="big-stat-label">VIX INDEX</div>
+    <div class="big-stat-change" id="vixChange">--</div>
+  </div>
+  <div style="margin-top:12px">
+    <div class="metric-row">
+      <span class="metric-name">REGIME</span>
+      <span id="vixRegime" class="metric-signal sig-neut">--</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-name">VIX SIGNAL</span>
+      <span id="vixSignal" class="metric-signal sig-neut">--</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">DXY · Dollar Index</div>
+  <div class="big-stat">
+    <div class="big-stat-value" id="dxyValue" style="color:var(--text-bright)">--</div>
+    <div class="big-stat-label">US DOLLAR</div>
+    <div class="big-stat-change" id="dxyChange">--</div>
+  </div>
+  <div style="margin-top:12px">
+    <div class="metric-row">
+      <span class="metric-name">DAY CHANGE %</span>
+      <span class="metric-value" id="dxyChangePct">--</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-name">DXY SIGNAL</span>
+      <span id="dxySignal" class="metric-signal sig-neut">--</span>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ROW 2: 10Y Yield + VX Term Structure -->
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">10Y Treasury Yield</div>
+      <div class="big-stat" style="padding-bottom:8px">
+        <div class="big-stat-value" id="yieldValue" style="color:var(--text-bright)">--</div>
+        <div class="big-stat-label">10Y YIELD %</div>
+        <div class="big-stat-change" id="yieldChange">--</div>
+      </div>
+      <div>
+        <div class="metric-row">
+          <span class="metric-name">YIELD SIGNAL</span>
+          <span id="yieldSignal" class="metric-signal sig-neut">--</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-name">RATE PRESSURE</span>
+          <span id="yieldPressure" class="metric-value">--</span>
+        </div>
+      </div>
+    </div>
+
+```
+<div class="panel">
+  <div class="panel-title">VX Futures · Term Structure</div>
+  <div class="metric-row" style="margin-bottom:8px">
+    <span class="metric-name">STRUCTURE</span>
+    <span id="termStructure" class="metric-signal sig-neut">--</span>
+  </div>
+  <div class="term-bars" id="termBars">
+    <div style="width:100%;text-align:center;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:11px;padding-top:20px">Fetching VX data...</div>
+  </div>
+  <div class="metric-row" style="margin-top:8px">
+    <span class="metric-name">M1→M2 SPREAD</span>
+    <span id="vxSpread" class="metric-value">--</span>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- SIGNAL DOTS -->
+
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-title">Signal Matrix</div>
+    <div class="signal-grid" id="signalGrid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- AI ANALYSIS -->
+
+  <div class="ai-panel">
+    <div class="panel-title">Claude AI · Market Analysis</div>
+    <div class="ai-content" id="aiContent">
+      <div class="ai-thinking"><span class="status-dot status-stale"></span><span class="dots-anim">Waiting for market data to load</span></div>
+    </div>
+    <div class="ai-ask-wrap">
+      <input class="ai-input" id="aiQuestion" type="text" placeholder="Ask about current market conditions, ES bias, trade setup..." />
+      <button class="ai-btn" id="aiAskBtn" onclick="askClaude()">ASK AI</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE · TRADE AT YOUR OWN RISK</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="data-source-tag">Yahoo Finance</span>
+      <span class="data-source-tag">CBOE</span>
+      <span class="data-source-tag">Claude AI</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const state = {
+  spx: null, vix: null, dxy: null,
+  yield10y: null, vxTerms: null,
+  lastUpdate: null, signals: {}
+};
+
+// ─── LOADING ────────────────────────────────────────────────────────────────
+let loadProgress = 0;
+function setProgress(pct, msg) {
+  document.getElementById('loaderBar').style.width = pct + '%';
+  document.getElementById('loaderStatus').textContent = msg;
+}
+
+function hideLoader() {
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+// ─── TIMESTAMP ──────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const pt = now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour12: false });
+  document.getElementById('timestampEl').textContent = pt + ' PT';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── FETCH helpers ──────────────────────────────────────────────────────────
+const PROXY = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+
+async function fetchYahoo(symbol) {
+  const url = `${PROXY}${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status} for ${symbol}`);
+  const d = await r.json();
+  const meta = d.chart.result[0].meta;
+  const closes = d.chart.result[0].indicators.quote[0].close.filter(Boolean);
+  const prev = closes[closes.length - 2];
+  const curr = meta.regularMarketPrice || closes[closes.length - 1];
+  return {
+    price: curr,
+    prev: prev,
+    change: curr - prev,
+    changePct: ((curr - prev) / prev) * 100
+  };
+}
+
+// ─── FETCH ALL ──────────────────────────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  setProgress(0, 'INITIALIZING...');
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').style.opacity = '1';
+  document.getElementById('loadingOverlay').style.pointerEvents = 'auto';
+
+  try {
+    setProgress(10, 'FETCHING SPX...');
+    state.spx = await fetchYahoo('^GSPC').catch(() => null);
+
+    setProgress(25, 'FETCHING VIX...');
+    state.vix = await fetchYahoo('^VIX').catch(() => null);
+
+    setProgress(40, 'FETCHING DXY...');
+    state.dxy = await fetchYahoo('DX-Y.NYB').catch(() => null);
+
+    setProgress(55, 'FETCHING 10Y YIELD...');
+    state.yield10y = await fetchYahoo('^TNX').catch(() => null);
+
+    setProgress(70, 'FETCHING VX FUTURES...');
+    // VX term structure: fetch M1-M4 approximations
+    const vxSymbols = ['^VIX', '^VIX3M', '^VIX6M', '^VIX1Y'];
+    const vxLabels  = ['VIX', 'VIX3M', 'VIX6M', 'VIX1Y'];
+    const vxData = await Promise.all(vxSymbols.map(s => fetchYahoo(s).catch(() => null)));
+    state.vxTerms = vxLabels.map((l, i) => ({
+      label: l,
+      value: vxData[i]?.price ?? null
+    }));
+
+    setProgress(90, 'COMPUTING SIGNALS...');
+    computeSignals();
+
+    setProgress(95, 'RENDERING...');
+    renderAll();
+
+    setProgress(100, 'COMPLETE');
+    state.lastUpdate = new Date();
+
+    setTimeout(hideLoader, 400);
+    setTimeout(() => { btn.disabled = false; }, 500);
+    document.getElementById('statusDot').className = 'status-dot status-live';
+
+    // Auto-run AI analysis
+    runAutoAnalysis();
+
+  } catch(e) {
+    console.error(e);
+    setProgress(100, 'ERROR — CHECK CONSOLE');
+    setTimeout(hideLoader, 1000);
+    btn.disabled = false;
+    document.getElementById('statusDot').className = 'status-dot status-err';
+  }
+}
+
+// ─── SIGNAL LOGIC ────────────────────────────────────────────────────────────
+function computeSignals() {
+  const sigs = {};
+
+  // VIX signal
+  if (state.vix) {
+    const v = state.vix.price;
+    const vc = state.vix.changePct;
+    if (v < 15) sigs.vix = { label:'VIX', dir:'bull', reason: `VIX ${v.toFixed(1)} — complacent, low fear` };
+    else if (v < 20) sigs.vix = { label:'VIX', dir:'bull', reason: `VIX ${v.toFixed(1)} — moderate, range-bound` };
+    else if (v < 25) sigs.vix = { label:'VIX', dir:'neut', reason: `VIX ${v.toFixed(1)} — elevated, caution` };
+    else if (v < 30) sigs.vix = { label:'VIX', dir:'bear', reason: `VIX ${v.toFixed(1)} — high fear` };
+    else sigs.vix = { label:'VIX', dir:'bear', reason: `VIX ${v.toFixed(1)} — extreme fear` };
+
+    // VIX daily change flip signal
+    if (vc > 10) sigs.vixSpike = { label:'VIX↑', dir:'bear', reason: `VIX spiked +${vc.toFixed(1)}% today` };
+    else if (vc < -8) sigs.vixSpike = { label:'VIX↓', dir:'bull', reason: `VIX crushed ${vc.toFixed(1)}% today` };
+    else sigs.vixSpike = { label:'VIX Δ', dir:'neut', reason: `VIX day move ${vc.toFixed(1)}%` };
+  }
+
+  // SPX momentum
+  if (state.spx) {
+    const pc = state.spx.changePct;
+    if (pc > 1.5) sigs.spxMom = { label:'SPX↑', dir:'bull', reason: `SPX +${pc.toFixed(2)}% strong day` };
+    else if (pc > 0.3) sigs.spxMom = { label:'SPX↑', dir:'bull', reason: `SPX +${pc.toFixed(2)}% positive` };
+    else if (pc > -0.3) sigs.spxMom = { label:'SPX', dir:'neut', reason: `SPX flat ${pc.toFixed(2)}%` };
+    else if (pc > -1.5) sigs.spxMom = { label:'SPX↓', dir:'bear', reason: `SPX ${pc.toFixed(2)}% weak` };
+    else sigs.spxMom = { label:'SPX↓', dir:'bear', reason: `SPX ${pc.toFixed(2)}% strong sell` };
+  }
+
+  // DXY — inverse relationship to stocks
+  if (state.dxy) {
+    const dc = state.dxy.changePct;
+    if (dc > 0.5) sigs.dxy = { label:'DXY↑', dir:'bear', reason: `DXY +${dc.toFixed(2)}% — dollar strength bearish for ES` };
+    else if (dc > 0.15) sigs.dxy = { label:'DXY↑', dir:'neut', reason: `DXY slightly up ${dc.toFixed(2)}%` };
+    else if (dc > -0.15) sigs.dxy = { label:'DXY', dir:'neut', reason: `DXY flat ${dc.toFixed(2)}%` };
+    else if (dc > -0.5) sigs.dxy = { label:'DXY↓', dir:'bull', reason: `DXY softening ${dc.toFixed(2)}% — bullish ES` };
+    else sigs.dxy = { label:'DXY↓', dir:'bull', reason: `DXY weak ${dc.toFixed(2)}% — strong ES tailwind` };
+  }
+
+  // 10Y Yield
+  if (state.yield10y) {
+    const y = state.yield10y.price;
+    const yc = state.yield10y.changePct;
+    if (y > 5.0) sigs.yield = { label:'YIELD', dir:'bear', reason: `10Y ${y.toFixed(2)}% — very restrictive` };
+    else if (y > 4.5) sigs.yield = { label:'YIELD', dir:'neut', reason: `10Y ${y.toFixed(2)}% — elevated but stable` };
+    else if (y > 4.0) sigs.yield = { label:'YIELD', dir:'neut', reason: `10Y ${y.toFixed(2)}% — moderate` };
+    else sigs.yield = { label:'YIELD', dir:'bull', reason: `10Y ${y.toFixed(2)}% — low, supportive` };
+
+    if (yc > 2) sigs.yieldMov = { label:'YIELD↑', dir:'bear', reason: `Yields surging +${yc.toFixed(1)}%` };
+    else if (yc < -2) sigs.yieldMov = { label:'YIELD↓', dir:'bull', reason: `Yields falling ${yc.toFixed(1)}% — flight to safety` };
+    else sigs.yieldMov = { label:'YIELD Δ', dir:'neut', reason: `Yields stable ${yc.toFixed(1)}%` };
+  }
+
+  // VX term structure
+  if (state.vxTerms) {
+    const vals = state.vxTerms.map(t => t.value).filter(Boolean);
+    if (vals.length >= 2) {
+      const m1 = vals[0], m2 = vals[1];
+      if (m1 < m2) {
+        sigs.termStr = { label:'CONTANGO', dir:'bull', reason: `VX contango: M1 ${m1.toFixed(1)} < M2 ${m2.toFixed(1)} — risk-on` };
+      } else if (m1 > m2 * 1.05) {
+        sigs.termStr = { label:'BACKWRD', dir:'bear', reason: `VX backwardation: M1 ${m1.toFixed(1)} > M2 ${m2.toFixed(1)} — stress` };
+      } else {
+        sigs.termStr = { label:'FLAT', dir:'neut', reason: `VX flat structure M1 ${m1.toFixed(1)} ≈ M2 ${m2.toFixed(1)}` };
+      }
+    }
+  }
+
+  state.signals = sigs;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function fmtNum(n, dec=2) { return n == null ? '--' : n.toFixed(dec); }
+function fmtChange(n) {
+  if (n == null) return '--';
+  const sign = n >= 0 ? '+' : '';
+  return `${sign}${n.toFixed(2)}`;
+}
+function colorForChange(n) {
+  if (n == null) return 'var(--text)';
+  return n > 0 ? 'var(--green)' : n < 0 ? 'var(--red)' : 'var(--text)';
+}
+
+function renderAll() {
+  // SPX
+  if (state.spx) {
+    document.getElementById('spxValue').textContent = fmtNum(state.spx.price, 2);
+    document.getElementById('spxValue').style.color = colorForChange(state.spx.change);
+    const pct = state.spx.changePct;
+    document.getElementById('spxChange').textContent = `${fmtChange(state.spx.change)} (${fmtChange(pct)}%)`;
+    document.getElementById('spxChange').style.color = colorForChange(state.spx.change);
+    document.getElementById('spxChangePct').textContent = `${fmtChange(pct)}%`;
+    document.getElementById('spxChangePct').style.color = colorForChange(pct);
+    const sig = document.getElementById('spxSignal');
+    if (pct > 0.3) { sig.textContent = 'BULLISH'; sig.className = 'metric-signal sig-bull'; }
+    else if (pct < -0.3) { sig.textContent = 'BEARISH'; sig.className = 'metric-signal sig-bear'; }
+    else { sig.textContent = 'NEUTRAL'; sig.className = 'metric-signal sig-neut'; }
+  }
+
+  // VIX
+  if (state.vix) {
+    const v = state.vix.price;
+    document.getElementById('vixValue').textContent = fmtNum(v, 2);
+    const vColor = v < 20 ? 'var(--green)' : v < 30 ? 'var(--yellow)' : 'var(--red)';
+    document.getElementById('vixValue').style.color = vColor;
+    document.getElementById('vixChange').textContent = `${fmtChange(state.vix.change)} (${fmtChange(state.vix.changePct)}%)`;
+    document.getElementById('vixChange').style.color = colorForChange(-state.vix.change); // inverted
+
+    const regime = document.getElementById('vixRegime');
+    if (v < 15) { regime.textContent = 'LOW FEAR'; regime.className = 'metric-signal sig-bull'; }
+    else if (v < 20) { regime.textContent = 'NORMAL'; regime.className = 'metric-signal sig-bull'; }
+    else if (v < 25) { regime.textContent = 'ELEVATED'; regime.className = 'metric-signal sig-neut'; }
+    else if (v < 30) { regime.textContent = 'HIGH FEAR'; regime.className = 'metric-signal sig-bear'; }
+    else { regime.textContent = 'EXTREME'; regime.className = 'metric-signal sig-bear'; }
+
+    const vsig = document.getElementById('vixSignal');
+    const sig = state.signals.vixSpike;
+    if (sig) {
+      vsig.textContent = sig.dir === 'bull' ? 'CRUSH BULL' : sig.dir === 'bear' ? 'SPIKE BEAR' : 'STABLE';
+      vsig.className = sig.dir === 'bull' ? 'metric-signal sig-bull' : sig.dir === 'bear' ? 'metric-signal sig-bear' : 'metric-signal sig-neut';
+    }
+  }
+
+  // DXY
+  if (state.dxy) {
+    document.getElementById('dxyValue').textContent = fmtNum(state.dxy.price, 3);
+    document.getElementById('dxyValue').style.color = 'var(--text-bright)';
+    document.getElementById('dxyChange').textContent = `${fmtChange(state.dxy.change)} (${fmtChange(state.dxy.changePct)}%)`;
+    document.getElementById('dxyChange').style.color = colorForChange(state.dxy.change);
+    document.getElementById('dxyChangePct').textContent = `${fmtChange(state.dxy.changePct)}%`;
+    document.getElementById('dxyChangePct').style.color = colorForChange(state.dxy.changePct);
+    const dsig = document.getElementById('dxySignal');
+    const sig = state.signals.dxy;
+    if (sig) {
+      dsig.textContent = sig.dir === 'bull' ? 'WEAK $' : sig.dir === 'bear' ? 'STRONG $' : 'FLAT';
+      dsig.className = sig.dir === 'bull' ? 'metric-signal sig-bull' : sig.dir === 'bear' ? 'metric-signal sig-bear' : 'metric-signal sig-neut';
+    }
+  }
+
+  // 10Y Yield
+  if (state.yield10y) {
+    document.getElementById('yieldValue').textContent = fmtNum(state.yield10y.price, 3) + '%';
+    document.getElementById('yieldChange').textContent = `${fmtChange(state.yield10y.change)} bps`;
+    document.getElementById('yieldChange').style.color = colorForChange(-state.yield10y.change);
+    const ysig = document.getElementById('yieldSignal');
+    const sig = state.signals.yield;
+    if (sig) {
+      ysig.textContent = sig.dir === 'bull' ? 'SUPPORTIVE' : sig.dir === 'bear' ? 'RESTRICTIVE' : 'NEUTRAL';
+      ysig.className = sig.dir === 'bull' ? 'metric-signal sig-bull' : sig.dir === 'bear' ? 'metric-signal sig-bear' : 'metric-signal sig-neut';
+    }
+    const yp = document.getElementById('yieldPressure');
+    const ypc = state.yield10y.changePct;
+    yp.textContent = ypc > 1 ? '↑ RISING' : ypc < -1 ? '↓ FALLING' : '→ STABLE';
+    yp.style.color = ypc > 1 ? 'var(--red)' : ypc < -1 ? 'var(--green)' : 'var(--yellow)';
+  }
+
+  // VX Term Structure
+  if (state.vxTerms) {
+    const vals = state.vxTerms.map(t => t.value).filter(Boolean);
+    const maxVal = Math.max(...vals) || 40;
+    const minVal = Math.min(...vals) || 10;
+
+    const termSig = document.getElementById('termStructure');
+    const ts = state.signals.termStr;
+    if (ts) {
+      termSig.textContent = ts.label;
+      termSig.className = ts.dir === 'bull' ? 'metric-signal sig-bull' : ts.dir === 'bear' ? 'metric-signal sig-bear' : 'metric-signal sig-neut';
+    }
+
+    const barsEl = document.getElementById('termBars');
+    barsEl.innerHTML = '';
+    state.vxTerms.forEach((t, i) => {
+      if (t.value == null) return;
+      const pct = Math.max(15, ((t.value - minVal + 3) / (maxVal - minVal + 6)) * 100);
+      // color: contango = blue (going up = bear), backwardation = red
+      const isUp = i > 0 && state.vxTerms[i-1].value && t.value > state.vxTerms[i-1].value;
+      const color = isUp ? 'rgba(0,212,255,0.6)' : 'rgba(0,255,136,0.5)';
+      barsEl.innerHTML += `
+        <div class="term-bar-wrap">
+          <div class="term-bar-val">${t.value.toFixed(1)}</div>
+          <div class="term-bar" style="height:${pct}%;background:${color}"></div>
+          <div class="term-bar-label">${t.label}</div>
+        </div>`;
+    });
+
+    if (vals.length >= 2) {
+      const spread = (vals[1] - vals[0]).toFixed(2);
+      const spreadEl = document.getElementById('vxSpread');
+      spreadEl.textContent = (spread > 0 ? '+' : '') + spread;
+      spreadEl.style.color = spread > 0 ? 'var(--green)' : 'var(--red)';
+    }
+  }
+
+  // Signal dots
+  renderSignalDots();
+
+  // Bias score
+  renderBiasScore();
+}
+
+function renderSignalDots() {
+  const sigs = Object.values(state.signals);
+  const grid = document.getElementById('signalGrid');
+  grid.innerHTML = '';
+  sigs.forEach(s => {
+    const cls = s.dir === 'bull' ? 'dot-bull' : s.dir === 'bear' ? 'dot-bear' : 'dot-neut';
+    const icon = s.dir === 'bull' ? '▲' : s.dir === 'bear' ? '▼' : '◆';
+    grid.innerHTML += `
+      <div class="signal-dot-wrap" title="${s.reason}">
+        <div class="signal-dot ${cls}">${icon}</div>
+        <div class="signal-dot-name">${s.label}</div>
+      </div>`;
+  });
+}
+
+function renderBiasScore() {
+  const sigs = Object.values(state.signals);
+  const bull = sigs.filter(s => s.dir === 'bull').length;
+  const bear = sigs.filter(s => s.dir === 'bear').length;
+  const neut = sigs.filter(s => s.dir === 'neut').length;
+  const total = sigs.length || 1;
+
+  // Score: -100 to +100
+  const score = Math.round(((bull - bear) / total) * 100);
+
+  document.getElementById('biasNumber').textContent = (score > 0 ? '+' : '') + score;
+  document.getElementById('bullCount').textContent = `▲ ${bull} bullish`;
+  document.getElementById('bearCount').textContent = `▼ ${bear} bearish`;
+  document.getElementById('neutCount').textContent = `◆ ${neut} neutral`;
+
+  const bullPct = (bull / total) * 100;
+  const bearPct = (bear / total) * 100;
+  document.getElementById('bullBar').style.width = bullPct + '%';
+  document.getElementById('bearBar').style.width = bearPct + '%';
+
+  const hero = document.getElementById('biasHero');
+  const numEl = document.getElementById('biasNumber');
+  const lblEl = document.getElementById('biasLabel');
+  const titleEl = document.getElementById('biasTitle');
+  const descEl = document.getElementById('biasDesc');
+
+  hero.className = 'bias-hero';
+
+  if (score >= 40) {
+    hero.classList.add('bullish');
+    numEl.style.color = 'var(--green)';
+    lblEl.style.color = 'var(--green)';
+    lblEl.textContent = 'BULLISH';
+    titleEl.textContent = 'Strong Bullish Bias';
+    descEl.textContent = `${bull} of ${total} signals are bullish. Conditions favor long setups on ES/MES. Risk-on environment detected.`;
+  } else if (score >= 15) {
+    hero.classList.add('bullish');
+    numEl.style.color = 'var(--green)';
+    lblEl.style.color = 'var(--green)';
+    lblEl.textContent = 'LEANING BULL';
+    titleEl.textContent = 'Mild Bullish Bias';
+    descEl.textContent = `${bull} bullish vs ${bear} bearish signals. Moderate tailwind for longs, stay selective.`;
+  } else if (score <= -40) {
+    hero.classList.add('bearish');
+    numEl.style.color = 'var(--red)';
+    lblEl.style.color = 'var(--red)';
+    lblEl.textContent = 'BEARISH';
+    titleEl.textContent = 'Strong Bearish Bias';
+    descEl.textContent = `${bear} of ${total} signals are bearish. Risk-off environment. Favor short setups or stay flat.`;
+  } else if (score <= -15) {
+    hero.classList.add('bearish');
+    numEl.style.color = 'var(--red)';
+    lblEl.style.color = 'var(--red)';
+    lblEl.textContent = 'LEANING BEAR';
+    titleEl.textContent = 'Mild Bearish Bias';
+    descEl.textContent = `${bear} bearish vs ${bull} bullish signals. Headwinds present, be cautious with longs.`;
+  } else {
+    hero.classList.add('neutral');
+    numEl.style.color = 'var(--yellow)';
+    lblEl.style.color = 'var(--yellow)';
+    lblEl.textContent = 'NEUTRAL';
+    titleEl.textContent = 'Mixed / Neutral Conditions';
+    descEl.textContent = `${bull} bull, ${bear} bear, ${neut} neutral signals. No clear edge. Wait for confirmation before entering.`;
+  }
+}
+
+// ─── AI ANALYSIS ─────────────────────────────────────────────────────────────
+function buildMarketContext() {
+  const sigs = Object.values(state.signals);
+  const bull = sigs.filter(s => s.dir === 'bull').length;
+  const bear = sigs.filter(s => s.dir === 'bear').length;
+  const score = Math.round(((bull - bear) / (sigs.length || 1)) * 100);
+
+  return `Current live market data as of ${new Date().toLocaleString('en-US', {timeZone:'America/Los_Angeles'})} PT:
+
+SPX: ${state.spx ? state.spx.price.toFixed(2) + ' (' + (state.spx.changePct > 0 ? '+' : '') + state.spx.changePct.toFixed(2) + '%)' : 'N/A'}
+VIX: ${state.vix ? state.vix.price.toFixed(2) + ' (' + (state.vix.changePct > 0 ? '+' : '') + state.vix.changePct.toFixed(2) + '%)' : 'N/A'}
+DXY: ${state.dxy ? state.dxy.price.toFixed(3) + ' (' + (state.dxy.changePct > 0 ? '+' : '') + state.dxy.changePct.toFixed(2) + '%)' : 'N/A'}
+10Y Yield: ${state.yield10y ? state.yield10y.price.toFixed(3) + '%' : 'N/A'}
+VX Term Structure: ${state.signals.termStr ? state.signals.termStr.reason : 'N/A'}
+
+Signal breakdown: ${bull} bullish, ${bear} bearish, ${sigs.filter(s=>s.dir==='neut').length} neutral
+Bias Score: ${score > 0 ? '+' : ''}${score} / 100
+
+Individual signals:
+${sigs.map(s => `- ${s.label}: ${s.dir.toUpperCase()} — ${s.reason}`).join('\n')}`;
+}
+
+async function runAutoAnalysis() {
+  const ctx = buildMarketContext();
+  const prompt = `You are a professional futures trader and market analyst. Based on the following live market data, provide a concise 3-4 sentence market analysis focused on ES/MES futures bias for today's session. Be direct and actionable. Mention any key risks or confluences. Do NOT include disclaimers.
+
+${ctx}`;
+
+  await callClaude(prompt);
+}
+
+async function askClaude() {
+  const q = document.getElementById('aiQuestion').value.trim();
+  if (!q) return;
+  const ctx = buildMarketContext();
+  const prompt = `You are a professional futures trader. Here is the current market data:\n\n${ctx}\n\nUser question: ${q}\n\nAnswer concisely and directly. No disclaimers.`;
+  document.getElementById('aiQuestion').value = '';
+  await callClaude(prompt);
+}
+
+async function callClaude(prompt) {
+  const contentEl = document.getElementById('aiContent');
+  const btn = document.getElementById('aiAskBtn');
+  btn.disabled = true;
+  contentEl.innerHTML = '<div class="ai-thinking"><span class="status-dot status-stale"></span><span class="dots-anim">Analyzing market conditions</span></div>';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'No response.';
+    contentEl.innerHTML = `<div style="line-height:1.8">${text.replace(/\n/g, '<br>')}</div>`;
+  } catch(e) {
+    contentEl.innerHTML = `<div style="color:var(--red)">AI analysis unavailable: ${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadAll();
+});
+</script>
+
+</body>
+</html>
