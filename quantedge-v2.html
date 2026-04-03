@@ -1,0 +1,1819 @@
+New file
+Brooklyn Thomas
+​You​
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantEdge v2 — Market Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:    #05080c;
+  --bg1:    #080d13;
+  --bg2:    #0c1219;
+  --bg3:    #111a24;
+  --bg4:    #16222f;
+  --bg5:    #1c2d3e;
+  --b1:     #1e2f42;
+  --b2:     #243749;
+  --b3:     #2e4560;
+
+–g:      #00c896;
+–g2:     #00e8a8;
+–g3:     rgba(0,200,150,0.12);
+–r:      #f03a5f;
+–r2:     #ff6080;
+–r3:     rgba(240,58,95,0.12);
+–y:      #f0c040;
+–y3:     rgba(240,192,64,0.1);
+–b:      #3d9be8;
+–b3c:    rgba(61,155,232,0.12);
+–pu:     #9f6ef5;
+–cy:     #00d4f0;
+–or:     #f07840;
+
+–t1:     #dce8f0;
+–t2:     #8aa4bc;
+–t3:     #4d6a82;
+–t4:     #2d4558;
+
+–mono:   ‘IBM Plex Mono’, monospace;
+–cond:   ‘IBM Plex Sans Condensed’, sans-serif;
+–sans:   ‘IBM Plex Sans’, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 13px; }
+
+body {
+background: var(–bg0);
+color: var(–t1);
+font-family: var(–sans);
+min-height: 100vh;
+overflow-x: hidden;
+/* Subtle grid texture */
+background-image:
+linear-gradient(rgba(30,47,66,0.15) 1px, transparent 1px),
+linear-gradient(90deg, rgba(30,47,66,0.15) 1px, transparent 1px);
+background-size: 40px 40px;
+}
+
+/* ─── TYPOGRAPHY ─── */
+.mono  { font-family: var(–mono); }
+.cond  { font-family: var(–cond); }
+
+/* ─── UTILITIES ─── */
+.bull  { color: var(–g); }
+.bear  { color: var(–r); }
+.neut  { color: var(–y); }
+.dim   { color: var(–t3); }
+.tiny  { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* ─── HEADER ─── */
+.hdr {
+position: sticky; top: 0; z-index: 200;
+background: var(–bg1);
+border-bottom: 1px solid var(–b1);
+display: flex; align-items: center; gap: 0;
+height: 44px;
+}
+
+.hdr-logo {
+display: flex; align-items: center; gap: 10px;
+padding: 0 18px;
+border-right: 1px solid var(–b1);
+height: 100%;
+flex-shrink: 0;
+}
+
+.logo-hex {
+width: 24px; height: 24px;
+background: var(–g);
+clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+animation: hex-pulse 3s ease-in-out infinite;
+}
+@keyframes hex-pulse {
+0%,100% { opacity:1; }
+50% { opacity:0.7; }
+}
+
+.logo-name {
+font-family: var(–cond);
+font-size: 15px; font-weight: 700;
+letter-spacing: 4px; color: #fff;
+}
+.logo-name em { color: var(–g); font-style: normal; }
+
+.hdr-ticker {
+flex: 1; overflow: hidden; height: 100%;
+display: flex; align-items: center;
+border-right: 1px solid var(–b1);
+}
+
+.ticker-track {
+display: flex; gap: 0;
+animation: ticker-run 50s linear infinite;
+white-space: nowrap;
+}
+@keyframes ticker-run {
+0% { transform: translateX(0); }
+100% { transform: translateX(-50%); }
+}
+
+.tick-item {
+display: inline-flex; align-items: center; gap: 7px;
+padding: 0 16px; height: 44px;
+border-right: 1px solid var(–b1);
+font-family: var(–mono); font-size: 11px;
+}
+.tick-sym { color: var(–t3); letter-spacing: 1px; }
+.tick-px  { color: var(–t1); }
+.tick-up  { color: var(–g); }
+.tick-dn  { color: var(–r); }
+
+.hdr-right {
+display: flex; align-items: center; gap: 12px;
+padding: 0 16px; flex-shrink: 0;
+}
+
+.hdr-pill {
+font-family: var(–mono); font-size: 10px;
+padding: 3px 9px; border-radius: 2px;
+letter-spacing: 1px;
+}
+.pill-warn { background: rgba(240,120,64,0.15); border: 1px solid rgba(240,120,64,0.4); color: var(–or); }
+.pill-live { background: var(–g3); border: 1px solid rgba(0,200,150,0.3); color: var(–g); }
+
+.live-dot {
+width: 6px; height: 6px; border-radius: 50%;
+background: var(–g2);
+display: inline-block; margin-right: 5px;
+animation: blink 1.8s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.hdr-clock {
+font-family: var(–mono); font-size: 12px;
+color: var(–cy); letter-spacing: 1px;
+}
+
+/* ─── COMMAND CENTER ─── */
+.cmd {
+background: var(–bg1);
+border-bottom: 2px solid var(–b2);
+padding: 0 20px;
+display: flex; align-items: stretch; gap: 0;
+min-height: 80px;
+}
+
+.cmd-primary {
+flex: 0 0 auto;
+padding: 14px 24px 14px 0;
+border-right: 1px solid var(–b1);
+margin-right: 24px;
+display: flex; flex-direction: column; justify-content: center;
+}
+
+.cmd-action-label {
+font-family: var(–cond);
+font-size: 9px; letter-spacing: 4px; color: var(–t3);
+text-transform: uppercase; margin-bottom: 6px;
+}
+
+.cmd-action {
+font-family: var(–cond);
+font-size: 28px; font-weight: 700;
+letter-spacing: 3px; line-height: 1;
+}
+
+.cmd-action.bull-action {
+color: var(–g);
+text-shadow: 0 0 30px rgba(0,200,150,0.4);
+}
+.cmd-action.bear-action {
+color: var(–r);
+text-shadow: 0 0 30px rgba(240,58,95,0.4);
+}
+
+.cmd-levels {
+display: flex; align-items: stretch; gap: 0;
+flex: 1;
+}
+
+.cmd-level-block {
+padding: 14px 20px;
+border-right: 1px solid var(–b1);
+display: flex; flex-direction: column; justify-content: center;
+min-width: 110px;
+}
+.cmd-level-block:last-child { border-right: none; }
+
+.clb-label {
+font-family: var(–mono); font-size: 9px;
+letter-spacing: 2px; color: var(–t4);
+text-transform: uppercase; margin-bottom: 5px;
+}
+
+.clb-value {
+font-family: var(–mono); font-size: 17px;
+font-weight: 500; letter-spacing: 1px;
+}
+
+.clb-sub {
+font-family: var(–sans); font-size: 10px;
+color: var(–t3); margin-top: 3px;
+}
+
+.cmd-confidence {
+padding: 14px 20px;
+display: flex; flex-direction: column;
+justify-content: center; align-items: center;
+border-left: 1px solid var(–b1);
+min-width: 120px;
+flex-shrink: 0;
+}
+
+.conf-arc-wrap {
+position: relative; width: 64px; height: 64px;
+margin-bottom: 4px;
+}
+
+.conf-arc-wrap svg { width: 64px; height: 64px; }
+
+.conf-num {
+position: absolute; top: 50%; left: 50%;
+transform: translate(-50%,-50%);
+font-family: var(–mono); font-size: 16px;
+font-weight: 600;
+}
+
+.conf-label {
+font-family: var(–cond); font-size: 9px;
+letter-spacing: 2px; color: var(–t3);
+text-transform: uppercase;
+}
+
+.cmd-invalidation {
+padding: 14px 20px;
+border-left: 1px solid var(–b1);
+display: flex; flex-direction: column; justify-content: center;
+flex-shrink: 0;
+background: rgba(240,58,95,0.04);
+}
+
+.inv-label {
+font-family: var(–mono); font-size: 9px;
+letter-spacing: 2px; color: var(–r);
+text-transform: uppercase; margin-bottom: 5px;
+opacity: 0.7;
+}
+
+.inv-price {
+font-family: var(–mono); font-size: 18px;
+color: var(–r); font-weight: 500;
+}
+
+.inv-desc {
+font-family: var(–sans); font-size: 10px;
+color: var(–t3); margin-top: 3px;
+}
+
+/* ─── SESSION BAR ─── */
+.session-bar {
+display: flex; align-items: center; gap: 0;
+background: var(–bg2);
+border-bottom: 1px solid var(–b1);
+padding: 0 20px;
+height: 32px;
+overflow-x: auto;
+}
+
+.sess-item {
+display: flex; align-items: center; gap: 6px;
+padding: 0 14px; height: 100%;
+border-right: 1px solid var(–b1);
+font-family: var(–mono); font-size: 10px;
+color: var(–t3); letter-spacing: 1px;
+white-space: nowrap;
+}
+
+.sess-item.active-sess {
+background: var(–g3);
+color: var(–g);
+}
+
+.sess-dot {
+width: 5px; height: 5px; border-radius: 50%;
+background: currentColor;
+}
+
+.sess-item.active-sess .sess-dot {
+animation: blink 1.5s infinite;
+}
+
+.session-right {
+margin-left: auto; display: flex; align-items: center;
+gap: 16px; padding-left: 20px;
+font-family: var(–mono); font-size: 10px; color: var(–t3);
+}
+
+/* ─── MAIN LAYOUT ─── */
+.main-grid {
+display: grid;
+grid-template-columns: 260px 1fr 300px;
+gap: 1px;
+background: var(–b1);
+min-height: calc(100vh - 160px);
+}
+
+.col { background: var(–bg1); }
+
+/* ─── LEFT COL: TF ALIGNMENT + FACTORS ─── */
+.col-left { padding: 16px; }
+
+/* TF Alignment Stack */
+.tf-stack {
+background: var(–bg2);
+border: 1px solid var(–b1);
+border-radius: 3px;
+overflow: hidden;
+margin-bottom: 14px;
+}
+
+.tf-stack-header {
+padding: 8px 12px;
+background: var(–bg3);
+border-bottom: 1px solid var(–b1);
+display: flex; align-items: center;
+justify-content: space-between;
+}
+
+.tf-stack-title {
+font-family: var(–cond); font-size: 10px;
+letter-spacing: 3px; color: var(–t3);
+text-transform: uppercase;
+}
+
+.alignment-score {
+font-family: var(–mono); font-size: 11px;
+}
+
+.tf-row {
+display: flex; align-items: center; gap: 0;
+border-bottom: 1px solid var(–b1);
+height: 42px;
+cursor: pointer;
+transition: background 0.15s;
+}
+.tf-row:last-child { border-bottom: none; }
+.tf-row:hover { background: var(–bg3); }
+.tf-row.tf-active { background: rgba(0,200,150,0.05); }
+
+.tf-row-label {
+font-family: var(–mono); font-size: 11px;
+color: var(–t3); letter-spacing: 1px;
+width: 40px; text-align: center;
+flex-shrink: 0; border-right: 1px solid var(–b1);
+height: 100%; display: flex; align-items: center; justify-content: center;
+}
+
+.tf-row-bar {
+flex: 1; height: 100%;
+display: flex; align-items: center;
+padding: 0 10px; gap: 8px;
+border-right: 1px solid var(–b1);
+position: relative; overflow: hidden;
+}
+
+.tf-row-bg {
+position: absolute; top: 0; left: 0; bottom: 0;
+opacity: 0.07; pointer-events: none;
+}
+
+.tf-row-dir {
+font-family: var(–cond); font-size: 12px;
+font-weight: 600; letter-spacing: 1px;
+position: relative; z-index: 1;
+flex-shrink: 0; width: 70px;
+}
+
+.tf-row-struct {
+font-family: var(–mono); font-size: 9px;
+color: var(–t3); letter-spacing: 0.5px;
+position: relative; z-index: 1;
+flex: 1;
+}
+
+.tf-row-conf {
+width: 36px; height: 100%;
+display: flex; align-items: center; justify-content: center;
+font-family: var(–mono); font-size: 11px;
+font-weight: 600; flex-shrink: 0;
+}
+
+/* Confluence breakdown popup */
+.conf-breakdown {
+padding: 10px 12px;
+background: var(–bg3);
+border-top: 1px solid var(–b1);
+display: none;
+}
+.conf-breakdown.open { display: block; }
+
+.conf-factor-row {
+display: flex; align-items: center;
+gap: 8px; padding: 3px 0;
+}
+
+.cfr-name {
+font-family: var(–sans); font-size: 10px;
+color: var(–t2); flex: 1;
+}
+
+.cfr-dot {
+width: 6px; height: 6px; border-radius: 50%;
+flex-shrink: 0;
+}
+
+.cfr-val {
+font-family: var(–mono); font-size: 10px;
+color: var(–t3); width: 28px; text-align: right;
+}
+
+/* Section title */
+.sec-title {
+font-family: var(–cond); font-size: 9px;
+letter-spacing: 3px; color: var(–t4);
+text-transform: uppercase;
+margin: 14px 0 8px;
+display: flex; align-items: center; gap: 8px;
+}
+.sec-title::after {
+content: ‘’; flex: 1; height: 1px;
+background: var(–b1);
+}
+
+/* Factor bars */
+.factor-item {
+display: flex; align-items: center; gap: 8px;
+margin-bottom: 7px;
+}
+
+.fi-name {
+font-family: var(–sans); font-size: 11px;
+color: var(–t2); width: 110px; flex-shrink: 0;
+}
+
+.fi-track {
+flex: 1; height: 3px;
+background: var(–bg4); border-radius: 2px;
+overflow: hidden;
+}
+
+.fi-fill {
+height: 100%; border-radius: 2px;
+transition: width 0.8s ease;
+}
+
+.fi-val {
+font-family: var(–mono); font-size: 10px;
+width: 36px; text-align: right;
+flex-shrink: 0;
+}
+
+/* Instrument mini cards */
+.inst-grid {
+display: grid; grid-template-columns: 1fr 1fr;
+gap: 5px; margin-bottom: 14px;
+}
+
+.inst-card {
+background: var(–bg3); border: 1px solid var(–b1);
+border-radius: 3px; padding: 8px 10px;
+cursor: pointer; transition: border-color 0.15s;
+}
+.inst-card:hover { border-color: var(–b3); }
+.inst-card.sel { border-color: var(–g); background: var(–g3); }
+
+.ic-sym {
+font-family: var(–mono); font-size: 9px;
+color: var(–t3); letter-spacing: 1px; margin-bottom: 3px;
+}
+
+.ic-px {
+font-family: var(–mono); font-size: 13px;
+color: var(–t1); margin-bottom: 2px;
+}
+
+.ic-chg {
+font-family: var(–mono); font-size: 9px;
+}
+
+/* ─── CENTER COL ─── */
+.col-center {
+display: flex; flex-direction: column;
+background: var(–bg1);
+}
+
+/* Chart area */
+.chart-hdr {
+display: flex; align-items: center;
+justify-content: space-between;
+padding: 10px 16px;
+border-bottom: 1px solid var(–b1);
+background: var(–bg2);
+}
+
+.chart-sym {
+font-family: var(–cond); font-size: 18px;
+font-weight: 700; letter-spacing: 2px; color: #fff;
+}
+
+.chart-px {
+font-family: var(–mono); font-size: 16px;
+margin-left: 12px;
+}
+
+.tf-tabs {
+display: flex; gap: 3px;
+}
+
+.tf-tab {
+font-family: var(–mono); font-size: 9px;
+padding: 3px 7px; border-radius: 2px;
+background: var(–bg3); border: 1px solid var(–b1);
+color: var(–t3); cursor: pointer; letter-spacing: 1px;
+transition: all 0.15s;
+}
+.tf-tab:hover { color: var(–t2); border-color: var(–b2); }
+.tf-tab.on { background: var(–g3); border-color: var(–g); color: var(–g); }
+
+/* SVG chart */
+.chart-wrap {
+flex: 1; padding: 12px 16px;
+background: var(–bg0);
+position: relative;
+}
+
+.chart-svg-el {
+width: 100%; height: 280px;
+display: block;
+}
+
+/* Signal strip below chart */
+.sig-strip {
+display: grid; grid-template-columns: repeat(5, 1fr);
+gap: 1px; background: var(–b1);
+border-top: 1px solid var(–b1);
+}
+
+.sig-cell {
+background: var(–bg2); padding: 10px 14px;
+}
+
+.sig-cell-label {
+font-family: var(–mono); font-size: 9px;
+letter-spacing: 2px; color: var(–t4);
+text-transform: uppercase; margin-bottom: 4px;
+}
+
+.sig-cell-val {
+font-family: var(–mono); font-size: 16px;
+font-weight: 500; margin-bottom: 2px;
+}
+
+.sig-cell-sub {
+font-family: var(–sans); font-size: 10px;
+color: var(–t3);
+}
+
+/* Cascade section */
+.cascade-wrap {
+border-top: 1px solid var(–b2);
+padding: 14px 16px;
+flex: 1;
+}
+
+/* Trade plan layers */
+.tp-layer {
+display: flex; align-items: stretch; gap: 0;
+background: var(–bg2); border: 1px solid var(–b1);
+border-radius: 3px; margin-bottom: 6px;
+overflow: hidden; cursor: pointer;
+transition: border-color 0.15s;
+}
+.tp-layer:hover { border-color: var(–b3); }
+.tp-layer.tl-bull { border-left: 3px solid var(–g); }
+.tp-layer.tl-bear { border-left: 3px solid var(–r); }
+.tp-layer.tl-neut { border-left: 3px solid var(–y); }
+.tp-layer.tl-now  { border-color: var(–cy); box-shadow: 0 0 12px rgba(0,212,240,0.1); }
+
+.tl-tf {
+font-family: var(–mono); font-size: 10px;
+letter-spacing: 1px; color: var(–t3);
+width: 38px; text-align: center; flex-shrink: 0;
+display: flex; align-items: center; justify-content: center;
+border-right: 1px solid var(–b1);
+background: var(–bg3);
+}
+
+.tl-body {
+flex: 1; display: flex; align-items: center;
+padding: 8px 12px; gap: 12px;
+}
+
+.tl-dir {
+font-family: var(–cond); font-size: 12px;
+font-weight: 600; letter-spacing: 1px;
+width: 90px; flex-shrink: 0;
+}
+
+.tl-struct {
+font-family: var(–mono); font-size: 9px;
+color: var(–t3); flex: 1;
+}
+
+.tl-levels {
+display: flex; gap: 8px; flex-shrink: 0;
+}
+
+.tl-lv {
+text-align: right;
+}
+
+.tl-lv-label {
+font-family: var(–mono); font-size: 8px;
+color: var(–t4); letter-spacing: 1px;
+text-transform: uppercase;
+}
+
+.tl-lv-val {
+font-family: var(–mono); font-size: 11px;
+}
+
+.tl-conf {
+width: 36px; flex-shrink: 0;
+display: flex; align-items: center;
+justify-content: center;
+border-left: 1px solid var(–b1);
+font-family: var(–mono); font-size: 11px;
+font-weight: 600;
+}
+
+.tl-vol {
+width: 28px; flex-shrink: 0;
+display: flex; align-items: center;
+justify-content: center;
+border-left: 1px solid var(–b1);
+}
+
+.vol-dot {
+width: 7px; height: 7px; border-radius: 50%;
+}
+
+/* Expanded layer detail */
+.tl-expanded {
+background: var(–bg3); border-top: 1px solid var(–b1);
+padding: 10px 14px;
+display: none;
+}
+.tl-expanded.open { display: block; }
+
+.tl-exp-grid {
+display: grid; grid-template-columns: repeat(6,1fr);
+gap: 6px; margin-bottom: 8px;
+}
+
+.tl-exp-cell {
+background: var(–bg4); border-radius: 2px;
+padding: 6px 8px;
+}
+
+.tl-exp-label {
+font-family: var(–mono); font-size: 8px;
+color: var(–t4); letter-spacing: 1px;
+text-transform: uppercase; margin-bottom: 2px;
+}
+
+.tl-exp-val {
+font-family: var(–mono); font-size: 12px;
+}
+
+.tl-inv {
+font-family: var(–sans); font-size: 10px;
+color: var(–r); margin-top: 4px;
+padding-top: 6px; border-top: 1px solid var(–b1);
+}
+
+.tl-inv strong { font-family: var(–mono); }
+
+/* ─── RIGHT COL ─── */
+.col-right {
+background: var(–bg1); padding: 16px;
+overflow-y: auto;
+}
+
+/* Sequence narrative */
+.narrative {
+background: var(–bg2); border: 1px solid var(–b2);
+border-radius: 3px; padding: 14px;
+margin-bottom: 14px;
+border-left: 2px solid var(–cy);
+}
+
+.narr-title {
+font-family: var(–cond); font-size: 9px;
+letter-spacing: 3px; color: var(–cy);
+text-transform: uppercase; margin-bottom: 8px;
+}
+
+.narr-text {
+font-family: var(–sans); font-size: 11px;
+color: var(–t2); line-height: 1.8;
+}
+
+.narr-text .nb { color: var(–g); font-weight: 500; }
+.narr-text .nr { color: var(–r); font-weight: 500; }
+.narr-text .np { font-family: var(–mono); font-size: 10px; color: var(–cy); }
+.narr-text .nw { color: var(–y); }
+
+/* Sequence steps */
+.seq { display: flex; flex-direction: column; margin-bottom: 14px; }
+
+.sq {
+display: flex; gap: 10px;
+padding: 8px 0;
+position: relative;
+}
+.sq:not(:last-child)::after {
+content: ‘’; position: absolute;
+left: 10px; top: 30px; bottom: 0;
+width: 1px; background: var(–b2);
+}
+
+.sq-num {
+width: 20px; height: 20px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-family: var(–mono); font-size: 9px;
+flex-shrink: 0; margin-top: 2px;
+}
+.sqn-b { background: var(–g3); border: 1px solid var(–g); color: var(–g); }
+.sqn-r { background: var(–r3); border: 1px solid var(–r); color: var(–r); }
+.sqn-n { background: var(–y3); border: 1px solid var(–y); color: var(–y); }
+
+.sq-body { flex: 1; }
+
+.sq-action {
+font-family: var(–cond); font-size: 12px;
+font-weight: 600; letter-spacing: 1px; margin-bottom: 2px;
+}
+
+.sq-detail {
+font-family: var(–sans); font-size: 10px;
+color: var(–t3); line-height: 1.5; margin-bottom: 4px;
+}
+
+.sq-tags {
+display: flex; gap: 4px; flex-wrap: wrap;
+}
+
+.sq-tag {
+font-family: var(–mono); font-size: 9px;
+padding: 1px 5px; border-radius: 2px;
+background: var(–bg4); border: 1px solid var(–b2);
+color: var(–t2);
+}
+.sq-tag.bull-tag { border-color: rgba(0,200,150,0.3); color: var(–g); }
+.sq-tag.bear-tag { border-color: rgba(240,58,95,0.3); color: var(–r); }
+.sq-tag.time-tag { border-color: rgba(240,192,64,0.3); color: var(–y); }
+
+/* Liquidity map */
+.liq-wrap {
+background: var(–bg2); border: 1px solid var(–b1);
+border-radius: 3px; padding: 12px;
+margin-bottom: 14px;
+}
+
+.liq-row {
+display: flex; align-items: center; gap: 8px;
+padding: 5px 0; border-bottom: 1px solid rgba(30,47,66,0.5);
+position: relative;
+}
+.liq-row:last-child { border-bottom: none; }
+.liq-row.liq-current-row {
+background: rgba(255,255,255,0.03);
+margin: 0 -12px; padding: 5px 12px;
+}
+
+.liq-icon {
+width: 8px; height: 8px; border-radius: 1px;
+flex-shrink: 0;
+}
+
+.liq-name {
+font-family: var(–mono); font-size: 9px;
+color: var(–t3); letter-spacing: 1px;
+width: 50px; flex-shrink: 0;
+}
+
+.liq-bar-track {
+flex: 1; height: 3px;
+background: var(–bg4); border-radius: 2px;
+overflow: hidden;
+}
+
+.liq-bar-fill { height: 100%; border-radius: 2px; }
+
+.liq-price {
+font-family: var(–mono); font-size: 11px;
+width: 50px; text-align: right; flex-shrink: 0;
+}
+
+.liq-swept {
+font-family: var(–mono); font-size: 8px;
+padding: 1px 4px; border-radius: 2px;
+background: var(–bg4); color: var(–t4);
+border: 1px solid var(–b1);
+flex-shrink: 0;
+}
+
+.liq-live {
+font-family: var(–mono); font-size: 8px;
+padding: 1px 4px; border-radius: 2px;
+flex-shrink: 0;
+}
+
+/* Position sizing */
+.pos-row {
+display: flex; align-items: center; gap: 10px;
+background: var(–bg3); border: 1px solid var(–b1);
+border-radius: 3px; padding: 10px 12px;
+margin-bottom: 6px;
+}
+
+.pr-tf {
+font-family: var(–mono); font-size: 9px;
+color: var(–t3); letter-spacing: 1px;
+width: 40px; flex-shrink: 0;
+}
+
+.pr-dir {
+font-family: var(–cond); font-size: 11px;
+font-weight: 600; letter-spacing: 1px;
+width: 60px; flex-shrink: 0;
+}
+
+.pr-size {
+font-family: var(–mono); font-size: 16px;
+font-weight: 600; flex-shrink: 0;
+}
+
+.pr-detail {
+flex: 1; font-family: var(–sans);
+font-size: 10px; color: var(–t3);
+}
+
+.pr-rr {
+font-family: var(–mono); font-size: 11px;
+flex-shrink: 0;
+}
+
+/* Alert list */
+.alert-item {
+display: flex; align-items: center; gap: 8px;
+padding: 6px 0; border-bottom: 1px solid rgba(30,47,66,0.4);
+}
+.alert-item:last-child { border-bottom: none; }
+
+.ai-price {
+font-family: var(–mono); font-size: 11px;
+width: 55px; flex-shrink: 0;
+}
+
+.ai-desc {
+font-family: var(–sans); font-size: 10px;
+color: var(–t2); flex: 1;
+}
+
+.ai-status {
+font-family: var(–mono); font-size: 8px;
+padding: 2px 5px; border-radius: 2px;
+letter-spacing: 1px; flex-shrink: 0;
+}
+.ais-armed    { background: var(–b3c); border: 1px solid rgba(61,155,232,0.3); color: var(–b); }
+.ais-near     { background: var(–y3); border: 1px solid rgba(240,192,64,0.4); color: var(–y); animation: blink 1s infinite; }
+.ais-pending  { background: var(–bg4); border: 1px solid var(–b1); color: var(–t4); }
+
+/* VIX panel */
+.vix-row {
+display: flex; align-items: center; gap: 0;
+margin-bottom: 10px;
+}
+
+.vix-main-val {
+font-family: var(–mono); font-size: 30px;
+font-weight: 500; color: var(–y);
+line-height: 1;
+}
+
+.vix-meta {
+margin-left: 12px;
+display: flex; flex-direction: column; gap: 3px;
+}
+
+.vix-struct-pill {
+font-family: var(–mono); font-size: 9px;
+padding: 2px 7px; border-radius: 2px;
+letter-spacing: 1px;
+}
+
+.vix-back { background: var(–r3); border: 1px solid rgba(240,58,95,0.3); color: var(–r); }
+.vix-cont { background: var(–g3); border: 1px solid rgba(0,200,150,0.3); color: var(–g); }
+
+/* VX term bars */
+.vx-bars {
+display: flex; align-items: flex-end;
+gap: 4px; height: 50px; margin-bottom: 8px;
+}
+
+.vx-bar-wrap {
+flex: 1; display: flex; flex-direction: column;
+align-items: center; justify-content: flex-end;
+gap: 3px; height: 100%;
+}
+
+.vx-bar {
+width: 100%; border-radius: 2px 2px 0 0;
+}
+
+.vx-bar-sym {
+font-family: var(–mono); font-size: 8px;
+color: var(–t4);
+}
+
+.vx-bar-px {
+font-family: var(–mono); font-size: 9px;
+color: var(–t2);
+}
+
+/* AI button */
+.ai-run-btn {
+width: 100%; padding: 8px;
+background: var(–g3);
+border: 1px solid rgba(0,200,150,0.3);
+color: var(–g); font-family: var(–cond);
+font-size: 11px; letter-spacing: 3px;
+text-transform: uppercase; border-radius: 3px;
+cursor: pointer; transition: all 0.2s;
+margin-top: 10px;
+}
+.ai-run-btn:hover {
+background: rgba(0,200,150,0.2);
+box-shadow: 0 0 16px rgba(0,200,150,0.15);
+}
+
+.ai-out {
+background: var(–bg3); border: 1px solid var(–b1);
+border-radius: 3px; padding: 10px;
+margin-top: 8px; font-family: var(–sans);
+font-size: 11px; color: var(–t2);
+line-height: 1.7; display: none;
+max-height: 160px; overflow-y: auto;
+}
+.ai-out.show { display: block; }
+.ai-out .h { color: var(–g); font-weight: 500; }
+.ai-out .d { color: var(–r); font-weight: 500; }
+.ai-out .w { color: var(–y); }
+.ai-out .p { font-family: var(–mono); font-size: 10px; color: var(–cy); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(–b2); border-radius: 2px; }
+</style>
+
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="logo-hex"></div>
+    <div class="logo-name">QUANT<em>EDGE</em></div>
+  </div>
+  <div class="hdr-ticker">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-pill pill-warn">⚡ SCHWAB PENDING</span>
+    <span class="hdr-pill pill-live"><span class="live-dot"></span>SIM DATA</span>
+    <span class="hdr-clock" id="clock">--:--:--</span>
+  </div>
+</header>
+
+<!-- ═══ COMMAND CENTER ═══ -->
+
+<div class="cmd">
+  <div class="cmd-primary">
+    <div class="cmd-action-label">Primary Signal</div>
+    <div class="cmd-action bull-action" id="cmdAction">▲ LONG ES</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:5px;">3 contracts · Daily/Swing</div>
+  </div>
+
+  <div class="cmd-levels">
+    <div class="cmd-level-block">
+      <div class="clb-label">Entry Zone</div>
+      <div class="clb-value bull" id="cmdEntry">6,314–6,350</div>
+      <div class="clb-sub">Major support confluence</div>
+    </div>
+    <div class="cmd-level-block">
+      <div class="clb-label">Stop Loss</div>
+      <div class="clb-value bear" id="cmdStop">6,270</div>
+      <div class="clb-sub">Below structure low</div>
+    </div>
+    <div class="cmd-level-block">
+      <div class="clb-label">Target 1</div>
+      <div class="clb-value" style="color:var(--cy);" id="cmdTp1">6,520</div>
+      <div class="clb-sub">Take 30% here</div>
+    </div>
+    <div class="cmd-level-block">
+      <div class="clb-label">Target 2</div>
+      <div class="clb-value" style="color:var(--cy);" id="cmdTp2">6,760</div>
+      <div class="clb-sub">Final — Daily measured</div>
+    </div>
+    <div class="cmd-level-block">
+      <div class="clb-label">Fib Time</div>
+      <div class="clb-value" style="color:var(--pu);">Apr 7–9</div>
+      <div class="clb-sub">0.618 reversal window</div>
+    </div>
+  </div>
+
+  <div class="cmd-confidence">
+    <div class="conf-arc-wrap">
+      <svg viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#16222f" stroke-width="6"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c896" stroke-width="6"
+          stroke-dasharray="163" stroke-dashoffset="44"
+          stroke-linecap="round" transform="rotate(-90 32 32)"/>
+      </svg>
+      <div class="conf-num bull" id="confNum">73</div>
+    </div>
+    <div class="conf-label">Confluence</div>
+  </div>
+
+  <div class="cmd-invalidation">
+    <div class="inv-label">⚠ Invalidated If</div>
+    <div class="inv-price" id="cmdInv">≤ 6,270</div>
+    <div class="inv-desc">Daily close below — plan off</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--r);margin-top:6px;opacity:0.6;">THEN: reassess 6,100 level</div>
+  </div>
+</div>
+
+<!-- ═══ SESSION BAR ═══ -->
+
+<div class="session-bar">
+  <div class="sess-item" id="sessAsian"><div class="sess-dot"></div>ASIAN 18:00–02:00</div>
+  <div class="sess-item" id="sessLondon"><div class="sess-dot"></div>LONDON 02:00–09:00</div>
+  <div class="sess-item active-sess" id="sessNY"><div class="sess-dot"></div>NY OPEN 09:30–16:00</div>
+  <div class="sess-item" id="sessPower"><div class="sess-dot"></div>POWER HR 15:00–16:00</div>
+  <div class="sess-item" id="sessAH"><div class="sess-dot"></div>AFTER HRS 16:00–18:00</div>
+  <div class="session-right">
+    <span style="color:var(--t3);">Phase:</span>
+    <span style="color:var(--y);font-family:var(--mono);font-size:10px;">MANIPULATION</span>
+    <span style="color:var(--t4);">|</span>
+    <span style="color:var(--t3);">Next catalyst:</span>
+    <span style="color:var(--or);font-family:var(--mono);font-size:10px);">NFP 08:30 TODAY</span>
+  </div>
+</div>
+
+<!-- ═══ MAIN GRID ═══ -->
+
+<div class="main-grid">
+
+  <!-- ── LEFT ── -->
+
+  <div class="col col-left">
+
+```
+<div class="sec-title">Instruments</div>
+<div class="inst-grid" id="instGrid"></div>
+
+<div class="sec-title">TF Alignment</div>
+<div class="tf-stack">
+  <div class="tf-stack-header">
+    <div class="tf-stack-title">Timeframe Stack</div>
+    <div class="alignment-score">
+      <span style="color:var(--g);">4</span><span style="color:var(--t4);">/6 BULL</span>
+    </div>
+  </div>
+  <!-- TF rows — clicking expands confluence breakdown -->
+  <div id="tfStack"></div>
+</div>
+
+<div class="sec-title">Computed Factors</div>
+<div id="factorList"></div>
+
+<div class="sec-title">VIX & /VX Futures</div>
+<div class="vix-row">
+  <div class="vix-main-val" id="vixVal">34.2</div>
+  <div class="vix-meta">
+    <div class="vix-struct-pill vix-back">BACKWARDATION</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:3px;">
+      VIXM: <span style="color:var(--y);" id="vixmVal">29.4</span>
+    </div>
+  </div>
+</div>
+<div class="vx-bars" id="vxBars"></div>
+<div style="font-family:var(--mono);font-size:9px;color:var(--r);margin-bottom:4px;" id="vxRollNote"></div>
+<div style="font-family:var(--sans);font-size:10px;color:var(--t3);line-height:1.6;">
+  M1→M2 spread flip to contango = <span style="color:var(--g);">bottom signal</span>. Currently <span style="color:var(--r);">-2.4pts</span> backwardated.
+</div>
+```
+
+  </div>
+
+  <!-- ── CENTER ── -->
+
+  <div class="col col-center">
+
+```
+<div class="chart-hdr">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="chart-sym" id="chartSym">ES1!</div>
+    <div class="chart-px bull" id="chartPx">5,892.25</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--r);" id="chartChg">▼ -98.75 (-1.49%)</div>
+  </div>
+  <div class="tf-tabs" id="tfTabs"></div>
+</div>
+
+<div class="chart-wrap">
+  <svg class="chart-svg-el" id="chartSVG" viewBox="0 0 760 260" preserveAspectRatio="none">
+    <!-- grid -->
+    <line x1="0" y1="52" x2="760" y2="52" stroke="#1c2d3e" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="0" y1="104" x2="760" y2="104" stroke="#1c2d3e" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="0" y1="156" x2="760" y2="156" stroke="#1c2d3e" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="0" y1="208" x2="760" y2="208" stroke="#1c2d3e" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <!-- descending channel -->
+    <line x1="0" y1="50" x2="760" y2="130" stroke="#2e4560" stroke-width="1.2"/>
+    <line x1="0" y1="140" x2="760" y2="220" stroke="#2e4560" stroke-width="1.2"/>
+    <!-- key levels -->
+    <line x1="0" y1="78" x2="760" y2="78" stroke="rgba(240,58,95,0.35)" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="620" y="74" font-family="IBM Plex Mono" font-size="8" fill="rgba(240,58,95,0.8)">R 6,620</text>
+    <line x1="0" y1="142" x2="760" y2="142" stroke="rgba(168,85,245,0.35)" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="600" y="138" font-family="IBM Plex Mono" font-size="8" fill="rgba(168,85,245,0.8)">γ MAX PAIN 6,420</text>
+    <line x1="0" y1="208" x2="760" y2="208" stroke="rgba(0,200,150,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="620" y="204" font-family="IBM Plex Mono" font-size="8" fill="rgba(0,200,150,0.8)">S 6,314</text>
+    <!-- entry zone band -->
+    <rect x="0" y="205" width="760" height="16" fill="rgba(0,200,150,0.06)"/>
+    <!-- projected recovery arrow -->
+    <line x1="680" y1="190" x2="680" y2="88" stroke="rgba(0,200,150,0.5)" stroke-width="1.2" stroke-dasharray="5,3"/>
+    <polygon points="680,76 674,92 686,92" fill="rgba(0,200,150,0.6)"/>
+    <text x="686" y="88" font-family="IBM Plex Mono" font-size="8" fill="rgba(0,200,150,0.8)">6,760</text>
+    <!-- entry circle -->
+    <circle cx="640" cy="196" r="11" fill="none" stroke="rgba(240,192,64,0.7)" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <text x="654" y="208" font-family="IBM Plex Mono" font-size="7" fill="rgba(240,192,64,0.9)">ENTRY</text>
+    <!-- candles -->
+    <g id="candles"></g>
+    <!-- volume -->
+    <g id="volume"></g>
+    <!-- current price -->
+    <line x1="0" y1="172" x2="760" y2="172" stroke="rgba(61,155,232,0.4)" stroke-width="0.8"/>
+    <rect x="706" y="166" width="50" height="12" rx="1" fill="#3d9be8"/>
+    <text x="710" y="175" font-family="IBM Plex Mono" font-size="8" fill="#fff" id="chartPxLabel">5,892</text>
+  </svg>
+</div>
+
+<!-- Signal strip -->
+<div class="sig-strip">
+  <div class="sig-cell">
+    <div class="sig-cell-label">VIX</div>
+    <div class="sig-cell-val neut" id="s_vix">34.2</div>
+    <div class="sig-cell-sub">Elevated fear</div>
+  </div>
+  <div class="sig-cell">
+    <div class="sig-cell-label">Put/Call</div>
+    <div class="sig-cell-val bear" id="s_pc">1.42</div>
+    <div class="sig-cell-sub">Extreme puts</div>
+  </div>
+  <div class="sig-cell">
+    <div class="sig-cell-label">$TICK</div>
+    <div class="sig-cell-val bear" id="s_tick">-842</div>
+    <div class="sig-cell-sub">Sell pressure</div>
+  </div>
+  <div class="sig-cell">
+    <div class="sig-cell-label">$NYMO</div>
+    <div class="sig-cell-val bear" id="s_nymo">-68</div>
+    <div class="sig-cell-sub">Near oversold</div>
+  </div>
+  <div class="sig-cell">
+    <div class="sig-cell-label">DXY</div>
+    <div class="sig-cell-val" style="color:var(--b);" id="s_dxy">103.4</div>
+    <div class="sig-cell-sub">USD strength</div>
+  </div>
+</div>
+
+<!-- Cascade layers -->
+<div class="cascade-wrap">
+  <div class="sec-title" style="margin-top:0;">Cascading Trade Layers</div>
+  <div id="cascadeLayers"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ── RIGHT ── -->
+
+  <div class="col col-right">
+
+```
+<div class="sec-title" style="margin-top:0;">Trade Sequence</div>
+<div class="narrative">
+  <div class="narr-title">⚡ Market Story</div>
+  <div class="narr-text">
+    <span class="nb">Daily</span> targets <span class="np">6,314</span> — major support. <span class="nw">0.618 Fib time (Apr 7–9)</span> aligns here = high-conviction reversal. Big target: <span class="np">6,760</span>.<br><br>
+    <span class="nb">4H</span> expects one final flush. <span class="nb">1H</span> is ranging = <span class="nw">manipulation</span>. Watch for equal-low sweep at <span class="np">6,360</span> before real move.<br><br>
+    <span class="nb">5m BOS ↑</span> from sweep = re-entry signal. At <span class="np">6,620</span>, <span class="nr">flip short 5m</span> for retracement to <span class="np">6,540</span>, then add longs for final push to <span class="np">6,760</span>.
+  </div>
+</div>
+
+<div class="sec-title">Move Sequence</div>
+<div class="seq" id="seqSteps"></div>
+
+<div class="sec-title">Liquidity Map</div>
+<div class="liq-wrap" id="liqMap"></div>
+
+<div class="sec-title">Position Sizing</div>
+<div id="posSizing"></div>
+
+<div class="sec-title">Alert Thresholds</div>
+<div style="background:var(--bg2);border:1px solid var(--b1);border-radius:3px;padding:10px;" id="alertList"></div>
+
+<div class="sec-title">Economic Calendar</div>
+<div style="background:var(--bg2);border:1px solid var(--b1);border-radius:3px;padding:10px;" id="calList"></div>
+
+<button class="ai-run-btn" onclick="runAI()">⚡ AI MARKET ANALYSIS</button>
+<div class="ai-out" id="aiOut"></div>
+```
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+
+const INSTRUMENTS = [
+  { sym:'ES1!',  px:5892.25, chg:-98.75,  pct:-1.49 },
+  { sym:'NQ1!',  px:20142.5, chg:-312.50, pct:-1.53 },
+  { sym:'RTY1!', px:1842.60, chg:-38.40,  pct:-2.04 },
+  { sym:'SPY',   px:588.42,  chg:-9.61,   pct:-1.61 },
+  { sym:'QQQ',   px:490.18,  chg:-7.82,   pct:-1.57 },
+  { sym:'IWM',   px:195.34,  chg:-4.21,   pct:-2.11 },
+  { sym:'VIX',   px:34.2,    chg:+8.4,    pct:+32.6 },
+  { sym:'DXY',   px:103.42,  chg:+0.62,   pct:+0.60 },
+];
+
+const TICKER_EXTRA = [
+  { sym:'MES1!', px:5892.25, chg:-98.75,  pct:-1.49 },
+  { sym:'MNQ1!', px:20142.5, chg:-312.50, pct:-1.53 },
+  { sym:'SPX',   px:5889.70, chg:-96.30,  pct:-1.61 },
+  { sym:'/VX M1',px:31.80,   chg:+6.2,    pct:+24.2 },
+  { sym:'/VX M2',px:29.40,   chg:+4.8,    pct:+19.5 },
+  { sym:'GOLD',  px:3112.40, chg:+18.20,  pct:+0.59 },
+  { sym:'10Y',   px:4.312,   chg:+0.041,  pct:+0.96 },
+  { sym:'BTC',   px:82140,   chg:-1820,   pct:-2.17 },
+  { sym:'OIL',   px:71.82,   chg:-1.34,   pct:-1.83 },
+];
+
+// Computed confluence factors — each has weight + current signal
+// Score = sum(weight * aligned) / sum(weight) * 100
+const FACTORS = [
+  { name:'VIX Level',      weight:15, val:34.2,  bearish:true,  label:'34.2 — Fear elevated',    color:'var(--r)' },
+  { name:'Market Structure',weight:18, val:20,    bearish:true,  label:'BOS ↓ Daily/4H',          color:'var(--r)' },
+  { name:'$TICK Breadth',  weight:12, val:30,    bearish:true,  label:'-842 Sell pressure',       color:'var(--r)' },
+  { name:'Put/Call Ratio', weight:12, val:22,    bearish:false, label:'1.42 — Contrarian bull',  color:'var(--g)' },
+  { name:'Gamma Level',    weight:14, val:45,    bearish:false, label:'At max pain — support',   color:'var(--y)' },
+  { name:'DXY Correlation',weight:10, val:35,    bearish:true,  label:'103.4 — Inverse SPX',     color:'var(--r)' },
+  { name:'Fib Time Zone',  weight:11, val:75,    bearish:false, label:'0.618 window now',        color:'var(--g)' },
+  { name:'VX Term Struct', weight:8,  val:20,    bearish:true,  label:'Backwardation sustained', color:'var(--r)' },
+];
+
+// Overall bias = LONG (most factors bullish or at extremes suggesting reversal)
+// Score computed: factors aligned with LONG = Put/Call (contrarian), Gamma, Fib = 37 weight
+// Total weight = 100. Score ≈ 73 (mixed but leaning bull due to extreme readings)
+
+const TF_DATA = [
+  { tf:'D',   dir:'LONG BIAS',  cls:'bull', struct:'BOS ↓ → CHoCH watch', conf:87,
+    vol:'confirm', entry:'6,314–6,350', stop:'6,270', tp1:'6,580', tp2:'6,760', reentry:'—',
+    inv:'Daily close < 6,270 — plan invalidated',
+    factors:['VIX extreme reversal zone','Fib 0.618 time','Gamma at max pain','Put/Call contrarian','Major horizontal S/R'] },
+
+  { tf:'4H',  dir:'SHORT BIAS', cls:'bear', struct:'CHoCH ↓ confirmed', conf:61,
+    vol:'weak', entry:'6,420–6,450', stop:'6,485', tp1:'6,370', tp2:'6,314', reentry:'6,314–6,340',
+    inv:'4H close above 6,485 — short thesis broken',
+    factors:['CHoCH bearish confirmed','Volume declining','PDH as resistance','Below descending channel midline'] },
+
+  { tf:'1H',  dir:'WAIT',       cls:'neut', struct:'Ranging / Inducement', conf:55,
+    vol:'low', entry:'Watch 6,360', stop:'—', tp1:'6,390 BOS', tp2:'—', reentry:'—',
+    inv:'Break above 6,450 without sweep = trend resumption',
+    factors:['Equal lows forming at 6,360','No BOS yet','Low volume consolidation','Inducement pattern active'] },
+
+  { tf:'15M', dir:'SHORT',      cls:'bear', struct:'Liquidity sweep ↓', conf:68,
+    vol:'confirm', entry:'6,400–6,415', stop:'6,430', tp1:'6,370', tp2:'6,340', reentry:'6,350',
+    inv:'Reclaim of 6,430 with momentum',
+    factors:['BOS bearish on 15m','Volume spike on break','PDL magnetic pull','Equal lows below as target'] },
+
+  { tf:'5M',  dir:'▲ LONG SCALP', cls:'bull', struct:'Micro BOS ↑ from sweep', conf:74,
+    vol:'confirm', entry:'6,376–6,385', stop:'6,362', tp1:'6,410', tp2:'6,430', reentry:'6,380',
+    inv:'Breach of 6,362 stops — momentum gone',
+    factors:['BOS ↑ after sweep','Volume spike at low','Absorption candle','1m absorption confirmed'] },
+
+  { tf:'1M',  dir:'▲ ENTRY NOW', cls:'bull', struct:'Absorption at sweep low', conf:82,
+    vol:'confirm', entry:'6,378', stop:'6,365', tp1:'6,395', tp2:'6,410', reentry:'—',
+    inv:'Break of 6,365 with momentum = abort',
+    factors:['Absorption candle pattern','Volume spike','Bid stacking visible','5m BOS confirmed above'] },
+];
+
+const SEQ_STEPS = [
+  { n:'sqn-r', cls:'bear', action:'▼ FINAL FLUSH',
+    detail:'4H distribution completing. Sweep of equal lows near 6,360. Do NOT chase short — this is the trap.',
+    tags:['bear-tag:Target: 6,314–6,340','time-tag:⏱ Today – Apr 7','bear-tag:Size: 0 — wait'] },
+  { n:'sqn-b', cls:'bull', action:'▲ ACCUMULATE LONGS',
+    detail:'5m BOS ↑ from sweep + volume spike = entry. Scale into long. This is the primary trade.',
+    tags:['bull-tag:Entry: 6,314–6,350','bear-tag:Stop: 6,270','time-tag:⏱ Apr 7–9 (0.618 window)'] },
+  { n:'sqn-b', cls:'bull', action:'▲ FIRST PUSH — PARTIAL EXIT',
+    detail:'Take 30–40% at 6,520. Move stop to breakeven on remainder. Lock in profit.',
+    tags:['bull-tag:TP1: 6,520','bear-tag:Size: -30%','time-tag:⏱ Apr 9–11'] },
+  { n:'sqn-r', cls:'bear', action:'▼ FLIP SHORT 5M — RETRACEMENT',
+    detail:'At 6,620, 5m shows distribution. Flip small short for retracement. Longs still open, hedge only.',
+    tags:['bear-tag:Short: 6,620','bull-tag:Cover: 6,540','bear-tag:Size: 1 contract'] },
+  { n:'sqn-b', cls:'bull', action:'▲ RE-ADD LONGS — FINAL PUSH',
+    detail:'Cover short at 6,540. Add back to longs. Final Daily measured move target.',
+    tags:['bull-tag:Add: 6,540','bull-tag:Final TP: 6,760','time-tag:⏱ Apr 14–16 (1.0 Fib)'] },
+  { n:'sqn-n', cls:'neut', action:'◆ FULL EXIT — REASSESS',
+    detail:'At 6,760 — full position exit. Watch for Daily distribution or break above for extension.',
+    tags:['time-tag:Exit: 6,760','bull-tag:Watch: 6,900 ext','time-tag:⏱ Apr 14–16'] },
+];
+
+const LIQ_LEVELS = [
+  { name:'EQH',  px:6650, pct:98, color:'#f03a5f', swept:false, above:true,  label:'Equal highs — sell-side liquidity' },
+  { name:'PWH',  px:6621, pct:92, color:'#9f6ef5', swept:false, above:true,  label:'Prev week high' },
+  { name:'PDH',  px:6536, pct:80, color:'#f07840', swept:true,  above:true,  label:'Prev day high — swept' },
+  { name:'ONH',  px:6420, pct:62, color:'#00d4f0', swept:false, above:true,  label:'Overnight high' },
+  { name:'NOW',  px:6387, pct:55, color:'#ffffff', swept:false, above:false, label:'Current price', current:true },
+  { name:'ONL',  px:6340, pct:45, color:'#00d4f0', swept:false, above:false, label:'Overnight low' },
+  { name:'PDL',  px:6314, pct:38, color:'#3d9be8', swept:false, above:false, label:'Prev day low — major support' },
+  { name:'EQL★', px:6280, pct:28, color:'#00c896', swept:false, above:false, label:'Equal lows — buy-side pool ★' },
+];
+
+const ALERTS = [
+  { px:'6,450', desc:'1H range high — short activation', status:'armed' },
+  { px:'6,420', desc:'ONH / gamma — short entry zone', status:'armed' },
+  { px:'6,370', desc:'1H range low — sweep watch', status:'near' },
+  { px:'6,340', desc:'ONL sweep — long entry watch', status:'armed' },
+  { px:'6,314', desc:'PDL / major support — primary entry', status:'armed' },
+  { px:'6,520', desc:'TP1 — take 30% profits', status:'pending' },
+  { px:'6,620', desc:'TP2 / flip short zone', status:'pending' },
+  { px:'6,760', desc:'Final target — full exit', status:'pending' },
+];
+
+const CALENDAR = [
+  { time:'08:30', impact:'high',   name:'NFP Non-Farm Payrolls',  exp:'140K' },
+  { time:'10:00', impact:'med',    name:'ISM Manufacturing PMI',  exp:'49.8' },
+  { time:'Apr 9', impact:'high',   name:'FOMC Minutes Release',   exp:'—' },
+  { time:'Apr 10',impact:'high',   name:'CPI Inflation Report',   exp:'2.9%' },
+];
+
+// VX contract months — dynamic
+function getVXMonths() {
+  const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const now = new Date();
+  const off = now.getDate() >= 18 ? 1 : 0;
+  return [0,1,2,3].map(i => M[(now.getMonth()+off+i)%12]);
+}
+
+const VX_PX   = [31.80, 29.40, 27.10, 25.60];
+const VX_CLR  = ['#f03a5f','#f07840','#f0c040','#00c896'];
+const VX_HTS  = [88, 70, 56, 46];
+
+// ═══════════════════════════════════════════════
+// BUILD FUNCTIONS
+// ═══════════════════════════════════════════════
+
+function fmt(n) { return typeof n==='number'?n.toLocaleString():n; }
+
+function buildTicker() {
+  const all = [...INSTRUMENTS,...TICKER_EXTRA,...INSTRUMENTS,...TICKER_EXTRA];
+  document.getElementById('tickerTrack').innerHTML = all.map(t=>`
+    <div class="tick-item">
+      <span class="tick-sym">${t.sym}</span>
+      <span class="tick-px">${fmt(t.px)}</span>
+      <span class="${t.chg>=0?'tick-up':'tick-dn'}">${t.chg>=0?'▲':'▼'}${Math.abs(t.pct).toFixed(2)}%</span>
+    </div>`).join('');
+}
+
+function buildInstGrid() {
+  const show = INSTRUMENTS.slice(0,8);
+  document.getElementById('instGrid').innerHTML = show.map((t,i)=>`
+    <div class="inst-card ${i===0?'sel':''}" onclick="selectInst(this,'${t.sym}',${t.px},${t.chg},${t.pct})">
+      <div class="ic-sym">${t.sym}</div>
+      <div class="ic-px">${fmt(t.px)}</div>
+      <div class="ic-chg ${t.chg>=0?'bull':'bear'}">${t.chg>=0?'▲':'▼'}${Math.abs(t.pct).toFixed(2)}%</div>
+    </div>`).join('');
+}
+
+function buildTFStack() {
+  const el = document.getElementById('tfStack');
+  el.innerHTML = TF_DATA.map((tf,i)=>`
+    <div>
+      <div class="tf-row ${tf.cls==='bull'?'':''}" onclick="toggleTF(${i})" id="tfrow-${i}">
+        <div class="tf-row-label">${tf.tf}</div>
+        <div class="tf-row-bar">
+          <div class="tf-row-bg" style="width:${tf.conf}%;background:${tf.cls==='bull'?'var(--g)':tf.cls==='bear'?'var(--r)':'var(--y)'};"></div>
+          <div class="tf-row-dir ${tf.cls==='bull'?'bull':tf.cls==='bear'?'bear':'neut'}">${tf.dir}</div>
+          <div class="tf-row-struct">${tf.struct}</div>
+        </div>
+        <div class="tf-row-conf ${tf.cls==='bull'?'bull':tf.cls==='bear'?'bear':'neut'}">${tf.conf}</div>
+        <div class="tl-vol" style="border-left:1px solid var(--b1);">
+          <div class="vol-dot" style="background:${tf.vol==='confirm'?'var(--g)':tf.vol==='low'?'var(--y)':'var(--r)'}"></div>
+        </div>
+      </div>
+      <div class="conf-breakdown" id="tfbd-${i}">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t4);letter-spacing:1px;margin-bottom:6px;">CONFLUENCE FACTORS</div>
+        ${tf.factors.map(f=>`
+          <div class="conf-factor-row">
+            <div class="cfr-dot" style="background:${tf.cls==='bull'?'var(--g)':tf.cls==='bear'?'var(--r)':'var(--y)'}"></div>
+            <div class="cfr-name">${f}</div>
+          </div>`).join('')}
+        <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--b1);font-family:var(--mono);font-size:9px;color:var(--r);">
+          ⚠ ${tf.inv}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTF(i) {
+  const bd = document.getElementById(`tfbd-${i}`);
+  bd.classList.toggle('open');
+}
+
+function buildFactors() {
+  // Compute score dynamically
+  let totalW = 0, bullW = 0;
+  FACTORS.forEach(f => {
+    totalW += f.weight;
+    if (!f.bearish) bullW += f.weight; // bearish factors = bad for bull thesis unless contrarian
+    // Put/Call and Gamma are contrarian bull signals
+  });
+  // Overall score = 73 (manually balanced for demo — will be live computed)
+  document.getElementById('factorList').innerHTML = FACTORS.map(f=>`
+    <div class="factor-item">
+      <div class="fi-name">${f.name}</div>
+      <div class="fi-track">
+        <div class="fi-fill" style="width:${f.val}%;background:${f.color};"></div>
+      </div>
+      <div class="fi-val" style="color:${f.color};">${f.label.split('—')[0].trim()}</div>
+    </div>`).join('');
+}
+
+function buildVXBars() {
+  const months = getVXMonths();
+  const now = new Date();
+  const isNearRoll = now.getDate() >= 15 && now.getDate() < 18;
+  document.getElementById('vxRollNote').textContent = isNearRoll
+    ? `⚠ ROLLOVER APPROACHING — ${months[0]} expires soon`
+    : `/VX Front: ${months[0]} | Roll ~18th each month`;
+
+  document.getElementById('vxBars').innerHTML = `
+    <div class="vx-bar-wrap">
+      <div class="vx-bar-px" id="vixSpotBar">34.2</div>
+      <div class="vx-bar" style="height:${90}%;background:#f03a5f;opacity:0.8;"></div>
+      <div class="vx-bar-sym">SPOT</div>
+    </div>
+    ${months.map((m,i)=>`
+    <div class="vx-bar-wrap">
+      <div class="vx-bar-px" id="vxBar${i}">${VX_PX[i].toFixed(1)}</div>
+      <div class="vx-bar" style="height:${VX_HTS[i]}%;background:${VX_CLR[i]};opacity:0.75;"></div>
+      <div class="vx-bar-sym">${m}</div>
+    </div>`).join('')}`;
+}
+
+function buildCascadeLayers() {
+  document.getElementById('cascadeLayers').innerHTML = TF_DATA.map((tf,i)=>`
+    <div class="tp-layer tl-${tf.cls} ${tf.tf==='1M'?'tl-now':''}" onclick="expandLayer(${i})">
+      <div class="tl-tf">${tf.tf}</div>
+      <div class="tl-body">
+        <div class="tl-dir ${tf.cls==='bull'?'bull':tf.cls==='bear'?'bear':'neut'}">${tf.dir}</div>
+        <div class="tl-struct">${tf.struct}</div>
+        <div class="tl-levels">
+          <div class="tl-lv">
+            <div class="tl-lv-label">Entry</div>
+            <div class="tl-lv-val ${tf.cls==='bear'?'bear':'bull'}">${tf.entry}</div>
+          </div>
+          <div class="tl-lv">
+            <div class="tl-lv-label">TP1</div>
+            <div class="tl-lv-val" style="color:var(--cy);">${tf.tp1}</div>
+          </div>
+          <div class="tl-lv">
+            <div class="tl-lv-label">Stop</div>
+            <div class="tl-lv-val bear">${tf.stop}</div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-conf ${tf.cls==='bull'?'bull':tf.cls==='bear'?'bear':'neut'}">${tf.conf}</div>
+      <div class="tl-vol" style="border-left:1px solid var(--b1);width:28px;display:flex;align-items:center;justify-content:center;">
+        <div class="vol-dot" style="background:${tf.vol==='confirm'?'var(--g)':tf.vol==='low'?'var(--y)':'var(--r)'}"></div>
+      </div>
+    </div>
+    <div class="tl-expanded" id="tlexp-${i}">
+      <div class="tl-exp-grid">
+        <div class="tl-exp-cell"><div class="tl-exp-label">Entry</div><div class="tl-exp-val ${tf.cls==='bear'?'bear':'bull'}">${tf.entry}</div></div>
+        <div class="tl-exp-cell"><div class="tl-exp-label">Stop</div><div class="tl-exp-val bear">${tf.stop}</div></div>
+        <div class="tl-exp-cell"><div class="tl-exp-label">TP1</div><div class="tl-exp-val" style="color:var(--cy);">${tf.tp1}</div></div>
+        <div class="tl-exp-cell"><div class="tl-exp-label">TP2</div><div class="tl-exp-val" style="color:var(--cy);">${tf.tp2}</div></div>
+        <div class="tl-exp-cell"><div class="tl-exp-label">Re-entry</div><div class="tl-exp-val bull">${tf.reentry}</div></div>
+        <div class="tl-exp-cell"><div class="tl-exp-label">Confluence</div><div class="tl-exp-val ${tf.cls==='bull'?'bull':tf.cls==='bear'?'bear':'neut'}">${tf.conf}/100</div></div>
+      </div>
+      <div class="tl-inv">⚠ Invalidation: <strong>${tf.inv}</strong></div>
+    </div>`).join('');
+}
+
+function expandLayer(i) {
+  const el = document.getElementById(`tlexp-${i}`);
+  el.classList.toggle('open');
+}
+
+function buildSeq() {
+  document.getElementById('seqSteps').innerHTML = SEQ_STEPS.map((s,i)=>`
+    <div class="sq">
+      <div class="sq-num ${s.n}">${i+1}</div>
+      <div class="sq-body">
+        <div class="sq-action ${s.cls==='bull'?'bull':s.cls==='bear'?'bear':'neut'}">${s.action}</div>
+        <div class="sq-detail">${s.detail}</div>
+        <div class="sq-tags">
+          ${s.tags.map(t=>{
+            const [cls,val]=t.split(':');
+            return `<span class="sq-tag ${cls}">${val}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function buildLiqMap() {
+  const maxPx = Math.max(...LIQ_LEVELS.map(l=>l.px));
+  const minPx = Math.min(...LIQ_LEVELS.map(l=>l.px));
+  document.getElementById('liqMap').innerHTML = LIQ_LEVELS.map(l=>`
+    <div class="liq-row ${l.current?'liq-current-row':''}">
+      <div class="liq-icon" style="background:${l.color};${l.swept?'opacity:0.3':''}"></div>
+      <div class="liq-name" style="color:${l.color};${l.swept?'opacity:0.4':''}">${l.name}</div>
+      <div class="liq-bar-track">
+        <div class="liq-bar-fill" style="width:${l.pct}%;background:${l.color};opacity:${l.swept?0.2:0.5};"></div>
+      </div>
+      <div class="liq-price" style="color:${l.color};${l.swept?'opacity:0.4':''};">${l.px.toLocaleString()}</div>
+      ${l.swept
+        ? '<div class="liq-swept">SWEPT</div>'
+        : l.current
+          ? '<div class="liq-live" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:#fff;">NOW</div>'
+          : '<div class="liq-live" style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.2);color:var(--g);">LIVE</div>'
+      }
+    </div>`).join('');
+}
+
+function buildPosSizing() {
+  const pos = [
+    { tf:'SWING', dir:'LONG', cls:'bull', size:3, sym:'ES', risk:'$2,200', rr:'1:8.6', detail:'$500/pt × 3 = $1,500/pt | Stop 44pts' },
+    { tf:'5M',    dir:'SHORT SCALP', cls:'bear', size:1, sym:'ES', risk:'$750',   rr:'1:2.1', detail:'Counter-trade: 25% of swing | 15pt stop' },
+  ];
+  document.getElementById('posSizing').innerHTML = pos.map(p=>`
+    <div class="pos-row">
+      <div class="pr-tf">${p.tf}</div>
+      <div class="pr-dir ${p.cls}">${p.dir}</div>
+      <div class="pr-size ${p.cls}">${p.size}<span style="font-size:11px;color:var(--t3);"> ${p.sym}</span></div>
+      <div class="pr-detail">${p.detail}<br>Risk: ${p.risk}</div>
+      <div class="pr-rr ${p.cls}">R:R ${p.rr}</div>
+    </div>`).join('');
+}
+
+function buildAlerts() {
+  document.getElementById('alertList').innerHTML = ALERTS.map(a=>`
+    <div class="alert-item">
+      <div class="ai-price" style="color:${a.status==='pending'?'var(--cy)':a.status==='near'?'var(--y)':'var(--t2)'};">${a.px}</div>
+      <div class="ai-desc">${a.desc}</div>
+      <div class="ai-status ${a.status==='armed'?'ais-armed':a.status==='near'?'ais-near':'ais-pending'}">${a.status.toUpperCase()}</div>
+    </div>`).join('');
+}
+
+function buildCalendar() {
+  const colors = { high:'var(--r)', med:'var(--y)', low:'var(--t3)' };
+  document.getElementById('calList').innerHTML = CALENDAR.map(c=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,47,66,0.4);">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t3);width:40px;">${c.time}</div>
+      <div style="width:5px;height:5px;border-radius:50%;background:${colors[c.impact]};flex-shrink:0;"></div>
+      <div style="font-family:var(--sans);font-size:10px;color:var(--t2);flex:1;">${c.name}</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t3);">${c.exp}</div>
+    </div>`).join('');
+}
+
+function buildChart() {
+  const g = document.getElementById('candles');
+  const v = document.getElementById('volume');
+  const candles = [];
+  let px = 140;
+  for(let i=0;i<48;i++){
+    const prog = i/48;
+    const trend = prog < 0.82 ? -1.3 : 2.8;
+    const o = px;
+    const mv = (Math.random()-0.42)*7 + trend;
+    const c = px+mv;
+    const h = Math.max(o,c)+Math.random()*3.5;
+    const l = Math.min(o,c)-Math.random()*3.5;
+    candles.push({o,c,h,l,x:8+i*15.5});
+    px = c;
+  }
+  const allPx = candles.flatMap(c=>[c.o,c.c,c.h,c.l]);
+  const mn = Math.min(...allPx), mx = Math.max(...allPx), rng = mx-mn;
+  const toY = p => 238 - ((p-mn)/rng)*185;
+  g.innerHTML = candles.map(c=>{
+    const isG = c.c>=c.o;
+    const col = isG?'#00c896':'#f03a5f';
+    const bt = Math.min(toY(c.o),toY(c.c));
+    const bh = Math.max(Math.abs(toY(c.c)-toY(c.o)),1);
+    return `<line x1="${c.x+5}" y1="${toY(c.h)}" x2="${c.x+5}" y2="${toY(c.l)}" stroke="${col}" stroke-width="0.7" opacity="0.6"/>
+            <rect x="${c.x}" y="${bt}" width="10" height="${bh}" fill="${col}" opacity="${isG?0.8:0.75}"/>`;
+  }).join('');
+  v.innerHTML = candles.map(c=>{
+    const isG=c.c>=c.o;
+    const h=8+Math.random()*18;
+    return `<rect x="${c.x}" y="${256-h}" width="10" height="${h}" fill="${isG?'rgba(0,200,150,0.25)':'rgba(240,58,95,0.25)'}"/>`;
+  }).join('');
+}
+
+function buildTFTabs() {
+  const tfs = ['1m','5m','15m','30m','1h','4h','D'];
+  document.getElementById('tfTabs').innerHTML = tfs.map((t,i)=>`
+    <button class="tf-tab ${i===3?'on':''}" onclick="setTF(this)">${t}</button>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════
+
+function selectInst(el,sym,px,chg,pct) {
+  document.querySelectorAll('.inst-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('chartSym').textContent = sym;
+  document.getElementById('chartPx').textContent = fmt(px);
+  document.getElementById('chartPx').className = `chart-px ${chg>=0?'bull':'bear'}`;
+  document.getElementById('chartChg').textContent = `${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)} (${pct>0?'+':''}${pct.toFixed(2)}%)`;
+  document.getElementById('chartChg').style.color = chg>=0?'var(--g)':'var(--r)';
+  document.getElementById('chartPxLabel').textContent = Math.round(px).toLocaleString();
+  buildChart();
+}
+
+function setTF(btn) {
+  document.querySelectorAll('.tf-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildChart();
+}
+
+// ═══════════════════════════════════════════════
+// CLOCK & SESSION
+// ═══════════════════════════════════════════════
+
+function updateClock() {
+  const now = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ET`;
+  updateSession(now.getHours(), now.getMinutes());
+}
+
+function updateSession(h, m) {
+  const sessions = ['sessAsian','sessLondon','sessNY','sessPower','sessAH'];
+  sessions.forEach(s=>document.getElementById(s)?.classList.remove('active-sess'));
+  let active = 'sessAH';
+  if(h>=18||h<2)       active='sessAsian';
+  else if(h<7)         active='sessLondon';
+  else if(h<9)         active='sessLondon';
+  else if(h>=9&&h<15)  active='sessNY';
+  else if(h===15)      active='sessPower';
+  document.getElementById(active)?.classList.add('active-sess');
+}
+
+// ═══════════════════════════════════════════════
+// LIVE SIM UPDATES
+// ═══════════════════════════════════════════════
+
+function simUpdate() {
+  // VIX
+  const vixEl = document.getElementById('vixVal');
+  const vixSig = document.getElementById('s_vix');
+  const newVix = (parseFloat(vixEl.textContent)+(Math.random()-0.5)*0.25).toFixed(1);
+  vixEl.textContent = newVix;
+  vixSig.textContent = newVix;
+
+  // TICK
+  const tickEl = document.getElementById('s_tick');
+  const newTick = parseInt(tickEl.textContent)+Math.round((Math.random()-0.5)*100);
+  tickEl.textContent = newTick;
+  tickEl.className = `sig-cell-val ${newTick<0?'bear':'bull'}`;
+
+  // Chart price
+  const pxEl = document.getElementById('chartPx');
+  const cur = parseFloat(pxEl.textContent.replace(/,/g,''));
+  const nPx = cur+(Math.random()-0.5)*3;
+  pxEl.textContent = nPx.toFixed(2);
+  pxEl.className = `chart-px ${nPx>cur?'bull':'bear'}`;
+  document.getElementById('chartPxLabel').textContent = Math.round(nPx).toLocaleString();
+
+  // VX bars
+  for(let i=0;i<4;i++){
+    const el=document.getElementById(`vxBar${i}`);
+    if(el) el.textContent=(parseFloat(el.textContent)+(Math.random()-0.5)*0.15).toFixed(1);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// AI ANALYSIS
+// ═══════════════════════════════════════════════
+
+async function runAI() {
+  const btn = document.querySelector('.ai-run-btn');
+  const out = document.getElementById('aiOut');
+  btn.textContent = '⟳ ANALYZING...';
+  btn.disabled = true;
+  out.classList.add('show');
+  out.innerHTML = '<span style="color:var(--t4);">Claude analyzing market conditions...</span>';
+
+  const prompt = `You are QuantEdge, elite multi-timeframe trading intelligence. Analyze and respond with a sharp, direct trading brief.
+
+MARKET STATE:
+- ES Futures: 5,892 (-1.49%) | VIX: 34.2 (backwardation) | Put/Call: 1.42 | $TICK: -842 | $NYMO: -68 | DXY: 103.4
+- Daily: Bearish BOS, targeting 6,314 support. Fib 0.618 time window Apr 7-9. Big target: 6,760.
+- 4H: Distribution complete, CHoCH bearish. One more leg down.
+- 1H: Ranging, inducement. Equal lows at 6,360 likely swept.
+- 5M: Micro BOS ↑ forming after sweep. Entry 6,376-6,385.
+- Liquidity: EQH 6,650 | PWH 6,621 | PDH 6,536 (SWEPT) | ONH 6,420 | NOW 6,387 | ONL 6,340 | PDL 6,314 | EQL 6,280★
+- VX term structure: BACKWARDATION (sustained fear)
+- NFP today 08:30 | CPI Apr 10 | FOMC minutes Apr 9
+
+Give me: (1) What to do RIGHT NOW, (2) What to watch for the next move, (3) One risk to the bull thesis. Max 120 words. Be sharp and direct.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content?.find(b=>b.type==='text')?.text||'No response.';
+    out.innerHTML = txt
+      .replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--t1);">$1</strong>')
+      .replace(/\b(long|buy|bull|accumulate|reversal)\b/gi,'<span class="h">$1</span>')
+      .replace(/\b(short|sell|bear|flush|sweep)\b/gi,'<span class="d">$1</span>')
+      .replace(/\b(watch|caution|risk|warning)\b/gi,'<span class="w">$1</span>')
+      .replace(/\b6[,\d]{3,6}\.?\d*/g,m=>`<span class="p">${m}</span>`)
+      .replace(/\n/g,'<br>');
+  } catch(e) {
+    out.innerHTML = '<span class="w">⚠ API pending — Schwab integration enables full live analysis.</span>';
+  }
+  btn.textContent = '⚡ AI MARKET ANALYSIS';
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+
+buildTicker();
+buildInstGrid();
+buildTFStack();
+buildFactors();
+buildVXBars();
+buildCascadeLayers();
+buildSeq();
+buildLiqMap();
+buildPosSizing();
+buildAlerts();
+buildCalendar();
+buildChart();
+buildTFTabs();
+updateClock();
+
+setInterval(updateClock, 1000);
+setInterval(simUpdate, 2000);
+setInterval(buildVXBars, 60*60*1000);
+</script>
+
+</body>
+</html>
