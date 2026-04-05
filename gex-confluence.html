@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEX Confluence Engine | QuantEdge</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050810;--bg2:#080d1a;--bg3:#0d1526;--panel:#0a1020;--border:#1a2840;--border2:#243650;--accent:#00d4ff;--accent2:#0088cc;--green:#00ff88;--red:#ff3355;--yellow:#ffd700;--orange:#ff8c00;--text:#c8d8f0;--text2:#6a8aaa;--text3:#3a5070;--glow:0 0 20px rgba(0,212,255,0.3);--glow-green:0 0 20px rgba(0,255,136,0.3);--glow-red:0 0 20px rgba(255,51,85,0.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:0 16px 40px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-hex{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:var(--bg);box-shadow:var(--glow)}
+.logo-name{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;text-shadow:var(--glow)}
+.logo-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:3px}
+.hdr-right{display:flex;align-items:center;gap:16px}
+.clock{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--accent);text-align:right}
+.clk-sub{font-size:10px;color:var(--text2)}
+.badge{padding:4px 12px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.b-pre{background:rgba(255,215,0,.15);color:var(--yellow);border:1px solid rgba(255,215,0,.3)}
+.b-open{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.3);animation:pg 2s infinite}
+.b-closed{background:rgba(106,138,170,.15);color:var(--text2);border:1px solid var(--border)}
+.b-after{background:rgba(255,140,0,.15);color:var(--orange);border:1px solid rgba(255,140,0,.3)}
+@keyframes pg{0%,100%{box-shadow:0 0 5px rgba(0,255,136,.3)}50%{box-shadow:0 0 15px rgba(0,255,136,.6)}}
+.tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:10px 20px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;transition:all .2s;position:relative;top:1px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);text-shadow:var(--glow)}
+.tp{display:none}
+.tp.active{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.4}
+.pt{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:var(--glow)}
+.dot.g{background:var(--green);box-shadow:var(--glow-green)}
+.dot.r{background:var(--red);box-shadow:var(--glow-red)}
+.dot.y{background:var(--yellow)}
+label{display:block;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px 10px;outline:none;transition:border-color .2s;margin-bottom:10px}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(0,212,255,.1)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:80px;font-size:11px;line-height:1.6}
+.ir{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ir3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.btn{padding:10px 20px;border:none;border-radius:2px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);box-shadow:var(--glow)}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,212,255,.5)}
+.btn-s{background:linear-gradient(135deg,var(--green),#00aa55);color:var(--bg);box-shadow:var(--glow-green)}
+.btn-g{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-g:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:6px 14px;font-size:11px}
+.btn-fw{width:100%}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:12px;text-align:center}
+.sl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.sv{font-family:'Orbitron',monospace;font-size:20px;font-weight:700}
+.ss{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-top:2px}
+.bull{color:var(--green);text-shadow:var(--glow-green)}
+.bear{color:var(--red);text-shadow:var(--glow-red)}
+.neut{color:var(--yellow)}
+.acc{color:var(--accent);text-shadow:var(--glow)}
+.bias-box{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center}
+.bias-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.bias-val{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;letter-spacing:3px;margin-bottom:8px}
+.cbar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin:8px 0}
+.cfill{height:100%;border-radius:2px;transition:width .8s ease}
+.ctxt{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2)}
+.lvrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:12px}
+.lvrow:last-child{border-bottom:none}
+.lvn{color:var(--text2);font-size:10px;letter-spacing:1px}
+.lvv{color:var(--accent);font-weight:600}
+.lvv.up{color:var(--green)}
+.lvv.dn{color:var(--red)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pi{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all .15s;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:500;color:var(--text2);user-select:none}
+.pi:hover{border-color:var(--border2);color:var(--text)}
+.pi.sel{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+.pi.bear-p.sel{background:rgba(255,51,85,.1);border-color:var(--red);color:var(--red)}
+.pck{width:14px;height:14px;border:1px solid var(--border2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.pi.sel .pck{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.pi.bear-p.sel .pck{background:var(--red);border-color:var(--red)}
+.wr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.wl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);width:160px;flex-shrink:0}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:var(--border);border-radius:2px;outline:none;margin-bottom:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:var(--glow)}
+.wv{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);width:30px;text-align:right}
+.aio{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:16px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;color:var(--text);min-height:200px;white-space:pre-wrap}
+.ai-think{display:flex;align-items:center;gap:8px;color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:11px}
+.td-dots span{animation:td 1.4s infinite;display:inline-block}
+.td-dots span:nth-child(2){animation-delay:.2s}
+.td-dots span:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.alert{padding:8px 12px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.a-warn{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);color:var(--yellow)}
+.a-danger{background:rgba(255,51,85,.1);border:1px solid rgba(255,51,85,.3);color:var(--red)}
+.a-info{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent)}
+.a-ok{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--green)}
+.ttbl{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px}
+.ttbl th{text-align:left;padding:8px 10px;color:var(--text2);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ttbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.sdiv{display:flex;align-items:center;gap:12px;margin:16px 0 12px}
+.sdiv span{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.ttabs{display:flex;gap:4px;margin-bottom:12px}
+.ttab{padding:5px 14px;border-radius:2px;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s}
+.ttab.active{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+.cal-ev{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;margin-bottom:6px;font-family:'Share Tech Mono',monospace;font-size:11px}
+.ih{color:var(--red)}.im{color:var(--yellow)}.il{color:var(--text2)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.sntl{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.sni{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)}
+.snt{color:var(--accent);min-width:50px}
+.og{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.oc{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:12px;text-align:center}
+.ol{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.ov{font-family:'Orbitron',monospace;font-size:16px;font-weight:700}
+.ng{color:var(--green);font-family:'Share Tech Mono',monospace}
+.nr{color:var(--red);font-family:'Share Tech Mono',monospace}
+.na{color:var(--accent);font-family:'Share Tech Mono',monospace}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mb8{margin-bottom:8px}
+.fl{display:flex}.flb{display:flex;align-items:center;justify-content:space-between}.flc{display:flex;flex-direction:column}
+.g6{gap:6px}.g10{gap:10px}
+@keyframes fup{0%{background:rgba(0,212,255,.2)}100%{background:transparent}}
+.flash{animation:fup .8s ease}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}.og{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.g2,.g3,.g21{grid-template-columns:1fr}.ir,.ir3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-hex">GX</div>
+    <div>
+      <div class="logo-name">GEX CONFLUENCE</div>
+      <div class="logo-sub">QuantEdge Tactical Engine</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div>
+      <div class="clock" id="clk">--:--:-- EST</div>
+      <div class="clock clk-sub" id="dt">Loading...</div>
+    </div>
+    <div class="badge b-closed" id="sess">LOADING</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="st('gp')">🎯 Game Plan</button>
+  <button class="tab" onclick="st('id')">⚡ Intraday</button>
+  <button class="tab" onclick="st('gd')">📊 GEX Data</button>
+  <button class="tab" onclick="st('pt')">📐 Patterns</button>
+  <button class="tab" onclick="st('wt')">⚙️ Weights</button>
+  <button class="tab" onclick="st('tl')">📋 Trade Log</button>
+</div>
+
+<!-- ======= GAME PLAN ======= -->
+<div class="tp active" id="tp-gp">
+<div class="g21" style="gap:12px">
+<div class="flc g10" style="gap:10px">
+
+  <div class="g2">
+    <div class="panel">
+      <div class="pt"><div class="dot y"></div>Overnight Context</div>
+      <div class="ir"><div><label>Globex High</label><input type="number" id="gh" placeholder="5520" step=".25"></div><div><label>Globex Low</label><input type="number" id="gl" placeholder="5480" step=".25"></div></div>
+      <div class="ir"><div><label>Prev Day High</label><input type="number" id="pdh" placeholder="5510" step=".25"></div><div><label>Prev Day Low</label><input type="number" id="pdl" placeholder="5460" step=".25"></div></div>
+      <div class="ir"><div><label>Prev Close</label><input type="number" id="pdc" placeholder="5490" step=".25"></div><div><label>Prev Wk High</label><input type="number" id="pwh" placeholder="5550" step=".25"></div></div>
+      <div><label>Prev Wk Low</label><input type="number" id="pwl" placeholder="5420" step=".25"></div>
+    </div>
+    <div class="panel">
+      <div class="pt"><div class="dot r"></div>Economic Calendar</div>
+      <div id="cal-ev"></div>
+      <div class="sdiv"><span>Manual Override</span></div>
+      <label>Add Event</label>
+      <div class="fl" style="gap:6px"><input type="text" id="mev" placeholder="CPI 8:30am HIGH" style="margin-bottom:0"><button class="btn btn-g btn-sm" onclick="addEv()">+</button></div>
+      <div id="mev-list" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="pt"><div class="dot g"></div>Market Internals</div>
+      <div class="ir">
+        <div><label>NYSE TICK</label><select id="tick"><option value="">--</option><option value="sb">Strong Bull</option><option value="b">Bullish</option><option value="n">Neutral</option><option value="be">Bearish</option><option value="sbe">Strong Bear</option></select></div>
+        <div><label>ADD Direction</label><select id="add"><option value="">--</option><option value="sb">Strong Advance</option><option value="b">Advancing</option><option value="n">Flat</option><option value="be">Declining</option><option value="sbe">Strong Decline</option></select></div>
+      </div>
+      <div class="ir">
+        <div><label>VOLD</label><select id="vold"><option value="">--</option><option value="sb">Heavy Buy Vol</option><option value="b">Buy Vol</option><option value="n">Mixed</option><option value="be">Sell Vol</option><option value="sbe">Heavy Sell Vol</option></select></div>
+        <div><label>ES vs NQ</label><select id="esnq"><option value="">--</option><option value="esl">ES Leading</option><option value="nql">NQ Leading</option><option value="bu">Both Up</option><option value="bd">Both Down</option><option value="div">Diverging</option></select></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="pt"><div class="dot"></div>Volume Profile</div>
+      <div class="ir"><div><label>POC</label><input type="number" id="poc" placeholder="5488" step=".25"></div><div><label>VAH</label><input type="number" id="vah" placeholder="5510" step=".25"></div></div>
+      <div class="ir"><div><label>VAL</label><input type="number" id="val" placeholder="5465" step=".25"></div><div><label>Current Price</label><input type="number" id="cpx" placeholder="5492" step=".25"></div></div>
+      <div><label>Price vs Value Area</label><select id="pva"><option value="">--</option><option value="avah">Above VAH</option><option value="iva">Inside VA</option><option value="apoc">At/Near POC</option><option value="bval">Below VAL</option></select></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="pt"><div class="dot y"></div>Sentiment</div>
+    <div class="ir3">
+      <div><label>Put/Call Ratio</label><input type="number" id="pcr" placeholder="0.85" step=".01"></div>
+      <div><label>VIX Level</label><input type="number" id="vixl" placeholder="18.5" step=".1"></div>
+      <div><label>VIX9D</label><input type="number" id="vix9" placeholder="16.2" step=".1"></div>
+    </div>
+    <div class="ir3">
+      <div><label>VVIX</label><input type="number" id="vvix" placeholder="95" step=".1"></div>
+      <div><label>VIX Term Structure</label><select id="vts"><option value="">--</option><option value="c">Contango (normal)</option><option value="f">Flat</option><option value="bk">Backwardation (stress)</option></select></div>
+      <div><label>Overall Sentiment</label><select id="osent"><option value="">--</option><option value="ro">Risk On</option><option value="n">Neutral</option><option value="rof">Risk Off</option><option value="fear">Fear/Panic</option></select></div>
+    </div>
+  </div>
+
+  <button class="btn btn-p btn-fw" onclick="genGP()" style="padding:14px;font-size:15px;letter-spacing:3px">⚡ GENERATE MORNING GAME PLAN</button>
+</div>
+
+<div class="flc" style="gap:10px">
+  <div class="bias-box">
+    <div class="bias-lbl">MORNING BIAS</div>
+    <div class="bias-val neut" id="bval">NEUTRAL</div>
+    <div class="cbar"><div class="cfill" id="cbar" style="width:0%;background:var(--yellow)"></div></div>
+    <div class="ctxt" id="ctxt">Run analysis to generate bias</div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot"></div>Key Levels</div>
+    <div class="lvrow"><span class="lvn">GEX FLIP (SPY)</span><span class="lvv" id="o-spy-flip">--</span></div>
+    <div class="lvrow"><span class="lvn">GEX FLIP (SPX)</span><span class="lvv" id="o-spx-flip">--</span></div>
+    <div class="lvrow"><span class="lvn">CALL WALL</span><span class="lvv up" id="o-cwall">--</span></div>
+    <div class="lvrow"><span class="lvn">PUT WALL</span><span class="lvv dn" id="o-pwall">--</span></div>
+    <div class="lvrow"><span class="lvn">VR TOP</span><span class="lvv up" id="o-vrt">--</span></div>
+    <div class="lvrow"><span class="lvn">VR BOTTOM</span><span class="lvv dn" id="o-vrb">--</span></div>
+    <div class="lvrow"><span class="lvn">TARGET ZONE</span><span class="lvv acc" id="o-tgt">--</span></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>Confluence Scores</div>
+    <div class="og" style="grid-template-columns:1fr 1fr">
+      <div class="oc"><div class="ol">GEX Score</div><div class="ov acc" id="s-gex">--</div></div>
+      <div class="oc"><div class="ol">Range Score</div><div class="ov acc" id="s-rng">--</div></div>
+      <div class="oc"><div class="ol">Internals</div><div class="ov acc" id="s-int">--</div></div>
+      <div class="oc"><div class="ol">Pattern</div><div class="ov acc" id="s-pat">--</div></div>
+    </div>
+    <div class="oc" style="margin-top:6px"><div class="ol">Overall Confluence</div><div class="ov" id="s-tot" style="font-size:28px">--</div></div>
+  </div>
+  <div id="alert-box"></div>
+</div>
+</div>
+
+<div class="panel mt12" style="margin-top:12px">
+  <div class="flb mb8" style="margin-bottom:8px">
+    <div class="pt" style="margin-bottom:0"><div class="dot g"></div>Claude AI Analysis</div>
+    <button class="btn btn-g btn-sm" onclick="cpyAI()">Copy</button>
+  </div>
+  <div class="aio" id="ai-out">Complete the fields above and click Generate Morning Game Plan...</div>
+</div>
+</div>
+
+<!-- ======= INTRADAY ======= -->
+<div class="tp" id="tp-id">
+<div class="g21" style="gap:12px">
+<div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot g"></div>Session Windows</div>
+    <div class="g4" style="gap:6px">
+      <div class="sc"><div class="sl">London</div><div class="sv" style="font-size:13px;color:var(--text3)" id="w-lon">--</div><div class="ss">2:00-5:00 AM</div></div>
+      <div class="sc"><div class="sl">NY Open</div><div class="sv" style="font-size:13px;color:var(--text3)" id="w-nyo">--</div><div class="ss">9:30-11:00 AM</div></div>
+      <div class="sc"><div class="sl">Mid-Day</div><div class="sv" style="font-size:13px;color:var(--text3)" id="w-mid">--</div><div class="ss">11AM - 2PM</div></div>
+      <div class="sc"><div class="sl">Close/MOC</div><div class="sv" style="font-size:13px;color:var(--text3)" id="w-cls">--</div><div class="ss">2:00-4:00 PM</div></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot y"></div>Intraday GEX Update</div>
+    <div class="ir"><div><label>Net GEX SPY (M)</label><input type="number" id="id-spy" placeholder="-230.9" step=".1"></div><div><label>Net GEX SPX (B)</label><input type="number" id="id-spx" placeholder="-4.2" step=".1"></div></div>
+    <div class="ir"><div><label>Current SPX Price</label><input type="number" id="id-px" placeholder="5492" step=".25"></div><div><label>VIX Current</label><input type="number" id="id-vix" placeholder="18.5" step=".1"></div></div>
+    <div><label>Price vs Key Levels</label><select id="id-lvl"><option value="">--</option><option value="acw">Above Call Wall</option><option value="tcw">Testing Call Wall</option><option value="agf">Above GEX Flip</option><option value="atgf">At GEX Flip</option><option value="bgf">Below GEX Flip</option><option value="tpw">Testing Put Wall</option><option value="bpw">Below Put Wall</option></select></div>
+    <div><label>Observation</label><textarea id="id-obs" placeholder="e.g. Failed breakout above GEX flip, volume declining on bounce, holding below VWAP..."></textarea></div>
+    <button class="btn btn-p btn-fw" onclick="genID()">⚡ UPDATE ANALYSIS</button>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>Intraday Update</div>
+    <div class="aio" id="id-out" style="min-height:150px">Paste intraday data and hit Update Analysis...</div>
+  </div>
+</div>
+<div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot"></div>Current Bias</div>
+    <div class="bias-box">
+      <div class="bias-lbl">INTRADAY BIAS</div>
+      <div class="bias-val neut" id="id-bval">--</div>
+      <div class="cbar"><div class="cfill" id="id-cbar" style="width:0%"></div></div>
+      <div class="ctxt" id="id-ctxt">No updates yet</div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot"></div>Snapshot Timeline</div>
+    <div class="sntl" id="snp-tl"><div style="text-align:center;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:11px;padding:20px">No snapshots yet</div></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot y"></div>Level Alerts</div>
+    <div id="id-alerts"><div style="text-align:center;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:11px;padding:20px">Alerts appear when levels trigger</div></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======= GEX DATA ======= -->
+<div class="tp" id="tp-gd">
+<div class="ttabs">
+  <button class="ttab active" onclick="stk('spy')">SPY</button>
+  <button class="ttab" onclick="stk('spx')">SPX</button>
+  <button class="ttab" onclick="stk('qqq')">QQQ</button>
+  <button class="ttab" onclick="stk('vix')">VIX</button>
+</div>
+<div id="tk-spy">
+  <div class="g2"><div class="panel">
+    <div class="pt"><div class="dot"></div>SPY GEX Data</div>
+    <div class="ir"><div><label>Net GEX (M)</label><input type="number" id="spy-ng" placeholder="-230.9" step=".1"></div><div><label>Abs GEX Strike</label><input type="number" id="spy-as" placeholder="650"></div></div>
+    <div class="ir"><div><label>GEX Flip</label><input type="number" id="spy-fl" placeholder="648" step=".5"></div><div><label>Notional Delta ($B)</label><input type="number" id="spy-nd" placeholder="21.8" step=".1"></div></div>
+    <div class="ir"><div><label>Call Wall</label><input type="number" id="spy-cw" placeholder="660" step=".5"></div><div><label>Put Wall</label><input type="number" id="spy-pw" placeholder="640" step=".5"></div></div>
+    <div class="ir"><div><label>Total Call OI</label><input type="text" id="spy-coi" placeholder="628.7K"></div><div><label>Total Put OI</label><input type="text" id="spy-poi" placeholder="1.2M"></div></div>
+    <div><label>GEX Regime</label><select id="spy-reg"><option value="">--</option><option value="pos">Positive GEX (pinning)</option><option value="neg">Negative GEX (amplifying)</option><option value="nz">Near Zero</option></select></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>SPY Volume Ranges</div>
+    <div class="ir"><div><label>VR Top</label><input type="number" id="spy-vrt" placeholder="656" step=".5"></div><div><label>VR Bottom</label><input type="number" id="spy-vrb" placeholder="624" step=".5"></div></div>
+    <div class="ir"><div><label>pVR Top</label><input type="number" id="spy-pvt" placeholder="654" step=".5"></div><div><label>pVR Bottom</label><input type="number" id="spy-pvb" placeholder="626" step=".5"></div></div>
+    <div class="ir"><div><label>Block Range Top</label><input type="number" id="spy-brt" placeholder="660" step=".5"></div><div><label>Block Range Bot</label><input type="number" id="spy-brb" placeholder="620" step=".5"></div></div>
+    <div class="ir">
+      <div><label>Price vs VR</label><select id="spy-pvr"><option value="">--</option><option value="avr">Above VR</option><option value="ivr">Inside VR</option><option value="bvr">Below VR</option></select></div>
+      <div><label>Price vs pVR</label><select id="spy-ppvr"><option value="">--</option><option value="apvr">Above pVR</option><option value="ipvr">Inside pVR</option><option value="bpvr">Below pVR</option></select></div>
+    </div>
+  </div></div>
+</div>
+<div id="tk-spx" style="display:none">
+  <div class="g2"><div class="panel">
+    <div class="pt"><div class="dot"></div>SPX GEX Data</div>
+    <div class="ir"><div><label>Net GEX ($B)</label><input type="number" id="spx-ng" placeholder="-4.2" step=".1"></div><div><label>Abs GEX Strike</label><input type="number" id="spx-as" placeholder="5500" step="5"></div></div>
+    <div class="ir"><div><label>GEX Flip</label><input type="number" id="spx-fl" placeholder="5480" step="5"></div><div><label>Call Wall</label><input type="number" id="spx-cw" placeholder="5600" step="5"></div></div>
+    <div class="ir"><div><label>Put Wall</label><input type="number" id="spx-pw" placeholder="5400" step="5"></div><div><label>GEX Regime</label><select id="spx-reg"><option value="">--</option><option value="pos">Positive GEX</option><option value="neg">Negative GEX</option><option value="nz">Near Zero</option></select></div></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>SPX Volume Ranges</div>
+    <div class="ir"><div><label>VR Top</label><input type="number" id="spx-vrt" placeholder="5560" step="5"></div><div><label>VR Bottom</label><input type="number" id="spx-vrb" placeholder="5420" step="5"></div></div>
+    <div class="ir"><div><label>pVR Top</label><input type="number" id="spx-pvt" placeholder="5545" step="5"></div><div><label>pVR Bottom</label><input type="number" id="spx-pvb" placeholder="5435" step="5"></div></div>
+  </div></div>
+</div>
+<div id="tk-qqq" style="display:none">
+  <div class="g2"><div class="panel">
+    <div class="pt"><div class="dot"></div>QQQ GEX Data</div>
+    <div class="ir"><div><label>Net GEX (M)</label><input type="number" id="qqq-ng" placeholder="-85.2" step=".1"></div><div><label>GEX Flip</label><input type="number" id="qqq-fl" placeholder="462" step=".5"></div></div>
+    <div class="ir"><div><label>Call Wall</label><input type="number" id="qqq-cw" placeholder="470" step=".5"></div><div><label>Put Wall</label><input type="number" id="qqq-pw" placeholder="455" step=".5"></div></div>
+    <div><label>SPY vs QQQ Alignment</label><select id="sq-align"><option value="">--</option><option value="both-neg">Both Negative GEX (high conviction)</option><option value="both-pos">Both Positive GEX (pinning)</option><option value="div">Divergent (conflicting)</option></select></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>QQQ Volume Ranges</div>
+    <div class="ir"><div><label>VR Top</label><input type="number" id="qqq-vrt" placeholder="468" step=".5"></div><div><label>VR Bottom</label><input type="number" id="qqq-vrb" placeholder="452" step=".5"></div></div>
+    <div class="ir"><div><label>pVR Top</label><input type="number" id="qqq-pvt" placeholder="466" step=".5"></div><div><label>pVR Bottom</label><input type="number" id="qqq-pvb" placeholder="454" step=".5"></div></div>
+  </div></div>
+</div>
+<div id="tk-vix" style="display:none">
+  <div class="g2"><div class="panel">
+    <div class="pt"><div class="dot r"></div>VIX GEX + Levels</div>
+    <div class="ir"><div><label>VIX Net GEX</label><input type="number" id="vix-ng" placeholder="12.5" step=".1"></div><div><label>VIX Call Wall</label><input type="number" id="vix-cw" placeholder="25" step=".5"></div></div>
+    <div class="ir"><div><label>VIX Put Wall</label><input type="number" id="vix-pw" placeholder="15" step=".5"></div><div><label>VIX Flip</label><input type="number" id="vix-fp" placeholder="20" step=".5"></div></div>
+    <div><label>VIX Positioning Signal</label><select id="vix-sig"><option value="">--</option><option value="pin">Vol Pinning</option><option value="exp">Vol Expanding</option><option value="spk">Vol Spike Likely</option><option value="crs">Vol Crush Likely</option></select></div>
+  </div>
+  <div class="panel"><div class="pt"><div class="dot y"></div>Vol Surface Notes</div><textarea id="vix-nt" placeholder="e.g. VX futures in backwardation, front month elevated..." style="min-height:150px"></textarea></div>
+  </div>
+</div>
+<div style="margin-top:12px"><button class="btn btn-s btn-fw" onclick="saveGEX()" style="padding:12px;font-size:14px;letter-spacing:2px">💾 SAVE GEX DATA TO SESSION</button></div>
+</div>
+
+<!-- ======= PATTERNS ======= -->
+<div class="tp" id="tp-pt">
+<div class="g21" style="gap:12px">
+<div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot g"></div>Bullish Patterns</div>
+    <div class="pgrid">
+      <div class="pi" onclick="tp2(this,'b','Bull Flag')"><div class="pck">✓</div>Bull Flag</div>
+      <div class="pi" onclick="tp2(this,'b','Bull Pennant')"><div class="pck">✓</div>Bull Pennant</div>
+      <div class="pi" onclick="tp2(this,'b','Ascending Triangle')"><div class="pck">✓</div>Ascending Triangle</div>
+      <div class="pi" onclick="tp2(this,'b','Falling Wedge')"><div class="pck">✓</div>Falling Wedge</div>
+      <div class="pi" onclick="tp2(this,'b','Double Bottom')"><div class="pck">✓</div>Double Bottom</div>
+      <div class="pi" onclick="tp2(this,'b','Break+Retest Up')"><div class="pck">✓</div>Break + Retest Up</div>
+      <div class="pi" onclick="tp2(this,'b','VWAP Reclaim')"><div class="pck">✓</div>VWAP Reclaim</div>
+      <div class="pi" onclick="tp2(this,'b','Demand Zone Tap')"><div class="pck">✓</div>Demand Zone Tap</div>
+      <div class="pi" onclick="tp2(this,'b','BOS Bullish')"><div class="pck">✓</div>BOS (Bullish)</div>
+      <div class="pi" onclick="tp2(this,'b','CHoCH Bullish')"><div class="pck">✓</div>CHoCH (Bullish)</div>
+      <div class="pi" onclick="tp2(this,'b','LOD Sweep+Reverse')"><div class="pck">✓</div>LOD Sweep+Reverse</div>
+      <div class="pi" onclick="tp2(this,'b','Cup+Handle')"><div class="pck">✓</div>Cup + Handle</div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot r"></div>Bearish Patterns</div>
+    <div class="pgrid">
+      <div class="pi bear-p" onclick="tp2(this,'r','Bear Flag')"><div class="pck">✓</div>Bear Flag</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Bear Pennant')"><div class="pck">✓</div>Bear Pennant</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Descending Triangle')"><div class="pck">✓</div>Descending Triangle</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Rising Wedge')"><div class="pck">✓</div>Rising Wedge</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Double Top')"><div class="pck">✓</div>Double Top</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Break+Retest Down')"><div class="pck">✓</div>Break+Retest Down</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','VWAP Reject')"><div class="pck">✓</div>VWAP Reject</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Supply Zone Tap')"><div class="pck">✓</div>Supply Zone Tap</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','BOS Bearish')"><div class="pck">✓</div>BOS (Bearish)</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','CHoCH Bearish')"><div class="pck">✓</div>CHoCH (Bearish)</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','HOD Sweep+Reverse')"><div class="pck">✓</div>HOD Sweep+Reverse</div>
+      <div class="pi bear-p" onclick="tp2(this,'r','Head&Shoulders')"><div class="pck">✓</div>Head & Shoulders</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot y"></div>Chart Observations</div>
+    <label>Describe what you see — Claude will factor this in</label>
+    <textarea id="cobs" placeholder="e.g. ES forming rising wedge on 15m, testing resistance at 5520 which aligns with GEX flip. Volume declining on push up. VWAP at 5495 below..." style="min-height:120px"></textarea>
+    <div class="ir">
+      <div><label>Timeframe</label><select id="tff"><option value="1m">1 Min</option><option value="5m">5 Min</option><option value="15m" selected>15 Min</option><option value="30m">30 Min</option><option value="1h">1 Hour</option><option value="daily">Daily</option></select></div>
+      <div><label>Conviction</label><select id="pconv"><option value="low">Low — Forming</option><option value="med" selected>Medium — Developing</option><option value="high">High — Confirmed</option><option value="vhigh">Very High — Textbook</option></select></div>
+    </div>
+  </div>
+</div>
+<div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot"></div>Selected Patterns</div>
+    <div id="sel-pats" style="min-height:80px"><div style="color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;padding:20px">Click patterns to select them</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot g"></div>Pattern Bias</div>
+    <div class="sc"><div class="sl">Bullish Patterns</div><div class="sv bull" id="p-bull">0</div></div>
+    <div style="margin-top:6px" class="sc"><div class="sl">Bearish Patterns</div><div class="sv bear" id="p-bear">0</div></div>
+    <div style="margin-top:6px" class="sc"><div class="sl">Net Bias</div><div class="sv neut" id="p-bias">NEUTRAL</div></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot y"></div>Confluence Notes</div>
+    <label>Where do patterns align with GEX levels?</label>
+    <textarea id="cnotes" placeholder="e.g. Wedge apex aligns with GEX flip at 648, also prev day high..."></textarea>
+    <button class="btn btn-p btn-fw" onclick="genGP()" style="margin-top:4px">🔍 ANALYZE PATTERN CONFLUENCE</button>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======= WEIGHTS ======= -->
+<div class="tp" id="tp-wt">
+<div class="g2">
+<div class="panel">
+  <div class="pt"><div class="dot"></div>Signal Weight Configuration</div>
+  <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:16px;line-height:1.6">Tune how much each factor influences the final confluence score.</p>
+  <div class="wr"><span class="wl">SPY Net GEX Direction</span><input type="range" min="0" max="25" value="15" oninput="uw(this,'w-sg')"><span class="wv" id="w-sg">15</span></div>
+  <div class="wr"><span class="wl">SPX Net GEX Direction</span><input type="range" min="0" max="25" value="15" oninput="uw(this,'w-xg')"><span class="wv" id="w-xg">15</span></div>
+  <div class="wr"><span class="wl">GEX Flip vs Price</span><input type="range" min="0" max="20" value="12" oninput="uw(this,'w-gf')"><span class="wv" id="w-gf">12</span></div>
+  <div class="wr"><span class="wl">VR Range Position</span><input type="range" min="0" max="20" value="10" oninput="uw(this,'w-vr')"><span class="wv" id="w-vr">10</span></div>
+  <div class="wr"><span class="wl">Market Internals</span><input type="range" min="0" max="20" value="10" oninput="uw(this,'w-in')"><span class="wv" id="w-in">10</span></div>
+  <div class="wr"><span class="wl">Volume Profile</span><input type="range" min="0" max="15" value="8" oninput="uw(this,'w-vp')"><span class="wv" id="w-vp">8</span></div>
+  <div class="wr"><span class="wl">Pattern Confluence</span><input type="range" min="0" max="25" value="15" oninput="uw(this,'w-pc')"><span class="wv" id="w-pc">15</span></div>
+  <div class="wr"><span class="wl">Sentiment (VIX/PCR)</span><input type="range" min="0" max="15" value="8" oninput="uw(this,'w-se')"><span class="wv" id="w-se">8</span></div>
+  <div class="wr"><span class="wl">QQQ Confirmation</span><input type="range" min="0" max="15" value="7" oninput="uw(this,'w-qq')"><span class="wv" id="w-qq">7</span></div>
+  <div class="sc" style="margin-top:12px"><div class="sl">Total Weight</div><div class="sv acc" id="w-tot">100</div></div>
+</div>
+<div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot y"></div>News Day Override</div>
+    <div class="wr"><span class="wl">Confidence Penalty</span><input type="range" min="0" max="50" value="20" oninput="uw(this,'w-np')"><span class="wv" id="w-np">20</span></div>
+    <div><label>News Event Active</label><select id="news-act"><option value="none">None / Low Impact</option><option value="med">Medium (ISM, Claims)</option><option value="high">High (CPI, NFP, FOMC)</option><option value="ext">Extreme (Fed + Press Conf)</option></select></div>
+  </div>
+  <div class="panel" style="margin-bottom:10px">
+    <div class="pt"><div class="dot g"></div>Presets</div>
+    <div class="flc" style="gap:6px">
+      <button class="btn btn-g btn-fw" onclick="lp('trend')">📈 Trending Day</button>
+      <button class="btn btn-g btn-fw" onclick="lp('range')">↔️ Range / Mean Revert</button>
+      <button class="btn btn-g btn-fw" onclick="lp('news')">📰 News Day</button>
+      <button class="btn btn-g btn-fw" onclick="lp('def')">⚙️ Reset Default</button>
+    </div>
+  </div>
+  <div class="panel"><div class="pt"><div class="dot"></div>Weight Notes</div><textarea placeholder="Notes on weight adjustments..."></textarea></div>
+</div>
+</div>
+</div>
+
+<!-- ======= TRADE LOG ======= -->
+<div class="tp" id="tp-tl">
+<div class="g21" style="gap:12px">
+<div>
+  <div class="panel">
+    <div class="pt"><div class="dot g"></div>Log New Trade</div>
+    <div class="ir"><div><label>Date</label><input type="text" id="l-dt" placeholder="2026-04-05"></div><div><label>Time (EST)</label><input type="text" id="l-tm" placeholder="9:45 AM"></div></div>
+    <div class="ir"><div><label>Direction</label><select id="l-dir"><option value="long">Long</option><option value="short">Short</option></select></div><div><label>Instrument</label><select id="l-ins"><option value="ES">ES</option><option value="MES">MES</option><option value="SPY">SPY</option><option value="SPX">SPX</option></select></div></div>
+    <div class="ir3"><div><label>Entry</label><input type="number" id="l-en" placeholder="5492" step=".25"></div><div><label>Target</label><input type="number" id="l-tg" placeholder="5480" step=".25"></div><div><label>Stop</label><input type="number" id="l-st" placeholder="5500" step=".25"></div></div>
+    <div><label>Confluence Score at Entry</label><input type="text" id="l-sc" placeholder="e.g. 72% Bearish"></div>
+    <div><label>Setup / Patterns</label><input type="text" id="l-su" placeholder="e.g. Rising wedge + GEX flip rejection + VWAP fail"></div>
+    <div class="ir"><div><label>Outcome</label><select id="l-oc"><option value="">-- Pending --</option><option value="win">Win</option><option value="loss">Loss</option><option value="be">Breakeven</option><option value="part">Partial</option></select></div><div><label>P&L (Points)</label><input type="number" id="l-pl" placeholder="8.5" step=".25"></div></div>
+    <div><label>Notes</label><textarea id="l-nt" placeholder="What worked, what to improve..." style="min-height:70px"></textarea></div>
+    <button class="btn btn-s btn-fw" onclick="logT()">+ LOG TRADE</button>
+  </div>
+</div>
+<div>
+  <div class="g2" style="gap:8px;margin-bottom:10px">
+    <div class="sc"><div class="sl">Win Rate</div><div class="sv bull" id="t-wr">--%</div></div>
+    <div class="sc"><div class="sl">Profit Factor</div><div class="sv acc" id="t-pf">--</div></div>
+    <div class="sc"><div class="sl">Total Trades</div><div class="sv" id="t-tot">0</div></div>
+    <div class="sc"><div class="sl">Net P&L (pts)</div><div class="sv" id="t-pnl">0</div></div>
+  </div>
+  <div class="panel">
+    <div class="pt"><div class="dot"></div>Trade History</div>
+    <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+      <table class="ttbl">
+        <thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Setup</th><th>P&L</th><th>Result</th></tr></thead>
+        <tbody id="tlog-body"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No trades logged yet</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+</div><!-- /app -->
+<script>
+const S={bulls:[],bears:[],trades:JSON.parse(localStorage.getItem('gex-t')||'[]'),lastBias:'NEUTRAL',lastConf:0};
+const gv=id=>{const e=document.getElementById(id);return e?e.value:''};
+
+function tic(){
+  const n=new Date(),e=new Date(n.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const h=String(e.getHours()).padStart(2,'0'),m=String(e.getMinutes()).padStart(2,'0'),s=String(e.getSeconds()).padStart(2,'0');
+  document.getElementById('clk').textContent=`${h}:${m}:${s} EST`;
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mos=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dt').textContent=`${days[e.getDay()]} ${mos[e.getMonth()]} ${e.getDate()}, ${e.getFullYear()}`;
+  const tm=e.getHours()*60+e.getMinutes(),wd=e.getDay()>0&&e.getDay()<6;
+  const b=document.getElementById('sess');
+  if(!wd){b.textContent='WEEKEND';b.className='badge b-closed';}
+  else if(tm>=120&&tm<300){b.textContent='LONDON';b.className='badge b-pre';}
+  else if(tm>=540&&tm<570){b.textContent='PRE-MARKET';b.className='badge b-pre';}
+  else if(tm>=570&&tm<960){b.textContent='MARKET OPEN';b.className='badge b-open';}
+  else if(tm>=960&&tm<1200){b.textContent='AFTER HOURS';b.className='badge b-after';}
+  else{b.textContent='CLOSED';b.className='badge b-closed';}
+  const ws=[{i:'w-lon',s:120,e:300},{i:'w-nyo',s:570,e:660},{i:'w-mid',s:660,e:840},{i:'w-cls',s:840,e:960}];
+  ws.forEach(w=>{const el=document.getElementById(w.i);if(!el)return;if(!wd){el.textContent='CLOSED';el.style.color='var(--text3)';}else if(tm>=w.s&&tm<w.e){el.textContent='ACTIVE';el.style.color='var(--green)';}else if(tm<w.s){el.textContent='UPCOMING';el.style.color='var(--yellow)';}else{el.textContent='CLOSED';el.style.color='var(--text3)';}});
+}
+setInterval(tic,1000);tic();
+
+function st(t){
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('tp-'+t).classList.add('active');
+  const m={gp:0,id:1,gd:2,pt:3,wt:4,tl:5};
+  if(m[t]!==undefined)document.querySelectorAll('.tab')[m[t]].classList.add('active');
+}
+
+function stk(t){
+  ['spy','spx','qqq','vix'].forEach(x=>{const e=document.getElementById('tk-'+x);if(e)e.style.display=x===t?'block':'none';});
+  document.querySelectorAll('.ttab').forEach((e,i)=>e.classList.toggle('active',['spy','spx','qqq','vix'][i]===t));
+}
+
+function tp2(el,type,name){
+  el.classList.toggle('sel');
+  const a=type==='b'?S.bulls:S.bears;
+  const i=a.indexOf(name);if(i>-1)a.splice(i,1);else a.push(name);
+  updPats();
+}
+
+function updPats(){
+  const b=S.bulls.length,r=S.bears.length;
+  document.getElementById('p-bull').textContent=b;
+  document.getElementById('p-bear').textContent=r;
+  const pb=document.getElementById('p-bias');
+  if(b>r+1){pb.textContent='BULLISH';pb.className='sv bull';}
+  else if(r>b+1){pb.textContent='BEARISH';pb.className='sv bear';}
+  else{pb.textContent='MIXED';pb.className='sv neut';}
+  const d=document.getElementById('sel-pats');
+  const all=[...S.bulls.map(p=>`<span style="color:var(--green);background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);padding:3px 8px;border-radius:2px;font-size:11px;display:inline-block;margin:2px">${p}</span>`),
+    ...S.bears.map(p=>`<span style="color:var(--red);background:rgba(255,51,85,.1);border:1px solid rgba(255,51,85,.3);padding:3px 8px;border-radius:2px;font-size:11px;display:inline-block;margin:2px">${p}</span>`)];
+  d.innerHTML=all.length?`<div style="display:flex;flex-wrap:wrap;gap:4px">${all.join('')}</div>`:'<div style="color:var(--text3);font-family:\'Share Tech Mono\',monospace;font-size:11px;text-align:center;padding:20px">Click patterns to select</div>';
+}
+
+function uw(inp,id){
+  document.getElementById(id).textContent=inp.value;
+  let tot=0;['w-sg','w-xg','w-gf','w-vr','w-in','w-vp','w-pc','w-se','w-qq'].forEach(w=>{const e=document.getElementById(w);if(e)tot+=parseInt(e.textContent)||0;});
+  const t=document.getElementById('w-tot');t.textContent=tot;
+  t.className='sv '+(Math.abs(tot-100)<5?'bull':tot>105?'bear':'neut');
+}
+
+function lp(t){
+  const P={trend:{sg:18,xg:18,gf:15,vr:8,i:12,vp:6,pc:12,se:6,qq:5},range:{sg:12,xg:12,gf:10,vr:15,i:8,vp:15,pc:18,se:7,qq:3},news:{sg:8,xg:8,gf:6,vr:8,i:15,vp:8,pc:8,se:20,qq:4},def:{sg:15,xg:15,gf:12,vr:10,i:10,vp:8,pc:15,se:8,qq:7}};
+  const p=P[t];if(!p)return;
+  [['w-sg',p.sg],['w-xg',p.xg],['w-gf',p.gf],['w-vr',p.vr],['w-in',p.i],['w-vp',p.vp],['w-pc',p.pc],['w-se',p.se],['w-qq',p.qq]].forEach(([id,v])=>{const e=document.getElementById(id);if(e){e.textContent=v;e.previousElementSibling.value=v;}});
+  uw({value:p.sg},'w-sg');
+}
+
+function initCal(){
+  document.getElementById('cal-ev').innerHTML='<div class="cal-ev"><span class="il">[CHECK]</span><span style="color:var(--text)">econoday.com for today\'s events</span><span class="il" style="font-size:10px">Daily</span></div>';
+}
+
+function addEv(){
+  const i=document.getElementById('mev'),v=i.value.trim();if(!v)return;
+  const d=document.createElement('div');d.className='alert a-warn';
+  d.innerHTML=`⚠️ ${v} <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--yellow);cursor:pointer;margin-left:auto">✕</button>`;
+  d.style.display='flex';document.getElementById('mev-list').appendChild(d);i.value='';
+}
+
+function collectData(){
+  return{
+    gh:gv('gh'),gl:gv('gl'),pdh:gv('pdh'),pdl:gv('pdl'),pdc:gv('pdc'),pwh:gv('pwh'),pwl:gv('pwl'),
+    tick:gv('tick'),add:gv('add'),vold:gv('vold'),esnq:gv('esnq'),
+    poc:gv('poc'),vah:gv('vah'),val:gv('val'),cpx:gv('cpx'),pva:gv('pva'),
+    pcr:gv('pcr'),vixl:gv('vixl'),vix9:gv('vix9'),vvix:gv('vvix'),vts:gv('vts'),osent:gv('osent'),
+    spyNg:gv('spy-ng'),spyAs:gv('spy-as'),spyFl:gv('spy-fl'),spyNd:gv('spy-nd'),
+    spyCw:gv('spy-cw'),spyPw:gv('spy-pw'),spyCoi:gv('spy-coi'),spyPoi:gv('spy-poi'),
+    spyReg:gv('spy-reg'),spyVrt:gv('spy-vrt'),spyVrb:gv('spy-vrb'),
+    spyPvt:gv('spy-pvt'),spyPvb:gv('spy-pvb'),spyPvr:gv('spy-pvr'),spyPpvr:gv('spy-ppvr'),
+    spxNg:gv('spx-ng'),spxFl:gv('spx-fl'),spxCw:gv('spx-cw'),spxPw:gv('spx-pw'),
+    spxReg:gv('spx-reg'),spxVrt:gv('spx-vrt'),spxVrb:gv('spx-vrb'),
+    qqqNg:gv('qqq-ng'),qqqFl:gv('qqq-fl'),qqqCw:gv('qqq-cw'),qqqPw:gv('qqq-pw'),sqAl:gv('sq-align'),
+    vixNg:gv('vix-ng'),vixCw:gv('vix-cw'),vixPw:gv('vix-pw'),vixFp:gv('vix-fp'),vixSig:gv('vix-sig'),vixNt:gv('vix-nt'),
+    bulls:S.bulls,bears:S.bears,cobs:gv('cobs'),tff:gv('tff'),pconv:gv('pconv'),cnotes:gv('cnotes'),
+    newsAct:gv('news-act')
+  };
+}
+
+function calcScores(d){
+  let gs=0,rs=0,is=0,ps=0,bp=0;
+  const sg=parseFloat(d.spyNg)||0,xg=parseFloat(d.spxNg)||0;
+  if(sg<0){gs+=35;bp--;}else{gs+=20;bp++;}
+  if(xg<0){gs+=35;bp--;}else{gs+=20;bp++;}
+  if(d.spyReg==='neg'){gs+=15;bp--;}else if(d.spyReg==='pos'){gs+=15;bp++;}
+  if(d.sqAl==='both-neg'){gs+=15;bp--;}else if(d.sqAl==='both-pos'){gs+=15;bp++;}else if(d.sqAl==='div')gs-=10;
+  if(d.spyPvr==='ivr')rs+=40;else if(d.spyPvr)rs+=20;
+  if(d.spyPpvr==='ipvr')rs+=30;else if(d.spyPpvr)rs+=20;
+  const pcr=parseFloat(d.pcr)||0;
+  if(pcr>1){rs+=15;bp--;}else if(pcr>0.7)rs+=10;
+  if(d.pva==='apoc')rs+=15;else if(d.pva)rs+=8;
+  const bi=['sb','b'],bri=['sbe','be'];
+  if(bi.includes(d.tick)){is+=25;bp++;}else if(bri.includes(d.tick)){is+=25;bp--;}else if(d.tick==='n')is+=10;
+  if(bi.includes(d.add)){is+=20;bp++;}else if(bri.includes(d.add)){is+=20;bp--;}
+  if(bi.includes(d.vold)){is+=20;bp++;}else if(bri.includes(d.vold)){is+=20;bp--;}
+  if(d.vixSig==='exp'||d.vixSig==='spk'){is+=20;bp--;}else if(d.vixSig==='crs'){is+=15;bp++;}
+  const bl=S.bulls.length,br=S.bears.length,tp=bl+br;
+  if(tp>0){ps=Math.min(100,tp*15);if(bl>br)bp+=Math.ceil((bl-br)/2);else if(br>bl)bp-=Math.ceil((br-bl)/2);}
+  if(d.pconv==='high')ps=Math.min(100,ps+20);
+  if(d.pconv==='vhigh')ps=Math.min(100,ps+35);
+  if(d.cobs&&d.cobs.length>20)ps=Math.min(100,ps+10);
+  gs=Math.min(100,Math.max(0,gs));rs=Math.min(100,Math.max(0,rs));is=Math.min(100,Math.max(0,is));ps=Math.min(100,Math.max(0,ps));
+  const wg=id=>parseInt(document.getElementById(id)?.textContent||0);
+  const wsg=wg('w-sg'),wxg=wg('w-xg'),wgf=wg('w-gf'),wvr=wg('w-vr'),win=wg('w-in'),wvp=wg('w-vp'),wpc=wg('w-pc'),wse=wg('w-se'),wqq=wg('w-qq');
+  const tw=wsg+wxg+wgf+wvr+win+wvp+wpc+wse+wqq||100;
+  const ov=Math.round((gs*(wsg+wxg+wgf)/tw)+(rs*wvr/tw)+(is*(win+wse)/tw)+(ps*(wpc+wqq)/tw));
+  const nm={none:0,med:10,high:20,ext:35};
+  const fin=Math.max(0,ov-(nm[d.newsAct]||0));
+  let bias='NEUTRAL';
+  if(bp<=-3)bias='BEARISH';else if(bp===-2)bias='LEAN BEARISH';else if(bp===-1)bias='SLIGHT BEARISH';
+  else if(bp>=3)bias='BULLISH';else if(bp===2)bias='LEAN BULLISH';else if(bp===1)bias='SLIGHT BULLISH';
+  return{gs,rs,is,ps,ov:fin,bias,bp};
+}
+
+async function genGP(){
+  if(document.getElementById('tp-pt').classList.contains('active'))st('gp');
+  const d=collectData(),sc=calcScores(d);
+  document.getElementById('s-gex').textContent=sc.gs+'%';
+  document.getElementById('s-rng').textContent=sc.rs+'%';
+  document.getElementById('s-int').textContent=sc.is+'%';
+  document.getElementById('s-pat').textContent=sc.ps+'%';
+  const ste=document.getElementById('s-tot');
+  ste.textContent=sc.ov+'%';ste.className='ov '+(sc.ov>=70?'bull':sc.ov>=45?'neut':'bear');
+  const bv=document.getElementById('bval');
+  bv.textContent=sc.bias;bv.className='bias-val '+(sc.bias.includes('BEAR')?'bear':sc.bias.includes('BULL')?'bull':'neut');
+  const cb=document.getElementById('cbar');
+  cb.style.width=sc.ov+'%';cb.style.background=sc.bias.includes('BEAR')?'var(--red)':sc.bias.includes('BULL')?'var(--green)':'var(--yellow)';
+  document.getElementById('ctxt').textContent=`${sc.ov}% Confluence Confidence`;
+  S.lastBias=sc.bias;S.lastConf=sc.ov;
+  document.getElementById('o-spy-flip').textContent=d.spyFl?'$'+d.spyFl:'--';
+  document.getElementById('o-spx-flip').textContent=d.spxFl?'$'+d.spxFl:'--';
+  document.getElementById('o-cwall').textContent=d.spyCw?'$'+d.spyCw:'--';
+  document.getElementById('o-pwall').textContent=d.spyPw?'$'+d.spyPw:'--';
+  document.getElementById('o-vrt').textContent=d.spyVrt?'$'+d.spyVrt:'--';
+  document.getElementById('o-vrb').textContent=d.spyVrb?'$'+d.spyVrb:'--';
+  if(sc.bias.includes('BEAR')&&d.spyPw)document.getElementById('o-tgt').textContent='$'+d.spyPw;
+  else if(sc.bias.includes('BULL')&&d.spyCw)document.getElementById('o-tgt').textContent='$'+d.spyCw;
+  genAlerts(d,sc);
+  const out=document.getElementById('ai-out');
+  out.innerHTML='<div class="ai-think">⚡ Claude analyzing confluence factors <span class="td-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+  const clk=document.getElementById('clk').textContent;
+  const prompt=`You are a professional ES/SPX futures trading analyst. Analyze this data and generate a concise morning game plan.
+
+TIME: ${clk}
+OVERNIGHT: Globex ${d.gl||'N/A'}-${d.gh||'N/A'} | PrevDay H:${d.pdh||'N/A'} L:${d.pdl||'N/A'} C:${d.pdc||'N/A'} | PrevWk H:${d.pwh||'N/A'} L:${d.pwl||'N/A'} | Price:${d.cpx||'N/A'}
+GEX: SPY ${d.spyNg||'N/A'}M [${d.spyReg||'N/A'}] Flip:${d.spyFl||'N/A'} CW:${d.spyCw||'N/A'} PW:${d.spyPw||'N/A'} | SPX ${d.spxNg||'N/A'}B [${d.spxReg||'N/A'}] Flip:${d.spxFl||'N/A'} | QQQ Align:${d.sqAl||'N/A'}
+RANGES: SPY VR ${d.spyVrb||'N/A'}-${d.spyVrt||'N/A'} pVR ${d.spyPvb||'N/A'}-${d.spyPvt||'N/A'} | PriceVsVR:${d.spyPvr||'N/A'}
+VP: POC:${d.poc||'N/A'} VAH:${d.vah||'N/A'} VAL:${d.val||'N/A'} PriceVsVA:${d.pva||'N/A'}
+INTERNALS: TICK:${d.tick||'N/A'} ADD:${d.add||'N/A'} VOLD:${d.vold||'N/A'} ES/NQ:${d.esnq||'N/A'}
+SENTIMENT: PCR:${d.pcr||'N/A'} VIX:${d.vixl||'N/A'} VIX9D:${d.vix9||'N/A'} VVIX:${d.vvix||'N/A'} TermStructure:${d.vts||'N/A'} Sentiment:${d.osent||'N/A'} VIXsig:${d.vixSig||'N/A'}
+PATTERNS (${d.tff||'15m'}, conviction:${d.pconv||'N/A'}): BULL:[${d.bulls.join(',')||'none'}] BEAR:[${d.bears.join(',')||'none'}]
+CHART: ${d.cobs||'None'} | CONFLUENCE NOTES: ${d.cnotes||'None'}
+NEWS: ${d.newsAct||'none'}
+SCORES: GEX:${sc.gs}% Range:${sc.rs}% Internals:${sc.is}% Pattern:${sc.ps}% TOTAL:${sc.ov}% BIAS:${sc.bias}
+
+Generate structured game plan:
+1. PRIMARY BIAS — Direction + reasoning (2-3 sentences, use specific price levels)
+2. KEY LEVELS — Ranked by significance with actual prices
+3. TARGET ZONE — Where price most likely gravitates today
+4. TRADE SETUPS — 1-2 specific setups: entry trigger, target, stop
+5. INVALIDATION — What specific levels/conditions flip the bias
+6. SESSION WINDOWS — When to be active vs sit out
+7. BOTTOM LINE — One sentence summary
+
+Be direct. Use actual numbers from the data. No generic advice.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const txt=data.content?.map(c=>c.text||'').join('')||'Analysis unavailable.';
+    out.textContent=txt;out.style.animation='';void out.offsetWidth;out.style.animation='fup .8s ease';
+  }catch(e){out.textContent=`Error: ${e.message}\n\nFallback Summary:\nBias: ${sc.bias}\nConfluence: ${sc.ov}%\nGEX:${sc.gs}% Range:${sc.rs}% Internals:${sc.is}% Pattern:${sc.ps}%`;}
+}
+
+function genAlerts(d,sc){
+  const c=document.getElementById('alert-box'),a=[];
+  if(d.newsAct==='high'||d.newsAct==='ext')a.push({t:'a-danger',m:'🚨 HIGH IMPACT NEWS — Reduce size, wider stops, wait for post-news structure'});
+  if(d.spyReg==='neg'&&d.spxReg==='neg')a.push({t:'a-warn',m:'⚠️ BOTH SPY+SPX NEGATIVE GEX — Amplified moves. No pinning behavior expected.'});
+  if(d.vixSig==='spk')a.push({t:'a-danger',m:'🚨 VOL SPIKE LIKELY — Elevated downside risk. Size down.'});
+  if(sc.ov<40)a.push({t:'a-warn',m:'⚠️ LOW CONFLUENCE — Conflicting signals. Consider sitting out or reducing size.'});
+  if(d.sqAl==='div')a.push({t:'a-info',m:'ℹ️ SPY/QQQ DIVERGENCE — Wait for alignment before committing to a direction.'});
+  if(sc.ov>=75)a.push({t:'a-ok',m:`✅ HIGH CONFIDENCE — ${sc.ov}% confluence. ${sc.bias} bias well-supported.`});
+  c.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.m}</div>`).join('');
+}
+
+async function genID(){
+  const id={spy:gv('id-spy'),spx:gv('id-spx'),px:gv('id-px'),vix:gv('id-vix'),lvl:gv('id-lvl'),obs:gv('id-obs')};
+  const clk=document.getElementById('clk').textContent.split(' ')[0];
+  const tl=document.getElementById('snp-tl');
+  if(tl.children.length===1&&!tl.children[0].className.includes('sni'))tl.innerHTML='';
+  const sn=document.createElement('div');sn.className='sni';
+  sn.innerHTML=`<span class="snt">${clk}</span><span>SPX:${id.px||'--'} GEX:${id.spy||'--'}M VIX:${id.vix||'--'} [${id.lvl||'--'}]</span>`;
+  tl.insertBefore(sn,tl.firstChild);
+  const bv=document.getElementById('id-bval');bv.textContent=S.lastBias;bv.className='bias-val '+(S.lastBias.includes('BEAR')?'bear':S.lastBias.includes('BULL')?'bull':'neut');
+  const cb=document.getElementById('id-cbar');cb.style.width=S.lastConf+'%';cb.style.background=S.lastBias.includes('BEAR')?'var(--red)':S.lastBias.includes('BULL')?'var(--green)':'var(--yellow)';
+  document.getElementById('id-ctxt').textContent=`Updated ${clk}`;
+  const out=document.getElementById('id-out');
+  out.innerHTML='<div class="ai-think">⚡ Updating analysis <span class="td-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+  try{
+    const prompt=`You are a professional ES/SPX futures trading analyst providing an intraday update.
+MORNING: Bias was ${S.lastBias} (${S.lastConf}% confluence) | Now: ${clk}
+UPDATE: SPX:${id.px||'N/A'} SPY GEX:${id.spy||'N/A'}M SPX GEX:${id.spx||'N/A'}B VIX:${id.vix||'N/A'} PriceVsLevels:${id.lvl||'N/A'}
+OBSERVATION: ${id.obs||'None'}
+Provide concise intraday update (3-4 paragraphs): (1) Is morning bias still valid? (2) Best setups RIGHT NOW with specific triggers and levels (3) Key levels rest of session (4) Any bias shifts or warnings. Be direct, use specific prices.`;
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    out.textContent=data.content?.map(c=>c.text||'').join('')||'Unavailable.';
+  }catch(e){out.textContent=`Error: ${e.message}`;}
+}
+
+function saveGEX(){
+  const btn=event.target,o=btn.textContent;
+  btn.textContent='✅ SAVED';btn.style.background='linear-gradient(135deg,var(--green),#00aa55)';
+  setTimeout(()=>{btn.textContent=o;btn.style.background='';},2000);
+}
+
+function cpyAI(){
+  navigator.clipboard.writeText(document.getElementById('ai-out').textContent).then(()=>{
+    const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);
+  });
+}
+
+function logT(){
+  const t={id:Date.now(),date:gv('l-dt')||new Date().toLocaleDateString(),time:gv('l-tm'),dir:gv('l-dir'),ins:gv('l-ins'),entry:gv('l-en'),tgt:gv('l-tg'),stop:gv('l-st'),score:gv('l-sc'),setup:gv('l-su'),oc:gv('l-oc'),pnl:parseFloat(gv('l-pl'))||0,notes:gv('l-nt')};
+  S.trades.unshift(t);localStorage.setItem('gex-t',JSON.stringify(S.trades));
+  renderLog();['l-tm','l-en','l-tg','l-st','l-sc','l-su','l-pl','l-nt'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+}
+
+function renderLog(){
+  const tb=document.getElementById('tlog-body');
+  if(!S.trades.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No trades logged yet</td></tr>';return;}
+  tb.innerHTML=S.trades.map(t=>`<tr><td>${t.date}</td><td class="${t.dir==='long'?'bull':'bear'}">${(t.dir||'').toUpperCase()}</td><td class="na">${t.entry}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.setup}</td><td class="${t.pnl>0?'ng':t.pnl<0?'nr':''}">${t.pnl>0?'+':''}${t.pnl}</td><td class="${t.oc==='win'?'bull':t.oc==='loss'?'bear':'neut'}">${t.oc||'--'}</td></tr>`).join('');
+  const comp=S.trades.filter(t=>t.oc&&t.oc!==''),wins=comp.filter(t=>t.oc==='win'||t.oc==='part').length;
+  const wr=comp.length?Math.round(wins/comp.length*100):0;
+  const tp=S.trades.reduce((a,t)=>a+(t.pnl||0),0);
+  const gw=S.trades.filter(t=>t.pnl>0).reduce((a,t)=>a+t.pnl,0);
+  const gl=Math.abs(S.trades.filter(t=>t.pnl<0).reduce((a,t)=>a+t.pnl,0));
+  const pf=gl>0?(gw/gl).toFixed(2):'∞';
+  document.getElementById('t-wr').textContent=wr+'%';document.getElementById('t-pf').textContent=pf;
+  document.getElementById('t-tot').textContent=S.trades.length;
+  const pe=document.getElementById('t-pnl');pe.textContent=(tp>0?'+':'')+tp.toFixed(2);
+  pe.className='sv '+(tp>0?'bull':tp<0?'bear':'');
+}
+
+initCal();renderLog();
+const ld=document.getElementById('l-dt');if(ld)ld.value=new Date().toLocaleDateString('en-CA');
+</script>
+</body>
+</html>
