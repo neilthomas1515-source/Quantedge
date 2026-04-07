@@ -1052,14 +1052,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 <script>
 // ===================== CONFIG =====================
-const FLASHALPHA_API_KEY = 'cpnJIDWhnVQOKJBrHnmo0wMOmUAevA0x2zK6bxhY';
-const FA_BASE = 'https://lab.flashalpha.com';
-
-// Basic plan available endpoints (no Growth required):
-// /v1/exposure/levels/{symbol}  — gamma flip, call wall, put wall, 0dte magnet
-// /v1/exposure/gex/{symbol}     — per-strike GEX (to compute net GEX + regime)
-// /stockquote/{symbol}          — live price
-// Pass apiKey as query param to avoid CORS preflight issues with custom headers
+// Cloudflare Worker proxy handles CORS + API key
+const PROXY = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
 
 // ===================== STATE =====================
 const state = {
@@ -1115,14 +1109,10 @@ async function fetchTicker(symbol) {
   setDotStatus(sym, 'loading');
 
   try {
-    const key = FLASHALPHA_API_KEY;
-
-    // Basic plan: use apiKey query param to avoid CORS header issues
-    // 2 calls per ticker: levels + stockquote
-    const [levResp, quoteResp, gexResp] = await Promise.all([
-      fetch(`${FA_BASE}/v1/exposure/levels/${symbol}?apiKey=${key}`),
-      fetch(`${FA_BASE}/stockquote/${symbol}?apiKey=${key}`),
-      fetch(`${FA_BASE}/v1/exposure/gex/${symbol}?apiKey=${key}`)
+    // Route through Cloudflare Worker proxy which handles CORS + API key
+    const [levResp, gexResp] = await Promise.all([
+      fetch(`${PROXY}?symbol=${symbol}&endpoint=levels`),
+      fetch(`${PROXY}?symbol=${symbol}&endpoint=gex`)
     ]);
 
     if (!levResp.ok) {
@@ -1130,23 +1120,26 @@ async function fetchTicker(symbol) {
       throw new Error(`Levels HTTP ${levResp.status}: ${err.slice(0,120)}`);
     }
 
-    const levels = await levResp.json();
-    const quote  = quoteResp.ok ? await quoteResp.json() : null;
+    const levels  = await levResp.json();
     const gexData = gexResp.ok ? await gexResp.json() : null;
 
     // Compute net GEX and regime from per-strike data
     let netGex = 0, regime = 'undetermined';
-    if (gexData && gexData.strikes) {
-      netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || 0), 0);
-      regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
-    } else if (gexData && gexData.net_gex !== undefined) {
-      netGex = gexData.net_gex;
+    if (gexData) {
+      // Try different response shapes
+      if (Array.isArray(gexData.strikes)) {
+        netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
+      } else if (Array.isArray(gexData.data)) {
+        netGex = gexData.data.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
+      } else if (typeof gexData.net_gex === 'number') {
+        netGex = gexData.net_gex;
+      }
       regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
     }
 
-    const price = quote?.price || quote?.last || quote?.c || 0;
+    // Use underlying_price from levels if available
+    const price = levels.underlying_price || 0;
 
-    // Build a unified data object matching what populateTickerFields expects
     const summary = {
       underlying_price: price,
       gamma_flip: levels.levels?.gamma_flip,
