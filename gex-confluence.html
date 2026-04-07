@@ -1055,6 +1055,12 @@ input[type="range"]::-webkit-slider-thumb {
 const FLASHALPHA_API_KEY = 'cpnJIDWhnVQOKJBrHnmo0wMOmUAevA0x2zK6bxhY';
 const FA_BASE = 'https://lab.flashalpha.com';
 
+// Basic plan available endpoints (no Growth required):
+// /v1/exposure/levels/{symbol}  — gamma flip, call wall, put wall, 0dte magnet
+// /v1/exposure/gex/{symbol}     — per-strike GEX (to compute net GEX + regime)
+// /stockquote/{symbol}          — live price
+// Pass apiKey as query param to avoid CORS preflight issues with custom headers
+
 // ===================== STATE =====================
 const state = {
   snapshots: [],
@@ -1109,21 +1115,48 @@ async function fetchTicker(symbol) {
   setDotStatus(sym, 'loading');
 
   try {
-    const headers = { 'X-Api-Key': FLASHALPHA_API_KEY };
+    const key = FLASHALPHA_API_KEY;
 
-    // Fetch summary + levels in parallel (2 calls per ticker)
-    const [sumResp, levResp] = await Promise.all([
-      fetch(`${FA_BASE}/v1/exposure/summary/${symbol}`, { headers }),
-      fetch(`${FA_BASE}/v1/exposure/levels/${symbol}`, { headers })
+    // Basic plan: use apiKey query param to avoid CORS header issues
+    // 2 calls per ticker: levels + stockquote
+    const [levResp, quoteResp, gexResp] = await Promise.all([
+      fetch(`${FA_BASE}/v1/exposure/levels/${symbol}?apiKey=${key}`),
+      fetch(`${FA_BASE}/stockquote/${symbol}?apiKey=${key}`),
+      fetch(`${FA_BASE}/v1/exposure/gex/${symbol}?apiKey=${key}`)
     ]);
 
-    if (!sumResp.ok || !levResp.ok) {
-      const err = await sumResp.text();
-      throw new Error(`HTTP ${sumResp.status}: ${err.slice(0,100)}`);
+    if (!levResp.ok) {
+      const err = await levResp.text();
+      throw new Error(`Levels HTTP ${levResp.status}: ${err.slice(0,120)}`);
     }
 
-    const summary = await sumResp.json();
-    const levels  = await levResp.json();
+    const levels = await levResp.json();
+    const quote  = quoteResp.ok ? await quoteResp.json() : null;
+    const gexData = gexResp.ok ? await gexResp.json() : null;
+
+    // Compute net GEX and regime from per-strike data
+    let netGex = 0, regime = 'undetermined';
+    if (gexData && gexData.strikes) {
+      netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || 0), 0);
+      regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
+    } else if (gexData && gexData.net_gex !== undefined) {
+      netGex = gexData.net_gex;
+      regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
+    }
+
+    const price = quote?.price || quote?.last || quote?.c || 0;
+
+    // Build a unified data object matching what populateTickerFields expects
+    const summary = {
+      underlying_price: price,
+      gamma_flip: levels.levels?.gamma_flip,
+      regime,
+      exposures: { net_gex: netGex, net_dex: 0, net_vex: 0, net_chex: 0 },
+      interpretation: {},
+      hedging_estimate: {},
+      zero_dte: { pct_of_total_gex: 0 },
+      as_of: new Date().toISOString()
+    };
 
     state.liveData[sym] = { summary, levels, fetchedAt: new Date() };
     populateTickerFields(sym, summary, levels);
@@ -1132,8 +1165,8 @@ async function fetchTicker(symbol) {
   } catch(e) {
     console.error(`FlashAlpha error for ${symbol}:`, e);
     setDotStatus(sym, 'error');
-    document.getElementById(`status-${sym}`).textContent = 'ERR';
-    document.getElementById(`status-${sym}`).style.color = 'var(--red)';
+    const statusEl = document.getElementById(`status-${sym}`);
+    if (statusEl) { statusEl.textContent = 'ERR'; statusEl.style.color = 'var(--red)'; }
     return false;
   }
 }
