@@ -28,9 +28,7 @@
   --text2: #7a9ab0;
   --text3: #3a5a70;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   background: var(--bg);
   color: var(--text);
@@ -39,8 +37,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
-/* SCANLINE OVERLAY */
 body::before {
   content: '';
   position: fixed;
@@ -62,54 +58,76 @@ body::before {
   top: 0;
   z-index: 100;
 }
-
-.logo-block {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.logo-main {
-  font-family: 'Orbitron', monospace;
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--cyan);
-  letter-spacing: 2px;
-  text-shadow: 0 0 20px rgba(0,212,255,0.4);
-}
-
-.logo-sub {
-  font-family: 'Orbitron', monospace;
-  font-size: 10px;
-  color: var(--dim);
-  letter-spacing: 3px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-#clock {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 18px;
-  color: var(--cyan);
-  text-shadow: 0 0 10px rgba(0,212,255,0.3);
-}
-
-#session-badge {
-  font-family: 'Orbitron', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 3px;
-  letter-spacing: 2px;
-}
+.logo-block { display: flex; align-items: baseline; gap: 10px; }
+.logo-main { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; color: var(--cyan); letter-spacing: 2px; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
+.logo-sub { font-family: 'Orbitron', monospace; font-size: 10px; color: var(--dim); letter-spacing: 3px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+#clock { font-family: 'Share Tech Mono', monospace; font-size: 18px; color: var(--cyan); text-shadow: 0 0 10px rgba(0,212,255,0.3); }
+#session-badge { font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 2px; }
 .session-open { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid var(--green2); }
 .session-premarket { background: rgba(255,204,0,0.1); color: var(--yellow); border: 1px solid rgba(255,204,0,0.4); }
 .session-closed { background: rgba(74,106,128,0.2); color: var(--dim); border: 1px solid var(--border2); }
 .session-london { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid var(--cyan2); }
+
+/* LIVE DATA STATUS BAR */
+#data-status-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.data-status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-green 2s infinite; }
+.status-loading { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse-yellow 0.8s infinite; }
+.status-error { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.status-idle { background: var(--text3); }
+@keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
+@keyframes pulse-yellow { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.regime-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+.regime-neg { background: rgba(255,51,102,0.15); color: var(--red); border: 1px solid rgba(255,51,102,0.3); }
+.regime-pos { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+.regime-und { background: rgba(255,204,0,0.1); color: var(--yellow); border: 1px solid rgba(255,204,0,0.2); }
+
+#fetch-btn {
+  margin-left: auto;
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border: 1px solid var(--cyan2);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#fetch-btn:hover { background: rgba(0,212,255,0.1); }
+#fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+#last-fetch { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
 
 /* ALERTS BAR */
 #alerts-bar {
@@ -122,7 +140,6 @@ body::before {
   min-height: 32px;
   flex-wrap: wrap;
 }
-
 .alert-pill {
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
@@ -136,7 +153,6 @@ body::before {
 .alert-danger { background: rgba(255,51,102,0.15); color: var(--red); border: 1px solid rgba(255,51,102,0.3); animation: pulse-red 2s infinite; }
 .alert-info { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
 .alert-success { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
-
 @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
 /* TABS */
@@ -147,7 +163,6 @@ body::before {
   padding: 0 20px;
   gap: 2px;
 }
-
 .tab-btn {
   background: none;
   border: none;
@@ -177,13 +192,7 @@ body::before {
 .col-span-3 { grid-column: span 3; }
 
 /* PANELS */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 14px;
-}
-
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 14px; }
 .panel-title {
   font-family: 'Orbitron', monospace;
   font-size: 10px;
@@ -196,11 +205,24 @@ body::before {
   align-items: center;
   gap: 8px;
 }
-.panel-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* LIVE FIELD INDICATOR */
+.live-field { position: relative; }
+.live-field input[data-live="true"], .live-field select[data-live="true"] {
+  border-color: rgba(0,212,255,0.4);
+  background: rgba(0,212,255,0.03);
+}
+.live-badge {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--cyan2);
+  letter-spacing: 1px;
+  pointer-events: none;
 }
 
 /* FORM ELEMENTS */
@@ -211,14 +233,7 @@ body::before {
   gap: 8px;
   margin-bottom: 8px;
 }
-
-.field-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--text2);
-  text-align: right;
-}
-
+.field-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); text-align: right; }
 input[type="text"], input[type="number"], select, textarea {
   background: var(--bg3);
   border: 1px solid var(--border2);
@@ -234,7 +249,6 @@ input[type="text"], input[type="number"], select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--cyan2); }
 textarea { resize: vertical; min-height: 70px; }
 select option { background: var(--bg3); }
-
 input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
@@ -254,7 +268,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* TICKER TABS */
-.ticker-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.ticker-tabs { display: flex; gap: 4px; margin-bottom: 12px; align-items: center; }
 .ticker-tab {
   background: var(--bg3);
   border: 1px solid var(--border2);
@@ -267,12 +281,39 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 .ticker-tab:hover { border-color: var(--cyan2); color: var(--text); }
 .ticker-tab.active { background: rgba(0,212,255,0.1); border-color: var(--cyan); color: var(--cyan); }
-
+.ticker-live-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 5px var(--green);
+  display: none;
+}
+.ticker-live-dot.visible { display: block; }
 .ticker-panel { display: none; }
 .ticker-panel.active { display: block; }
+
+/* GEX LIVE DATA DISPLAY CARDS */
+.gex-live-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.gex-live-card { text-align: center; }
+.gex-live-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.gex-live-value { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; }
 
 /* BUTTONS */
 .btn {
@@ -305,76 +346,21 @@ input[type="range"]::-webkit-slider-thumb {
   border: 2px solid var(--border2);
   margin-bottom: 12px;
 }
-.bias-label {
-  font-family: 'Orbitron', monospace;
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 4px;
-  text-shadow: 0 0 20px currentColor;
-}
-.bias-score {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
-  color: var(--text2);
-  margin-top: 4px;
-}
+.bias-label { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 20px currentColor; }
+.bias-score { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text2); margin-top: 4px; }
 
 /* LEVEL DISPLAYS */
 .level-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.level-box {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 8px 10px;
-  text-align: center;
-}
-.level-name {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  color: var(--text3);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.level-value {
-  font-family: 'Orbitron', monospace;
-  font-size: 14px;
-  font-weight: 700;
-  margin-top: 2px;
-}
+.level-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px 10px; text-align: center; }
+.level-name { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.level-value { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; margin-top: 2px; }
 
 /* SCORE BARS */
-.score-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.score-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: var(--text2);
-  width: 120px;
-  flex-shrink: 0;
-}
-.score-bar-bg {
-  flex: 1;
-  height: 6px;
-  background: var(--bg3);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.score-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.4s;
-}
-.score-val {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--text);
-  width: 35px;
-  text-align: right;
-}
+.score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.score-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text2); width: 120px; flex-shrink: 0; }
+.score-bar-bg { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.score-val { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text); width: 35px; text-align: right; }
 
 /* AI OUTPUT */
 #ai-output {
@@ -406,126 +392,38 @@ input[type="range"]::-webkit-slider-thumb {
 .pattern-item:hover { border-color: var(--border2); }
 .pattern-item.bull-checked { border-color: var(--green2); background: rgba(0,255,136,0.05); }
 .pattern-item.bear-checked { border-color: var(--red2); background: rgba(255,51,102,0.05); }
-.pattern-check {
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  flex-shrink: 0;
-}
-.pattern-name {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 12px;
-  color: var(--text2);
-}
+.pattern-check { width: 14px; height: 14px; border: 1px solid var(--border2); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.pattern-name { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text2); }
 
 /* SESSION WINDOWS */
-.session-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border-radius: 3px;
-  margin-bottom: 6px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-}
-.session-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
+.session-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 3px; margin-bottom: 6px; background: var(--bg3); border: 1px solid var(--border); }
+.session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .session-active .session-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
 .session-inactive .session-dot { background: var(--text3); }
 .session-name { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); flex: 1; }
 .session-time { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
 
 /* TRADE LOG */
-#trade-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-#trade-table th {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  padding: 6px 10px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: var(--text2);
-  text-align: center;
-  letter-spacing: 1px;
-}
-#trade-table td {
-  border: 1px solid var(--border);
-  padding: 6px 10px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  text-align: center;
-}
+#trade-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#trade-table th { background: var(--bg3); border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text2); text-align: center; letter-spacing: 1px; }
+#trade-table td { border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; text-align: center; }
 #trade-table tr:hover td { background: var(--bg3); }
 .trade-win { color: var(--green); }
 .trade-loss { color: var(--red); }
 .trade-be { color: var(--yellow); }
 
 /* STATS ROW */
-.stat-box {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 10px 14px;
-  text-align: center;
-}
-.stat-num {
-  font-family: 'Orbitron', monospace;
-  font-size: 20px;
-  font-weight: 700;
-}
-.stat-name {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  color: var(--text2);
-  letter-spacing: 1px;
-  margin-top: 2px;
-}
+.stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; text-align: center; }
+.stat-num { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; }
+.stat-name { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 1px; margin-top: 2px; }
 
 /* WEIGHT SLIDERS */
-.weight-row {
-  display: grid;
-  grid-template-columns: 160px 1fr 50px;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.weight-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--text2);
-}
-.weight-val {
-  font-family: 'Orbitron', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--cyan);
-  text-align: right;
-}
+.weight-row { display: grid; grid-template-columns: 160px 1fr 50px; align-items: center; gap: 10px; margin-bottom: 10px; }
+.weight-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); }
+.weight-val { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; color: var(--cyan); text-align: right; }
 
 /* INTRADAY SNAPSHOT */
-.snapshot-item {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 8px 12px;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.snapshot-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
 .snapshot-time { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--dim); width: 55px; flex-shrink: 0; }
 .snapshot-bias { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; width: 80px; flex-shrink: 0; }
 .snapshot-text { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text2); flex: 1; }
@@ -545,29 +443,12 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* CONFIDENCE RING */
 .conf-ring-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.conf-ring {
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-  border: 3px solid var(--border);
-  position: relative;
-}
+.conf-ring { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; border: 3px solid var(--border); position: relative; }
 .conf-pct { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; }
 .conf-lbl { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); }
 
 /* SECTION HEADER */
-.section-header {
-  font-family: 'Orbitron', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text3);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  padding: 6px 0 4px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
+.section-header { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; padding: 6px 0 4px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
 
 .inline-flex { display: flex; gap: 8px; align-items: center; }
 .spacer { flex: 1; }
@@ -578,42 +459,32 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* PRESETS */
 .preset-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-.preset-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  padding: 4px 10px;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
+.preset-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
 .preset-btn:hover { border-color: var(--cyan2); color: var(--cyan); }
 
 /* NEWS FLAG */
-.news-day-banner {
-  background: rgba(255,136,0,0.1);
-  border: 1px solid rgba(255,136,0,0.3);
-  border-radius: 3px;
-  padding: 8px 12px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--orange);
-  display: none;
-}
+.news-day-banner { background: rgba(255,136,0,0.1); border: 1px solid rgba(255,136,0,0.3); border-radius: 3px; padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--orange); display: none; }
 .news-day-banner.active { display: block; }
+
+/* DEX VEX panel */
+.exposure-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.exp-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px; text-align: center; }
+.exp-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; }
+.exp-value { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; margin-top: 2px; }
+.exp-interp { font-family: 'Rajdhani', monospace; font-size: 10px; color: var(--text2); margin-top: 2px; line-height: 1.3; }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .grid-4 { grid-template-columns: 1fr 1fr; }
+  .gex-live-row { grid-template-columns: 1fr 1fr; }
   .col-span-2 { grid-column: span 1; }
   .col-span-3 { grid-column: span 2; }
 }
 @media (max-width: 600px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .col-span-2, .col-span-3 { grid-column: span 1; }
+  .gex-live-row { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -629,6 +500,36 @@ input[type="range"]::-webkit-slider-thumb {
     <span id="clock">--:--:-- EST</span>
     <span id="session-badge" class="session-closed">LOADING</span>
   </div>
+</div>
+
+<!-- LIVE DATA STATUS BAR -->
+<div id="data-status-bar">
+  <div class="data-status-item">
+    <div class="status-dot status-idle" id="dot-spy"></div>
+    <span style="color:var(--text2)">SPY</span>
+    <span id="status-spy" style="color:var(--text3)">—</span>
+    <span id="regime-spy"></span>
+  </div>
+  <div class="data-status-item">
+    <div class="status-dot status-idle" id="dot-spx"></div>
+    <span style="color:var(--text2)">SPX</span>
+    <span id="status-spx" style="color:var(--text3)">—</span>
+    <span id="regime-spx"></span>
+  </div>
+  <div class="data-status-item">
+    <div class="status-dot status-idle" id="dot-qqq"></div>
+    <span style="color:var(--text2)">QQQ</span>
+    <span id="status-qqq" style="color:var(--text3)">—</span>
+    <span id="regime-qqq"></span>
+  </div>
+  <div class="data-status-item">
+    <div class="status-dot status-idle" id="dot-vix"></div>
+    <span style="color:var(--text2)">VIX</span>
+    <span id="status-vix" style="color:var(--text3)">—</span>
+    <span id="regime-vix"></span>
+  </div>
+  <span id="last-fetch">Not fetched yet</span>
+  <button id="fetch-btn" onclick="fetchAllGEXData()">⚡ FETCH LIVE DATA</button>
 </div>
 
 <!-- ALERTS BAR -->
@@ -654,203 +555,77 @@ input[type="range"]::-webkit-slider-thumb {
     <!-- LEFT: INPUTS -->
     <div style="display:flex;flex-direction:column;gap:12px;">
 
-      <!-- OVERNIGHT CONTEXT -->
       <div class="panel">
         <div class="panel-title">Overnight Context</div>
-        <div class="field-row">
-          <div class="field-label">Globex High</div>
-          <input type="number" id="gp-globex-high" placeholder="5682.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Globex Low</div>
-          <input type="number" id="gp-globex-low" placeholder="5601.50" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Prev Close</div>
-          <input type="number" id="gp-prev-close" placeholder="5640.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Prev Day High</div>
-          <input type="number" id="gp-prev-high" placeholder="5695.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Prev Day Low</div>
-          <input type="number" id="gp-prev-low" placeholder="5589.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Prev Week High</div>
-          <input type="number" id="gp-prevwk-high" placeholder="5740.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Prev Week Low</div>
-          <input type="number" id="gp-prevwk-low" placeholder="5555.00" step="0.25">
-        </div>
+        <div class="field-row"><div class="field-label">Globex High</div><input type="number" id="gp-globex-high" placeholder="5682.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Globex Low</div><input type="number" id="gp-globex-low" placeholder="5601.50" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Prev Close</div><input type="number" id="gp-prev-close" placeholder="5640.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Prev Day High</div><input type="number" id="gp-prev-high" placeholder="5695.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Prev Day Low</div><input type="number" id="gp-prev-low" placeholder="5589.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Prev Week High</div><input type="number" id="gp-prevwk-high" placeholder="5740.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Prev Week Low</div><input type="number" id="gp-prevwk-low" placeholder="5555.00" step="0.25"></div>
       </div>
 
-      <!-- MARKET INTERNALS -->
       <div class="panel">
         <div class="panel-title">Market Internals</div>
-        <div class="field-row">
-          <div class="field-label">TICK Bias</div>
-          <select id="gp-tick">
-            <option value="">-- select --</option>
-            <option value="strong-bull">Strong Bull (+800)</option>
-            <option value="bull">Bullish (+200 to +800)</option>
-            <option value="neutral">Neutral (-200 to +200)</option>
-            <option value="bear">Bearish (-200 to -800)</option>
-            <option value="strong-bear">Strong Bear (-800)</option>
-          </select>
+        <div class="field-row"><div class="field-label">TICK Bias</div>
+          <select id="gp-tick"><option value="">-- select --</option><option value="strong-bull">Strong Bull (+800)</option><option value="bull">Bullish (+200 to +800)</option><option value="neutral">Neutral (-200 to +200)</option><option value="bear">Bearish (-200 to -800)</option><option value="strong-bear">Strong Bear (-800)</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">ADD</div>
-          <select id="gp-add">
-            <option value="">-- select --</option>
-            <option value="strong-bull">+1000 and above</option>
-            <option value="bull">+300 to +1000</option>
-            <option value="neutral">-300 to +300</option>
-            <option value="bear">-300 to -1000</option>
-            <option value="strong-bear">-1000 and below</option>
-          </select>
+        <div class="field-row"><div class="field-label">ADD</div>
+          <select id="gp-add"><option value="">-- select --</option><option value="strong-bull">+1000 and above</option><option value="bull">+300 to +1000</option><option value="neutral">-300 to +300</option><option value="bear">-300 to -1000</option><option value="strong-bear">-1000 and below</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">VOLD</div>
-          <select id="gp-vold">
-            <option value="">-- select --</option>
-            <option value="strong-bull">Strongly Positive</option>
-            <option value="bull">Positive</option>
-            <option value="neutral">Neutral</option>
-            <option value="bear">Negative</option>
-            <option value="strong-bear">Strongly Negative</option>
-          </select>
+        <div class="field-row"><div class="field-label">VOLD</div>
+          <select id="gp-vold"><option value="">-- select --</option><option value="strong-bull">Strongly Positive</option><option value="bull">Positive</option><option value="neutral">Neutral</option><option value="bear">Negative</option><option value="strong-bear">Strongly Negative</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">Put/Call Ratio</div>
-          <input type="number" id="gp-pcr" placeholder="0.85" step="0.01">
+        <div class="field-row"><div class="field-label">Put/Call Ratio</div><input type="number" id="gp-pcr" placeholder="0.85" step="0.01"></div>
+        <div class="field-row"><div class="field-label">VIX9D vs VIX</div>
+          <select id="gp-vix9d"><option value="">-- select --</option><option value="contango">VIX9D &lt; VIX (Normal/Calm)</option><option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option><option value="flat">VIX9D ≈ VIX (Flat)</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">VIX9D vs VIX</div>
-          <select id="gp-vix9d">
-            <option value="">-- select --</option>
-            <option value="contango">VIX9D &lt; VIX (Normal/Calm)</option>
-            <option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option>
-            <option value="flat">VIX9D ≈ VIX (Flat)</option>
-          </select>
-        </div>
-        <div class="field-row">
-          <div class="field-label">VVIX</div>
-          <input type="number" id="gp-vvix" placeholder="95" step="0.1">
-        </div>
+        <div class="field-row"><div class="field-label">VVIX</div><input type="number" id="gp-vvix" placeholder="95" step="0.1"></div>
       </div>
 
-      <!-- VOLUME PROFILE -->
       <div class="panel">
         <div class="panel-title">Volume Profile</div>
-        <div class="field-row">
-          <div class="field-label">POC</div>
-          <input type="number" id="gp-poc" placeholder="5645.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">VAH</div>
-          <input type="number" id="gp-vah" placeholder="5680.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">VAL</div>
-          <input type="number" id="gp-val" placeholder="5610.00" step="0.25">
-        </div>
-        <div class="field-row">
-          <div class="field-label">Price vs VA</div>
-          <select id="gp-price-va">
-            <option value="">-- select --</option>
-            <option value="above-vah">Above VAH (Premium)</option>
-            <option value="inside">Inside Value Area</option>
-            <option value="below-val">Below VAL (Discount)</option>
-            <option value="at-poc">At / Near POC</option>
-          </select>
+        <div class="field-row"><div class="field-label">POC</div><input type="number" id="gp-poc" placeholder="5645.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">VAH</div><input type="number" id="gp-vah" placeholder="5680.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">VAL</div><input type="number" id="gp-val" placeholder="5610.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Price vs VA</div>
+          <select id="gp-price-va"><option value="">-- select --</option><option value="above-vah">Above VAH (Premium)</option><option value="inside">Inside Value Area</option><option value="below-val">Below VAL (Discount)</option><option value="at-poc">At / Near POC</option></select>
         </div>
       </div>
 
-      <!-- ECONOMIC CALENDAR -->
       <div class="panel">
         <div class="panel-title">Economic Calendar</div>
-        <div class="field-row">
-          <div class="field-label">News Impact</div>
-          <select id="gp-news-impact" onchange="updateNewsBanner()">
-            <option value="none">No major events</option>
-            <option value="low">Low impact</option>
-            <option value="medium">Medium impact</option>
-            <option value="high">HIGH IMPACT</option>
-            <option value="fomc">FOMC / Fed</option>
-          </select>
+        <div class="field-row"><div class="field-label">News Impact</div>
+          <select id="gp-news-impact" onchange="updateNewsBanner()"><option value="none">No major events</option><option value="low">Low impact</option><option value="medium">Medium impact</option><option value="high">HIGH IMPACT</option><option value="fomc">FOMC / Fed</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">Event / Time</div>
-          <input type="text" id="gp-news-event" placeholder="CPI @ 8:30am EST">
-        </div>
-        <div id="news-day-banner" class="news-day-banner mt-8">
-          ⚠ HIGH IMPACT NEWS DAY — Confidence score will be reduced. Wait for post-news structure.
-        </div>
+        <div class="field-row"><div class="field-label">Event / Time</div><input type="text" id="gp-news-event" placeholder="CPI @ 8:30am EST"></div>
+        <div id="news-day-banner" class="news-day-banner mt-8">⚠ HIGH IMPACT NEWS DAY — Confidence score will be reduced.</div>
       </div>
-
     </div><!-- /LEFT -->
 
-    <!-- CENTER: GEX QUICK VIEW + SCORING -->
+    <!-- CENTER -->
     <div style="display:flex;flex-direction:column;gap:12px;">
 
-      <!-- BIAS OUTPUT -->
       <div class="panel">
         <div class="panel-title">Market Bias</div>
         <div id="bias-display" style="border-color:var(--border2)">
           <div class="bias-label" id="bias-label" style="color:var(--text3)">NEUTRAL</div>
           <div class="bias-score" id="bias-score">Run scoring engine to generate bias</div>
         </div>
-
         <div class="grid-4">
-          <div class="stat-box">
-            <div class="stat-num" id="stat-gex-score" style="color:var(--cyan)">--</div>
-            <div class="stat-name">GEX SCORE</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-num" id="stat-range-score" style="color:var(--green)">--</div>
-            <div class="stat-name">RANGE SCORE</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-num" id="stat-int-score" style="color:var(--yellow)">--</div>
-            <div class="stat-name">INTERNALS</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-num" id="stat-pat-score" style="color:var(--orange)">--</div>
-            <div class="stat-name">PATTERNS</div>
-          </div>
+          <div class="stat-box"><div class="stat-num" id="stat-gex-score" style="color:var(--cyan)">--</div><div class="stat-name">GEX SCORE</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-range-score" style="color:var(--green)">--</div><div class="stat-name">RANGE SCORE</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-int-score" style="color:var(--yellow)">--</div><div class="stat-name">INTERNALS</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-pat-score" style="color:var(--orange)">--</div><div class="stat-name">PATTERNS</div></div>
         </div>
-
         <div class="mt-12" id="score-bars">
-          <div class="score-row">
-            <div class="score-label">Dealer Positioning</div>
-            <div class="score-bar-bg"><div class="score-bar-fill" id="bar-gex" style="width:0%;background:var(--cyan)"></div></div>
-            <div class="score-val" id="barval-gex">--</div>
-          </div>
-          <div class="score-row">
-            <div class="score-label">Range Intelligence</div>
-            <div class="score-bar-bg"><div class="score-bar-fill" id="bar-range" style="width:0%;background:var(--green)"></div></div>
-            <div class="score-val" id="barval-range">--</div>
-          </div>
-          <div class="score-row">
-            <div class="score-label">Market Internals</div>
-            <div class="score-bar-bg"><div class="score-bar-fill" id="bar-int" style="width:0%;background:var(--yellow)"></div></div>
-            <div class="score-val" id="barval-int">--</div>
-          </div>
-          <div class="score-row">
-            <div class="score-label">Pattern Confluence</div>
-            <div class="score-bar-bg"><div class="score-bar-fill" id="bar-pat" style="width:0%;background:var(--orange)"></div></div>
-            <div class="score-val" id="barval-pat">--</div>
-          </div>
-          <div class="score-row">
-            <div class="score-label">Macro Context</div>
-            <div class="score-bar-bg"><div class="score-bar-fill" id="bar-macro" style="width:0%;background:var(--cyan2)"></div></div>
-            <div class="score-val" id="barval-macro">--</div>
-          </div>
+          <div class="score-row"><div class="score-label">Dealer Positioning</div><div class="score-bar-bg"><div class="score-bar-fill" id="bar-gex" style="width:0%;background:var(--cyan)"></div></div><div class="score-val" id="barval-gex">--</div></div>
+          <div class="score-row"><div class="score-label">Range Intelligence</div><div class="score-bar-bg"><div class="score-bar-fill" id="bar-range" style="width:0%;background:var(--green)"></div></div><div class="score-val" id="barval-range">--</div></div>
+          <div class="score-row"><div class="score-label">Market Internals</div><div class="score-bar-bg"><div class="score-bar-fill" id="bar-int" style="width:0%;background:var(--yellow)"></div></div><div class="score-val" id="barval-int">--</div></div>
+          <div class="score-row"><div class="score-label">Pattern Confluence</div><div class="score-bar-bg"><div class="score-bar-fill" id="bar-pat" style="width:0%;background:var(--orange)"></div></div><div class="score-val" id="barval-pat">--</div></div>
+          <div class="score-row"><div class="score-label">Macro Context</div><div class="score-bar-bg"><div class="score-bar-fill" id="bar-macro" style="width:0%;background:var(--cyan2)"></div></div><div class="score-val" id="barval-macro">--</div></div>
         </div>
-
         <div class="mt-12">
           <div style="display:flex;gap:10px;align-items:center;justify-content:center">
             <div class="conf-ring-container">
@@ -861,86 +636,43 @@ input[type="range"]::-webkit-slider-thumb {
             </div>
             <div style="flex:1">
               <div class="level-grid">
-                <div class="level-box">
-                  <div class="level-name">GEX FLIP</div>
-                  <div class="level-value" id="out-flip" style="color:var(--yellow)">---</div>
-                </div>
-                <div class="level-box">
-                  <div class="level-name">TARGET</div>
-                  <div class="level-value" id="out-target" style="color:var(--green)">---</div>
-                </div>
-                <div class="level-box">
-                  <div class="level-name">VR TOP</div>
-                  <div class="level-value" id="out-vr-top" style="color:var(--red)">---</div>
-                </div>
-                <div class="level-box">
-                  <div class="level-name">VR BOTTOM</div>
-                  <div class="level-value" id="out-vr-bot" style="color:var(--green)">---</div>
-                </div>
+                <div class="level-box"><div class="level-name">GEX FLIP</div><div class="level-value" id="out-flip" style="color:var(--yellow)">---</div></div>
+                <div class="level-box"><div class="level-name">TARGET</div><div class="level-value" id="out-target" style="color:var(--green)">---</div></div>
+                <div class="level-box"><div class="level-name">VR TOP</div><div class="level-value" id="out-vr-top" style="color:var(--red)">---</div></div>
+                <div class="level-box"><div class="level-name">VR BOTTOM</div><div class="level-value" id="out-vr-bot" style="color:var(--green)">---</div></div>
               </div>
             </div>
           </div>
         </div>
-
         <div class="mt-12 inline-flex" style="justify-content:center;gap:10px">
           <button class="btn btn-primary" onclick="runScoring()">⚡ RUN SCORING ENGINE</button>
           <button class="btn btn-ghost btn-sm" onclick="resetScoring()">RESET</button>
         </div>
       </div>
 
-      <!-- SESSION WINDOWS -->
       <div class="panel">
         <div class="panel-title">Session Windows</div>
         <div id="session-windows"></div>
       </div>
 
-      <!-- ES/NQ RELATIVE STRENGTH -->
       <div class="panel">
         <div class="panel-title">Cross-Asset Context</div>
-        <div class="field-row">
-          <div class="field-label">ES vs NQ</div>
-          <select id="gp-es-nq">
-            <option value="">-- select --</option>
-            <option value="es-lead">ES Leading (broad strength)</option>
-            <option value="nq-lead">NQ Leading (tech driven)</option>
-            <option value="diverge-bull">NQ strong, ES weak (narrowing)</option>
-            <option value="diverge-bear">ES weak, NQ weak (broad selling)</option>
-            <option value="aligned">Both aligned same direction</option>
-          </select>
+        <div class="field-row"><div class="field-label">ES vs NQ</div>
+          <select id="gp-es-nq"><option value="">-- select --</option><option value="es-lead">ES Leading</option><option value="nq-lead">NQ Leading</option><option value="diverge-bull">NQ strong, ES weak</option><option value="diverge-bear">Both weak</option><option value="aligned">Both aligned</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">DXY Bias</div>
-          <select id="gp-dxy">
-            <option value="">-- select --</option>
-            <option value="strong-up">Strongly Rising (bearish SPX)</option>
-            <option value="up">Rising</option>
-            <option value="flat">Flat</option>
-            <option value="down">Falling</option>
-            <option value="strong-down">Strongly Falling (bullish SPX)</option>
-          </select>
+        <div class="field-row"><div class="field-label">DXY Bias</div>
+          <select id="gp-dxy"><option value="">-- select --</option><option value="strong-up">Strongly Rising</option><option value="up">Rising</option><option value="flat">Flat</option><option value="down">Falling</option><option value="strong-down">Strongly Falling</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">10Y Yield</div>
-          <select id="gp-yield">
-            <option value="">-- select --</option>
-            <option value="spike">Spiking (bearish equities)</option>
-            <option value="rising">Rising</option>
-            <option value="flat">Flat</option>
-            <option value="falling">Falling</option>
-            <option value="drop">Dropping (bullish equities)</option>
-          </select>
+        <div class="field-row"><div class="field-label">10Y Yield</div>
+          <select id="gp-yield"><option value="">-- select --</option><option value="spike">Spiking</option><option value="rising">Rising</option><option value="flat">Flat</option><option value="falling">Falling</option><option value="drop">Dropping</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">VIX Level</div>
-          <input type="number" id="gp-vix" placeholder="18.5" step="0.1">
-        </div>
+        <div class="field-row"><div class="field-label">VIX Level</div><input type="number" id="gp-vix" placeholder="18.5" step="0.1"></div>
       </div>
 
     </div><!-- /CENTER -->
 
     <!-- RIGHT: AI OUTPUT -->
     <div style="display:flex;flex-direction:column;gap:12px;">
-
       <div class="panel" style="flex:1">
         <div class="panel-title inline-flex">
           <span>AI Game Plan Analysis</span>
@@ -949,17 +681,10 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <div id="ai-output" style="min-height:300px">Enter your data in the left panels, run the scoring engine, then hit GENERATE to produce your daily game plan.</div>
       </div>
-
-      <!-- QUICK LEVELS SUMMARY -->
       <div class="panel">
         <div class="panel-title">Key Levels Summary</div>
-        <div id="levels-summary">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">
-            — levels will populate after scoring —
-          </div>
-        </div>
+        <div id="levels-summary"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— levels will populate after scoring —</div></div>
       </div>
-
     </div><!-- /RIGHT -->
 
   </div>
@@ -968,106 +693,48 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ======================== INTRADAY TAB ======================== -->
 <div id="tab-intraday" class="tab-panel">
   <div class="grid-2">
-
     <div style="display:flex;flex-direction:column;gap:12px;">
-
-      <!-- QUICK UPDATE -->
       <div class="panel">
         <div class="panel-title">Intraday GEX Update</div>
-        <div class="field-row">
-          <div class="field-label">Current Price</div>
-          <input type="number" id="id-price" placeholder="5641.25" step="0.25">
+        <div class="field-row"><div class="field-label">Current Price</div><input type="number" id="id-price" placeholder="5641.25" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Net GEX Change</div>
+          <select id="id-gex-change"><option value="">-- select --</option><option value="more-neg">More Negative (amplifying)</option><option value="less-neg">Less Negative (absorbing)</option><option value="flipped-neg">Flipped Negative</option><option value="flipped-pos">Flipped Positive</option><option value="more-pos">More Positive (dampening)</option><option value="no-change">No significant change</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">Net GEX Change</div>
-          <select id="id-gex-change">
-            <option value="">-- select --</option>
-            <option value="more-neg">More Negative (amplifying)</option>
-            <option value="less-neg">Less Negative (absorbing)</option>
-            <option value="flipped-neg">Flipped Negative</option>
-            <option value="flipped-pos">Flipped Positive</option>
-            <option value="more-pos">More Positive (dampening)</option>
-            <option value="no-change">No significant change</option>
-          </select>
+        <div class="field-row"><div class="field-label">Price vs Flip</div>
+          <select id="id-price-flip"><option value="">-- select --</option><option value="above">Above GEX Flip</option><option value="below">Below GEX Flip</option><option value="at">Testing GEX Flip</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">Price vs Flip</div>
-          <select id="id-price-flip">
-            <option value="">-- select --</option>
-            <option value="above">Above GEX Flip (bullish side)</option>
-            <option value="below">Below GEX Flip (bearish side)</option>
-            <option value="at">Testing GEX Flip level</option>
-          </select>
+        <div class="field-row"><div class="field-label">Price vs VR</div>
+          <select id="id-price-vr"><option value="">-- select --</option><option value="inside">Inside VR</option><option value="above-top">Above VR Top</option><option value="below-bot">Below VR Bottom</option><option value="at-top">Testing VR Top</option><option value="at-bot">Testing VR Bottom</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">Price vs VR</div>
-          <select id="id-price-vr">
-            <option value="">-- select --</option>
-            <option value="inside">Inside VR (range bound)</option>
-            <option value="above-top">Above VR Top (extended)</option>
-            <option value="below-bot">Below VR Bottom (extended)</option>
-            <option value="at-top">Testing VR Top</option>
-            <option value="at-bot">Testing VR Bottom</option>
-          </select>
+        <div class="field-row"><div class="field-label">TICK Current</div>
+          <select id="id-tick"><option value="">-- select --</option><option value="strong-bull">Strong Bull</option><option value="bull">Bullish</option><option value="neutral">Neutral</option><option value="bear">Bearish</option><option value="strong-bear">Strong Bear</option></select>
         </div>
-        <div class="field-row">
-          <div class="field-label">TICK Current</div>
-          <select id="id-tick">
-            <option value="">-- select --</option>
-            <option value="strong-bull">Strong Bull</option>
-            <option value="bull">Bullish</option>
-            <option value="neutral">Neutral</option>
-            <option value="bear">Bearish</option>
-            <option value="strong-bear">Strong Bear</option>
-          </select>
-        </div>
-        <div class="field-row">
-          <div class="field-label">Notes</div>
-          <textarea id="id-notes" placeholder="What's happening right now..."></textarea>
-        </div>
+        <div class="field-row"><div class="field-label">Notes</div><textarea id="id-notes" placeholder="What's happening right now..."></textarea></div>
         <div class="mt-8 inline-flex">
           <button class="btn btn-primary" onclick="logSnapshot()">📸 LOG SNAPSHOT</button>
           <button class="btn btn-ghost btn-sm" onclick="generateIntradayUpdate()">AI UPDATE ▶</button>
         </div>
       </div>
-
-      <!-- SESSION TRACKER -->
       <div class="panel">
         <div class="panel-title">Session Windows — Live</div>
         <div id="session-windows-intraday"></div>
-        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">
-          Next key window: <span id="next-window" style="color:var(--cyan)">--</span>
-        </div>
+        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">Next key window: <span id="next-window" style="color:var(--cyan)">--</span></div>
       </div>
-
     </div>
-
     <div style="display:flex;flex-direction:column;gap:12px;">
-
-      <!-- AI INTRADAY UPDATE -->
       <div class="panel">
         <div class="panel-title">AI Intraday Analysis</div>
-        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;min-height:150px;color:var(--text)">
-          Log a snapshot and hit AI UPDATE to get current analysis.
-        </div>
+        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;min-height:150px;color:var(--text)">Log a snapshot and hit AI UPDATE to get current analysis.</div>
       </div>
-
-      <!-- SNAPSHOT TIMELINE -->
       <div class="panel">
         <div class="panel-title inline-flex">
           <span>Snapshot Timeline</span>
           <div class="spacer"></div>
           <button class="btn btn-ghost btn-sm" onclick="clearSnapshots()">CLEAR</button>
         </div>
-        <div id="snapshot-timeline">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">
-            — no snapshots logged today —
-          </div>
-        </div>
+        <div id="snapshot-timeline"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— no snapshots logged today —</div></div>
       </div>
-
     </div>
-
   </div>
 </div>
 
@@ -1075,17 +742,33 @@ input[type="range"]::-webkit-slider-thumb {
 <div id="tab-gex" class="tab-panel">
 
   <div class="ticker-tabs">
-    <div class="ticker-tab active" onclick="switchTicker(this, 'spy')">SPY</div>
-    <div class="ticker-tab" onclick="switchTicker(this, 'spx')">SPX</div>
-    <div class="ticker-tab" onclick="switchTicker(this, 'qqq')">QQQ</div>
-    <div class="ticker-tab" onclick="switchTicker(this, 'vix')">VIX</div>
+    <div class="ticker-tab active" onclick="switchTicker(this, 'spy')">SPY<div class="ticker-live-dot" id="live-dot-spy"></div></div>
+    <div class="ticker-tab" onclick="switchTicker(this, 'spx')">SPX<div class="ticker-live-dot" id="live-dot-spx"></div></div>
+    <div class="ticker-tab" onclick="switchTicker(this, 'qqq')">QQQ<div class="ticker-live-dot" id="live-dot-qqq"></div></div>
+    <div class="ticker-tab" onclick="switchTicker(this, 'vix')">VIX<div class="ticker-live-dot" id="live-dot-vix"></div></div>
+    <div style="flex:1"></div>
+    <button class="btn btn-ghost btn-sm" onclick="fetchAllGEXData()" style="font-size:9px">⚡ REFRESH ALL</button>
   </div>
 
   <!-- SPY -->
   <div id="gex-spy" class="ticker-panel active">
+    <!-- LIVE SUMMARY ROW -->
+    <div class="gex-live-row" id="spy-live-row" style="display:none">
+      <div class="gex-live-card"><div class="gex-live-label">PRICE</div><div class="gex-live-value" id="spy-live-price" style="color:var(--text)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">NET GEX</div><div class="gex-live-value" id="spy-live-gex" style="color:var(--cyan)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">REGIME</div><div class="gex-live-value" id="spy-live-regime" style="color:var(--text2)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spy-live-0dte" style="color:var(--orange)">--</div></div>
+    </div>
+    <!-- DEX / VEX / CHEX exposure mini -->
+    <div class="exposure-mini-grid" id="spy-exp-mini" style="display:none;margin-bottom:12px">
+      <div class="exp-box"><div class="exp-label">DEX (Delta Exposure)</div><div class="exp-value" id="spy-dex-val">--</div><div class="exp-interp" id="spy-dex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">VEX (Vanna Exposure)</div><div class="exp-value" id="spy-vex-val">--</div><div class="exp-interp" id="spy-vex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX (Charm Exposure)</div><div class="exp-value" id="spy-chex-val">--</div><div class="exp-interp" id="spy-chex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="spy-hedge-val">--</div><div class="exp-interp" id="spy-hedge-dir">—</div></div>
+    </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPY — GEX Data</div>
+        <div class="panel-title">SPY — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spy-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spy-net-gex" placeholder="-230.9"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spy-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -1094,6 +777,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Notional Delta ($B)</div><input type="number" id="spy-notional" placeholder="21.8" step="0.1"></div>
         <div class="field-row"><div class="field-label">Call Wall</div><input type="number" id="spy-call-wall" placeholder="660" step="0.5"></div>
         <div class="field-row"><div class="field-label">Put Wall</div><input type="number" id="spy-put-wall" placeholder="640" step="0.5"></div>
+        <div class="field-row"><div class="field-label">0DTE Magnet</div><input type="number" id="spy-0dte-magnet" placeholder="650" step="0.5"></div>
         <div class="field-row"><div class="field-label">Total Call OI (K)</div><input type="number" id="spy-call-oi" placeholder="628.7" step="0.1"></div>
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spy-put-oi" placeholder="1200" step="0.1"></div>
       </div>
@@ -1118,9 +802,21 @@ input[type="range"]::-webkit-slider-thumb {
 
   <!-- SPX -->
   <div id="gex-spx" class="ticker-panel">
+    <div class="gex-live-row" id="spx-live-row" style="display:none">
+      <div class="gex-live-card"><div class="gex-live-label">PRICE</div><div class="gex-live-value" id="spx-live-price" style="color:var(--text)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">NET GEX</div><div class="gex-live-value" id="spx-live-gex" style="color:var(--cyan)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">REGIME</div><div class="gex-live-value" id="spx-live-regime" style="color:var(--text2)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spx-live-0dte" style="color:var(--orange)">--</div></div>
+    </div>
+    <div class="exposure-mini-grid" id="spx-exp-mini" style="display:none;margin-bottom:12px">
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="spx-dex-val">--</div><div class="exp-interp" id="spx-dex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="spx-vex-val">--</div><div class="exp-interp" id="spx-vex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="spx-chex-val">--</div><div class="exp-interp" id="spx-chex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="spx-hedge-val">--</div><div class="exp-interp" id="spx-hedge-dir">—</div></div>
+    </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPX — GEX Data</div>
+        <div class="panel-title">SPX — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spx-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spx-net-gex" placeholder="-850.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spx-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -1129,6 +825,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Notional Delta ($B)</div><input type="number" id="spx-notional" placeholder="45.2" step="0.1"></div>
         <div class="field-row"><div class="field-label">Call Wall</div><input type="number" id="spx-call-wall" placeholder="5700" step="5"></div>
         <div class="field-row"><div class="field-label">Put Wall</div><input type="number" id="spx-put-wall" placeholder="5400" step="5"></div>
+        <div class="field-row"><div class="field-label">0DTE Magnet</div><input type="number" id="spx-0dte-magnet" placeholder="5600" step="5"></div>
         <div class="field-row"><div class="field-label">Total Call OI (K)</div><input type="number" id="spx-call-oi" placeholder="280" step="0.1"></div>
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spx-put-oi" placeholder="420" step="0.1"></div>
       </div>
@@ -1153,9 +850,21 @@ input[type="range"]::-webkit-slider-thumb {
 
   <!-- QQQ -->
   <div id="gex-qqq" class="ticker-panel">
+    <div class="gex-live-row" id="qqq-live-row" style="display:none">
+      <div class="gex-live-card"><div class="gex-live-label">PRICE</div><div class="gex-live-value" id="qqq-live-price" style="color:var(--text)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">NET GEX</div><div class="gex-live-value" id="qqq-live-gex" style="color:var(--cyan)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">REGIME</div><div class="gex-live-value" id="qqq-live-regime" style="color:var(--text2)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="qqq-live-0dte" style="color:var(--orange)">--</div></div>
+    </div>
+    <div class="exposure-mini-grid" id="qqq-exp-mini" style="display:none;margin-bottom:12px">
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="qqq-dex-val">--</div><div class="exp-interp" id="qqq-dex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="qqq-vex-val">--</div><div class="exp-interp" id="qqq-vex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="qqq-chex-val">--</div><div class="exp-interp" id="qqq-chex-interp">—</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="qqq-hedge-val">--</div><div class="exp-interp" id="qqq-hedge-dir">—</div></div>
+    </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">QQQ — GEX Data</div>
+        <div class="panel-title">QQQ — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="qqq-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="qqq-net-gex" placeholder="-95.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="qqq-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -1164,16 +873,18 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Put Wall</div><input type="number" id="qqq-put-wall" placeholder="435" step="0.5"></div>
         <div class="field-row"><div class="field-label">VR Top</div><input type="number" id="qqq-vr-top" placeholder="460" step="0.5"></div>
         <div class="field-row"><div class="field-label">VR Bottom</div><input type="number" id="qqq-vr-bot" placeholder="432" step="0.5"></div>
-        <div class="field-row"><div class="field-label">SPY/QQQ Alignment</div><select id="qqq-align"><option value="">--</option><option value="aligned">Both Negative (confirming)</option><option value="qqq-worse">QQQ more negative (tech leading)</option><option value="spy-worse">SPY more negative (broad)</option><option value="diverge">Diverging (conflicting)</option></select></div>
+        <div class="field-row"><div class="field-label">SPY/QQQ Alignment</div>
+          <select id="qqq-align"><option value="">--</option><option value="aligned">Both Negative</option><option value="qqq-worse">QQQ more negative</option><option value="spy-worse">SPY more negative</option><option value="diverge">Diverging</option></select>
+        </div>
       </div>
       <div class="panel">
         <div class="panel-title">QQQ — Context Notes</div>
         <div class="section-header">NQ Confluence</div>
-        <div style="margin-bottom:10px">
-          <textarea id="qqq-notes" placeholder="QQQ-specific observations, NQ correlation, tech sector leadership notes..." style="min-height:120px;width:100%"></textarea>
+        <textarea id="qqq-notes" placeholder="QQQ-specific observations, NQ correlation..." style="min-height:120px;width:100%"></textarea>
+        <div class="section-header mt-12">SPY vs SPX Alignment</div>
+        <div class="field-row"><div class="field-label">Both Negative?</div>
+          <select id="spy-spx-align"><option value="">--</option><option value="both-neg">Both Negative (high conviction)</option><option value="both-pos">Both Positive (high conviction)</option><option value="diverge">Diverging (reduce confidence)</option><option value="mixed">Mixed signals</option></select>
         </div>
-        <div class="section-header">SPY vs SPX Alignment</div>
-        <div class="field-row"><div class="field-label">Both Negative?</div><select id="spy-spx-align"><option value="">--</option><option value="both-neg">Both Negative (high conviction)</option><option value="both-pos">Both Positive (high conviction)</option><option value="diverge">Diverging (reduce confidence)</option><option value="mixed">Mixed signals</option></select></div>
         <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
           When SPY + SPX GEX agree → HIGH CONVICTION<br>When they diverge → REDUCE SIZE / STAY OUT
         </div>
@@ -1183,24 +894,36 @@ input[type="range"]::-webkit-slider-thumb {
 
   <!-- VIX -->
   <div id="gex-vix" class="ticker-panel">
+    <div class="gex-live-row" id="vix-live-row" style="display:none">
+      <div class="gex-live-card"><div class="gex-live-label">VIX LEVEL</div><div class="gex-live-value" id="vix-live-price" style="color:var(--red)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">NET GEX</div><div class="gex-live-value" id="vix-live-gex" style="color:var(--cyan)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">REGIME</div><div class="gex-live-value" id="vix-live-regime" style="color:var(--text2)">--</div></div>
+      <div class="gex-live-card"><div class="gex-live-label">GAMMA FLIP</div><div class="gex-live-value" id="vix-live-flip" style="color:var(--yellow)">--</div></div>
+    </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">VIX — Options Data</div>
+        <div class="panel-title">VIX — Options Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="vix-data-age"></span></div>
         <div class="section-header">Vol Options Positioning</div>
-        <div class="field-row"><div class="field-label">VIX Net GEX Dir</div><select id="vix-gex-dir"><option value="">--</option><option value="call-heavy">Call Heavy (vol expected higher)</option><option value="put-heavy">Put Heavy (vol expected lower)</option><option value="neutral">Neutral</option></select></div>
+        <div class="field-row"><div class="field-label">VIX Net GEX Dir</div>
+          <select id="vix-gex-dir"><option value="">--</option><option value="call-heavy">Call Heavy (vol higher)</option><option value="put-heavy">Put Heavy (vol lower)</option><option value="neutral">Neutral</option></select>
+        </div>
         <div class="field-row"><div class="field-label">VIX Current</div><input type="number" id="vix-current" placeholder="18.5" step="0.1"></div>
         <div class="field-row"><div class="field-label">VIX9D</div><input type="number" id="vix-9d" placeholder="16.2" step="0.1"></div>
         <div class="field-row"><div class="field-label">VIX Call Wall</div><input type="number" id="vix-call-wall" placeholder="25" step="0.5"></div>
         <div class="field-row"><div class="field-label">VIX Put Wall</div><input type="number" id="vix-put-wall" placeholder="15" step="0.5"></div>
-        <div class="field-row"><div class="field-label">Vol Regime</div><select id="vix-regime"><option value="">--</option><option value="low">Low Vol (&lt;15) — trending/dampened</option><option value="normal">Normal (15-25) — balanced</option><option value="elevated">Elevated (25-35) — amplified moves</option><option value="high">High Vol (&gt;35) — extreme amplification</option></select></div>
+        <div class="field-row"><div class="field-label">Vol Regime</div>
+          <select id="vix-regime"><option value="">--</option><option value="low">Low Vol (&lt;15)</option><option value="normal">Normal (15-25)</option><option value="elevated">Elevated (25-35)</option><option value="high">High Vol (&gt;35)</option></select>
+        </div>
       </div>
       <div class="panel">
         <div class="panel-title">VIX — Context</div>
         <div class="section-header">Term Structure</div>
-        <div class="field-row"><div class="field-label">VX Term Structure</div><select id="vx-ts"><option value="">--</option><option value="contango">Contango (normal, risk-on)</option><option value="flat">Flat (uncertainty)</option><option value="inversion">Inversion (fear, near-term risk)</option></select></div>
+        <div class="field-row"><div class="field-label">VX Term Structure</div>
+          <select id="vx-ts"><option value="">--</option><option value="contango">Contango (normal)</option><option value="flat">Flat (uncertainty)</option><option value="inversion">Inversion (fear)</option></select>
+        </div>
         <div class="field-row"><div class="field-label">VVIX</div><input type="number" id="vix-vvix" placeholder="95" step="0.1"></div>
         <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          VIX GEX call-heavy = dealers long vol = vol suppression likely<br>VIX GEX put-heavy = dealers short vol = vol expansion risk<br>VIX9D &gt; VIX = near-term fear elevated (reduces confidence)
+          VIX GEX call-heavy = vol suppression likely<br>VIX GEX put-heavy = vol expansion risk<br>VIX9D &gt; VIX = near-term fear elevated
         </div>
       </div>
     </div>
@@ -1211,31 +934,22 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ======================== PATTERNS TAB ======================== -->
 <div id="tab-patterns" class="tab-panel">
   <div class="grid-3">
-
-    <!-- BULLISH PATTERNS -->
     <div class="panel">
       <div class="panel-title" style="color:var(--green)">Bullish Patterns</div>
       <div class="pattern-grid" id="bull-patterns"></div>
     </div>
-
-    <!-- BEARISH PATTERNS -->
     <div class="panel">
       <div class="panel-title" style="color:var(--red)">Bearish Patterns</div>
       <div class="pattern-grid" id="bear-patterns"></div>
     </div>
-
-    <!-- FREE TEXT + CONFLUENCE -->
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
-        <div class="panel-title">Chart Observations (Free Text)</div>
-        <textarea id="pat-freetext" placeholder="Describe what you see on the chart. Include timeframes, key levels, structure, volume, context... Claude will read this and factor it into the scoring." style="min-height:140px;width:100%"></textarea>
-        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">
-          Claude reads free text and weights patterns against GEX levels
-        </div>
+        <div class="panel-title">Chart Observations</div>
+        <textarea id="pat-freetext" placeholder="Describe what you see on the chart. Include timeframes, key levels, structure, volume, context..." style="min-height:140px;width:100%"></textarea>
       </div>
       <div class="panel">
         <div class="panel-title">Pattern Confluence Notes</div>
-        <textarea id="pat-confluence" placeholder="GEX wall alignment notes, pattern + level confluence, invalidation conditions..." style="min-height:100px;width:100%"></textarea>
+        <textarea id="pat-confluence" placeholder="GEX wall alignment, invalidation conditions..." style="min-height:100px;width:100%"></textarea>
       </div>
       <div class="panel">
         <div class="panel-title">Pattern Score</div>
@@ -1247,68 +961,32 @@ input[type="range"]::-webkit-slider-thumb {
         <button class="btn btn-ghost btn-sm" onclick="calcPatternScore()" style="width:100%">CALCULATE</button>
       </div>
     </div>
-
   </div>
 </div>
 
 <!-- ======================== WEIGHTS TAB ======================== -->
 <div id="tab-weights" class="tab-panel">
   <div class="grid-2">
-
     <div class="panel">
       <div class="panel-title">Signal Weights</div>
       <div class="section-header">Factor Weighting</div>
-
-      <div class="weight-row">
-        <div class="weight-label">Dealer Positioning</div>
-        <input type="range" id="w-gex" min="0" max="40" value="30" oninput="updateWeights()">
-        <div class="weight-val" id="wv-gex">30%</div>
-      </div>
-      <div class="weight-row">
-        <div class="weight-label">Range Intelligence</div>
-        <input type="range" id="w-range" min="0" max="40" value="20" oninput="updateWeights()">
-        <div class="weight-val" id="wv-range">20%</div>
-      </div>
-      <div class="weight-row">
-        <div class="weight-label">Pattern Confluence</div>
-        <input type="range" id="w-pattern" min="0" max="40" value="20" oninput="updateWeights()">
-        <div class="weight-val" id="wv-pattern">20%</div>
-      </div>
-      <div class="weight-row">
-        <div class="weight-label">Market Internals</div>
-        <input type="range" id="w-internals" min="0" max="30" value="15" oninput="updateWeights()">
-        <div class="weight-val" id="wv-internals">15%</div>
-      </div>
-      <div class="weight-row">
-        <div class="weight-label">Macro Context</div>
-        <input type="range" id="w-macro" min="0" max="20" value="15" oninput="updateWeights()">
-        <div class="weight-val" id="wv-macro">15%</div>
-      </div>
-
+      <div class="weight-row"><div class="weight-label">Dealer Positioning</div><input type="range" id="w-gex" min="0" max="40" value="30" oninput="updateWeights()"><div class="weight-val" id="wv-gex">30%</div></div>
+      <div class="weight-row"><div class="weight-label">Range Intelligence</div><input type="range" id="w-range" min="0" max="40" value="20" oninput="updateWeights()"><div class="weight-val" id="wv-range">20%</div></div>
+      <div class="weight-row"><div class="weight-label">Pattern Confluence</div><input type="range" id="w-pattern" min="0" max="40" value="20" oninput="updateWeights()"><div class="weight-val" id="wv-pattern">20%</div></div>
+      <div class="weight-row"><div class="weight-label">Market Internals</div><input type="range" id="w-internals" min="0" max="30" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-internals">15%</div></div>
+      <div class="weight-row"><div class="weight-label">Macro Context</div><input type="range" id="w-macro" min="0" max="20" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-macro">15%</div></div>
       <div class="divider"></div>
       <div class="section-header">Total Weight</div>
       <div id="weight-total" style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--cyan);text-align:center;padding:8px">100%</div>
       <div id="weight-warning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--orange);text-align:center;margin-top:4px">⚠ Weights should sum to 100%</div>
-
       <div class="divider"></div>
       <div class="section-header">News Day Penalty</div>
-      <div class="weight-row">
-        <div class="weight-label">Confidence Reduction</div>
-        <input type="range" id="w-news-penalty" min="0" max="50" value="20" oninput="updateWeights()">
-        <div class="weight-val" id="wv-news-penalty">20%</div>
-      </div>
+      <div class="weight-row"><div class="weight-label">Confidence Reduction</div><input type="range" id="w-news-penalty" min="0" max="50" value="20" oninput="updateWeights()"><div class="weight-val" id="wv-news-penalty">20%</div></div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">Applied on HIGH IMPACT / FOMC days</div>
-
       <div class="divider"></div>
       <div class="section-header">SPY/SPX Divergence Penalty</div>
-      <div class="weight-row">
-        <div class="weight-label">Divergence Penalty</div>
-        <input type="range" id="w-div-penalty" min="0" max="30" value="15" oninput="updateWeights()">
-        <div class="weight-val" id="wv-div-penalty">15%</div>
-      </div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">Applied when SPY and SPX GEX diverge</div>
+      <div class="weight-row"><div class="weight-label">Divergence Penalty</div><input type="range" id="w-div-penalty" min="0" max="30" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-div-penalty">15%</div></div>
     </div>
-
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">Presets</div>
@@ -1318,153 +996,65 @@ input[type="range"]::-webkit-slider-thumb {
           <div class="preset-btn" onclick="applyPreset('range')">Range Day</div>
           <div class="preset-btn" onclick="applyPreset('news')">News Day</div>
         </div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:1.8">
-          <div><span style="color:var(--cyan)">Default</span> — Balanced weights for typical sessions</div>
-          <div><span style="color:var(--green)">Trending Day</span> — GEX + Internals heavy</div>
-          <div><span style="color:var(--yellow)">Range Day</span> — Range + Pattern heavy</div>
-          <div><span style="color:var(--orange)">News Day</span> — All weights reduced, high penalty</div>
-        </div>
       </div>
-
       <div class="panel">
-        <div class="panel-title">GEX Regime Settings</div>
-        <div class="section-header">Negative GEX Behavior</div>
+        <div class="panel-title">GEX Regime Reference</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:1.8;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          Negative GEX → Dealers SHORT gamma<br>
-          → Must buy on rallies, sell on dips<br>
-          → AMPLIFIES moves in both directions<br>
-          → Targets more likely to be exceeded<br>
-          → Widen stop expectations<br><br>
-          Positive GEX → Dealers LONG gamma<br>
-          → Must sell on rallies, buy on dips<br>
-          → DAMPENS moves, mean-reversion bias<br>
-          → Tighter range, fades work better
+          Negative GEX → Dealers SHORT gamma<br>→ AMPLIFIES moves in both directions<br>→ Widen stop expectations<br><br>
+          Positive GEX → Dealers LONG gamma<br>→ DAMPENS moves, mean-reversion bias<br>→ Tighter range, fades work better
         </div>
       </div>
-
       <div class="panel">
         <div class="panel-title">VR Stats Reference</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:2;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
           VR (Volume Range): <span style="color:var(--green)">94.35% hit rate</span><br>
           pVR (Prob Vol Range): <span style="color:var(--yellow)">50.81% hit rate</span><br>
-          Block Range: <span style="color:var(--cyan)">100% hit rate</span><br>
-          Avg Daily Range: <span style="color:var(--text)">~$7.85 / ~78.5 ES pts</span><br>
-          Block Range Width: <span style="color:var(--text)">~$27.03 / ~270 ES pts</span>
+          Block Range: <span style="color:var(--cyan)">100% hit rate</span>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
 <!-- ======================== TRADE LOG TAB ======================== -->
 <div id="tab-tradelog" class="tab-panel">
-
-  <!-- STATS ROW -->
   <div class="grid-4 mb-8">
-    <div class="stat-box">
-      <div class="stat-num" id="tl-total" style="color:var(--cyan)">0</div>
-      <div class="stat-name">TOTAL TRADES</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num" id="tl-winrate" style="color:var(--green)">--%</div>
-      <div class="stat-name">WIN RATE</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num" id="tl-pf" style="color:var(--yellow)">--</div>
-      <div class="stat-name">PROFIT FACTOR</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num" id="tl-avg-conf" style="color:var(--orange)">--%</div>
-      <div class="stat-name">AVG CONFIDENCE</div>
-    </div>
+    <div class="stat-box"><div class="stat-num" id="tl-total" style="color:var(--cyan)">0</div><div class="stat-name">TOTAL TRADES</div></div>
+    <div class="stat-box"><div class="stat-num" id="tl-winrate" style="color:var(--green)">--%</div><div class="stat-name">WIN RATE</div></div>
+    <div class="stat-box"><div class="stat-num" id="tl-pf" style="color:var(--yellow)">--</div><div class="stat-name">PROFIT FACTOR</div></div>
+    <div class="stat-box"><div class="stat-num" id="tl-avg-conf" style="color:var(--orange)">--%</div><div class="stat-name">AVG CONFIDENCE</div></div>
   </div>
-
-  <!-- LOG ENTRY FORM -->
   <div class="panel mb-8">
     <div class="panel-title">Log New Trade</div>
     <div class="grid-4">
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Date / Time</div>
-        <input type="text" id="tl-date" placeholder="2026-04-05 09:45">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Direction</div>
-        <select id="tl-dir">
-          <option value="LONG">LONG</option>
-          <option value="SHORT">SHORT</option>
-        </select>
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Entry Price</div>
-        <input type="number" id="tl-entry" placeholder="5641.25" step="0.25">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Target</div>
-        <input type="number" id="tl-target" placeholder="5610.00" step="0.25">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Stop</div>
-        <input type="number" id="tl-stop" placeholder="5655.00" step="0.25">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Exit Price</div>
-        <input type="number" id="tl-exit" placeholder="5615.00" step="0.25">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Confidence %</div>
-        <input type="number" id="tl-conf" placeholder="72" step="1" min="0" max="100">
-      </div>
-      <div>
-        <div class="field-label" style="text-align:left;margin-bottom:4px">Outcome</div>
-        <select id="tl-outcome">
-          <option value="WIN">WIN</option>
-          <option value="LOSS">LOSS</option>
-          <option value="BE">BREAKEVEN</option>
-        </select>
-      </div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Date / Time</div><input type="text" id="tl-date" placeholder="2026-04-07 09:45"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Direction</div><select id="tl-dir"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Entry Price</div><input type="number" id="tl-entry" placeholder="5641.25" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Target</div><input type="number" id="tl-target" placeholder="5610.00" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Stop</div><input type="number" id="tl-stop" placeholder="5655.00" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Exit Price</div><input type="number" id="tl-exit" placeholder="5615.00" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Confidence %</div><input type="number" id="tl-conf" placeholder="72" step="1" min="0" max="100"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:4px">Outcome</div><select id="tl-outcome"><option value="WIN">WIN</option><option value="LOSS">LOSS</option><option value="BE">BREAKEVEN</option></select></div>
     </div>
-    <div class="mt-8">
-      <div class="field-label" style="text-align:left;margin-bottom:4px">Setup Notes</div>
-      <textarea id="tl-notes" placeholder="What patterns/signals triggered this trade? GEX alignment? What was the confluence?" style="width:100%;min-height:60px"></textarea>
-    </div>
-    <div class="mt-8 inline-flex">
-      <button class="btn btn-success" onclick="logTrade()">+ LOG TRADE</button>
-      <div class="spacer"></div>
-      <button class="btn btn-ghost btn-sm" onclick="clearTradeLog()">CLEAR LOG</button>
-    </div>
+    <div class="mt-8"><div class="field-label" style="text-align:left;margin-bottom:4px">Setup Notes</div><textarea id="tl-notes" placeholder="What patterns/signals triggered this trade?" style="width:100%;min-height:60px"></textarea></div>
+    <div class="mt-8 inline-flex"><button class="btn btn-success" onclick="logTrade()">+ LOG TRADE</button><div class="spacer"></div><button class="btn btn-ghost btn-sm" onclick="clearTradeLog()">CLEAR LOG</button></div>
   </div>
-
-  <!-- TRADE TABLE -->
   <div class="panel">
     <div class="panel-title">Trade History</div>
     <div style="overflow-x:auto">
       <table id="trade-table">
-        <thead>
-          <tr>
-            <th>DATE/TIME</th>
-            <th>DIR</th>
-            <th>ENTRY</th>
-            <th>TARGET</th>
-            <th>STOP</th>
-            <th>EXIT</th>
-            <th>P/L PTS</th>
-            <th>CONF%</th>
-            <th>OUTCOME</th>
-            <th>NOTES</th>
-            <th>DEL</th>
-          </tr>
-        </thead>
-        <tbody id="trade-tbody">
-          <tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>
-        </tbody>
+        <thead><tr><th>DATE/TIME</th><th>DIR</th><th>ENTRY</th><th>TARGET</th><th>STOP</th><th>EXIT</th><th>P/L PTS</th><th>CONF%</th><th>OUTCOME</th><th>NOTES</th><th>DEL</th></tr></thead>
+        <tbody id="trade-tbody"><tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr></tbody>
       </table>
     </div>
   </div>
-
 </div><!-- /tradelog -->
 
 <script>
+// ===================== CONFIG =====================
+const FLASHALPHA_API_KEY = 'cpnJIDWhnVQOKJBrHnmo0wMOmUAevA0x2zK6bxhY';
+const FA_BASE = 'https://lab.flashalpha.com';
+
 // ===================== STATE =====================
 const state = {
   snapshots: [],
@@ -1472,28 +1062,25 @@ const state = {
   weights: { gex: 30, range: 20, pattern: 20, internals: 15, macro: 15, news_penalty: 20, div_penalty: 15 },
   lastScore: null,
   lastBias: 'NEUTRAL',
-  lastConf: 0
+  lastConf: 0,
+  liveData: {}
 };
 
 const BULL_PATTERNS = [
-  // Classical / SMC
-  'Bull Flag / Pennant', 'Ascending Triangle', 'Inverse H&S', 'Double Bottom',
-  'Cup & Handle', 'VWAP Reclaim', 'HOD Sweep + Hold', 'Supply Zone Flip (Demand)',
-  'BOS Bullish', 'CHoCH Bullish', 'Bullish FVG Fill', 'Measured Move Up',
-  // Harmonics (Bullish)
-  'Bullish Gartley', 'Bullish Bat', 'Bullish Butterfly', 'Bullish Crab',
-  'Bullish Deep Crab', 'Bullish Shark', 'Bullish Cypher', 'Bullish AB=CD',
-  'Bullish 5-0', 'Bullish 3-Drive'
+  'Bull Flag / Pennant','Ascending Triangle','Inverse H&S','Double Bottom',
+  'Cup & Handle','VWAP Reclaim','HOD Sweep + Hold','Supply Zone Flip (Demand)',
+  'BOS Bullish','CHoCH Bullish','Bullish FVG Fill','Measured Move Up',
+  'Bullish Gartley','Bullish Bat','Bullish Butterfly','Bullish Crab',
+  'Bullish Deep Crab','Bullish Shark','Bullish Cypher','Bullish AB=CD',
+  'Bullish 5-0','Bullish 3-Drive'
 ];
 const BEAR_PATTERNS = [
-  // Classical / SMC
-  'Bear Flag / Pennant', 'Descending Triangle', 'H&S Pattern', 'Double Top',
-  'Rising Wedge', 'VWAP Rejection', 'LOD Sweep + Hold', 'Demand Zone Flip (Supply)',
-  'BOS Bearish', 'CHoCH Bearish', 'Bearish FVG Fill', 'Measured Move Down',
-  // Harmonics (Bearish)
-  'Bearish Gartley', 'Bearish Bat', 'Bearish Butterfly', 'Bearish Crab',
-  'Bearish Deep Crab', 'Bearish Shark', 'Bearish Cypher', 'Bearish AB=CD',
-  'Bearish 5-0', 'Bearish 3-Drive'
+  'Bear Flag / Pennant','Descending Triangle','H&S Pattern','Double Top',
+  'Rising Wedge','VWAP Rejection','LOD Sweep + Hold','Demand Zone Flip (Supply)',
+  'BOS Bearish','CHoCH Bearish','Bearish FVG Fill','Measured Move Down',
+  'Bearish Gartley','Bearish Bat','Bearish Butterfly','Bearish Crab',
+  'Bearish Deep Crab','Bearish Shark','Bearish Cypher','Bearish AB=CD',
+  'Bearish 5-0','Bearish 3-Drive'
 ];
 
 // ===================== INIT =====================
@@ -1506,12 +1093,260 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSessionWindows();
   setInterval(updateSessionWindows, 30000);
   setDefaultDate();
+  // Auto-fetch on load
+  fetchAllGEXData();
 });
 
 function setDefaultDate() {
   const now = new Date();
   const pad = n => String(n).padStart(2,'0');
   document.getElementById('tl-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+// ===================== FLASHALPHA LIVE DATA =====================
+async function fetchTicker(symbol) {
+  const sym = symbol.toLowerCase();
+  setDotStatus(sym, 'loading');
+
+  try {
+    const headers = { 'X-Api-Key': FLASHALPHA_API_KEY };
+
+    // Fetch summary + levels in parallel (2 calls per ticker)
+    const [sumResp, levResp] = await Promise.all([
+      fetch(`${FA_BASE}/v1/exposure/summary/${symbol}`, { headers }),
+      fetch(`${FA_BASE}/v1/exposure/levels/${symbol}`, { headers })
+    ]);
+
+    if (!sumResp.ok || !levResp.ok) {
+      const err = await sumResp.text();
+      throw new Error(`HTTP ${sumResp.status}: ${err.slice(0,100)}`);
+    }
+
+    const summary = await sumResp.json();
+    const levels  = await levResp.json();
+
+    state.liveData[sym] = { summary, levels, fetchedAt: new Date() };
+    populateTickerFields(sym, summary, levels);
+    setDotStatus(sym, 'live');
+    return true;
+  } catch(e) {
+    console.error(`FlashAlpha error for ${symbol}:`, e);
+    setDotStatus(sym, 'error');
+    document.getElementById(`status-${sym}`).textContent = 'ERR';
+    document.getElementById(`status-${sym}`).style.color = 'var(--red)';
+    return false;
+  }
+}
+
+async function fetchAllGEXData() {
+  const btn = document.getElementById('fetch-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ FETCHING...';
+
+  // Fetch all 4 tickers — each is 2 API calls = 8 total
+  await Promise.all([
+    fetchTicker('SPY'),
+    fetchTicker('SPX'),
+    fetchTicker('QQQ'),
+    fetchTicker('VIX')
+  ]);
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const estTime = now.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  document.getElementById('last-fetch').textContent = `Last fetch: ${estTime} EST`;
+
+  btn.disabled = false;
+  btn.textContent = '⚡ FETCH LIVE DATA';
+
+  // Auto-populate alignment field after fetch
+  autoSetAlignment();
+}
+
+function populateTickerFields(sym, summary, levels) {
+  const netGex = summary.exposures?.net_gex || 0;
+  const netDex = summary.exposures?.net_dex || 0;
+  const netVex = summary.exposures?.net_vex || 0;
+  const netChex = summary.exposures?.net_chex || 0;
+  const regime = summary.regime || 'undetermined';
+  const price = summary.underlying_price || 0;
+  const gammaFlip = levels.levels?.gamma_flip || summary.gamma_flip || 0;
+  const callWall = levels.levels?.call_wall || 0;
+  const putWall = levels.levels?.put_wall || 0;
+  const absGex = levels.levels?.max_positive_gamma || 0;
+  const zeroMagnet = levels.levels?.zero_dte_magnet || 0;
+  const zeroPct = summary.zero_dte?.pct_of_total_gex || 0;
+  const hedgeDir = summary.hedging_estimate?.spot_up_1pct?.direction || '--';
+  const hedgeNotional = summary.hedging_estimate?.spot_up_1pct?.notional_usd || 0;
+  const interp = summary.interpretation || {};
+
+  // Format helpers
+  const fmtGex = v => v === 0 ? '--' : `$${(v/1e6).toFixed(1)}M`;
+  const fmtB = v => v === 0 ? '--' : `$${(Math.abs(v)/1e9).toFixed(2)}B`;
+  const fmtPrice = v => v === 0 ? '--' : v.toFixed(2);
+  const fmtPct = v => v === 0 ? '--' : `${v.toFixed(1)}%`;
+
+  // Update status bar
+  const statusEl = document.getElementById(`status-${sym}`);
+  statusEl.textContent = price > 0 ? `$${fmtPrice(price)}` : 'OK';
+  statusEl.style.color = 'var(--text2)';
+
+  // Regime badge
+  const regimeEl = document.getElementById(`regime-${sym}`);
+  if (regimeEl) {
+    const cls = regime === 'negative_gamma' ? 'regime-neg' : regime === 'positive_gamma' ? 'regime-pos' : 'regime-und';
+    const label = regime === 'negative_gamma' ? 'NEG γ' : regime === 'positive_gamma' ? 'POS γ' : 'UND';
+    regimeEl.innerHTML = `<span class="regime-badge ${cls}">${label}</span>`;
+  }
+
+  // Show live summary row
+  const liveRow = document.getElementById(`${sym}-live-row`);
+  if (liveRow) {
+    liveRow.style.display = 'grid';
+    document.getElementById(`${sym}-live-price`).textContent = fmtPrice(price);
+    document.getElementById(`${sym}-live-gex`).textContent = fmtGex(netGex);
+    document.getElementById(`${sym}-live-gex`).style.color = netGex < 0 ? 'var(--red)' : 'var(--green)';
+    document.getElementById(`${sym}-live-regime`).textContent = regime.replace('_gamma','').toUpperCase();
+    document.getElementById(`${sym}-live-regime`).style.color = regime === 'negative_gamma' ? 'var(--red)' : regime === 'positive_gamma' ? 'var(--green)' : 'var(--yellow)';
+    if (sym === 'vix') {
+      document.getElementById('vix-live-flip').textContent = gammaFlip ? gammaFlip.toFixed(2) : '--';
+    } else {
+      document.getElementById(`${sym}-live-0dte`).textContent = fmtPct(zeroPct);
+    }
+  }
+
+  // Show exposure mini grid (not for VIX)
+  if (sym !== 'vix') {
+    const miniGrid = document.getElementById(`${sym}-exp-mini`);
+    if (miniGrid) {
+      miniGrid.style.display = 'grid';
+      document.getElementById(`${sym}-dex-val`).textContent = fmtGex(netDex);
+      document.getElementById(`${sym}-dex-val`).style.color = netDex < 0 ? 'var(--red)' : 'var(--green)';
+      document.getElementById(`${sym}-dex-interp`).textContent = interp.gamma || '—';
+      document.getElementById(`${sym}-vex-val`).textContent = fmtGex(netVex);
+      document.getElementById(`${sym}-vex-val`).style.color = netVex < 0 ? 'var(--red)' : 'var(--green)';
+      document.getElementById(`${sym}-vex-interp`).textContent = interp.vanna || '—';
+      document.getElementById(`${sym}-chex-val`).textContent = fmtGex(netChex);
+      document.getElementById(`${sym}-chex-val`).style.color = netChex < 0 ? 'var(--red)' : 'var(--green)';
+      document.getElementById(`${sym}-chex-interp`).textContent = interp.charm || '—';
+      document.getElementById(`${sym}-hedge-val`).textContent = hedgeNotional > 0 ? fmtB(hedgeNotional) : '--';
+      document.getElementById(`${sym}-hedge-dir`).textContent = hedgeDir ? `Dealers ${hedgeDir} on ↑1%` : '—';
+    }
+  }
+
+  // Live dot on ticker tab
+  const liveDot = document.getElementById(`live-dot-${sym}`);
+  if (liveDot) liveDot.classList.add('visible');
+
+  // Data age label
+  const ageEl = document.getElementById(`${sym}-data-age`);
+  if (ageEl && summary.as_of) {
+    const asOf = new Date(summary.as_of);
+    const mins = Math.round((Date.now() - asOf) / 60000);
+    ageEl.textContent = mins < 60 ? `(${mins}m ago)` : `(${(mins/60).toFixed(1)}h ago)`;
+  }
+
+  // Populate input fields
+  if (sym === 'spy') {
+    setField('spy-net-gex', (netGex/1e6).toFixed(1));
+    setField('spy-flip', gammaFlip);
+    setField('spy-call-wall', callWall);
+    setField('spy-put-wall', putWall);
+    setField('spy-abs-strike', absGex);
+    setField('spy-0dte-magnet', zeroMagnet);
+    setField('spy-notional', netDex ? (Math.abs(netDex)/1e9).toFixed(2) : '');
+    setSelect('spy-gex-dir', netGex < 0 ? 'negative' : 'positive');
+    // Also update VIX field in game plan from VIX data if available
+  }
+  if (sym === 'spx') {
+    setField('spx-net-gex', (netGex/1e6).toFixed(1));
+    setField('spx-flip', gammaFlip);
+    setField('spx-call-wall', callWall);
+    setField('spx-put-wall', putWall);
+    setField('spx-abs-strike', absGex);
+    setField('spx-0dte-magnet', zeroMagnet);
+    setField('spx-notional', netDex ? (Math.abs(netDex)/1e9).toFixed(2) : '');
+    setSelect('spx-gex-dir', netGex < 0 ? 'negative' : 'positive');
+  }
+  if (sym === 'qqq') {
+    setField('qqq-net-gex', (netGex/1e6).toFixed(1));
+    setField('qqq-flip', gammaFlip);
+    setField('qqq-call-wall', callWall);
+    setField('qqq-put-wall', putWall);
+    setField('qqq-vr-top', callWall); // approximate
+    setField('qqq-vr-bot', putWall);
+    setSelect('qqq-gex-dir', netGex < 0 ? 'negative' : 'positive');
+  }
+  if (sym === 'vix') {
+    setField('vix-current', price.toFixed(2));
+    setField('vix-call-wall', callWall);
+    setField('vix-put-wall', putWall);
+    setField('gp-vix', price.toFixed(2)); // also populate game plan VIX field
+    // Determine vol regime
+    const vixVal = price;
+    let volRegime = '';
+    if (vixVal < 15) volRegime = 'low';
+    else if (vixVal < 25) volRegime = 'normal';
+    else if (vixVal < 35) volRegime = 'elevated';
+    else volRegime = 'high';
+    setSelect('vix-regime', volRegime);
+    // VIX GEX direction from regime
+    setSelect('vix-gex-dir', netGex < 0 ? 'put-heavy' : 'call-heavy');
+  }
+}
+
+function setField(id, value) {
+  const el = document.getElementById(id);
+  if (el && value !== '' && value !== null && value !== undefined && !isNaN(value)) {
+    el.value = value;
+    el.style.borderColor = 'rgba(0,212,255,0.4)';
+    el.style.background = 'rgba(0,212,255,0.03)';
+  }
+}
+
+function setSelect(id, value) {
+  const el = document.getElementById(id);
+  if (el && value) {
+    el.value = value;
+    el.style.borderColor = 'rgba(0,212,255,0.4)';
+    el.style.background = 'rgba(0,212,255,0.03)';
+  }
+}
+
+function setDotStatus(sym, status) {
+  const dot = document.getElementById(`dot-${sym}`);
+  if (!dot) return;
+  dot.className = 'status-dot';
+  if (status === 'loading') dot.classList.add('status-loading');
+  else if (status === 'live') dot.classList.add('status-live');
+  else if (status === 'error') dot.classList.add('status-error');
+  else dot.classList.add('status-idle');
+}
+
+function autoSetAlignment() {
+  // Auto-set SPY/SPX alignment based on live data
+  const spyGex = parseFloat(document.getElementById('spy-net-gex').value) || 0;
+  const spxGex = parseFloat(document.getElementById('spx-net-gex').value) || 0;
+  const qqqGex = parseFloat(document.getElementById('qqq-net-gex').value) || 0;
+
+  if (spyGex !== 0 && spxGex !== 0) {
+    const spyNeg = spyGex < 0, spxNeg = spxGex < 0;
+    let align = '';
+    if (spyNeg && spxNeg) align = 'both-neg';
+    else if (!spyNeg && !spxNeg) align = 'both-pos';
+    else align = 'diverge';
+    setSelect('spy-spx-align', align);
+  }
+
+  if (spyGex !== 0 && qqqGex !== 0) {
+    const spyNeg = spyGex < 0, qqqNeg = qqqGex < 0;
+    let qalign = '';
+    if (spyNeg && qqqNeg) qalign = 'aligned';
+    else if (qqqGex < spyGex) qalign = 'qqq-worse';
+    else if (spyGex < qqqGex) qalign = 'spy-worse';
+    else qalign = 'diverge';
+    setSelect('qqq-align', qalign);
+  }
 }
 
 // ===================== CLOCK + SESSION =====================
@@ -1521,7 +1356,6 @@ function updateClock() {
   const h = est.getHours(), m = est.getMinutes(), s = est.getSeconds();
   const pad = n => String(n).padStart(2,'0');
   document.getElementById('clock').textContent = `${pad(h)}:${pad(m)}:${pad(s)} EST`;
-
   const badge = document.getElementById('session-badge');
   const session = getSessionInfo(h, m);
   badge.textContent = session.name;
@@ -1543,7 +1377,6 @@ function updateSessionWindows() {
   const now = new Date().toLocaleString('en-US', {timeZone: 'America/New_York'});
   const est = new Date(now);
   const mins = est.getHours() * 60 + est.getMinutes();
-
   const sessions = [
     { name: 'London Open', time: '2:00–5:00 AM', start: 120, end: 300 },
     { name: 'Pre-Market', time: '7:00–9:30 AM', start: 420, end: 570 },
@@ -1552,7 +1385,6 @@ function updateSessionWindows() {
     { name: 'Afternoon / Close', time: '2:00–3:45 PM', start: 840, end: 945 },
     { name: 'MOC', time: '3:45–4:00 PM', start: 945, end: 960 },
   ];
-
   const buildHTML = (containerId) => {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1566,11 +1398,8 @@ function updateSessionWindows() {
       container.appendChild(div);
     });
   };
-
   buildHTML('session-windows');
   buildHTML('session-windows-intraday');
-
-  // Next window
   const next = sessions.find(s => s.start > mins);
   const nextEl = document.getElementById('next-window');
   if (nextEl && next) {
@@ -1584,10 +1413,11 @@ function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.toLowerCase().includes(name.slice(0,4))) b.classList.add('active'); });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name.slice(0,4))) b.classList.add('active');
+  });
 }
 
-// ===================== TICKER TABS =====================
 function switchTicker(el, ticker) {
   document.querySelectorAll('.ticker-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.ticker-panel').forEach(p => p.classList.remove('active'));
@@ -1602,20 +1432,17 @@ function buildPatternLists() {
     const div = document.createElement('div');
     div.className = 'pattern-item';
     div.innerHTML = `<div class="pattern-check" style="border-color:var(--green2)">✓</div><div class="pattern-name">${p}</div>`;
-    div.dataset.type = 'bull';
-    div.dataset.active = 'false';
+    div.dataset.type = 'bull'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bull'));
     bullContainer.appendChild(div);
   });
-
   const bearContainer = document.getElementById('bear-patterns');
   BEAR_PATTERNS.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pattern-item';
     div.innerHTML = `<div class="pattern-check" style="border-color:var(--red2)">✓</div><div class="pattern-name">${p}</div>`;
-    div.dataset.type = 'bear';
-    div.dataset.active = 'false';
+    div.dataset.type = 'bear'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bear'));
     bearContainer.appendChild(div);
@@ -1659,8 +1486,6 @@ function calcPatternScore() {
 // ===================== SCORING ENGINE =====================
 function runScoring() {
   const w = state.weights;
-
-  // GEX SCORE
   let gexScore = 50;
   const spyDir = document.getElementById('spy-gex-dir').value;
   const spxDir = document.getElementById('spx-gex-dir').value;
@@ -1669,51 +1494,32 @@ function runScoring() {
   const spyNetGex = parseFloat(document.getElementById('spy-net-gex').value) || 0;
   const spxNetGex = parseFloat(document.getElementById('spx-net-gex').value) || 0;
   const spySpxAlign = document.getElementById('spy-spx-align').value;
-
   let biasPoints = 0;
 
-  // Net GEX direction
   if (spyDir === 'negative') { gexScore -= 15; biasPoints -= 2; }
   if (spyDir === 'positive') { gexScore += 10; biasPoints += 1; }
   if (spxDir === 'negative') { gexScore -= 15; biasPoints -= 2; }
   if (spxDir === 'positive') { gexScore += 10; biasPoints += 1; }
-
-  // Alignment bonus/penalty
   if (spySpxAlign === 'both-neg') { gexScore -= 10; biasPoints -= 2; }
   if (spySpxAlign === 'both-pos') { gexScore += 10; biasPoints += 2; }
   if (spySpxAlign === 'diverge') { gexScore = Math.max(gexScore - 15, 10); }
-
   gexScore = Math.max(0, Math.min(100, gexScore));
 
-  // RANGE SCORE
   let rangeScore = 50;
   const spyVrTop = parseFloat(document.getElementById('spy-vr-top').value) || 0;
   const spyVrBot = parseFloat(document.getElementById('spy-vr-bot').value) || 0;
-  const spxVrTop = parseFloat(document.getElementById('spx-vr-top').value) || 0;
-  const spxVrBot = parseFloat(document.getElementById('spx-vr-bot').value) || 0;
   const priceVa = document.getElementById('gp-price-va').value;
-  const globexHigh = parseFloat(document.getElementById('gp-globex-high').value) || 0;
-  const globexLow = parseFloat(document.getElementById('gp-globex-low').value) || 0;
-  const prevClose = parseFloat(document.getElementById('gp-prev-close').value) || 0;
-
   if (priceVa === 'below-val') { rangeScore -= 20; biasPoints -= 2; }
   if (priceVa === 'above-vah') { rangeScore += 15; biasPoints += 2; }
-  if (priceVa === 'inside') { rangeScore += 5; }
-  if (priceVa === 'at-poc') rangeScore += 0;
-  if (spyVrTop && spyVrBot) {
-    const vrMid = (spyVrTop + spyVrBot) / 2;
-    rangeScore = Math.max(0, Math.min(100, rangeScore));
-  }
+  if (priceVa === 'inside') rangeScore += 5;
   rangeScore = Math.max(0, Math.min(100, rangeScore));
 
-  // INTERNALS SCORE
   let intScore = 50;
   const tick = document.getElementById('gp-tick').value;
   const add = document.getElementById('gp-add').value;
   const vold = document.getElementById('gp-vold').value;
   const pcr = parseFloat(document.getElementById('gp-pcr').value) || 0;
   const vix9d = document.getElementById('gp-vix9d').value;
-
   const intMap = { 'strong-bull': 2, 'bull': 1, 'neutral': 0, 'bear': -1, 'strong-bear': -2 };
   let intBias = 0;
   if (tick) intBias += intMap[tick] || 0;
@@ -1726,22 +1532,17 @@ function runScoring() {
   if (vix9d === 'inversion') { intScore -= 10; biasPoints -= 1; }
   intScore = Math.max(0, Math.min(100, intScore));
 
-  // PATTERN SCORE
   const { bull, bear } = getSelectedPatterns();
-  const freeText = document.getElementById('pat-freetext').value || '';
   let patScore = 50;
   const patNet = bull.length - bear.length;
   patScore += (patNet / Math.max(bull.length + bear.length, 1)) * 35;
   biasPoints += patNet;
   patScore = Math.max(0, Math.min(100, patScore));
 
-  // MACRO SCORE
   let macroScore = 50;
   const dxy = document.getElementById('gp-dxy').value;
   const yield_ = document.getElementById('gp-yield').value;
   const vixLevel = parseFloat(document.getElementById('gp-vix').value) || 18;
-  const esNq = document.getElementById('gp-es-nq').value;
-
   if (dxy === 'strong-up') { macroScore -= 15; biasPoints -= 2; }
   if (dxy === 'up') { macroScore -= 8; biasPoints -= 1; }
   if (dxy === 'strong-down') { macroScore += 10; biasPoints += 1; }
@@ -1749,10 +1550,9 @@ function runScoring() {
   if (yield_ === 'rising') { macroScore -= 8; biasPoints -= 1; }
   if (yield_ === 'drop') { macroScore += 10; biasPoints += 1; }
   if (vixLevel > 30) { macroScore -= 10; biasPoints -= 1; }
-  if (vixLevel > 20) { macroScore -= 5; }
+  if (vixLevel > 20) macroScore -= 5;
   macroScore = Math.max(0, Math.min(100, macroScore));
 
-  // WEIGHTED OVERALL
   const totalW = (w.gex + w.range + w.pattern + w.internals + w.macro) / 100;
   let overallScore = (
     gexScore * (w.gex / 100) +
@@ -1762,27 +1562,12 @@ function runScoring() {
     macroScore * (w.macro / 100)
   ) / totalW;
 
-  // NEWS PENALTY
   const newsImpact = document.getElementById('gp-news-impact').value;
-  let newsPenalty = 0;
-  if (newsImpact === 'high' || newsImpact === 'fomc') {
-    newsPenalty = w.news_penalty;
-    overallScore = Math.max(overallScore - newsPenalty * 0.3, 10);
-  }
-
-  // DIVERGENCE PENALTY
-  if (spySpxAlign === 'diverge') {
-    overallScore = Math.max(overallScore - (w.div_penalty * 0.4), 10);
-  }
-
+  if (newsImpact === 'high' || newsImpact === 'fomc') overallScore = Math.max(overallScore - w.news_penalty * 0.3, 10);
+  if (spySpxAlign === 'diverge') overallScore = Math.max(overallScore - (w.div_penalty * 0.4), 10);
   overallScore = Math.max(0, Math.min(100, overallScore));
 
-  // DETERMINE BIAS
-  let biasLabel = 'NEUTRAL';
-  let biasColor = 'var(--text3)';
-  let biasBg = 'rgba(74,106,128,0.1)';
-  let biasBorder = 'var(--border2)';
-
+  let biasLabel = 'NEUTRAL', biasColor = 'var(--text3)', biasBg = 'rgba(74,106,128,0.1)', biasBorder = 'var(--border2)';
   if (biasPoints <= -6) { biasLabel = 'BEARISH'; biasColor = 'var(--red)'; biasBg = 'rgba(255,51,102,0.08)'; biasBorder = 'var(--red2)'; }
   else if (biasPoints <= -4) { biasLabel = 'LEAN BEARISH'; biasColor = 'var(--red)'; biasBg = 'rgba(255,51,102,0.06)'; biasBorder = 'rgba(204,17,68,0.5)'; }
   else if (biasPoints <= -1) { biasLabel = 'SLIGHT BEARISH'; biasColor = 'var(--orange)'; biasBg = 'rgba(255,136,0,0.06)'; biasBorder = 'rgba(255,136,0,0.3)'; }
@@ -1790,7 +1575,6 @@ function runScoring() {
   else if (biasPoints >= 4) { biasLabel = 'LEAN BULLISH'; biasColor = 'var(--green)'; biasBg = 'rgba(0,255,136,0.06)'; biasBorder = 'rgba(0,204,102,0.5)'; }
   else if (biasPoints >= 1) { biasLabel = 'SLIGHT BULLISH'; biasColor = 'var(--cyan)'; biasBg = 'rgba(0,212,255,0.06)'; biasBorder = 'rgba(0,153,204,0.3)'; }
 
-  // UPDATE UI
   const biasDisplay = document.getElementById('bias-display');
   biasDisplay.style.background = biasBg;
   biasDisplay.style.borderColor = biasBorder;
@@ -1798,55 +1582,38 @@ function runScoring() {
   document.getElementById('bias-label').style.color = biasColor;
   document.getElementById('bias-score').textContent = `bias points: ${biasPoints > 0 ? '+' : ''}${biasPoints} | overall: ${Math.round(overallScore)}`;
 
-  // SCORE BARS
-  const setBar = (id, val, color) => {
-    document.getElementById(id).style.width = val + '%';
-    document.getElementById(id).style.background = color;
-  };
+  const setBar = (id, val, color) => { document.getElementById(id).style.width = val + '%'; document.getElementById(id).style.background = color; };
   setBar('bar-gex', gexScore, 'var(--cyan)');
   setBar('bar-range', rangeScore, 'var(--green)');
   setBar('bar-int', intScore, 'var(--yellow)');
   setBar('bar-pat', patScore, 'var(--orange)');
   setBar('bar-macro', macroScore, 'var(--cyan2)');
-
-  document.getElementById('barval-gex').textContent = Math.round(gexScore);
-  document.getElementById('barval-range').textContent = Math.round(rangeScore);
-  document.getElementById('barval-int').textContent = Math.round(intScore);
-  document.getElementById('barval-pat').textContent = Math.round(patScore);
-  document.getElementById('barval-macro').textContent = Math.round(macroScore);
-
+  ['gex','range','int','pat','macro'].forEach((k, i) => {
+    document.getElementById(`barval-${k}`).textContent = Math.round([gexScore,rangeScore,intScore,patScore,macroScore][i]);
+  });
   document.getElementById('stat-gex-score').textContent = Math.round(gexScore);
   document.getElementById('stat-range-score').textContent = Math.round(rangeScore);
   document.getElementById('stat-int-score').textContent = Math.round(intScore);
   document.getElementById('stat-pat-score').textContent = Math.round(patScore);
 
-  // CONFIDENCE
   const conf = Math.round(overallScore);
   document.getElementById('conf-pct').textContent = conf + '%';
   document.getElementById('conf-pct').style.color = conf >= 70 ? 'var(--green)' : conf >= 50 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('conf-ring').style.borderColor = conf >= 70 ? 'var(--green2)' : conf >= 50 ? 'rgba(255,204,0,0.5)' : 'rgba(255,51,102,0.5)';
 
-  // KEY LEVELS
   if (spyFlip) document.getElementById('out-flip').textContent = '$' + spyFlip;
   if (spxFlip) document.getElementById('out-flip').textContent += ' / ' + spxFlip;
-  if (spyVrTop) document.getElementById('out-vr-top').textContent = '$' + spyVrTop;
-  if (spyVrBot) document.getElementById('out-vr-bot').textContent = '$' + spyVrBot;
+  const spyVrTopV = parseFloat(document.getElementById('spy-vr-top').value) || 0;
+  const spyVrBotV = parseFloat(document.getElementById('spy-vr-bot').value) || 0;
+  if (spyVrTopV) document.getElementById('out-vr-top').textContent = '$' + spyVrTopV;
+  if (spyVrBotV) document.getElementById('out-vr-bot').textContent = '$' + spyVrBotV;
 
-  // TARGET (rough: biased toward put or call wall)
   const spyPutWall = parseFloat(document.getElementById('spy-put-wall').value) || 0;
   const spyCallWall = parseFloat(document.getElementById('spy-call-wall').value) || 0;
-  if (biasLabel.includes('BEAR') && spyPutWall) {
-    document.getElementById('out-target').textContent = '$' + spyPutWall;
-    document.getElementById('out-target').style.color = 'var(--red)';
-  } else if (biasLabel.includes('BULL') && spyCallWall) {
-    document.getElementById('out-target').textContent = '$' + spyCallWall;
-    document.getElementById('out-target').style.color = 'var(--green)';
-  }
+  if (biasLabel.includes('BEAR') && spyPutWall) { document.getElementById('out-target').textContent = '$' + spyPutWall; document.getElementById('out-target').style.color = 'var(--red)'; }
+  else if (biasLabel.includes('BULL') && spyCallWall) { document.getElementById('out-target').textContent = '$' + spyCallWall; document.getElementById('out-target').style.color = 'var(--green)'; }
 
-  // LEVELS SUMMARY
-  buildLevelsSummary({ spyFlip, spxFlip, spyVrTop, spyVrBot, spyPutWall, spyCallWall, biasLabel, biasColor, conf });
-
-  // ALERTS
+  buildLevelsSummary({ spyFlip, spxFlip, spyVrTop: spyVrTopV, spyVrBot: spyVrBotV, spyPutWall, spyCallWall, biasLabel, biasColor, conf });
   updateAlerts({ biasLabel, spyDir, spxDir, newsImpact, vixLevel, conf, spySpxAlign });
 
   state.lastScore = overallScore;
@@ -1857,8 +1624,8 @@ function runScoring() {
 
 function buildLevelsSummary(d) {
   const el = document.getElementById('levels-summary');
-  const rows = [];
   const row = (label, value, color) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${label}</span><span style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:${color}">${value}</span></div>`;
+  const rows = [];
   if (d.spyFlip) rows.push(row('GEX FLIP (SPY)', '$' + d.spyFlip, 'var(--yellow)'));
   if (d.spxFlip) rows.push(row('GEX FLIP (SPX)', d.spxFlip, 'var(--yellow)'));
   if (d.spyCallWall) rows.push(row('CALL WALL', '$' + d.spyCallWall, 'var(--green)'));
@@ -1873,9 +1640,7 @@ function buildLevelsSummary(d) {
 function updateAlerts(d) {
   const bar = document.getElementById('alerts-bar');
   const noAlerts = document.getElementById('no-alerts');
-  const existing = bar.querySelectorAll('.alert-pill');
-  existing.forEach(e => e.remove());
-
+  bar.querySelectorAll('.alert-pill').forEach(e => e.remove());
   const alerts = [];
   if (d.spyDir === 'negative' && d.spxDir === 'negative') alerts.push({cls:'alert-danger', text:'⚡ NEGATIVE GEX REGIME — Amplified moves expected'});
   if (d.newsImpact === 'high' || d.newsImpact === 'fomc') alerts.push({cls:'alert-warn', text:'📰 HIGH IMPACT NEWS DAY — Reduce confluence weighting'});
@@ -1883,18 +1648,8 @@ function updateAlerts(d) {
   if (d.spySpxAlign === 'diverge') alerts.push({cls:'alert-warn', text:'⚠ SPY/SPX DIVERGING — Reduce position size'});
   if (d.conf >= 75) alerts.push({cls:'alert-success', text:`✅ HIGH CONFIDENCE SETUP — ${d.conf}% confluence score`});
   if (d.conf < 40) alerts.push({cls:'alert-info', text:`ℹ LOW CONFIDENCE (${d.conf}%) — Consider sitting out`});
-
-  if (alerts.length === 0) {
-    noAlerts.style.display = 'block';
-  } else {
-    noAlerts.style.display = 'none';
-    alerts.forEach(a => {
-      const pill = document.createElement('span');
-      pill.className = 'alert-pill ' + a.cls;
-      pill.textContent = a.text;
-      bar.appendChild(pill);
-    });
-  }
+  if (alerts.length === 0) { noAlerts.style.display = 'block'; }
+  else { noAlerts.style.display = 'none'; alerts.forEach(a => { const pill = document.createElement('span'); pill.className = 'alert-pill ' + a.cls; pill.textContent = a.text; bar.appendChild(pill); }); }
 }
 
 function resetScoring() {
@@ -1911,17 +1666,22 @@ async function generateAIGamePlan() {
   const output = document.getElementById('ai-output');
   output.textContent = 'Analyzing all inputs... ';
   output.classList.add('loading-dots');
-
   const { bull, bear } = getSelectedPatterns();
   const freeText = document.getElementById('pat-freetext').value;
   const confText = document.getElementById('pat-confluence').value;
-
   const gexData = {
-    spy: { netGex: document.getElementById('spy-net-gex').value, dir: document.getElementById('spy-gex-dir').value, flip: document.getElementById('spy-flip').value, absStrike: document.getElementById('spy-abs-strike').value, notional: document.getElementById('spy-notional').value, callWall: document.getElementById('spy-call-wall').value, putWall: document.getElementById('spy-put-wall').value, vrTop: document.getElementById('spy-vr-top').value, vrBot: document.getElementById('spy-vr-bot').value, pvrTop: document.getElementById('spy-pvr-top').value, pvrBot: document.getElementById('spy-pvr-bot').value },
+    spy: { netGex: document.getElementById('spy-net-gex').value, dir: document.getElementById('spy-gex-dir').value, flip: document.getElementById('spy-flip').value, callWall: document.getElementById('spy-call-wall').value, putWall: document.getElementById('spy-put-wall').value, vrTop: document.getElementById('spy-vr-top').value, vrBot: document.getElementById('spy-vr-bot').value, pvrTop: document.getElementById('spy-pvr-top').value, pvrBot: document.getElementById('spy-pvr-bot').value, zeroMagnet: document.getElementById('spy-0dte-magnet').value },
     spx: { netGex: document.getElementById('spx-net-gex').value, dir: document.getElementById('spx-gex-dir').value, flip: document.getElementById('spx-flip').value, callWall: document.getElementById('spx-call-wall').value, putWall: document.getElementById('spx-put-wall').value, vrTop: document.getElementById('spx-vr-top').value, vrBot: document.getElementById('spx-vr-bot').value },
     qqq: { dir: document.getElementById('qqq-gex-dir').value, flip: document.getElementById('qqq-flip').value, align: document.getElementById('spy-spx-align').value },
-    vix: { current: document.getElementById('vix-current').value, vix9d: document.getElementById('vix-9d').value, dir: document.getElementById('vix-gex-dir').value, regime: document.getElementById('vix-regime').value, ts: document.getElementById('vx-ts').value }
+    vix: { current: document.getElementById('vix-current').value, dir: document.getElementById('vix-gex-dir').value, regime: document.getElementById('vix-regime').value, ts: document.getElementById('vx-ts').value }
   };
+
+  // Include DEX/VEX/CHEX from live data if available
+  const liveContext = Object.entries(state.liveData).map(([sym, d]) => {
+    if (!d.summary) return '';
+    const interp = d.summary.interpretation || {};
+    return `${sym.toUpperCase()} LIVE CONTEXT: Gamma: ${interp.gamma || 'N/A'} | Vanna: ${interp.vanna || 'N/A'} | Charm: ${interp.charm || 'N/A'}`;
+  }).filter(Boolean).join('\n');
 
   const prompt = `You are an elite quantitative trading analyst for an ES/MES futures trader. Generate a concise, actionable morning game plan.
 
@@ -1929,30 +1689,28 @@ INPUT DATA:
 BIAS: ${state.lastBias} | CONFIDENCE: ${state.lastConf}%
 NEWS: ${document.getElementById('gp-news-impact').value} — ${document.getElementById('gp-news-event').value || 'none'}
 OVERNIGHT: High ${document.getElementById('gp-globex-high').value || 'N/A'} / Low ${document.getElementById('gp-globex-low').value || 'N/A'} | Prev Close: ${document.getElementById('gp-prev-close').value || 'N/A'}
-PREV DAY: H ${document.getElementById('gp-prev-high').value || 'N/A'} / L ${document.getElementById('gp-prev-low').value || 'N/A'}
-SPY GEX: Net ${gexData.spy.netGex || 'N/A'} (${gexData.spy.dir}) | Flip: ${gexData.spy.flip || 'N/A'} | Notional Δ: $${gexData.spy.notional || 'N/A'}B | Call Wall: ${gexData.spy.callWall || 'N/A'} | Put Wall: ${gexData.spy.putWall || 'N/A'}
-SPX GEX: Net ${gexData.spx.netGex || 'N/A'} (${gexData.spx.dir}) | Flip: ${gexData.spx.flip || 'N/A'} | Call Wall: ${gexData.spx.callWall || 'N/A'} | Put Wall: ${gexData.spx.putWall || 'N/A'}
-SPY VR: ${gexData.spy.vrTop || 'N/A'} — ${gexData.spy.vrBot || 'N/A'} | pVR: ${gexData.spy.pvrTop || 'N/A'} — ${gexData.spy.pvrBot || 'N/A'}
+SPY GEX: Net ${gexData.spy.netGex || 'N/A'}M (${gexData.spy.dir}) | Flip: $${gexData.spy.flip || 'N/A'} | Call Wall: $${gexData.spy.callWall || 'N/A'} | Put Wall: $${gexData.spy.putWall || 'N/A'} | 0DTE Magnet: $${gexData.spy.zeroMagnet || 'N/A'}
+SPX GEX: Net ${gexData.spx.netGex || 'N/A'}M (${gexData.spx.dir}) | Flip: ${gexData.spx.flip || 'N/A'} | Call Wall: ${gexData.spx.callWall || 'N/A'} | Put Wall: ${gexData.spx.putWall || 'N/A'}
+SPY VR: $${gexData.spy.vrTop || 'N/A'} — $${gexData.spy.vrBot || 'N/A'} | pVR: $${gexData.spy.pvrTop || 'N/A'} — $${gexData.spy.pvrBot || 'N/A'}
 SPX VR: ${gexData.spx.vrTop || 'N/A'} — ${gexData.spx.vrBot || 'N/A'}
 SPY/SPX ALIGNMENT: ${gexData.qqq.align || 'unknown'}
-VIX: ${gexData.vix.current || 'N/A'} (${gexData.vix.regime || 'N/A'}) | VIX9D: ${gexData.vix.vix9d || 'N/A'} | GEX Dir: ${gexData.vix.dir || 'N/A'} | Term Structure: ${gexData.vix.ts || 'N/A'}
-INTERNALS: TICK ${document.getElementById('gp-tick').value || 'N/A'} | ADD ${document.getElementById('gp-add').value || 'N/A'} | VOLD ${document.getElementById('gp-vold').value || 'N/A'} | P/C Ratio: ${document.getElementById('gp-pcr').value || 'N/A'} | VIX9D-VIX: ${document.getElementById('gp-vix9d').value || 'N/A'}
+VIX: ${gexData.vix.current || 'N/A'} (${gexData.vix.regime || 'N/A'}) | GEX Dir: ${gexData.vix.dir || 'N/A'} | Term Structure: ${gexData.vix.ts || 'N/A'}
+INTERNALS: TICK ${document.getElementById('gp-tick').value || 'N/A'} | ADD ${document.getElementById('gp-add').value || 'N/A'} | VOLD ${document.getElementById('gp-vold').value || 'N/A'} | P/C Ratio: ${document.getElementById('gp-pcr').value || 'N/A'}
 VOLUME PROFILE: POC ${document.getElementById('gp-poc').value || 'N/A'} | VAH ${document.getElementById('gp-vah').value || 'N/A'} | VAL ${document.getElementById('gp-val').value || 'N/A'} | Price vs VA: ${document.getElementById('gp-price-va').value || 'N/A'}
 MACRO: DXY ${document.getElementById('gp-dxy').value || 'N/A'} | 10Y ${document.getElementById('gp-yield').value || 'N/A'} | ES vs NQ: ${document.getElementById('gp-es-nq').value || 'N/A'}
 PATTERNS (bullish): ${bull.join(', ') || 'none'}
 PATTERNS (bearish): ${bear.join(', ') || 'none'}
-HARMONIC PATTERNS ACTIVE: ${[...bull,...bear].filter(p=>p.includes('Gartley')||p.includes('Bat')||p.includes('Butterfly')||p.includes('Crab')||p.includes('Shark')||p.includes('Cypher')||p.includes('AB=CD')||p.includes('5-0')||p.includes('3-Drive')).join(', ')||'none'}
 CHART OBSERVATIONS: ${freeText || 'none provided'}
 CONFLUENCE NOTES: ${confText || 'none provided'}
-Note: If harmonic patterns are present, identify the PRZ and weight it heavily. Harmonics completing at GEX walls or flip levels are very high conviction setups.
+${liveContext ? 'LIVE DEALER INTERPRETATION:\n' + liveContext : ''}
 
 Respond in this EXACT format:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MORNING BIAS: [BULLISH / BEARISH / NEUTRAL / LEAN BEARISH / etc]
-GEX FLIP: [SPY level] / [SPX level if available]
+GEX FLIP: [SPY level] / [SPX level]
 TARGET ZONE: [price range]
 RANGE: [VR bottom] – [VR top]
-pVR RANGE: [pVR bottom] – [pVR top]  
+0DTE MAGNET: [level]
 CONFIDENCE: [score]%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NARRATIVE:
@@ -1977,36 +1735,21 @@ RISK FLAGS:
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await resp.json();
     output.classList.remove('loading-dots');
-    const text = data.content?.map(b => b.text || '').join('') || 'Error generating analysis.';
-    output.textContent = text;
+    output.textContent = data.content?.map(b => b.text || '').join('') || 'Error generating analysis.';
   } catch(e) {
     output.classList.remove('loading-dots');
-    output.textContent = 'Error connecting to AI. Check your connection.\n\n' + e.message;
+    output.textContent = 'Error connecting to AI.\n\n' + e.message;
   }
 }
 
 // ===================== INTRADAY =====================
 function logSnapshot() {
   const now = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
-  const snap = {
-    time: now,
-    price: document.getElementById('id-price').value,
-    gexChange: document.getElementById('id-gex-change').value,
-    priceFlip: document.getElementById('id-price-flip').value,
-    priceVr: document.getElementById('id-price-vr').value,
-    tick: document.getElementById('id-tick').value,
-    notes: document.getElementById('id-notes').value,
-    bias: state.lastBias,
-    conf: state.lastConf
-  };
+  const snap = { time: now, price: document.getElementById('id-price').value, gexChange: document.getElementById('id-gex-change').value, priceFlip: document.getElementById('id-price-flip').value, priceVr: document.getElementById('id-price-vr').value, tick: document.getElementById('id-tick').value, notes: document.getElementById('id-notes').value, bias: state.lastBias, conf: state.lastConf };
   state.snapshots.unshift(snap);
   renderSnapshots();
   saveToStorage();
@@ -2014,25 +1757,11 @@ function logSnapshot() {
 
 function renderSnapshots() {
   const container = document.getElementById('snapshot-timeline');
-  if (state.snapshots.length === 0) {
-    container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— no snapshots logged today —</div>';
-    return;
-  }
-  container.innerHTML = state.snapshots.map(s => `
-    <div class="snapshot-item">
-      <div class="snapshot-time">${s.time}</div>
-      <div class="snapshot-bias" style="color:${s.bias.includes('BEAR') ? 'var(--red)' : s.bias.includes('BULL') ? 'var(--green)' : 'var(--text2)'}">${s.bias}</div>
-      <div class="snapshot-text">@${s.price || '---'} | ${s.gexChange || 'no change'} | ${s.priceVr || 'unknown'}</div>
-      <div class="snapshot-conf">${s.conf || '--'}%</div>
-    </div>
-  `).join('');
+  if (state.snapshots.length === 0) { container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— no snapshots logged today —</div>'; return; }
+  container.innerHTML = state.snapshots.map(s => `<div class="snapshot-item"><div class="snapshot-time">${s.time}</div><div class="snapshot-bias" style="color:${s.bias.includes('BEAR')?'var(--red)':s.bias.includes('BULL')?'var(--green)':'var(--text2)'}">${s.bias}</div><div class="snapshot-text">@${s.price||'---'} | ${s.gexChange||'no change'} | ${s.priceVr||'unknown'}</div><div class="snapshot-conf">${s.conf||'--'}%</div></div>`).join('');
 }
 
-function clearSnapshots() {
-  state.snapshots = [];
-  renderSnapshots();
-  saveToStorage();
-}
+function clearSnapshots() { state.snapshots = []; renderSnapshots(); saveToStorage(); }
 
 async function generateIntradayUpdate() {
   const output = document.getElementById('ai-intraday-output');
@@ -2041,29 +1770,20 @@ async function generateIntradayUpdate() {
   output.classList.add('loading-dots');
   const snap = state.snapshots[0];
   const prompt = `You are an ES/MES futures trading analyst. Provide a concise intraday update.
-
-Current snapshot: Price ${snap.price || 'N/A'} | GEX Change: ${snap.gexChange || 'N/A'} | Price vs Flip: ${snap.priceFlip || 'N/A'} | Price vs VR: ${snap.priceVr || 'N/A'} | TICK: ${snap.tick || 'N/A'} | Notes: ${snap.notes || 'N/A'}
+Current snapshot: Price ${snap.price||'N/A'} | GEX Change: ${snap.gexChange||'N/A'} | Price vs Flip: ${snap.priceFlip||'N/A'} | Price vs VR: ${snap.priceVr||'N/A'} | TICK: ${snap.tick||'N/A'} | Notes: ${snap.notes||'N/A'}
 Morning bias: ${state.lastBias} | Confidence: ${state.lastConf}%
-
 In 3-5 sentences: Is the morning bias holding? What's changed? What's the highest probability next move? Any level to watch?`;
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
-    });
+    const resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
     const data = await resp.json();
     output.classList.remove('loading-dots');
     output.textContent = data.content?.map(b => b.text || '').join('') || 'Error.';
-  } catch(e) {
-    output.classList.remove('loading-dots');
-    output.textContent = 'Connection error: ' + e.message;
-  }
+  } catch(e) { output.classList.remove('loading-dots'); output.textContent = 'Connection error: ' + e.message; }
 }
 
 // ===================== WEIGHTS =====================
 function updateWeights() {
-  const fields = ['gex','range','pattern','internals','macro','news_penalty','div_penalty'];
-  fields.forEach(f => {
+  ['gex','range','pattern','internals','macro','news_penalty','div_penalty'].forEach(f => {
     const el = document.getElementById('w-' + f);
     const vEl = document.getElementById('wv-' + f);
     if (el && vEl) { state.weights[f] = parseInt(el.value); vEl.textContent = el.value + '%'; }
@@ -2079,24 +1799,19 @@ function updateWeights() {
 
 function applyPreset(preset) {
   const presets = {
-    default:   { gex: 30, range: 20, pattern: 20, internals: 15, macro: 15, news_penalty: 20, div_penalty: 15 },
-    trending:  { gex: 35, range: 15, pattern: 15, internals: 25, macro: 10, news_penalty: 20, div_penalty: 20 },
-    range:     { gex: 20, range: 35, pattern: 30, internals: 5,  macro: 10, news_penalty: 15, div_penalty: 10 },
-    news:      { gex: 20, range: 20, pattern: 20, internals: 20, macro: 20, news_penalty: 50, div_penalty: 20 }
+    default:  { gex: 30, range: 20, pattern: 20, internals: 15, macro: 15, news_penalty: 20, div_penalty: 15 },
+    trending: { gex: 35, range: 15, pattern: 15, internals: 25, macro: 10, news_penalty: 20, div_penalty: 20 },
+    range:    { gex: 20, range: 35, pattern: 30, internals: 5,  macro: 10, news_penalty: 15, div_penalty: 10 },
+    news:     { gex: 20, range: 20, pattern: 20, internals: 20, macro: 20, news_penalty: 50, div_penalty: 20 }
   };
   const p = presets[preset];
-  Object.entries(p).forEach(([k, v]) => {
-    const el = document.getElementById('w-' + k);
-    if (el) el.value = v;
-  });
+  Object.entries(p).forEach(([k, v]) => { const el = document.getElementById('w-' + k); if (el) el.value = v; });
   updateWeights();
 }
 
-// ===================== NEWS BANNER =====================
 function updateNewsBanner() {
   const val = document.getElementById('gp-news-impact').value;
-  const banner = document.getElementById('news-day-banner');
-  banner.classList.toggle('active', val === 'high' || val === 'fomc');
+  document.getElementById('news-day-banner').classList.toggle('active', val === 'high' || val === 'fomc');
 }
 
 // ===================== TRADE LOG =====================
@@ -2105,21 +1820,8 @@ function logTrade() {
   const exit_ = parseFloat(document.getElementById('tl-exit').value);
   const dir = document.getElementById('tl-dir').value;
   if (!entry || !exit_) { alert('Entry and exit price required'); return; }
-  const pl = dir === 'LONG' ? (exit_ - entry) * 4 : (entry - exit_) * 4; // ES points (×4 for ticks)
   const plPts = dir === 'LONG' ? exit_ - entry : entry - exit_;
-  const trade = {
-    id: Date.now(),
-    date: document.getElementById('tl-date').value,
-    dir,
-    entry,
-    target: parseFloat(document.getElementById('tl-target').value) || '',
-    stop: parseFloat(document.getElementById('tl-stop').value) || '',
-    exit: exit_,
-    plPts: plPts.toFixed(2),
-    conf: document.getElementById('tl-conf').value,
-    outcome: document.getElementById('tl-outcome').value,
-    notes: document.getElementById('tl-notes').value
-  };
+  const trade = { id: Date.now(), date: document.getElementById('tl-date').value, dir, entry, target: parseFloat(document.getElementById('tl-target').value) || '', stop: parseFloat(document.getElementById('tl-stop').value) || '', exit: exit_, plPts: plPts.toFixed(2), conf: document.getElementById('tl-conf').value, outcome: document.getElementById('tl-outcome').value, notes: document.getElementById('tl-notes').value };
   state.trades.unshift(trade);
   renderTrades();
   updateTradeStats();
@@ -2129,25 +1831,8 @@ function logTrade() {
 
 function renderTrades() {
   const tbody = document.getElementById('trade-tbody');
-  if (state.trades.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>';
-    return;
-  }
-  tbody.innerHTML = state.trades.map(t => `
-    <tr>
-      <td>${t.date}</td>
-      <td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td>
-      <td>${t.entry}</td>
-      <td>${t.target || '--'}</td>
-      <td>${t.stop || '--'}</td>
-      <td>${t.exit}</td>
-      <td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td>
-      <td>${t.conf || '--'}%</td>
-      <td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td>
-      <td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes || '--'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">×</button></td>
-    </tr>
-  `).join('');
+  if (state.trades.length === 0) { tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>'; return; }
+  tbody.innerHTML = state.trades.map(t => `<tr><td>${t.date}</td><td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td><td>${t.entry}</td><td>${t.target||'--'}</td><td>${t.stop||'--'}</td><td>${t.exit}</td><td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td><td>${t.conf||'--'}%</td><td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td><td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes||'--'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">×</button></td></tr>`).join('');
 }
 
 function updateTradeStats() {
@@ -2155,49 +1840,26 @@ function updateTradeStats() {
   document.getElementById('tl-total').textContent = trades.length;
   const wins = trades.filter(t => t.outcome === 'WIN').length;
   document.getElementById('tl-winrate').textContent = trades.length ? Math.round((wins/trades.length)*100) + '%' : '--%';
-  const grossWin = trades.filter(t => t.outcome === 'WIN').reduce((a, t) => a + Math.abs(parseFloat(t.plPts) || 0), 0);
-  const grossLoss = trades.filter(t => t.outcome === 'LOSS').reduce((a, t) => a + Math.abs(parseFloat(t.plPts) || 0), 0);
-  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin / grossLoss).toFixed(2) : grossWin > 0 ? '∞' : '--';
+  const grossWin = trades.filter(t => t.outcome === 'WIN').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
+  const grossLoss = trades.filter(t => t.outcome === 'LOSS').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
+  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin/grossLoss).toFixed(2) : grossWin > 0 ? '∞' : '--';
   const avgConf = trades.filter(t => t.conf).reduce((a, t) => a + parseFloat(t.conf), 0) / (trades.filter(t => t.conf).length || 1);
   document.getElementById('tl-avg-conf').textContent = trades.length ? Math.round(avgConf) + '%' : '--%';
 }
 
-function deleteTrade(id) {
-  state.trades = state.trades.filter(t => t.id !== id);
-  renderTrades();
-  updateTradeStats();
-  saveToStorage();
-}
-
-function clearTradeLog() {
-  if (confirm('Clear all trade history?')) {
-    state.trades = [];
-    renderTrades();
-    updateTradeStats();
-    saveToStorage();
-  }
-}
+function deleteTrade(id) { state.trades = state.trades.filter(t => t.id !== id); renderTrades(); updateTradeStats(); saveToStorage(); }
+function clearTradeLog() { if (confirm('Clear all trade history?')) { state.trades = []; renderTrades(); updateTradeStats(); saveToStorage(); } }
 
 // ===================== STORAGE =====================
 function saveToStorage() {
-  try {
-    localStorage.setItem('gex_state', JSON.stringify({ trades: state.trades, snapshots: state.snapshots, weights: state.weights, lastBias: state.lastBias, lastConf: state.lastConf }));
-  } catch(e) {}
+  try { localStorage.setItem('gex_state', JSON.stringify({ trades: state.trades, snapshots: state.snapshots, weights: state.weights, lastBias: state.lastBias, lastConf: state.lastConf })); } catch(e) {}
 }
-
 function loadFromStorage() {
   try {
     const saved = JSON.parse(localStorage.getItem('gex_state') || '{}');
     if (saved.trades) state.trades = saved.trades;
     if (saved.snapshots) state.snapshots = saved.snapshots;
-    if (saved.weights) {
-      state.weights = { ...state.weights, ...saved.weights };
-      Object.entries(state.weights).forEach(([k, v]) => {
-        const el = document.getElementById('w-' + k);
-        if (el) el.value = v;
-      });
-      updateWeights();
-    }
+    if (saved.weights) { state.weights = { ...state.weights, ...saved.weights }; Object.entries(state.weights).forEach(([k, v]) => { const el = document.getElementById('w-' + k); if (el) el.value = v; }); updateWeights(); }
     if (saved.lastBias) state.lastBias = saved.lastBias;
     if (saved.lastConf) state.lastConf = saved.lastConf;
     renderSnapshots();
