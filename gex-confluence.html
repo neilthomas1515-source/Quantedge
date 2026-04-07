@@ -1052,8 +1052,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 <script>
 // ===================== CONFIG =====================
-// Cloudflare Worker proxy handles CORS + API key
-const PROXY = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
+const FLASHALPHA_API_KEY = 'cpnJIDWhnVQOKJBrHnmo0wMOmUAevA0x2zK6bxhY';
+const FA_BASE = 'https://lab.flashalpha.com';
 
 // ===================== STATE =====================
 const state = {
@@ -1109,47 +1109,21 @@ async function fetchTicker(symbol) {
   setDotStatus(sym, 'loading');
 
   try {
-    // Route through Cloudflare Worker proxy which handles CORS + API key
-    const [levResp, gexResp] = await Promise.all([
-      fetch(`${PROXY}?symbol=${symbol}&endpoint=levels`),
-      fetch(`${PROXY}?symbol=${symbol}&endpoint=gex`)
+    const headers = { 'X-Api-Key': FLASHALPHA_API_KEY };
+
+    // Fetch summary + levels in parallel (2 calls per ticker)
+    const [sumResp, levResp] = await Promise.all([
+      fetch(`${FA_BASE}/v1/exposure/summary/${symbol}`, { headers }),
+      fetch(`${FA_BASE}/v1/exposure/levels/${symbol}`, { headers })
     ]);
 
-    if (!levResp.ok) {
-      const err = await levResp.text();
-      throw new Error(`Levels HTTP ${levResp.status}: ${err.slice(0,120)}`);
+    if (!sumResp.ok || !levResp.ok) {
+      const err = await sumResp.text();
+      throw new Error(`HTTP ${sumResp.status}: ${err.slice(0,100)}`);
     }
 
+    const summary = await sumResp.json();
     const levels  = await levResp.json();
-    const gexData = gexResp.ok ? await gexResp.json() : null;
-
-    // Compute net GEX and regime from per-strike data
-    let netGex = 0, regime = 'undetermined';
-    if (gexData) {
-      // Try different response shapes
-      if (Array.isArray(gexData.strikes)) {
-        netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
-      } else if (Array.isArray(gexData.data)) {
-        netGex = gexData.data.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
-      } else if (typeof gexData.net_gex === 'number') {
-        netGex = gexData.net_gex;
-      }
-      regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
-    }
-
-    // Use underlying_price from levels if available
-    const price = levels.underlying_price || 0;
-
-    const summary = {
-      underlying_price: price,
-      gamma_flip: levels.levels?.gamma_flip,
-      regime,
-      exposures: { net_gex: netGex, net_dex: 0, net_vex: 0, net_chex: 0 },
-      interpretation: {},
-      hedging_estimate: {},
-      zero_dte: { pct_of_total_gex: 0 },
-      as_of: new Date().toISOString()
-    };
 
     state.liveData[sym] = { summary, levels, fetchedAt: new Date() };
     populateTickerFields(sym, summary, levels);
@@ -1158,8 +1132,8 @@ async function fetchTicker(symbol) {
   } catch(e) {
     console.error(`FlashAlpha error for ${symbol}:`, e);
     setDotStatus(sym, 'error');
-    const statusEl = document.getElementById(`status-${sym}`);
-    if (statusEl) { statusEl.textContent = 'ERR'; statusEl.style.color = 'var(--red)'; }
+    document.getElementById(`status-${sym}`).textContent = 'ERR';
+    document.getElementById(`status-${sym}`).style.color = 'var(--red)';
     return false;
   }
 }
