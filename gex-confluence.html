@@ -1758,7 +1758,7 @@ RISK FLAGS:
 [any specific risks, news events, or conflicting signals to watch]`;
 
   try {
-    const resp = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?endpoint=ai', {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
@@ -1798,7 +1798,7 @@ Current snapshot: Price ${snap.price||'N/A'} | GEX Change: ${snap.gexChange||'N/
 Morning bias: ${state.lastBias} | Confidence: ${state.lastConf}%
 In 3-5 sentences: Is the morning bias holding? What's changed? What's the highest probability next move? Any level to watch?`;
   try {
-    const resp = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?endpoint=ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
+    const resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
     const data = await resp.json();
     output.classList.remove('loading-dots');
     output.textContent = data.content?.map(b => b.text || '').join('') || 'Error.';
