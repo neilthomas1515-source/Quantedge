@@ -1763,9 +1763,7 @@ RISK FLAGS:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
     });
-    const data = await resp.json();
-    output.classList.remove('loading-dots');
-    output.textContent = data.content?.map(b => b.text || '').join('') || 'Error generating analysis.';
+    const rawText = await resp.text(); output.classList.remove('loading-dots'); try { const data = JSON.parse(rawText); output.textContent = data.content?.map(b => b.text || '').join('') || rawText; } catch(e2) { output.textContent = rawText; }
   } catch(e) {
     output.classList.remove('loading-dots');
     output.textContent = 'Error connecting to AI.\n\n' + e.message;
