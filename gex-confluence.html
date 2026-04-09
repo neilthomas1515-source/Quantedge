@@ -99,6 +99,25 @@ body::before {
 @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
 @keyframes pulse-yellow { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+/* ES PRICE DISPLAY */
+#es-price-display {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  background: rgba(0,212,255,0.06);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 3px;
+  padding: 3px 10px;
+  display: none;
+}
+#es-fv-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  margin-left: 4px;
+}
+
 .regime-badge {
   font-family: 'Orbitron', monospace;
   font-size: 9px;
@@ -129,6 +148,16 @@ body::before {
 #fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 #last-fetch { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
 
+/* AUTO-REFRESH TIMER */
+#refresh-timer {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  display: none;
+}
+#refresh-timer.urgent { color: var(--yellow); }
+#refresh-timer.very-urgent { color: var(--red); animation: pulse-red 1s infinite; }
+
 /* ALERTS BAR */
 #alerts-bar {
   background: var(--bg2);
@@ -153,7 +182,24 @@ body::before {
 .alert-danger { background: rgba(255,51,102,0.15); color: var(--red); border: 1px solid rgba(255,51,102,0.3); animation: pulse-red 2s infinite; }
 .alert-info { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
 .alert-success { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+.alert-regime-flip { background: rgba(255,204,0,0.2); color: var(--yellow); border: 1px solid var(--yellow); animation: pulse-yellow 1s infinite; font-weight: 700; }
 @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* REGIME CHANGE BANNER */
+#regime-change-banner {
+  display: none;
+  background: rgba(255,204,0,0.12);
+  border-top: 2px solid var(--yellow);
+  border-bottom: 2px solid var(--yellow);
+  padding: 10px 20px;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 2px;
+  text-align: center;
+  animation: pulse-yellow 1s infinite;
+}
 
 /* TABS */
 #tab-bar {
@@ -207,24 +253,6 @@ body::before {
 }
 .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* LIVE FIELD INDICATOR */
-.live-field { position: relative; }
-.live-field input[data-live="true"], .live-field select[data-live="true"] {
-  border-color: rgba(0,212,255,0.4);
-  background: rgba(0,212,255,0.03);
-}
-.live-badge {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 8px;
-  color: var(--cyan2);
-  letter-spacing: 1px;
-  pointer-events: none;
-}
-
 /* FORM ELEMENTS */
 .field-row {
   display: grid;
@@ -266,6 +294,51 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   cursor: pointer;
 }
+
+/* ES LEVELS BOX - INTRADAY */
+#es-levels-box {
+  display: none;
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.25);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+#es-levels-box .es-levels-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--cyan2);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.es-level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.es-level-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 6px 8px;
+  text-align: center;
+}
+.es-level-name { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.es-level-value { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; margin-top: 2px; }
+.es-level-spx { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); margin-top: 1px; }
+
+/* DEX TREND INDICATOR */
+.dex-trend {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+.dex-bearish { background: rgba(255,51,102,0.15); color: var(--red); }
+.dex-bullish { background: rgba(0,255,136,0.1); color: var(--green); }
+.dex-neutral { background: rgba(74,106,128,0.2); color: var(--dim); }
 
 /* TICKER TABS */
 .ticker-tabs { display: flex; gap: 4px; margin-bottom: 12px; align-items: center; }
@@ -473,6 +546,28 @@ input[type="range"]::-webkit-slider-thumb {
 .exp-value { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; margin-top: 2px; }
 .exp-interp { font-family: 'Rajdhani', monospace; font-size: 10px; color: var(--text2); margin-top: 2px; line-height: 1.3; }
 
+/* PROXIMITY ALERT ROW */
+#proximity-alerts {
+  display: none;
+  background: rgba(255,204,0,0.06);
+  border: 1px solid rgba(255,204,0,0.2);
+  border-radius: 3px;
+  padding: 6px 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 20px 0 20px;
+}
+#proximity-alerts.visible { display: flex; }
+.prox-item {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--yellow);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .grid-3 { grid-template-columns: 1fr 1fr; }
@@ -480,11 +575,13 @@ input[type="range"]::-webkit-slider-thumb {
   .gex-live-row { grid-template-columns: 1fr 1fr; }
   .col-span-2 { grid-column: span 1; }
   .col-span-3 { grid-column: span 2; }
+  .es-level-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .col-span-2, .col-span-3 { grid-column: span 1; }
   .gex-live-row { grid-template-columns: 1fr 1fr; }
+  .es-level-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -494,9 +591,10 @@ input[type="range"]::-webkit-slider-thumb {
 <div id="header">
   <div class="logo-block">
     <div class="logo-main">GEX CONFLUENCE</div>
-    <div class="logo-sub">ENGINE v1.0</div>
+    <div class="logo-sub">ENGINE v2.0</div>
   </div>
   <div class="header-right">
+    <div id="es-price-display">ES <span id="es-price-val">--</span><span id="es-fv-badge">â‰ˆSPX</span></div>
     <span id="clock">--:--:-- EST</span>
     <span id="session-badge" class="session-closed">LOADING</span>
   </div>
@@ -507,45 +605,53 @@ input[type="range"]::-webkit-slider-thumb {
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-spy"></div>
     <span style="color:var(--text2)">SPY</span>
-    <span id="status-spy" style="color:var(--text3)">—</span>
+    <span id="status-spy" style="color:var(--text3)">â€”</span>
     <span id="regime-spy"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-spx"></div>
     <span style="color:var(--text2)">SPX</span>
-    <span id="status-spx" style="color:var(--text3)">—</span>
+    <span id="status-spx" style="color:var(--text3)">â€”</span>
     <span id="regime-spx"></span>
+    <span id="dex-trend-spx"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-qqq"></div>
     <span style="color:var(--text2)">QQQ</span>
-    <span id="status-qqq" style="color:var(--text3)">—</span>
+    <span id="status-qqq" style="color:var(--text3)">â€”</span>
     <span id="regime-qqq"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-vix"></div>
     <span style="color:var(--text2)">VIX</span>
-    <span id="status-vix" style="color:var(--text3)">—</span>
+    <span id="status-vix" style="color:var(--text3)">â€”</span>
     <span id="regime-vix"></span>
   </div>
   <span id="last-fetch">Not fetched yet</span>
-  <button id="fetch-btn" onclick="fetchAllGEXData()">⚡ FETCH LIVE DATA</button>
+  <span id="refresh-timer">Next refresh: --:--</span>
+  <button id="fetch-btn" onclick="fetchAllGEXData()">âš¡ FETCH LIVE DATA</button>
 </div>
+
+<!-- REGIME CHANGE BANNER -->
+<div id="regime-change-banner"></div>
+
+<!-- PROXIMITY ALERTS ROW -->
+<div id="proximity-alerts"></div>
 
 <!-- ALERTS BAR -->
 <div id="alerts-bar">
   <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ALERTS:</span>
-  <span id="no-alerts" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">— no active alerts —</span>
+  <span id="no-alerts" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">â€” no active alerts â€”</span>
 </div>
 
 <!-- TABS -->
 <div id="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('gameplan')">🎯 Game Plan</button>
-  <button class="tab-btn" onclick="switchTab('intraday')">⚡ Intraday</button>
-  <button class="tab-btn" onclick="switchTab('gex')">📊 GEX Data</button>
-  <button class="tab-btn" onclick="switchTab('patterns')">📐 Patterns</button>
-  <button class="tab-btn" onclick="switchTab('weights')">⚙️ Weights</button>
-  <button class="tab-btn" onclick="switchTab('tradelog')">📋 Trade Log</button>
+  <button class="tab-btn active" onclick="switchTab('gameplan')">ðŸŽ¯ Game Plan</button>
+  <button class="tab-btn" onclick="switchTab('intraday')">âš¡ Intraday</button>
+  <button class="tab-btn" onclick="switchTab('gex')">ðŸ“Š GEX Data</button>
+  <button class="tab-btn" onclick="switchTab('patterns')">ðŸ“ Patterns</button>
+  <button class="tab-btn" onclick="switchTab('weights')">âš™ï¸ Weights</button>
+  <button class="tab-btn" onclick="switchTab('tradelog')">ðŸ“‹ Trade Log</button>
 </div>
 
 <!-- ======================== GAME PLAN TAB ======================== -->
@@ -579,7 +685,7 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <div class="field-row"><div class="field-label">Put/Call Ratio</div><input type="number" id="gp-pcr" placeholder="0.85" step="0.01"></div>
         <div class="field-row"><div class="field-label">VIX9D vs VIX</div>
-          <select id="gp-vix9d"><option value="">-- select --</option><option value="contango">VIX9D &lt; VIX (Normal/Calm)</option><option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option><option value="flat">VIX9D ≈ VIX (Flat)</option></select>
+          <select id="gp-vix9d"><option value="">-- select --</option><option value="contango">VIX9D &lt; VIX (Normal/Calm)</option><option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option><option value="flat">VIX9D â‰ˆ VIX (Flat)</option></select>
         </div>
         <div class="field-row"><div class="field-label">VVIX</div><input type="number" id="gp-vvix" placeholder="95" step="0.1"></div>
       </div>
@@ -600,7 +706,7 @@ input[type="range"]::-webkit-slider-thumb {
           <select id="gp-news-impact" onchange="updateNewsBanner()"><option value="none">No major events</option><option value="low">Low impact</option><option value="medium">Medium impact</option><option value="high">HIGH IMPACT</option><option value="fomc">FOMC / Fed</option></select>
         </div>
         <div class="field-row"><div class="field-label">Event / Time</div><input type="text" id="gp-news-event" placeholder="CPI @ 8:30am EST"></div>
-        <div id="news-day-banner" class="news-day-banner mt-8">⚠ HIGH IMPACT NEWS DAY — Confidence score will be reduced.</div>
+        <div id="news-day-banner" class="news-day-banner mt-8">âš  HIGH IMPACT NEWS DAY â€” Confidence score will be reduced.</div>
       </div>
     </div><!-- /LEFT -->
 
@@ -636,16 +742,16 @@ input[type="range"]::-webkit-slider-thumb {
             </div>
             <div style="flex:1">
               <div class="level-grid">
-                <div class="level-box"><div class="level-name">GEX FLIP</div><div class="level-value" id="out-flip" style="color:var(--yellow)">---</div></div>
-                <div class="level-box"><div class="level-name">TARGET</div><div class="level-value" id="out-target" style="color:var(--green)">---</div></div>
-                <div class="level-box"><div class="level-name">VR TOP</div><div class="level-value" id="out-vr-top" style="color:var(--red)">---</div></div>
-                <div class="level-box"><div class="level-name">VR BOTTOM</div><div class="level-value" id="out-vr-bot" style="color:var(--green)">---</div></div>
+                <div class="level-box"><div class="level-name">GEX FLIP (ES)</div><div class="level-value" id="out-flip" style="color:var(--yellow)">---</div></div>
+                <div class="level-box"><div class="level-name">TARGET (ES)</div><div class="level-value" id="out-target" style="color:var(--green)">---</div></div>
+                <div class="level-box"><div class="level-name">VR TOP (ES)</div><div class="level-value" id="out-vr-top" style="color:var(--red)">---</div></div>
+                <div class="level-box"><div class="level-name">VR BOTTOM (ES)</div><div class="level-value" id="out-vr-bot" style="color:var(--green)">---</div></div>
               </div>
             </div>
           </div>
         </div>
         <div class="mt-12 inline-flex" style="justify-content:center;gap:10px">
-          <button class="btn btn-primary" onclick="runScoring()">⚡ RUN SCORING ENGINE</button>
+          <button class="btn btn-primary" onclick="runScoring()">âš¡ RUN SCORING ENGINE</button>
           <button class="btn btn-ghost btn-sm" onclick="resetScoring()">RESET</button>
         </div>
       </div>
@@ -667,6 +773,7 @@ input[type="range"]::-webkit-slider-thumb {
           <select id="gp-yield"><option value="">-- select --</option><option value="spike">Spiking</option><option value="rising">Rising</option><option value="flat">Flat</option><option value="falling">Falling</option><option value="drop">Dropping</option></select>
         </div>
         <div class="field-row"><div class="field-label">VIX Level</div><input type="number" id="gp-vix" placeholder="18.5" step="0.1"></div>
+        <div class="field-row"><div class="field-label">ES Basis Offset</div><input type="number" id="es-basis" placeholder="2" step="0.25" value="2" title="Points added to SPX to get ES price (usually 0-5)"></div>
       </div>
 
     </div><!-- /CENTER -->
@@ -677,13 +784,13 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="panel-title inline-flex">
           <span>AI Game Plan Analysis</span>
           <div class="spacer"></div>
-          <button class="btn btn-primary btn-sm" onclick="generateAIGamePlan()">GENERATE ▶</button>
+          <button class="btn btn-primary btn-sm" onclick="generateAIGamePlan()">GENERATE â–¶</button>
         </div>
         <div id="ai-output" style="min-height:300px">Enter your data in the left panels, run the scoring engine, then hit GENERATE to produce your daily game plan.</div>
       </div>
       <div class="panel">
-        <div class="panel-title">Key Levels Summary</div>
-        <div id="levels-summary"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— levels will populate after scoring —</div></div>
+        <div class="panel-title">Key ES Levels Summary</div>
+        <div id="levels-summary"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” levels will populate after scoring â€”</div></div>
       </div>
     </div><!-- /RIGHT -->
 
@@ -692,11 +799,76 @@ input[type="range"]::-webkit-slider-thumb {
 
 <!-- ======================== INTRADAY TAB ======================== -->
 <div id="tab-intraday" class="tab-panel">
+
+  <!-- ES LEVELS BOX - auto-populated from SPX live data -->
+  <div id="es-levels-box">
+    <div class="es-levels-title">âš¡ LIVE ES KEY LEVELS (converted from SPX)</div>
+    <div class="es-level-grid">
+      <div class="es-level-item">
+        <div class="es-level-name">GEX FLIP</div>
+        <div class="es-level-value" id="es-flip-val" style="color:var(--yellow)">--</div>
+        <div class="es-level-spx" id="es-flip-spx">SPX: --</div>
+      </div>
+      <div class="es-level-item">
+        <div class="es-level-name">CALL WALL</div>
+        <div class="es-level-value" id="es-callwall-val" style="color:var(--green)">--</div>
+        <div class="es-level-spx" id="es-callwall-spx">SPX: --</div>
+      </div>
+      <div class="es-level-item">
+        <div class="es-level-name">PUT WALL</div>
+        <div class="es-level-value" id="es-putwall-val" style="color:var(--red)">--</div>
+        <div class="es-level-spx" id="es-putwall-spx">SPX: --</div>
+      </div>
+      <div class="es-level-item">
+        <div class="es-level-name">VR TOP</div>
+        <div class="es-level-value" id="es-vrtop-val" style="color:var(--red)">--</div>
+        <div class="es-level-spx" id="es-vrtop-spx">SPX: --</div>
+      </div>
+      <div class="es-level-item">
+        <div class="es-level-name">VR BOTTOM</div>
+        <div class="es-level-value" id="es-vrbot-val" style="color:var(--green)">--</div>
+        <div class="es-level-spx" id="es-vrbot-spx">SPX: --</div>
+      </div>
+      <div class="es-level-item">
+        <div class="es-level-name">0DTE MAGNET</div>
+        <div class="es-level-value" id="es-magnet-val" style="color:var(--orange)">--</div>
+        <div class="es-level-spx" id="es-magnet-spx">SPX: --</div>
+      </div>
+    </div>
+    <!-- DEX/VEX/CHEX summary row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <div style="text-align:center">
+        <div class="es-level-name">DEX (Delta)</div>
+        <div class="es-level-value" id="id-dex-val" style="font-size:11px">--</div>
+        <div class="es-level-spx" id="id-dex-trend">trend: --</div>
+      </div>
+      <div style="text-align:center">
+        <div class="es-level-name">VEX (Vanna)</div>
+        <div class="es-level-value" id="id-vex-val" style="font-size:11px">--</div>
+        <div class="es-level-spx" id="id-vex-interp">--</div>
+      </div>
+      <div style="text-align:center">
+        <div class="es-level-name">CHEX (Charm)</div>
+        <div class="es-level-value" id="id-chex-val" style="font-size:11px">--</div>
+        <div class="es-level-spx" id="id-chex-interp">--</div>
+      </div>
+    </div>
+    <!-- Regime + GEX direction -->
+    <div style="display:flex;gap:10px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">SPX REGIME:</div>
+      <div id="id-regime-badge"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-left:12px">NET GEX:</div>
+      <div id="id-net-gex" style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700">--</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-left:12px">0DTE%:</div>
+      <div id="id-zero-dte" style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--orange)">--</div>
+    </div>
+  </div>
+
   <div class="grid-2">
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">Intraday GEX Update</div>
-        <div class="field-row"><div class="field-label">Current Price</div><input type="number" id="id-price" placeholder="5641.25" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Current ES Price</div><input type="number" id="id-price" placeholder="5641.25" step="0.25"></div>
         <div class="field-row"><div class="field-label">Net GEX Change</div>
           <select id="id-gex-change"><option value="">-- select --</option><option value="more-neg">More Negative (amplifying)</option><option value="less-neg">Less Negative (absorbing)</option><option value="flipped-neg">Flipped Negative</option><option value="flipped-pos">Flipped Positive</option><option value="more-pos">More Positive (dampening)</option><option value="no-change">No significant change</option></select>
         </div>
@@ -711,12 +883,12 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <div class="field-row"><div class="field-label">Notes</div><textarea id="id-notes" placeholder="What's happening right now..."></textarea></div>
         <div class="mt-8 inline-flex">
-          <button class="btn btn-primary" onclick="logSnapshot()">📸 LOG SNAPSHOT</button>
-          <button class="btn btn-ghost btn-sm" onclick="generateIntradayUpdate()">AI UPDATE ▶</button>
+          <button class="btn btn-primary" onclick="logSnapshot()">ðŸ“¸ LOG SNAPSHOT</button>
+          <button class="btn btn-ghost btn-sm" onclick="generateIntradayUpdate()">AI UPDATE â–¶</button>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">Session Windows — Live</div>
+        <div class="panel-title">Session Windows â€” Live</div>
         <div id="session-windows-intraday"></div>
         <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">Next key window: <span id="next-window" style="color:var(--cyan)">--</span></div>
       </div>
@@ -724,7 +896,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">AI Intraday Analysis</div>
-        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;min-height:150px;color:var(--text)">Log a snapshot and hit AI UPDATE to get current analysis.</div>
+        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;min-height:150px;color:var(--text)">Fetch live data first, then log a snapshot and hit AI UPDATE to get current analysis with full GEX context.</div>
       </div>
       <div class="panel">
         <div class="panel-title inline-flex">
@@ -732,7 +904,7 @@ input[type="range"]::-webkit-slider-thumb {
           <div class="spacer"></div>
           <button class="btn btn-ghost btn-sm" onclick="clearSnapshots()">CLEAR</button>
         </div>
-        <div id="snapshot-timeline"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— no snapshots logged today —</div></div>
+        <div id="snapshot-timeline"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” no snapshots logged today â€”</div></div>
       </div>
     </div>
   </div>
@@ -747,28 +919,26 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="ticker-tab" onclick="switchTicker(this, 'qqq')">QQQ<div class="ticker-live-dot" id="live-dot-qqq"></div></div>
     <div class="ticker-tab" onclick="switchTicker(this, 'vix')">VIX<div class="ticker-live-dot" id="live-dot-vix"></div></div>
     <div style="flex:1"></div>
-    <button class="btn btn-ghost btn-sm" onclick="fetchAllGEXData()" style="font-size:9px">⚡ REFRESH ALL</button>
+    <button class="btn btn-ghost btn-sm" onclick="fetchAllGEXData()" style="font-size:9px">âš¡ REFRESH ALL</button>
   </div>
 
   <!-- SPY -->
   <div id="gex-spy" class="ticker-panel active">
-    <!-- LIVE SUMMARY ROW -->
     <div class="gex-live-row" id="spy-live-row" style="display:none">
       <div class="gex-live-card"><div class="gex-live-label">PRICE</div><div class="gex-live-value" id="spy-live-price" style="color:var(--text)">--</div></div>
       <div class="gex-live-card"><div class="gex-live-label">NET GEX</div><div class="gex-live-value" id="spy-live-gex" style="color:var(--cyan)">--</div></div>
       <div class="gex-live-card"><div class="gex-live-label">REGIME</div><div class="gex-live-value" id="spy-live-regime" style="color:var(--text2)">--</div></div>
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spy-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
-    <!-- DEX / VEX / CHEX exposure mini -->
     <div class="exposure-mini-grid" id="spy-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX (Delta Exposure)</div><div class="exp-value" id="spy-dex-val">--</div><div class="exp-interp" id="spy-dex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">VEX (Vanna Exposure)</div><div class="exp-value" id="spy-vex-val">--</div><div class="exp-interp" id="spy-vex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX (Charm Exposure)</div><div class="exp-value" id="spy-chex-val">--</div><div class="exp-interp" id="spy-chex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="spy-hedge-val">--</div><div class="exp-interp" id="spy-hedge-dir">—</div></div>
+      <div class="exp-box"><div class="exp-label">DEX (Delta Exposure)</div><div class="exp-value" id="spy-dex-val">--</div><div class="exp-interp" id="spy-dex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">VEX (Vanna Exposure)</div><div class="exp-value" id="spy-vex-val">--</div><div class="exp-interp" id="spy-vex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX (Charm Exposure)</div><div class="exp-value" id="spy-chex-val">--</div><div class="exp-interp" id="spy-chex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="spy-hedge-val">--</div><div class="exp-interp" id="spy-hedge-dir">â€”</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPY — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spy-data-age"></span></div>
+        <div class="panel-title">SPY â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spy-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spy-net-gex" placeholder="-230.9"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spy-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -782,7 +952,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spy-put-oi" placeholder="1200" step="0.1"></div>
       </div>
       <div class="panel">
-        <div class="panel-title">SPY — VR Range Data</div>
+        <div class="panel-title">SPY â€” VR Range Data</div>
         <div class="section-header">Option Volume Range</div>
         <div class="field-row"><div class="field-label">VR Top</div><input type="number" id="spy-vr-top" placeholder="656" step="0.5"></div>
         <div class="field-row"><div class="field-label">VR Bottom</div><input type="number" id="spy-vr-bot" placeholder="624" step="0.5"></div>
@@ -809,14 +979,14 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spx-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
     <div class="exposure-mini-grid" id="spx-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="spx-dex-val">--</div><div class="exp-interp" id="spx-dex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="spx-vex-val">--</div><div class="exp-interp" id="spx-vex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="spx-chex-val">--</div><div class="exp-interp" id="spx-chex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="spx-hedge-val">--</div><div class="exp-interp" id="spx-hedge-dir">—</div></div>
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="spx-dex-val">--</div><div class="exp-interp" id="spx-dex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="spx-vex-val">--</div><div class="exp-interp" id="spx-vex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="spx-chex-val">--</div><div class="exp-interp" id="spx-chex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="spx-hedge-val">--</div><div class="exp-interp" id="spx-hedge-dir">â€”</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPX — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spx-data-age"></span></div>
+        <div class="panel-title">SPX â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spx-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spx-net-gex" placeholder="-850.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spx-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -830,7 +1000,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spx-put-oi" placeholder="420" step="0.1"></div>
       </div>
       <div class="panel">
-        <div class="panel-title">SPX — VR Range Data</div>
+        <div class="panel-title">SPX â€” VR Range Data</div>
         <div class="section-header">Option Volume Range</div>
         <div class="field-row"><div class="field-label">VR Top</div><input type="number" id="spx-vr-top" placeholder="5720" step="5"></div>
         <div class="field-row"><div class="field-label">VR Bottom</div><input type="number" id="spx-vr-bot" placeholder="5480" step="5"></div>
@@ -857,14 +1027,14 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="qqq-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
     <div class="exposure-mini-grid" id="qqq-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="qqq-dex-val">--</div><div class="exp-interp" id="qqq-dex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="qqq-vex-val">--</div><div class="exp-interp" id="qqq-vex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="qqq-chex-val">--</div><div class="exp-interp" id="qqq-chex-interp">—</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (↑1%)</div><div class="exp-value" id="qqq-hedge-val">--</div><div class="exp-interp" id="qqq-hedge-dir">—</div></div>
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="qqq-dex-val">--</div><div class="exp-interp" id="qqq-dex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="qqq-vex-val">--</div><div class="exp-interp" id="qqq-vex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="qqq-chex-val">--</div><div class="exp-interp" id="qqq-chex-interp">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="qqq-hedge-val">--</div><div class="exp-interp" id="qqq-hedge-dir">â€”</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">QQQ — GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="qqq-data-age"></span></div>
+        <div class="panel-title">QQQ â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="qqq-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="qqq-net-gex" placeholder="-95.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="qqq-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -878,7 +1048,7 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">QQQ — Context Notes</div>
+        <div class="panel-title">QQQ â€” Context Notes</div>
         <div class="section-header">NQ Confluence</div>
         <textarea id="qqq-notes" placeholder="QQQ-specific observations, NQ correlation..." style="min-height:120px;width:100%"></textarea>
         <div class="section-header mt-12">SPY vs SPX Alignment</div>
@@ -886,7 +1056,7 @@ input[type="range"]::-webkit-slider-thumb {
           <select id="spy-spx-align"><option value="">--</option><option value="both-neg">Both Negative (high conviction)</option><option value="both-pos">Both Positive (high conviction)</option><option value="diverge">Diverging (reduce confidence)</option><option value="mixed">Mixed signals</option></select>
         </div>
         <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          When SPY + SPX GEX agree → HIGH CONVICTION<br>When they diverge → REDUCE SIZE / STAY OUT
+          When SPY + SPX GEX agree â†’ HIGH CONVICTION<br>When they diverge â†’ REDUCE SIZE / STAY OUT
         </div>
       </div>
     </div>
@@ -902,7 +1072,7 @@ input[type="range"]::-webkit-slider-thumb {
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">VIX — Options Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="vix-data-age"></span></div>
+        <div class="panel-title">VIX â€” Options Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="vix-data-age"></span></div>
         <div class="section-header">Vol Options Positioning</div>
         <div class="field-row"><div class="field-label">VIX Net GEX Dir</div>
           <select id="vix-gex-dir"><option value="">--</option><option value="call-heavy">Call Heavy (vol higher)</option><option value="put-heavy">Put Heavy (vol lower)</option><option value="neutral">Neutral</option></select>
@@ -916,7 +1086,7 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">VIX — Context</div>
+        <div class="panel-title">VIX â€” Context</div>
         <div class="section-header">Term Structure</div>
         <div class="field-row"><div class="field-label">VX Term Structure</div>
           <select id="vx-ts"><option value="">--</option><option value="contango">Contango (normal)</option><option value="flat">Flat (uncertainty)</option><option value="inversion">Inversion (fear)</option></select>
@@ -956,7 +1126,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div id="pattern-score-display" style="text-align:center;padding:10px">
           <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900" id="pat-score-num" style="color:var(--text3)">--</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-top:4px">PATTERN CONFLUENCE SCORE</div>
-          <div id="pat-bias-label" style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text2);margin-top:6px">—</div>
+          <div id="pat-bias-label" style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text2);margin-top:6px">â€”</div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="calcPatternScore()" style="width:100%">CALCULATE</button>
       </div>
@@ -978,7 +1148,7 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="divider"></div>
       <div class="section-header">Total Weight</div>
       <div id="weight-total" style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--cyan);text-align:center;padding:8px">100%</div>
-      <div id="weight-warning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--orange);text-align:center;margin-top:4px">⚠ Weights should sum to 100%</div>
+      <div id="weight-warning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--orange);text-align:center;margin-top:4px">âš  Weights should sum to 100%</div>
       <div class="divider"></div>
       <div class="section-header">News Day Penalty</div>
       <div class="weight-row"><div class="weight-label">Confidence Reduction</div><input type="range" id="w-news-penalty" min="0" max="50" value="20" oninput="updateWeights()"><div class="weight-val" id="wv-news-penalty">20%</div></div>
@@ -986,6 +1156,12 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="divider"></div>
       <div class="section-header">SPY/SPX Divergence Penalty</div>
       <div class="weight-row"><div class="weight-label">Divergence Penalty</div><input type="range" id="w-div-penalty" min="0" max="30" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-div-penalty">15%</div></div>
+      <div class="divider"></div>
+      <div class="section-header">Alert Thresholds</div>
+      <div class="weight-row"><div class="weight-label">Flip Proximity (pts)</div><input type="range" id="w-flip-proximity" min="2" max="20" value="8" oninput="updateWeights()"><div class="weight-val" id="wv-flip-proximity">8</div></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ES points from GEX flip to trigger proximity alert</div>
+      <div class="weight-row"><div class="weight-label">VR Proximity (pts)</div><input type="range" id="w-vr-proximity" min="2" max="20" value="6" oninput="updateWeights()"><div class="weight-val" id="wv-vr-proximity">6</div></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ES points from VR boundary to trigger proximity alert</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
@@ -998,10 +1174,27 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
       <div class="panel">
+        <div class="panel-title">Auto-Refresh Settings</div>
+        <div class="field-row">
+          <div class="field-label">Auto-Refresh</div>
+          <select id="auto-refresh-interval" onchange="updateAutoRefresh()">
+            <option value="0">Off</option>
+            <option value="5">Every 5 min</option>
+            <option value="10">Every 10 min</option>
+            <option value="15" selected>Every 15 min</option>
+            <option value="30">Every 30 min</option>
+          </select>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px">
+          15min = 8 calls/fetch Ã— 9 fetches = 72 daily API calls<br>
+          Stays within FlashAlpha Basic plan limit
+        </div>
+      </div>
+      <div class="panel">
         <div class="panel-title">GEX Regime Reference</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:1.8;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          Negative GEX → Dealers SHORT gamma<br>→ AMPLIFIES moves in both directions<br>→ Widen stop expectations<br><br>
-          Positive GEX → Dealers LONG gamma<br>→ DAMPENS moves, mean-reversion bias<br>→ Tighter range, fades work better
+          Negative GEX â†’ Dealers SHORT gamma<br>â†’ AMPLIFIES moves in both directions<br>â†’ Widen stop expectations<br><br>
+          Positive GEX â†’ Dealers LONG gamma<br>â†’ DAMPENS moves, mean-reversion bias<br>â†’ Tighter range, fades work better
         </div>
       </div>
       <div class="panel">
@@ -1048,22 +1241,27 @@ input[type="range"]::-webkit-slider-thumb {
       </table>
     </div>
   </div>
-</div><!-- /tradelog -->
+</div>
 
 <script>
 // ===================== CONFIG =====================
-// Cloudflare Worker proxy handles CORS + API key
 const PROXY = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
 
 // ===================== STATE =====================
 const state = {
   snapshots: [],
   trades: [],
-  weights: { gex: 30, range: 20, pattern: 20, internals: 15, macro: 15, news_penalty: 20, div_penalty: 15 },
+  weights: { gex: 30, range: 20, pattern: 20, internals: 15, macro: 15, news_penalty: 20, div_penalty: 15, flip_proximity: 8, vr_proximity: 6 },
   lastScore: null,
   lastBias: 'NEUTRAL',
   lastConf: 0,
-  liveData: {}
+  liveData: {},
+  prevRegimes: {},       // track regime changes between fetches
+  prevDex: {},           // track DEX values between fetches for trend
+  autoRefreshInterval: null,
+  autoRefreshSecs: 0,
+  autoRefreshCountdown: 0,
+  fetchCount: 0
 };
 
 const BULL_PATTERNS = [
@@ -1093,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSessionWindows();
   setInterval(updateSessionWindows, 30000);
   setDefaultDate();
-  // Auto-fetch on load
+  updateAutoRefresh();
   fetchAllGEXData();
 });
 
@@ -1103,13 +1301,76 @@ function setDefaultDate() {
   document.getElementById('tl-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
+// ===================== ES CONVERSION =====================
+function getESBasis() {
+  return parseFloat(document.getElementById('es-basis').value) || 2;
+}
+
+// Convert SPX price to ES equivalent
+function spxToES(spxPrice) {
+  if (!spxPrice || spxPrice === 0) return 0;
+  return Math.round((spxPrice + getESBasis()) * 4) / 4; // round to nearest 0.25 (ES tick)
+}
+
+function fmtES(val) {
+  if (!val || val === 0) return '--';
+  return val.toFixed(2);
+}
+
+// ===================== AUTO-REFRESH =====================
+function updateAutoRefresh() {
+  const sel = document.getElementById('auto-refresh-interval');
+  const mins = parseInt(sel.value) || 0;
+
+  // Clear existing
+  if (state.autoRefreshInterval) {
+    clearInterval(state.autoRefreshInterval);
+    state.autoRefreshInterval = null;
+  }
+  if (state.countdownInterval) {
+    clearInterval(state.countdownInterval);
+    state.countdownInterval = null;
+  }
+
+  const timerEl = document.getElementById('refresh-timer');
+
+  if (mins === 0) {
+    timerEl.style.display = 'none';
+    return;
+  }
+
+  state.autoRefreshSecs = mins * 60;
+  state.autoRefreshCountdown = state.autoRefreshSecs;
+  timerEl.style.display = 'inline';
+
+  // Countdown ticker
+  state.countdownInterval = setInterval(() => {
+    state.autoRefreshCountdown--;
+    if (state.autoRefreshCountdown <= 0) {
+      state.autoRefreshCountdown = state.autoRefreshSecs;
+    }
+    const m = Math.floor(state.autoRefreshCountdown / 60);
+    const s = state.autoRefreshCountdown % 60;
+    timerEl.textContent = `Next refresh: ${m}:${String(s).padStart(2,'0')}`;
+    // Color urgency
+    timerEl.className = '';
+    if (state.autoRefreshCountdown <= 30) timerEl.classList.add('very-urgent');
+    else if (state.autoRefreshCountdown <= 60) timerEl.classList.add('urgent');
+  }, 1000);
+
+  // Actual fetch trigger
+  state.autoRefreshInterval = setInterval(() => {
+    fetchAllGEXData();
+    state.autoRefreshCountdown = state.autoRefreshSecs;
+  }, mins * 60 * 1000);
+}
+
 // ===================== FLASHALPHA LIVE DATA =====================
 async function fetchTicker(symbol) {
   const sym = symbol.toLowerCase();
   setDotStatus(sym, 'loading');
 
   try {
-    // Route through Cloudflare Worker proxy which handles CORS + API key
     const [levResp, gexResp] = await Promise.all([
       fetch(`${PROXY}?symbol=${symbol}&endpoint=levels`),
       fetch(`${PROXY}?symbol=${symbol}&endpoint=gex`)
@@ -1123,10 +1384,8 @@ async function fetchTicker(symbol) {
     const levels  = await levResp.json();
     const gexData = gexResp.ok ? await gexResp.json() : null;
 
-    // Compute net GEX and regime from per-strike data
     let netGex = 0, regime = 'undetermined';
     if (gexData) {
-      // Try different response shapes
       if (Array.isArray(gexData.strikes)) {
         netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
       } else if (Array.isArray(gexData.data)) {
@@ -1137,7 +1396,6 @@ async function fetchTicker(symbol) {
       regime = netGex >= 0 ? 'positive_gamma' : 'negative_gamma';
     }
 
-    // Use underlying_price from levels if available
     const price = levels.underlying_price || 0;
 
     const summary = {
@@ -1151,6 +1409,21 @@ async function fetchTicker(symbol) {
       as_of: new Date().toISOString()
     };
 
+    // --- REGIME CHANGE DETECTION ---
+    if (state.prevRegimes[sym] && state.prevRegimes[sym] !== regime && regime !== 'undetermined') {
+      fireRegimeChangeAlert(sym, state.prevRegimes[sym], regime);
+    }
+
+    // --- DEX TREND TRACKING ---
+    const prevDex = state.prevDex[sym] || null;
+    const newDex = summary.exposures.net_dex;
+    if (prevDex !== null && newDex !== 0) {
+      state.prevDex[sym] = { value: newDex, prev: prevDex.value };
+    } else if (newDex !== 0) {
+      state.prevDex[sym] = { value: newDex, prev: null };
+    }
+
+    state.prevRegimes[sym] = regime;
     state.liveData[sym] = { summary, levels, fetchedAt: new Date() };
     populateTickerFields(sym, summary, levels);
     setDotStatus(sym, 'live');
@@ -1167,9 +1440,9 @@ async function fetchTicker(symbol) {
 async function fetchAllGEXData() {
   const btn = document.getElementById('fetch-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ FETCHING...';
+  btn.textContent = 'â³ FETCHING...';
+  state.fetchCount++;
 
-  // Fetch all 4 tickers — each is 2 API calls = 8 total
   await Promise.all([
     fetchTicker('SPY'),
     fetchTicker('SPX'),
@@ -1183,12 +1456,243 @@ async function fetchAllGEXData() {
   document.getElementById('last-fetch').textContent = `Last fetch: ${estTime} EST`;
 
   btn.disabled = false;
-  btn.textContent = '⚡ FETCH LIVE DATA';
+  btn.textContent = 'âš¡ FETCH LIVE DATA';
 
-  // Auto-populate alignment field after fetch
   autoSetAlignment();
+
+  // After all tickers fetched â€” run proximity checks and populate intraday ES levels
+  populateIntradayESLevels();
+  runProximityAlerts();
+  runBiasChangeCheck();
 }
 
+// ===================== SPX â†’ ES INTRADAY POPULATE =====================
+function populateIntradayESLevels() {
+  const spxData = state.liveData['spx'];
+  if (!spxData) return;
+
+  const { summary, levels } = spxData;
+  const netGex = summary.exposures?.net_gex || 0;
+  const netDex = summary.exposures?.net_dex || 0;
+  const netVex = summary.exposures?.net_vex || 0;
+  const netChex = summary.exposures?.net_chex || 0;
+  const regime = summary.regime || 'undetermined';
+  const spxPrice = summary.underlying_price || 0;
+  const zeroPct = summary.zero_dte?.pct_of_total_gex || 0;
+  const interp = summary.interpretation || {};
+
+  // Key SPX levels
+  const spxFlip = levels.levels?.gamma_flip || 0;
+  const spxCallWall = levels.levels?.call_wall || 0;
+  const spxPutWall = levels.levels?.put_wall || 0;
+  const spxVrTop = parseFloat(document.getElementById('spx-vr-top').value) || 0;
+  const spxVrBot = parseFloat(document.getElementById('spx-vr-bot').value) || 0;
+  const spxMagnet = levels.levels?.zero_dte_magnet || 0;
+
+  // Convert all to ES
+  const setESLevel = (valId, spxId, spxVal) => {
+    const esVal = spxToES(spxVal);
+    const valEl = document.getElementById(valId);
+    const spxEl = document.getElementById(spxId);
+    if (valEl) valEl.textContent = esVal > 0 ? fmtES(esVal) : '--';
+    if (spxEl) spxEl.textContent = `SPX: ${spxVal > 0 ? spxVal.toFixed(2) : '--'}`;
+  };
+
+  setESLevel('es-flip-val',    'es-flip-spx',    spxFlip);
+  setESLevel('es-callwall-val','es-callwall-spx', spxCallWall);
+  setESLevel('es-putwall-val', 'es-putwall-spx',  spxPutWall);
+  setESLevel('es-vrtop-val',   'es-vrtop-spx',   spxVrTop);
+  setESLevel('es-vrbot-val',   'es-vrbot-spx',    spxVrBot);
+  setESLevel('es-magnet-val',  'es-magnet-spx',   spxMagnet);
+
+  // ES current price in header
+  if (spxPrice > 0) {
+    const esPrice = spxToES(spxPrice);
+    document.getElementById('es-price-val').textContent = fmtES(esPrice);
+    document.getElementById('es-price-display').style.display = 'flex';
+  }
+
+  // DEX/VEX/CHEX with trend
+  const fmtGex = v => v === 0 ? '--' : `$${(v/1e6).toFixed(1)}M`;
+  const dexEl = document.getElementById('id-dex-val');
+  const dexTrend = document.getElementById('id-dex-trend');
+  if (dexEl) {
+    dexEl.textContent = fmtGex(netDex);
+    dexEl.style.color = netDex < 0 ? 'var(--red)' : netDex > 0 ? 'var(--green)' : 'var(--text2)';
+  }
+  if (dexTrend) {
+    const prevDexData = state.prevDex['spx'];
+    if (prevDexData && prevDexData.prev !== null) {
+      const dir = netDex < prevDexData.prev ? 'â†“ bearish' : netDex > prevDexData.prev ? 'â†‘ bullish' : 'â†’ flat';
+      dexTrend.textContent = `trend: ${dir}`;
+      dexTrend.style.color = netDex < prevDexData.prev ? 'var(--red)' : netDex > prevDexData.prev ? 'var(--green)' : 'var(--text3)';
+    } else {
+      dexTrend.textContent = 'trend: (next fetch)';
+    }
+  }
+
+  const vexEl = document.getElementById('id-vex-val');
+  if (vexEl) { vexEl.textContent = fmtGex(netVex); vexEl.style.color = netVex < 0 ? 'var(--red)' : netVex > 0 ? 'var(--green)' : 'var(--text2)'; }
+  const vexInterp = document.getElementById('id-vex-interp');
+  if (vexInterp) vexInterp.textContent = interp.vanna || '--';
+
+  const chexEl = document.getElementById('id-chex-val');
+  if (chexEl) { chexEl.textContent = fmtGex(netChex); chexEl.style.color = netChex < 0 ? 'var(--red)' : netChex > 0 ? 'var(--green)' : 'var(--text2)'; }
+  const chexInterp = document.getElementById('id-chex-interp');
+  if (chexInterp) chexInterp.textContent = interp.charm || '--';
+
+  // Regime badge
+  const regimeBadge = document.getElementById('id-regime-badge');
+  if (regimeBadge) {
+    const cls = regime === 'negative_gamma' ? 'regime-neg' : regime === 'positive_gamma' ? 'regime-pos' : 'regime-und';
+    const label = regime === 'negative_gamma' ? 'NEG Î³ â€” AMPLIFYING' : regime === 'positive_gamma' ? 'POS Î³ â€” DAMPENING' : 'UNDETERMINED';
+    regimeBadge.innerHTML = `<span class="regime-badge ${cls}">${label}</span>`;
+  }
+
+  // Net GEX display
+  const netGexEl = document.getElementById('id-net-gex');
+  if (netGexEl) {
+    netGexEl.textContent = netGex === 0 ? '--' : `$${(netGex/1e6).toFixed(1)}M`;
+    netGexEl.style.color = netGex < 0 ? 'var(--red)' : 'var(--green)';
+  }
+
+  // 0DTE %
+  const zeroDteEl = document.getElementById('id-zero-dte');
+  if (zeroDteEl) zeroDteEl.textContent = zeroPct > 0 ? `${zeroPct.toFixed(1)}%` : '--';
+
+  // Auto-populate the current ES price field in intraday tab
+  if (spxPrice > 0) {
+    const idPriceEl = document.getElementById('id-price');
+    if (idPriceEl && !idPriceEl.value) {
+      idPriceEl.value = spxToES(spxPrice).toFixed(2);
+      idPriceEl.style.borderColor = 'rgba(0,212,255,0.4)';
+    }
+  }
+
+  // Show ES levels box
+  document.getElementById('es-levels-box').style.display = 'block';
+}
+
+// ===================== REGIME CHANGE ALERT =====================
+function fireRegimeChangeAlert(sym, fromRegime, toRegime) {
+  const fromLabel = fromRegime === 'negative_gamma' ? 'NEGATIVE Î³' : 'POSITIVE Î³';
+  const toLabel = toRegime === 'negative_gamma' ? 'NEGATIVE Î³' : 'POSITIVE Î³';
+  const isBearishFlip = toRegime === 'negative_gamma';
+
+  const banner = document.getElementById('regime-change-banner');
+  banner.style.display = 'block';
+  banner.style.color = isBearishFlip ? 'var(--red)' : 'var(--green)';
+  banner.style.background = isBearishFlip ? 'rgba(255,51,102,0.1)' : 'rgba(0,255,136,0.08)';
+  banner.style.borderTopColor = isBearishFlip ? 'var(--red)' : 'var(--green)';
+  banner.style.borderBottomColor = isBearishFlip ? 'var(--red)' : 'var(--green)';
+  banner.textContent = `âš¡ REGIME FLIP â€” ${sym.toUpperCase()}: ${fromLabel} â†’ ${toLabel} | ${isBearishFlip ? 'DEALERS NOW SHORT GAMMA â€” EXPECT AMPLIFIED MOVES' : 'DEALERS NOW LONG GAMMA â€” MEAN REVERSION MODE'}`;
+
+  // Audible alert
+  playAlertTone(isBearishFlip ? 'bearish' : 'bullish');
+
+  // Auto-hide after 60 seconds
+  setTimeout(() => { banner.style.display = 'none'; }, 60000);
+}
+
+// ===================== PROXIMITY ALERTS =====================
+function runProximityAlerts() {
+  const spxData = state.liveData['spx'];
+  if (!spxData) return;
+
+  const { levels } = spxData;
+  const currentESPrice = parseFloat(document.getElementById('id-price').value) || 0;
+  if (!currentESPrice) return;
+
+  const flipProx = state.weights.flip_proximity || 8;
+  const vrProx = state.weights.vr_proximity || 6;
+
+  const spxFlip = levels.levels?.gamma_flip || 0;
+  const spxVrTop = parseFloat(document.getElementById('spx-vr-top').value) || 0;
+  const spxVrBot = parseFloat(document.getElementById('spx-vr-bot').value) || 0;
+  const spxMagnet = levels.levels?.zero_dte_magnet || 0;
+
+  const esFlip = spxToES(spxFlip);
+  const esVrTop = spxToES(spxVrTop);
+  const esVrBot = spxToES(spxVrBot);
+  const esMagnet = spxToES(spxMagnet);
+
+  const alerts = [];
+
+  if (esFlip && Math.abs(currentESPrice - esFlip) <= flipProx) {
+    const dir = currentESPrice > esFlip ? 'above' : 'below';
+    alerts.push(`âš¡ GEX FLIP PROXIMITY: ES ${currentESPrice} is ${Math.abs(currentESPrice - esFlip).toFixed(2)}pts ${dir} flip @ ${esFlip}`);
+  }
+  if (esVrTop && Math.abs(currentESPrice - esVrTop) <= vrProx) {
+    alerts.push(`ðŸ”´ VR TOP PROXIMITY: ES approaching VR top @ ${esVrTop} (${Math.abs(currentESPrice - esVrTop).toFixed(2)}pts away)`);
+  }
+  if (esVrBot && Math.abs(currentESPrice - esVrBot) <= vrProx) {
+    alerts.push(`ðŸŸ¢ VR BOTTOM PROXIMITY: ES approaching VR bottom @ ${esVrBot} (${Math.abs(currentESPrice - esVrBot).toFixed(2)}pts away)`);
+  }
+  if (esMagnet && Math.abs(currentESPrice - esMagnet) <= 5) {
+    alerts.push(`ðŸ§² 0DTE MAGNET: ES within 5pts of magnet level @ ${esMagnet}`);
+  }
+
+  const container = document.getElementById('proximity-alerts');
+  if (alerts.length > 0) {
+    container.innerHTML = alerts.map(a => `<div class="prox-item">âš  ${a}</div>`).join('');
+    container.classList.add('visible');
+    if (alerts.some(a => a.includes('GEX FLIP'))) playAlertTone('neutral');
+  } else {
+    container.innerHTML = '';
+    container.classList.remove('visible');
+  }
+}
+
+// ===================== BIAS CHANGE DETECTION =====================
+function runBiasChangeCheck() {
+  // Compare current GEX regimes across SPX + SPY â€” if they flipped direction vs prev fetch
+  const spxCurrent = state.liveData['spx']?.summary?.regime;
+  const spyCurrent = state.liveData['spy']?.summary?.regime;
+
+  // Cross-ticker divergence detection
+  if (spxCurrent && spyCurrent && spxCurrent !== spyCurrent) {
+    // They're diverging â€” already handled in updateAlerts but reinforce here
+    console.log('SPX/SPY divergence detected:', spxCurrent, 'vs', spyCurrent);
+  }
+}
+
+// ===================== ALERT TONE =====================
+function playAlertTone(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    if (type === 'bearish') {
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.5);
+    } else if (type === 'bullish') {
+      oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.5);
+    } else {
+      // neutral / proximity
+      oscillator.frequency.setValueAtTime(660, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.3);
+    }
+  } catch(e) {
+    // Audio not available â€” silent fail
+  }
+}
+
+// ===================== POPULATE TICKER FIELDS =====================
 function populateTickerFields(sym, summary, levels) {
   const netGex = summary.exposures?.net_gex || 0;
   const netDex = summary.exposures?.net_dex || 0;
@@ -1206,26 +1710,34 @@ function populateTickerFields(sym, summary, levels) {
   const hedgeNotional = summary.hedging_estimate?.spot_up_1pct?.notional_usd || 0;
   const interp = summary.interpretation || {};
 
-  // Format helpers
   const fmtGex = v => v === 0 ? '--' : `$${(v/1e6).toFixed(1)}M`;
   const fmtB = v => v === 0 ? '--' : `$${(Math.abs(v)/1e9).toFixed(2)}B`;
   const fmtPrice = v => v === 0 ? '--' : v.toFixed(2);
   const fmtPct = v => v === 0 ? '--' : `${v.toFixed(1)}%`;
 
-  // Update status bar
   const statusEl = document.getElementById(`status-${sym}`);
   statusEl.textContent = price > 0 ? `$${fmtPrice(price)}` : 'OK';
   statusEl.style.color = 'var(--text2)';
 
-  // Regime badge
   const regimeEl = document.getElementById(`regime-${sym}`);
   if (regimeEl) {
     const cls = regime === 'negative_gamma' ? 'regime-neg' : regime === 'positive_gamma' ? 'regime-pos' : 'regime-und';
-    const label = regime === 'negative_gamma' ? 'NEG γ' : regime === 'positive_gamma' ? 'POS γ' : 'UND';
+    const label = regime === 'negative_gamma' ? 'NEG Î³' : regime === 'positive_gamma' ? 'POS Î³' : 'UND';
     regimeEl.innerHTML = `<span class="regime-badge ${cls}">${label}</span>`;
   }
 
-  // Show live summary row
+  // DEX trend indicator in status bar (SPX only)
+  if (sym === 'spx') {
+    const dexTrendEl = document.getElementById('dex-trend-spx');
+    if (dexTrendEl) {
+      const prevDexData = state.prevDex['spx'];
+      if (prevDexData && prevDexData.prev !== null && netDex !== 0) {
+        const isMore = netDex < prevDexData.prev;
+        dexTrendEl.innerHTML = `<span class="dex-trend ${isMore ? 'dex-bearish' : 'dex-bullish'}">${isMore ? 'â†“DEX' : 'â†‘DEX'}</span>`;
+      }
+    }
+  }
+
   const liveRow = document.getElementById(`${sym}-live-row`);
   if (liveRow) {
     liveRow.style.display = 'grid';
@@ -1241,30 +1753,27 @@ function populateTickerFields(sym, summary, levels) {
     }
   }
 
-  // Show exposure mini grid (not for VIX)
   if (sym !== 'vix') {
     const miniGrid = document.getElementById(`${sym}-exp-mini`);
     if (miniGrid) {
       miniGrid.style.display = 'grid';
       document.getElementById(`${sym}-dex-val`).textContent = fmtGex(netDex);
       document.getElementById(`${sym}-dex-val`).style.color = netDex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-dex-interp`).textContent = interp.gamma || '—';
+      document.getElementById(`${sym}-dex-interp`).textContent = interp.gamma || 'â€”';
       document.getElementById(`${sym}-vex-val`).textContent = fmtGex(netVex);
       document.getElementById(`${sym}-vex-val`).style.color = netVex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-vex-interp`).textContent = interp.vanna || '—';
+      document.getElementById(`${sym}-vex-interp`).textContent = interp.vanna || 'â€”';
       document.getElementById(`${sym}-chex-val`).textContent = fmtGex(netChex);
       document.getElementById(`${sym}-chex-val`).style.color = netChex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-chex-interp`).textContent = interp.charm || '—';
+      document.getElementById(`${sym}-chex-interp`).textContent = interp.charm || 'â€”';
       document.getElementById(`${sym}-hedge-val`).textContent = hedgeNotional > 0 ? fmtB(hedgeNotional) : '--';
-      document.getElementById(`${sym}-hedge-dir`).textContent = hedgeDir ? `Dealers ${hedgeDir} on ↑1%` : '—';
+      document.getElementById(`${sym}-hedge-dir`).textContent = hedgeDir ? `Dealers ${hedgeDir} on â†‘1%` : 'â€”';
     }
   }
 
-  // Live dot on ticker tab
   const liveDot = document.getElementById(`live-dot-${sym}`);
   if (liveDot) liveDot.classList.add('visible');
 
-  // Data age label
   const ageEl = document.getElementById(`${sym}-data-age`);
   if (ageEl && summary.as_of) {
     const asOf = new Date(summary.as_of);
@@ -1282,7 +1791,6 @@ function populateTickerFields(sym, summary, levels) {
     setField('spy-0dte-magnet', zeroMagnet);
     setField('spy-notional', netDex ? (Math.abs(netDex)/1e9).toFixed(2) : '');
     setSelect('spy-gex-dir', netGex < 0 ? 'negative' : 'positive');
-    // Also update VIX field in game plan from VIX data if available
   }
   if (sym === 'spx') {
     setField('spx-net-gex', (netGex/1e6).toFixed(1));
@@ -1299,7 +1807,7 @@ function populateTickerFields(sym, summary, levels) {
     setField('qqq-flip', gammaFlip);
     setField('qqq-call-wall', callWall);
     setField('qqq-put-wall', putWall);
-    setField('qqq-vr-top', callWall); // approximate
+    setField('qqq-vr-top', callWall);
     setField('qqq-vr-bot', putWall);
     setSelect('qqq-gex-dir', netGex < 0 ? 'negative' : 'positive');
   }
@@ -1307,8 +1815,7 @@ function populateTickerFields(sym, summary, levels) {
     setField('vix-current', price.toFixed(2));
     setField('vix-call-wall', callWall);
     setField('vix-put-wall', putWall);
-    setField('gp-vix', price.toFixed(2)); // also populate game plan VIX field
-    // Determine vol regime
+    setField('gp-vix', price.toFixed(2));
     const vixVal = price;
     let volRegime = '';
     if (vixVal < 15) volRegime = 'low';
@@ -1316,7 +1823,6 @@ function populateTickerFields(sym, summary, levels) {
     else if (vixVal < 35) volRegime = 'elevated';
     else volRegime = 'high';
     setSelect('vix-regime', volRegime);
-    // VIX GEX direction from regime
     setSelect('vix-gex-dir', netGex < 0 ? 'put-heavy' : 'call-heavy');
   }
 }
@@ -1350,7 +1856,6 @@ function setDotStatus(sym, status) {
 }
 
 function autoSetAlignment() {
-  // Auto-set SPY/SPX alignment based on live data
   const spyGex = parseFloat(document.getElementById('spy-net-gex').value) || 0;
   const spxGex = parseFloat(document.getElementById('spx-net-gex').value) || 0;
   const qqqGex = parseFloat(document.getElementById('qqq-net-gex').value) || 0;
@@ -1399,17 +1904,30 @@ function getSessionInfo(h, m) {
   return {name:'CLOSED', cls:'closed'};
 }
 
+function getCurrentSession() {
+  const now = new Date().toLocaleString('en-US', {timeZone: 'America/New_York'});
+  const est = new Date(now);
+  const mins = est.getHours() * 60 + est.getMinutes();
+  if (mins >= 120 && mins < 300) return 'London Open (2-5am EST)';
+  if (mins >= 420 && mins < 570) return 'Pre-Market (7-9:30am EST)';
+  if (mins >= 570 && mins < 660) return 'NY Open (9:30-11am EST) â€” highest volatility window';
+  if (mins >= 660 && mins < 840) return 'Mid-Day (11am-2pm EST) â€” typically lower volume';
+  if (mins >= 840 && mins < 945) return 'Afternoon/Close (2-3:45pm EST) â€” institutional activity picks up';
+  if (mins >= 945 && mins < 960) return 'MOC (3:45-4pm EST) â€” market-on-close orders dominate';
+  return 'After Hours / Closed';
+}
+
 function updateSessionWindows() {
   const now = new Date().toLocaleString('en-US', {timeZone: 'America/New_York'});
   const est = new Date(now);
   const mins = est.getHours() * 60 + est.getMinutes();
   const sessions = [
-    { name: 'London Open', time: '2:00–5:00 AM', start: 120, end: 300 },
-    { name: 'Pre-Market', time: '7:00–9:30 AM', start: 420, end: 570 },
-    { name: 'NY Open', time: '9:30–11:00 AM', start: 570, end: 660 },
-    { name: 'Mid-Day', time: '11:00 AM–2:00 PM', start: 660, end: 840 },
-    { name: 'Afternoon / Close', time: '2:00–3:45 PM', start: 840, end: 945 },
-    { name: 'MOC', time: '3:45–4:00 PM', start: 945, end: 960 },
+    { name: 'London Open', time: '2:00â€“5:00 AM', start: 120, end: 300 },
+    { name: 'Pre-Market', time: '7:00â€“9:30 AM', start: 420, end: 570 },
+    { name: 'NY Open', time: '9:30â€“11:00 AM', start: 570, end: 660 },
+    { name: 'Mid-Day', time: '11:00 AMâ€“2:00 PM', start: 660, end: 840 },
+    { name: 'Afternoon / Close', time: '2:00â€“3:45 PM', start: 840, end: 945 },
+    { name: 'MOC', time: '3:45â€“4:00 PM', start: 945, end: 960 },
   ];
   const buildHTML = (containerId) => {
     const container = document.getElementById(containerId);
@@ -1457,7 +1975,7 @@ function buildPatternLists() {
   BULL_PATTERNS.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pattern-item';
-    div.innerHTML = `<div class="pattern-check" style="border-color:var(--green2)">✓</div><div class="pattern-name">${p}</div>`;
+    div.innerHTML = `<div class="pattern-check" style="border-color:var(--green2)">âœ“</div><div class="pattern-name">${p}</div>`;
     div.dataset.type = 'bull'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bull'));
@@ -1467,7 +1985,7 @@ function buildPatternLists() {
   BEAR_PATTERNS.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pattern-item';
-    div.innerHTML = `<div class="pattern-check" style="border-color:var(--red2)">✓</div><div class="pattern-name">${p}</div>`;
+    div.innerHTML = `<div class="pattern-check" style="border-color:var(--red2)">âœ“</div><div class="pattern-name">${p}</div>`;
     div.dataset.type = 'bear'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bear'));
@@ -1505,7 +2023,7 @@ function calcPatternScore() {
   document.getElementById('pat-score-num').textContent = score;
   document.getElementById('pat-score-num').style.color = score > 60 ? 'var(--green)' : score < 40 ? 'var(--red)' : 'var(--yellow)';
   const biasEl = document.getElementById('pat-bias-label');
-  if (bull.length === 0 && bear.length === 0) { biasEl.textContent = '— no patterns selected —'; return; }
+  if (bull.length === 0 && bear.length === 0) { biasEl.textContent = 'â€” no patterns selected â€”'; return; }
   biasEl.textContent = `${bull.length} bullish / ${bear.length} bearish patterns selected`;
 }
 
@@ -1601,6 +2119,23 @@ function runScoring() {
   else if (biasPoints >= 4) { biasLabel = 'LEAN BULLISH'; biasColor = 'var(--green)'; biasBg = 'rgba(0,255,136,0.06)'; biasBorder = 'rgba(0,204,102,0.5)'; }
   else if (biasPoints >= 1) { biasLabel = 'SLIGHT BULLISH'; biasColor = 'var(--cyan)'; biasBg = 'rgba(0,212,255,0.06)'; biasBorder = 'rgba(0,153,204,0.3)'; }
 
+  // Bias change detection from last score
+  if (state.lastBias && state.lastBias !== biasLabel) {
+    const wasBear = state.lastBias.includes('BEAR');
+    const isBear = biasLabel.includes('BEAR');
+    if (wasBear !== isBear) {
+      const banner = document.getElementById('regime-change-banner');
+      banner.style.display = 'block';
+      banner.style.color = isBear ? 'var(--red)' : 'var(--green)';
+      banner.style.background = isBear ? 'rgba(255,51,102,0.1)' : 'rgba(0,255,136,0.08)';
+      banner.style.borderTopColor = isBear ? 'var(--red)' : 'var(--green)';
+      banner.style.borderBottomColor = isBear ? 'var(--red)' : 'var(--green)';
+      banner.textContent = `ðŸ”„ BIAS FLIP â€” Scoring changed from ${state.lastBias} â†’ ${biasLabel}`;
+      playAlertTone(isBear ? 'bearish' : 'bullish');
+      setTimeout(() => { banner.style.display = 'none'; }, 30000);
+    }
+  }
+
   const biasDisplay = document.getElementById('bias-display');
   biasDisplay.style.background = biasBg;
   biasDisplay.style.borderColor = biasBorder;
@@ -1627,10 +2162,15 @@ function runScoring() {
   document.getElementById('conf-pct').style.color = conf >= 70 ? 'var(--green)' : conf >= 50 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('conf-ring').style.borderColor = conf >= 70 ? 'var(--green2)' : conf >= 50 ? 'rgba(255,204,0,0.5)' : 'rgba(255,51,102,0.5)';
 
-  if (spyFlip) document.getElementById('out-flip').textContent = '$' + spyFlip;
-  if (spxFlip) document.getElementById('out-flip').textContent += ' / ' + spxFlip;
+  // Key ES levels in output boxes (converted from SPX)
+  const spxFlipVal = parseFloat(document.getElementById('spx-flip').value) || 0;
+  const spyFlipVal = parseFloat(document.getElementById('spy-flip').value) || 0;
+  const esFlipSpx = spxToES(spxFlipVal);
   const spyVrTopV = parseFloat(document.getElementById('spy-vr-top').value) || 0;
   const spyVrBotV = parseFloat(document.getElementById('spy-vr-bot').value) || 0;
+
+  if (esFlipSpx) document.getElementById('out-flip').textContent = fmtES(esFlipSpx) + ' ES';
+  else if (spyFlipVal) document.getElementById('out-flip').textContent = '$' + spyFlipVal + ' SPY';
   if (spyVrTopV) document.getElementById('out-vr-top').textContent = '$' + spyVrTopV;
   if (spyVrBotV) document.getElementById('out-vr-bot').textContent = '$' + spyVrBotV;
 
@@ -1639,7 +2179,7 @@ function runScoring() {
   if (biasLabel.includes('BEAR') && spyPutWall) { document.getElementById('out-target').textContent = '$' + spyPutWall; document.getElementById('out-target').style.color = 'var(--red)'; }
   else if (biasLabel.includes('BULL') && spyCallWall) { document.getElementById('out-target').textContent = '$' + spyCallWall; document.getElementById('out-target').style.color = 'var(--green)'; }
 
-  buildLevelsSummary({ spyFlip, spxFlip, spyVrTop: spyVrTopV, spyVrBot: spyVrBotV, spyPutWall, spyCallWall, biasLabel, biasColor, conf });
+  buildLevelsSummary({ spyFlip: spyFlipVal, spxFlip: spxFlipVal, spyVrTop: spyVrTopV, spyVrBot: spyVrBotV, spyPutWall, spyCallWall, biasLabel, biasColor, conf });
   updateAlerts({ biasLabel, spyDir, spxDir, newsImpact, vixLevel, conf, spySpxAlign });
 
   state.lastScore = overallScore;
@@ -1652,12 +2192,13 @@ function buildLevelsSummary(d) {
   const el = document.getElementById('levels-summary');
   const row = (label, value, color) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${label}</span><span style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:${color}">${value}</span></div>`;
   const rows = [];
-  if (d.spyFlip) rows.push(row('GEX FLIP (SPY)', '$' + d.spyFlip, 'var(--yellow)'));
-  if (d.spxFlip) rows.push(row('GEX FLIP (SPX)', d.spxFlip, 'var(--yellow)'));
-  if (d.spyCallWall) rows.push(row('CALL WALL', '$' + d.spyCallWall, 'var(--green)'));
-  if (d.spyPutWall) rows.push(row('PUT WALL', '$' + d.spyPutWall, 'var(--red)'));
-  if (d.spyVrTop) rows.push(row('VR TOP', '$' + d.spyVrTop, 'var(--red)'));
-  if (d.spyVrBot) rows.push(row('VR BOTTOM', '$' + d.spyVrBot, 'var(--green)'));
+  const esFlip = spxToES(d.spxFlip);
+  if (esFlip) rows.push(row('GEX FLIP (ES)', fmtES(esFlip), 'var(--yellow)'));
+  else if (d.spyFlip) rows.push(row('GEX FLIP (SPY)', '$' + d.spyFlip, 'var(--yellow)'));
+  if (d.spyCallWall) rows.push(row('CALL WALL (SPY)', '$' + d.spyCallWall, 'var(--green)'));
+  if (d.spyPutWall) rows.push(row('PUT WALL (SPY)', '$' + d.spyPutWall, 'var(--red)'));
+  if (d.spyVrTop) rows.push(row('VR TOP (SPY)', '$' + d.spyVrTop, 'var(--red)'));
+  if (d.spyVrBot) rows.push(row('VR BOTTOM (SPY)', '$' + d.spyVrBot, 'var(--green)'));
   rows.push(row('BIAS', d.biasLabel, d.biasColor));
   rows.push(row('CONFIDENCE', d.conf + '%', d.conf >= 70 ? 'var(--green)' : 'var(--yellow)'));
   el.innerHTML = rows.join('');
@@ -1668,12 +2209,14 @@ function updateAlerts(d) {
   const noAlerts = document.getElementById('no-alerts');
   bar.querySelectorAll('.alert-pill').forEach(e => e.remove());
   const alerts = [];
-  if (d.spyDir === 'negative' && d.spxDir === 'negative') alerts.push({cls:'alert-danger', text:'⚡ NEGATIVE GEX REGIME — Amplified moves expected'});
-  if (d.newsImpact === 'high' || d.newsImpact === 'fomc') alerts.push({cls:'alert-warn', text:'📰 HIGH IMPACT NEWS DAY — Reduce confluence weighting'});
-  if (d.vixLevel > 30) alerts.push({cls:'alert-warn', text:`🔥 VIX ELEVATED (${d.vixLevel}) — Wider stops, expect volatility`});
-  if (d.spySpxAlign === 'diverge') alerts.push({cls:'alert-warn', text:'⚠ SPY/SPX DIVERGING — Reduce position size'});
-  if (d.conf >= 75) alerts.push({cls:'alert-success', text:`✅ HIGH CONFIDENCE SETUP — ${d.conf}% confluence score`});
-  if (d.conf < 40) alerts.push({cls:'alert-info', text:`ℹ LOW CONFIDENCE (${d.conf}%) — Consider sitting out`});
+  if (d.spyDir === 'negative' && d.spxDir === 'negative') alerts.push({cls:'alert-danger', text:'âš¡ NEGATIVE GEX REGIME â€” Amplified moves expected'});
+  if (d.newsImpact === 'high' || d.newsImpact === 'fomc') alerts.push({cls:'alert-warn', text:'ðŸ“° HIGH IMPACT NEWS DAY â€” Reduce confluence weighting'});
+  if (d.vixLevel > 30) alerts.push({cls:'alert-warn', text:`ðŸ”¥ VIX ELEVATED (${d.vixLevel}) â€” Wider stops, expect volatility`});
+  if (d.spySpxAlign === 'diverge') alerts.push({cls:'alert-warn', text:'âš  SPY/SPX DIVERGING â€” Reduce position size'});
+  if (d.conf >= 75) alerts.push({cls:'alert-success', text:`âœ… HIGH CONFIDENCE SETUP â€” ${d.conf}% confluence score`});
+  if (d.conf < 40) alerts.push({cls:'alert-info', text:`â„¹ LOW CONFIDENCE (${d.conf}%) â€” Consider sitting out`});
+  if (d.biasLabel.includes('BEAR')) alerts.push({cls:'alert-danger', text:`ðŸ”´ BEARISH BIAS â€” ${d.biasLabel} | Favor short setups`});
+  else if (d.biasLabel.includes('BULL')) alerts.push({cls:'alert-success', text:`ðŸŸ¢ BULLISH BIAS â€” ${d.biasLabel} | Favor long setups`});
   if (alerts.length === 0) { noAlerts.style.display = 'block'; }
   else { noAlerts.style.display = 'none'; alerts.forEach(a => { const pill = document.createElement('span'); pill.className = 'alert-pill ' + a.cls; pill.textContent = a.text; bar.appendChild(pill); }); }
 }
@@ -1695,122 +2238,291 @@ async function generateAIGamePlan() {
   const { bull, bear } = getSelectedPatterns();
   const freeText = document.getElementById('pat-freetext').value;
   const confText = document.getElementById('pat-confluence').value;
+
   const gexData = {
-    spy: { netGex: document.getElementById('spy-net-gex').value, dir: document.getElementById('spy-gex-dir').value, flip: document.getElementById('spy-flip').value, callWall: document.getElementById('spy-call-wall').value, putWall: document.getElementById('spy-put-wall').value, vrTop: document.getElementById('spy-vr-top').value, vrBot: document.getElementById('spy-vr-bot').value, pvrTop: document.getElementById('spy-pvr-top').value, pvrBot: document.getElementById('spy-pvr-bot').value, zeroMagnet: document.getElementById('spy-0dte-magnet').value },
-    spx: { netGex: document.getElementById('spx-net-gex').value, dir: document.getElementById('spx-gex-dir').value, flip: document.getElementById('spx-flip').value, callWall: document.getElementById('spx-call-wall').value, putWall: document.getElementById('spx-put-wall').value, vrTop: document.getElementById('spx-vr-top').value, vrBot: document.getElementById('spx-vr-bot').value },
-    qqq: { dir: document.getElementById('qqq-gex-dir').value, flip: document.getElementById('qqq-flip').value, align: document.getElementById('spy-spx-align').value },
-    vix: { current: document.getElementById('vix-current').value, dir: document.getElementById('vix-gex-dir').value, regime: document.getElementById('vix-regime').value, ts: document.getElementById('vx-ts').value }
+    spy: {
+      netGex: document.getElementById('spy-net-gex').value,
+      dir: document.getElementById('spy-gex-dir').value,
+      flip: document.getElementById('spy-flip').value,
+      callWall: document.getElementById('spy-call-wall').value,
+      putWall: document.getElementById('spy-put-wall').value,
+      vrTop: document.getElementById('spy-vr-top').value,
+      vrBot: document.getElementById('spy-vr-bot').value,
+      pvrTop: document.getElementById('spy-pvr-top').value,
+      pvrBot: document.getElementById('spy-pvr-bot').value,
+      zeroMagnet: document.getElementById('spy-0dte-magnet').value
+    },
+    spx: {
+      netGex: document.getElementById('spx-net-gex').value,
+      dir: document.getElementById('spx-gex-dir').value,
+      flip: document.getElementById('spx-flip').value,
+      flipES: spxToES(parseFloat(document.getElementById('spx-flip').value) || 0),
+      callWall: document.getElementById('spx-call-wall').value,
+      callWallES: spxToES(parseFloat(document.getElementById('spx-call-wall').value) || 0),
+      putWall: document.getElementById('spx-put-wall').value,
+      putWallES: spxToES(parseFloat(document.getElementById('spx-put-wall').value) || 0),
+      vrTop: document.getElementById('spx-vr-top').value,
+      vrTopES: spxToES(parseFloat(document.getElementById('spx-vr-top').value) || 0),
+      vrBot: document.getElementById('spx-vr-bot').value,
+      vrBotES: spxToES(parseFloat(document.getElementById('spx-vr-bot').value) || 0),
+      zeroMagnet: document.getElementById('spx-0dte-magnet').value,
+      zeroMagnetES: spxToES(parseFloat(document.getElementById('spx-0dte-magnet').value) || 0),
+      notional: document.getElementById('spx-notional').value
+    },
+    qqq: {
+      dir: document.getElementById('qqq-gex-dir').value,
+      flip: document.getElementById('qqq-flip').value,
+      align: document.getElementById('spy-spx-align').value
+    },
+    vix: {
+      current: document.getElementById('vix-current').value,
+      dir: document.getElementById('vix-gex-dir').value,
+      regime: document.getElementById('vix-regime').value,
+      ts: document.getElementById('vx-ts').value,
+      vvix: document.getElementById('vix-vvix').value
+    }
   };
 
-  // Include DEX/VEX/CHEX from live data if available
+  // Full live DEX/VEX/CHEX context
   const liveContext = Object.entries(state.liveData).map(([sym, d]) => {
     if (!d.summary) return '';
+    const exp = d.summary.exposures || {};
     const interp = d.summary.interpretation || {};
-    return `${sym.toUpperCase()} LIVE CONTEXT: Gamma: ${interp.gamma || 'N/A'} | Vanna: ${interp.vanna || 'N/A'} | Charm: ${interp.charm || 'N/A'}`;
+    const fmtM = v => v ? `$${(v/1e6).toFixed(1)}M` : 'N/A';
+    return `${sym.toUpperCase()}: Price $${(d.summary.underlying_price||0).toFixed(2)} | NET GEX ${fmtM(exp.net_gex)} | DEX ${fmtM(exp.net_dex)} | VEX ${fmtM(exp.net_vex)} | CHEX ${fmtM(exp.net_chex)} | Gamma: ${interp.gamma||'N/A'} | Vanna: ${interp.vanna||'N/A'} | Charm: ${interp.charm||'N/A'}`;
   }).filter(Boolean).join('\n');
 
-  const prompt = `You are an elite quantitative trading analyst for an ES/MES futures trader. Generate a concise, actionable morning game plan.
+  // DEX trend
+  const dexTrendData = state.prevDex['spx'];
+  const dexTrendStr = dexTrendData && dexTrendData.prev !== null
+    ? `DEX TREND: ${dexTrendData.value < dexTrendData.prev ? 'BEARISH (getting more negative)' : 'BULLISH (getting less negative / more positive)'}`
+    : 'DEX TREND: Insufficient data (need 2+ fetches)';
 
-INPUT DATA:
+  const currentSession = getCurrentSession();
+
+  const prompt = `You are an elite quantitative trading analyst for an ES/MES futures trader. Generate a concise, actionable morning game plan. The trader uses ES futures, so all price levels should be expressed in ES terms where possible.
+
+CURRENT SESSION: ${currentSession}
 BIAS: ${state.lastBias} | CONFIDENCE: ${state.lastConf}%
-NEWS: ${document.getElementById('gp-news-impact').value} — ${document.getElementById('gp-news-event').value || 'none'}
+NEWS: ${document.getElementById('gp-news-impact').value} â€” ${document.getElementById('gp-news-event').value || 'none'}
 OVERNIGHT: High ${document.getElementById('gp-globex-high').value || 'N/A'} / Low ${document.getElementById('gp-globex-low').value || 'N/A'} | Prev Close: ${document.getElementById('gp-prev-close').value || 'N/A'}
-SPY GEX: Net ${gexData.spy.netGex || 'N/A'}M (${gexData.spy.dir}) | Flip: $${gexData.spy.flip || 'N/A'} | Call Wall: $${gexData.spy.callWall || 'N/A'} | Put Wall: $${gexData.spy.putWall || 'N/A'} | 0DTE Magnet: $${gexData.spy.zeroMagnet || 'N/A'}
-SPX GEX: Net ${gexData.spx.netGex || 'N/A'}M (${gexData.spx.dir}) | Flip: ${gexData.spx.flip || 'N/A'} | Call Wall: ${gexData.spx.callWall || 'N/A'} | Put Wall: ${gexData.spx.putWall || 'N/A'}
-SPY VR: $${gexData.spy.vrTop || 'N/A'} — $${gexData.spy.vrBot || 'N/A'} | pVR: $${gexData.spy.pvrTop || 'N/A'} — $${gexData.spy.pvrBot || 'N/A'}
-SPX VR: ${gexData.spx.vrTop || 'N/A'} — ${gexData.spx.vrBot || 'N/A'}
+
+SPX GEX (primary â€” converts to ES):
+  Net GEX: ${gexData.spx.netGex || 'N/A'}M (${gexData.spx.dir}) | Notional Delta: $${gexData.spx.notional || 'N/A'}B
+  GEX Flip: SPX ${gexData.spx.flip || 'N/A'} â†’ ES ${gexData.spx.flipES || 'N/A'}
+  Call Wall: SPX ${gexData.spx.callWall || 'N/A'} â†’ ES ${gexData.spx.callWallES || 'N/A'}
+  Put Wall: SPX ${gexData.spx.putWall || 'N/A'} â†’ ES ${gexData.spx.putWallES || 'N/A'}
+  VR Range: SPX ${gexData.spx.vrBot || 'N/A'}â€“${gexData.spx.vrTop || 'N/A'} â†’ ES ${gexData.spx.vrBotES || 'N/A'}â€“${gexData.spx.vrTopES || 'N/A'}
+  0DTE Magnet: SPX ${gexData.spx.zeroMagnet || 'N/A'} â†’ ES ${gexData.spx.zeroMagnetES || 'N/A'}
+
+SPY GEX (confirmation):
+  Net GEX: ${gexData.spy.netGex || 'N/A'}M (${gexData.spy.dir}) | Flip: $${gexData.spy.flip || 'N/A'}
+  Call Wall: $${gexData.spy.callWall || 'N/A'} | Put Wall: $${gexData.spy.putWall || 'N/A'}
+  VR: $${gexData.spy.vrBot || 'N/A'}â€“$${gexData.spy.vrTop || 'N/A'} | pVR: $${gexData.spy.pvrBot || 'N/A'}â€“$${gexData.spy.pvrTop || 'N/A'}
+  0DTE Magnet: $${gexData.spy.zeroMagnet || 'N/A'}
+
 SPY/SPX ALIGNMENT: ${gexData.qqq.align || 'unknown'}
-VIX: ${gexData.vix.current || 'N/A'} (${gexData.vix.regime || 'N/A'}) | GEX Dir: ${gexData.vix.dir || 'N/A'} | Term Structure: ${gexData.vix.ts || 'N/A'}
-INTERNALS: TICK ${document.getElementById('gp-tick').value || 'N/A'} | ADD ${document.getElementById('gp-add').value || 'N/A'} | VOLD ${document.getElementById('gp-vold').value || 'N/A'} | P/C Ratio: ${document.getElementById('gp-pcr').value || 'N/A'}
+QQQ GEX: ${gexData.qqq.dir || 'N/A'} | Flip: ${gexData.qqq.flip || 'N/A'}
+
+VIX: ${gexData.vix.current || 'N/A'} (${gexData.vix.regime || 'N/A'}) | GEX Dir: ${gexData.vix.dir || 'N/A'} | Term Structure: ${gexData.vix.ts || 'N/A'} | VVIX: ${gexData.vix.vvix || 'N/A'}
+
+DEALER EXPOSURE (DEX/VEX/CHEX â€” full live data):
+${liveContext || 'Not yet fetched'}
+${dexTrendStr}
+
+MARKET INTERNALS: TICK ${document.getElementById('gp-tick').value || 'N/A'} | ADD ${document.getElementById('gp-add').value || 'N/A'} | VOLD ${document.getElementById('gp-vold').value || 'N/A'} | P/C Ratio: ${document.getElementById('gp-pcr').value || 'N/A'} | VIX9D: ${document.getElementById('gp-vix9d').value || 'N/A'}
 VOLUME PROFILE: POC ${document.getElementById('gp-poc').value || 'N/A'} | VAH ${document.getElementById('gp-vah').value || 'N/A'} | VAL ${document.getElementById('gp-val').value || 'N/A'} | Price vs VA: ${document.getElementById('gp-price-va').value || 'N/A'}
 MACRO: DXY ${document.getElementById('gp-dxy').value || 'N/A'} | 10Y ${document.getElementById('gp-yield').value || 'N/A'} | ES vs NQ: ${document.getElementById('gp-es-nq').value || 'N/A'}
 PATTERNS (bullish): ${bull.join(', ') || 'none'}
 PATTERNS (bearish): ${bear.join(', ') || 'none'}
 CHART OBSERVATIONS: ${freeText || 'none provided'}
 CONFLUENCE NOTES: ${confText || 'none provided'}
-${liveContext ? 'LIVE DEALER INTERPRETATION:\n' + liveContext : ''}
+
+Express ALL price targets and levels in ES futures terms. Use SPX levels only for reference.
 
 Respond in this EXACT format:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+SESSION: [current session name]
 MORNING BIAS: [BULLISH / BEARISH / NEUTRAL / LEAN BEARISH / etc]
-GEX FLIP: [SPY level] / [SPX level]
-TARGET ZONE: [price range]
-RANGE: [VR bottom] – [VR top]
-0DTE MAGNET: [level]
+GEX REGIME: [NEGATIVE GAMMA (amplifying) / POSITIVE GAMMA (dampening)]
+GEX FLIP (ES): [ES level]
+TRADE RANGE (ES): [VR bottom ES] â€“ [VR top ES]
+0DTE MAGNET (ES): [level]
 CONFIDENCE: [score]%
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 NARRATIVE:
-[2-3 sentence plain English game plan]
+[2-3 sentence plain English game plan in ES terms]
 
-KEY LEVELS TO WATCH:
-• [Level 1 — significance]
-• [Level 2 — significance]
-• [Level 3 — significance]
+KEY ES LEVELS TO WATCH:
+â€¢ [ES Level 1 â€” significance]
+â€¢ [ES Level 2 â€” significance]
+â€¢ [ES Level 3 â€” significance]
+
+DEALER POSITIONING CONTEXT:
+[1-2 sentences on what DEX/VEX/CHEX and GEX regime mean for expected price behavior today]
 
 TRADE SETUP:
-• Direction: [LONG / SHORT / WAIT]
-• Entry trigger: [specific condition]
-• Target: [price]
-• Stop: [price]
-• Invalidation: [condition]
+â€¢ Direction: [LONG / SHORT / WAIT]
+â€¢ Entry trigger: [specific ES condition]
+â€¢ Target (ES): [price]
+â€¢ Stop (ES): [price]
+â€¢ Invalidation: [ES condition]
 
 RISK FLAGS:
-[any specific risks, news events, or conflicting signals to watch]`;
+[any specific risks, news events, VIX conditions, or conflicting signals]`;
 
   try {
-    const resp = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?endpoint=ai', {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
     });
-    const rawText = await resp.text(); output.classList.remove('loading-dots'); try { const data = JSON.parse(rawText); output.textContent = data.content?.map(b => b.text || '').join('') || rawText; } catch(e2) { output.textContent = rawText; }
+    const rawText = await resp.text();
+    output.classList.remove('loading-dots');
+    try {
+      const data = JSON.parse(rawText);
+      output.textContent = data.content?.map(b => b.text || '').join('') || rawText;
+    } catch(e2) { output.textContent = rawText; }
   } catch(e) {
     output.classList.remove('loading-dots');
     output.textContent = 'Error connecting to AI.\n\n' + e.message;
   }
 }
 
-// ===================== INTRADAY =====================
-function logSnapshot() {
-  const now = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
-  const snap = { time: now, price: document.getElementById('id-price').value, gexChange: document.getElementById('id-gex-change').value, priceFlip: document.getElementById('id-price-flip').value, priceVr: document.getElementById('id-price-vr').value, tick: document.getElementById('id-tick').value, notes: document.getElementById('id-notes').value, bias: state.lastBias, conf: state.lastConf };
-  state.snapshots.unshift(snap);
-  renderSnapshots();
-  saveToStorage();
-}
-
-function renderSnapshots() {
-  const container = document.getElementById('snapshot-timeline');
-  if (state.snapshots.length === 0) { container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">— no snapshots logged today —</div>'; return; }
-  container.innerHTML = state.snapshots.map(s => `<div class="snapshot-item"><div class="snapshot-time">${s.time}</div><div class="snapshot-bias" style="color:${s.bias.includes('BEAR')?'var(--red)':s.bias.includes('BULL')?'var(--green)':'var(--text2)'}">${s.bias}</div><div class="snapshot-text">@${s.price||'---'} | ${s.gexChange||'no change'} | ${s.priceVr||'unknown'}</div><div class="snapshot-conf">${s.conf||'--'}%</div></div>`).join('');
-}
-
-function clearSnapshots() { state.snapshots = []; renderSnapshots(); saveToStorage(); }
-
+// ===================== INTRADAY AI UPDATE =====================
 async function generateIntradayUpdate() {
   const output = document.getElementById('ai-intraday-output');
   if (state.snapshots.length === 0) { output.textContent = 'Log a snapshot first.'; return; }
   output.textContent = 'Analyzing current market state';
   output.classList.add('loading-dots');
+
   const snap = state.snapshots[0];
-  const prompt = `You are an ES/MES futures trading analyst. Provide a concise intraday update.
-Current snapshot: Price ${snap.price||'N/A'} | GEX Change: ${snap.gexChange||'N/A'} | Price vs Flip: ${snap.priceFlip||'N/A'} | Price vs VR: ${snap.priceVr||'N/A'} | TICK: ${snap.tick||'N/A'} | Notes: ${snap.notes||'N/A'}
-Morning bias: ${state.lastBias} | Confidence: ${state.lastConf}%
-In 3-5 sentences: Is the morning bias holding? What's changed? What's the highest probability next move? Any level to watch?`;
+  const spxData = state.liveData['spx'];
+  const vixData = state.liveData['vix'];
+  const currentSession = getCurrentSession();
+
+  // Full SPX live context for intraday
+  let spxContext = 'No live data fetched yet.';
+  if (spxData) {
+    const { summary, levels } = spxData;
+    const exp = summary.exposures || {};
+    const interp = summary.interpretation || {};
+    const fmtM = v => v ? `$${(v/1e6).toFixed(1)}M` : 'N/A';
+    const spxFlip = levels.levels?.gamma_flip || 0;
+    const spxCallWall = levels.levels?.call_wall || 0;
+    const spxPutWall = levels.levels?.put_wall || 0;
+    const spxVrTop = parseFloat(document.getElementById('spx-vr-top').value) || 0;
+    const spxVrBot = parseFloat(document.getElementById('spx-vr-bot').value) || 0;
+    const spxMagnet = levels.levels?.zero_dte_magnet || 0;
+
+    spxContext = `SPX LIVE:
+  Price: $${(summary.underlying_price||0).toFixed(2)}
+  GEX Regime: ${summary.regime || 'unknown'} | Net GEX: ${fmtM(exp.net_gex)}
+  DEX: ${fmtM(exp.net_dex)} | VEX: ${fmtM(exp.net_vex)} | CHEX: ${fmtM(exp.net_chex)}
+  Gamma interpretation: ${interp.gamma || 'N/A'}
+  Vanna interpretation: ${interp.vanna || 'N/A'}
+  Charm interpretation: ${interp.charm || 'N/A'}
+  GEX Flip: SPX ${spxFlip || 'N/A'} â†’ ES ${spxFlip ? fmtES(spxToES(spxFlip)) : 'N/A'}
+  Call Wall: SPX ${spxCallWall || 'N/A'} â†’ ES ${spxCallWall ? fmtES(spxToES(spxCallWall)) : 'N/A'}
+  Put Wall: SPX ${spxPutWall || 'N/A'} â†’ ES ${spxPutWall ? fmtES(spxToES(spxPutWall)) : 'N/A'}
+  VR Range: SPX ${spxVrBot || 'N/A'}â€“${spxVrTop || 'N/A'} â†’ ES ${spxVrBot ? fmtES(spxToES(spxVrBot)) : 'N/A'}â€“${spxVrTop ? fmtES(spxToES(spxVrTop)) : 'N/A'}
+  0DTE Magnet: SPX ${spxMagnet || 'N/A'} â†’ ES ${spxMagnet ? fmtES(spxToES(spxMagnet)) : 'N/A'}`;
+  }
+
+  const vixContext = vixData
+    ? `VIX: ${(vixData.summary.underlying_price||0).toFixed(2)} (${vixData.summary.regime || 'N/A'}) | GEX Dir: ${document.getElementById('vix-gex-dir').value || 'N/A'}`
+    : 'VIX: not fetched';
+
+  const dexTrendData = state.prevDex['spx'];
+  const dexTrend = dexTrendData && dexTrendData.prev !== null
+    ? `DEX TREND: ${dexTrendData.value < dexTrendData.prev ? 'â†“ BEARISH acceleration' : 'â†‘ BULLISH stabilization'}`
+    : 'DEX TREND: insufficient data';
+
+  const prompt = `You are an ES/MES futures trading analyst providing a concise, actionable intraday update. Think in ES prices.
+
+CURRENT SESSION: ${currentSession}
+MORNING BIAS: ${state.lastBias} | MORNING CONFIDENCE: ${state.lastConf}%
+
+CURRENT SNAPSHOT:
+  ES Price: ${snap.price || 'N/A'}
+  GEX Change since open: ${snap.gexChange || 'N/A'}
+  Price vs GEX Flip: ${snap.priceFlip || 'N/A'}
+  Price vs VR: ${snap.priceVr || 'N/A'}
+  TICK: ${snap.tick || 'N/A'}
+  Notes: ${snap.notes || 'N/A'}
+
+${spxContext}
+${vixContext}
+${dexTrend}
+
+SPY/SPX Alignment: ${document.getElementById('spy-spx-align').value || 'N/A'}
+
+Answer these 4 questions in 4-6 sentences total:
+1. Is the morning ${state.lastBias} bias still holding? Why or why not?
+2. What is the highest-probability next move in ES based on current GEX positioning?
+3. Which ES level is most critical right now and why?
+4. Any regime or bias change signals to watch for in this session window?
+
+Keep it tight and actionable. Express everything in ES prices.`;
+
   try {
-    const resp = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?endpoint=ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 500, messages: [{ role: 'user', content: prompt }] })
+    });
     const data = await resp.json();
     output.classList.remove('loading-dots');
     output.textContent = data.content?.map(b => b.text || '').join('') || 'Error.';
-  } catch(e) { output.classList.remove('loading-dots'); output.textContent = 'Connection error: ' + e.message; }
+  } catch(e) {
+    output.classList.remove('loading-dots');
+    output.textContent = 'Connection error: ' + e.message;
+  }
 }
+
+// ===================== INTRADAY SNAPSHOT =====================
+function logSnapshot() {
+  const now = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+  const snap = {
+    time: now,
+    price: document.getElementById('id-price').value,
+    gexChange: document.getElementById('id-gex-change').value,
+    priceFlip: document.getElementById('id-price-flip').value,
+    priceVr: document.getElementById('id-price-vr').value,
+    tick: document.getElementById('id-tick').value,
+    notes: document.getElementById('id-notes').value,
+    bias: state.lastBias,
+    conf: state.lastConf
+  };
+  state.snapshots.unshift(snap);
+  renderSnapshots();
+
+  // Re-run proximity alerts with new price
+  runProximityAlerts();
+  saveToStorage();
+}
+
+function renderSnapshots() {
+  const container = document.getElementById('snapshot-timeline');
+  if (state.snapshots.length === 0) {
+    container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” no snapshots logged today â€”</div>';
+    return;
+  }
+  container.innerHTML = state.snapshots.map(s => `<div class="snapshot-item"><div class="snapshot-time">${s.time}</div><div class="snapshot-bias" style="color:${s.bias.includes('BEAR')?'var(--red)':s.bias.includes('BULL')?'var(--green)':'var(--text2)'}">${s.bias}</div><div class="snapshot-text">ES@${s.price||'---'} | ${s.gexChange||'no change'} | ${s.priceVr||'unknown'}</div><div class="snapshot-conf">${s.conf||'--'}%</div></div>`).join('');
+}
+
+function clearSnapshots() { state.snapshots = []; renderSnapshots(); saveToStorage(); }
 
 // ===================== WEIGHTS =====================
 function updateWeights() {
-  ['gex','range','pattern','internals','macro','news_penalty','div_penalty'].forEach(f => {
+  ['gex','range','pattern','internals','macro','news_penalty','div_penalty','flip_proximity','vr_proximity'].forEach(f => {
     const el = document.getElementById('w-' + f);
     const vEl = document.getElementById('wv-' + f);
-    if (el && vEl) { state.weights[f] = parseInt(el.value); vEl.textContent = el.value + '%'; }
+    if (el && vEl) {
+      state.weights[f] = parseInt(el.value);
+      // For proximity fields don't add % sign
+      vEl.textContent = (f === 'flip_proximity' || f === 'vr_proximity') ? el.value : el.value + '%';
+    }
   });
   const total = state.weights.gex + state.weights.range + state.weights.pattern + state.weights.internals + state.weights.macro;
   const totalEl = document.getElementById('weight-total');
@@ -1845,7 +2557,18 @@ function logTrade() {
   const dir = document.getElementById('tl-dir').value;
   if (!entry || !exit_) { alert('Entry and exit price required'); return; }
   const plPts = dir === 'LONG' ? exit_ - entry : entry - exit_;
-  const trade = { id: Date.now(), date: document.getElementById('tl-date').value, dir, entry, target: parseFloat(document.getElementById('tl-target').value) || '', stop: parseFloat(document.getElementById('tl-stop').value) || '', exit: exit_, plPts: plPts.toFixed(2), conf: document.getElementById('tl-conf').value, outcome: document.getElementById('tl-outcome').value, notes: document.getElementById('tl-notes').value };
+  const trade = {
+    id: Date.now(),
+    date: document.getElementById('tl-date').value,
+    dir, entry,
+    target: parseFloat(document.getElementById('tl-target').value) || '',
+    stop: parseFloat(document.getElementById('tl-stop').value) || '',
+    exit: exit_,
+    plPts: plPts.toFixed(2),
+    conf: document.getElementById('tl-conf').value,
+    outcome: document.getElementById('tl-outcome').value,
+    notes: document.getElementById('tl-notes').value
+  };
   state.trades.unshift(trade);
   renderTrades();
   updateTradeStats();
@@ -1855,8 +2578,11 @@ function logTrade() {
 
 function renderTrades() {
   const tbody = document.getElementById('trade-tbody');
-  if (state.trades.length === 0) { tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>'; return; }
-  tbody.innerHTML = state.trades.map(t => `<tr><td>${t.date}</td><td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td><td>${t.entry}</td><td>${t.target||'--'}</td><td>${t.stop||'--'}</td><td>${t.exit}</td><td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td><td>${t.conf||'--'}%</td><td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td><td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes||'--'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">×</button></td></tr>`).join('');
+  if (state.trades.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.trades.map(t => `<tr><td>${t.date}</td><td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td><td>${t.entry}</td><td>${t.target||'--'}</td><td>${t.stop||'--'}</td><td>${t.exit}</td><td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td><td>${t.conf||'--'}%</td><td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td><td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes||'--'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">Ã—</button></td></tr>`).join('');
 }
 
 function updateTradeStats() {
@@ -1866,7 +2592,7 @@ function updateTradeStats() {
   document.getElementById('tl-winrate').textContent = trades.length ? Math.round((wins/trades.length)*100) + '%' : '--%';
   const grossWin = trades.filter(t => t.outcome === 'WIN').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
   const grossLoss = trades.filter(t => t.outcome === 'LOSS').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
-  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin/grossLoss).toFixed(2) : grossWin > 0 ? '∞' : '--';
+  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin/grossLoss).toFixed(2) : grossWin > 0 ? 'âˆž' : '--';
   const avgConf = trades.filter(t => t.conf).reduce((a, t) => a + parseFloat(t.conf), 0) / (trades.filter(t => t.conf).length || 1);
   document.getElementById('tl-avg-conf').textContent = trades.length ? Math.round(avgConf) + '%' : '--%';
 }
@@ -1876,14 +2602,30 @@ function clearTradeLog() { if (confirm('Clear all trade history?')) { state.trad
 
 // ===================== STORAGE =====================
 function saveToStorage() {
-  try { localStorage.setItem('gex_state', JSON.stringify({ trades: state.trades, snapshots: state.snapshots, weights: state.weights, lastBias: state.lastBias, lastConf: state.lastConf })); } catch(e) {}
+  try {
+    localStorage.setItem('gex_state_v2', JSON.stringify({
+      trades: state.trades,
+      snapshots: state.snapshots,
+      weights: state.weights,
+      lastBias: state.lastBias,
+      lastConf: state.lastConf
+    }));
+  } catch(e) {}
 }
+
 function loadFromStorage() {
   try {
-    const saved = JSON.parse(localStorage.getItem('gex_state') || '{}');
+    const saved = JSON.parse(localStorage.getItem('gex_state_v2') || localStorage.getItem('gex_state') || '{}');
     if (saved.trades) state.trades = saved.trades;
     if (saved.snapshots) state.snapshots = saved.snapshots;
-    if (saved.weights) { state.weights = { ...state.weights, ...saved.weights }; Object.entries(state.weights).forEach(([k, v]) => { const el = document.getElementById('w-' + k); if (el) el.value = v; }); updateWeights(); }
+    if (saved.weights) {
+      state.weights = { ...state.weights, ...saved.weights };
+      Object.entries(state.weights).forEach(([k, v]) => {
+        const el = document.getElementById('w-' + k);
+        if (el) el.value = v;
+      });
+      updateWeights();
+    }
     if (saved.lastBias) state.lastBias = saved.lastBias;
     if (saved.lastConf) state.lastConf = saved.lastConf;
     renderSnapshots();
