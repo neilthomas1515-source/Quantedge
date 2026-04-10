@@ -2540,11 +2540,25 @@ Answer these 4 questions in 4-6 sentences total:
 
 Keep it tight and actionable. Express everything in ES prices.`;
 
+  // Include uploaded images in intraday analysis too
+  let intradayContent;
+  if (uploadedImages.length > 0) {
+    intradayContent = [
+      ...uploadedImages.map(img => ({
+        type: 'image',
+        source: { type: 'base64', media_type: img.type || 'image/jpeg', data: img.base64 }
+      })),
+      { type: 'text', text: `The above ${uploadedImages.length} image(s) are GEX charts from QTA/Discord. Extract all visible GEX data â€” levels, flip zones, call/put walls, net GEX, regime â€” and use this in your intraday analysis below.\n\n` + prompt }
+    ];
+  } else {
+    intradayContent = prompt;
+  }
+
   try {
     const resp = await fetch(PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 500, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 500, messages: [{ role: 'user', content: intradayContent }] })
     });
     const data = await resp.json();
     output.classList.remove('loading-dots');
