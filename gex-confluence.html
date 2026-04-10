@@ -794,6 +794,33 @@ input[type="range"]::-webkit-slider-thumb {
 
     <!-- RIGHT: AI OUTPUT -->
     <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- IMAGE UPLOAD ZONE -->
+      <div class="panel">
+        <div class="panel-title inline-flex">
+          <span>Chart / GEX Image Upload</span>
+          <div class="spacer"></div>
+          <span id="img-count-badge" style="display:none;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--cyan);background:rgba(0,212,255,0.1);border:1px solid var(--cyan2);padding:2px 8px;border-radius:2px;"></span>
+          <button onclick="clearAllImages()" style="display:none;background:var(--red2);border:none;color:#fff;font-size:11px;padding:2px 8px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;margin-left:6px;" id="img-clear-all-btn">&#10005; CLEAR ALL</button>
+        </div>
+        <div id="img-drop-zone"
+          style="border:2px dashed var(--border2);border-radius:4px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg3);"
+          onclick="document.getElementById('img-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--cyan)';this.style.background='rgba(0,212,255,0.06)'"
+          ondragleave="this.style.borderColor='var(--border2)';this.style.background='var(--bg3)'"
+          ondrop="handleImageDrop(event)">
+          <input type="file" id="img-file-input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files)">
+          <div id="img-drop-label" style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text3);">
+            &#128247; Drop SPY, SPX, QQQ charts here &mdash; multiple at once<br>
+            <span style="font-size:11px;color:var(--text3);">or click to browse &mdash; AI reads all images with your data</span>
+          </div>
+        </div>
+        <div id="img-preview-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-top:6px;">
+          &#9888; Drop up to 5 images. AI reads all of them alongside GEX + macro data. Best used when FlashAlpha quota is burned.
+        </div>
+      </div>
+
       <div class="panel" style="flex:1">
         <div class="panel-title inline-flex">
           <span>AI Game Plan Analysis</span>
@@ -1258,6 +1285,83 @@ input[type="range"]::-webkit-slider-thumb {
 <script>
 // ===================== CONFIG =====================
 const PROXY = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
+
+// ===================== IMAGE UPLOAD (multi-image) =====================
+let uploadedImages = []; // array of {base64, type, name}
+
+function handleImageDrop(event) {
+  event.preventDefault();
+  const zone = document.getElementById('img-drop-zone');
+  zone.style.borderColor = 'var(--border2)';
+  zone.style.background = 'var(--bg3)';
+  handleImageFiles(event.dataTransfer.files);
+}
+
+function handleImageFiles(files) {
+  if (!files || files.length === 0) return;
+  const remaining = 5 - uploadedImages.length;
+  const toProcess = Math.min(files.length, remaining);
+  let processed = 0;
+  for (let i = 0; i < toProcess; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      uploadedImages.push({ base64: dataUrl.split(',')[1], type: file.type, name: file.name });
+      processed++;
+      if (processed === toProcess) renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function renderImagePreviews() {
+  const grid = document.getElementById('img-preview-grid');
+  const label = document.getElementById('img-drop-label');
+  const badge = document.getElementById('img-count-badge');
+  const clearAllBtn = document.getElementById('img-clear-all-btn');
+  const zone = document.getElementById('img-drop-zone');
+
+  if (uploadedImages.length === 0) {
+    grid.style.display = 'none';
+    label.style.display = 'block';
+    badge.style.display = 'none';
+    clearAllBtn.style.display = 'none';
+    zone.style.borderColor = 'var(--border2)';
+    zone.style.background = 'var(--bg3)';
+    return;
+  }
+
+  grid.style.display = 'grid';
+  label.style.display = uploadedImages.length >= 5 ? 'none' : 'block';
+  label.innerHTML = uploadedImages.length >= 5
+    ? ''
+    : '&#128247; Drop more charts (up to 5 total)<br><span style="font-size:11px;color:var(--text3);">or click to browse</span>';
+  badge.style.display = 'inline';
+  badge.textContent = uploadedImages.length + ' image' + (uploadedImages.length > 1 ? 's' : '') + ' loaded';
+  clearAllBtn.style.display = 'inline';
+  zone.style.borderColor = 'var(--cyan2)';
+  zone.style.background = 'rgba(0,212,255,0.04)';
+
+  grid.innerHTML = uploadedImages.map((img, idx) => `
+    <div style="position:relative;">
+      <img src="data:${img.type};base64,${img.base64}" style="width:100%;height:80px;object-fit:cover;border-radius:3px;border:1px solid var(--border2);">
+      <button onclick="removeImage(${idx})" style="position:absolute;top:2px;right:2px;background:var(--red2);border:none;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px;cursor:pointer;">&#10005;</button>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.name}</div>
+    </div>`).join('');
+}
+
+function removeImage(idx) {
+  uploadedImages.splice(idx, 1);
+  renderImagePreviews();
+}
+
+function clearAllImages() {
+  uploadedImages = [];
+  document.getElementById('img-file-input').value = '';
+  renderImagePreviews();
+}
 
 // ===================== STATE =====================
 const state = {
@@ -2311,11 +2415,25 @@ TRADE SETUP:
 RISK FLAGS:
 [any specific risks, news events, VIX conditions, or conflicting signals]`;
 
+  // Build message content â€” include all uploaded images if present
+  let messageContent;
+  if (uploadedImages.length > 0) {
+    messageContent = [
+      ...uploadedImages.map((img, idx) => ({
+        type: 'image',
+        source: { type: 'base64', media_type: img.type || 'image/jpeg', data: img.base64 }
+      })),
+      { type: 'text', text: `The above ${uploadedImages.length} image(s) are GEX charts or market screenshots from QTA/Discord. Read ALL visible data from each image â€” GEX levels, flip zones, call/put walls, net GEX values, regime, price levels, any numbers or labels visible. Incorporate all of this image data into your analysis below alongside the manual inputs.\n\n` + prompt }
+    ];
+  } else {
+    messageContent = prompt;
+  }
+
   try {
     const resp = await fetch(PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: messageContent }] })
     });
     const rawText = await resp.text();
     output.classList.remove('loading-dots');
