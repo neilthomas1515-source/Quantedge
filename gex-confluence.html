@@ -33,7 +33,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Rajdhani', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -59,11 +59,11 @@ body::before {
   z-index: 100;
 }
 .logo-block { display: flex; align-items: baseline; gap: 10px; }
-.logo-main { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; color: var(--cyan); letter-spacing: 2px; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
-.logo-sub { font-family: 'Orbitron', monospace; font-size: 10px; color: var(--dim); letter-spacing: 3px; }
+.logo-main { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; color: var(--cyan); letter-spacing: 2px; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
+.logo-sub { font-family: 'Orbitron', monospace; font-size: 12px; color: var(--dim); letter-spacing: 3px; }
 .header-right { display: flex; align-items: center; gap: 16px; }
-#clock { font-family: 'Share Tech Mono', monospace; font-size: 18px; color: var(--cyan); text-shadow: 0 0 10px rgba(0,212,255,0.3); }
-#session-badge { font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 2px; }
+#clock { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--cyan); text-shadow: 0 0 10px rgba(0,212,255,0.3); }
+#session-badge { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 2px; }
 .session-open { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid var(--green2); }
 .session-premarket { background: rgba(255,204,0,0.1); color: var(--yellow); border: 1px solid rgba(255,204,0,0.4); }
 .session-closed { background: rgba(74,106,128,0.2); color: var(--dim); border: 1px solid var(--border2); }
@@ -84,7 +84,7 @@ body::before {
   align-items: center;
   gap: 6px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
 }
 .status-dot {
   width: 7px;
@@ -99,10 +99,23 @@ body::before {
 @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
 @keyframes pulse-yellow { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+/* API COUNTER */
+#api-counter {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text3);
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+#api-counter.warning { color: var(--yellow); border-color: rgba(255,204,0,0.4); }
+#api-counter.danger { color: var(--red); border-color: rgba(255,51,102,0.4); }
+
 /* ES PRICE DISPLAY */
 #es-price-display {
   font-family: 'Orbitron', monospace;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--cyan);
   background: rgba(0,212,255,0.06);
@@ -113,14 +126,14 @@ body::before {
 }
 #es-fv-badge {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text3);
   margin-left: 4px;
 }
 
 .regime-badge {
   font-family: 'Orbitron', monospace;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 2px;
@@ -133,10 +146,10 @@ body::before {
 #fetch-btn {
   margin-left: auto;
   font-family: 'Orbitron', monospace;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border: 1px solid var(--cyan2);
   border-radius: 2px;
   background: transparent;
@@ -146,12 +159,12 @@ body::before {
 }
 #fetch-btn:hover { background: rgba(0,212,255,0.1); }
 #fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-#last-fetch { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
+#last-fetch { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text3); }
 
 /* AUTO-REFRESH TIMER */
 #refresh-timer {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text3);
   display: none;
 }
@@ -171,7 +184,7 @@ body::before {
 }
 .alert-pill {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   padding: 3px 8px;
   border-radius: 2px;
   display: flex;
@@ -193,7 +206,7 @@ body::before {
   border-bottom: 2px solid var(--yellow);
   padding: 10px 20px;
   font-family: 'Orbitron', monospace;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--yellow);
   letter-spacing: 2px;
@@ -215,7 +228,7 @@ body::before {
   border-bottom: 2px solid transparent;
   color: var(--dim);
   font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 1px;
   padding: 10px 16px;
@@ -241,7 +254,7 @@ body::before {
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 14px; }
 .panel-title {
   font-family: 'Orbitron', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--cyan2);
   letter-spacing: 2px;
@@ -261,14 +274,14 @@ body::before {
   gap: 8px;
   margin-bottom: 8px;
 }
-.field-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); text-align: right; }
+.field-label { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text2); text-align: right; }
 input[type="text"], input[type="number"], select, textarea {
   background: var(--bg3);
   border: 1px solid var(--border2);
   border-radius: 3px;
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   padding: 5px 8px;
   width: 100%;
   outline: none;
@@ -306,7 +319,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 #es-levels-box .es-levels-title {
   font-family: 'Orbitron', monospace;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--cyan2);
   letter-spacing: 2px;
@@ -324,14 +337,14 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 6px 8px;
   text-align: center;
 }
-.es-level-name { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
-.es-level-value { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; margin-top: 2px; }
-.es-level-spx { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); margin-top: 1px; }
+.es-level-name { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.es-level-value { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; margin-top: 2px; }
+.es-level-spx { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 1px; }
 
 /* DEX TREND INDICATOR */
 .dex-trend {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
   padding: 1px 5px;
   border-radius: 2px;
   margin-left: 4px;
@@ -347,7 +360,7 @@ input[type="range"]::-webkit-slider-thumb {
   border: 1px solid var(--border2);
   color: var(--text2);
   font-family: 'Orbitron', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   padding: 5px 12px;
@@ -385,13 +398,13 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 4px;
 }
 .gex-live-card { text-align: center; }
-.gex-live-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
-.gex-live-value { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; }
+.gex-live-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.gex-live-value { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; }
 
 /* BUTTONS */
 .btn {
   font-family: 'Orbitron', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   padding: 8px 18px;
@@ -409,7 +422,7 @@ input[type="range"]::-webkit-slider-thumb {
 .btn-danger:hover { background: var(--red); }
 .btn-ghost { background: transparent; color: var(--cyan); border: 1px solid var(--cyan2); }
 .btn-ghost:hover { background: rgba(0,212,255,0.1); }
-.btn-sm { padding: 5px 10px; font-size: 9px; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
 
 /* BIAS DISPLAY */
 #bias-display {
@@ -419,21 +432,21 @@ input[type="range"]::-webkit-slider-thumb {
   border: 2px solid var(--border2);
   margin-bottom: 12px;
 }
-.bias-label { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 20px currentColor; }
-.bias-score { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text2); margin-top: 4px; }
+.bias-label { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 20px currentColor; }
+.bias-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--text2); margin-top: 4px; }
 
 /* LEVEL DISPLAYS */
 .level-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .level-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px 10px; text-align: center; }
-.level-name { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
-.level-value { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; margin-top: 2px; }
+.level-name { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.level-value { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; margin-top: 2px; }
 
 /* SCORE BARS */
 .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.score-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text2); width: 120px; flex-shrink: 0; }
+.score-label { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text2); width: 120px; flex-shrink: 0; }
 .score-bar-bg { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
-.score-val { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text); width: 35px; text-align: right; }
+.score-val { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text); width: 35px; text-align: right; }
 
 /* AI OUTPUT */
 #ai-output {
@@ -442,7 +455,7 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 4px;
   padding: 14px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   min-height: 120px;
   color: var(--text);
@@ -466,20 +479,20 @@ input[type="range"]::-webkit-slider-thumb {
 .pattern-item.bull-checked { border-color: var(--green2); background: rgba(0,255,136,0.05); }
 .pattern-item.bear-checked { border-color: var(--red2); background: rgba(255,51,102,0.05); }
 .pattern-check { width: 14px; height: 14px; border: 1px solid var(--border2); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-.pattern-name { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text2); }
+.pattern-name { font-family: 'Rajdhani', sans-serif; font-size: 14px; color: var(--text2); }
 
 /* SESSION WINDOWS */
 .session-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 3px; margin-bottom: 6px; background: var(--bg3); border: 1px solid var(--border); }
 .session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .session-active .session-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
 .session-inactive .session-dot { background: var(--text3); }
-.session-name { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); flex: 1; }
-.session-time { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
+.session-name { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text2); flex: 1; }
+.session-time { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text3); }
 
 /* TRADE LOG */
-#trade-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-#trade-table th { background: var(--bg3); border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text2); text-align: center; letter-spacing: 1px; }
-#trade-table td { border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; text-align: center; }
+#trade-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+#trade-table th { background: var(--bg3); border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text2); text-align: center; letter-spacing: 1px; }
+#trade-table td { border: 1px solid var(--border); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: 13px; text-align: center; }
 #trade-table tr:hover td { background: var(--bg3); }
 .trade-win { color: var(--green); }
 .trade-loss { color: var(--red); }
@@ -487,20 +500,20 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* STATS ROW */
 .stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; text-align: center; }
-.stat-num { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; }
-.stat-name { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 1px; margin-top: 2px; }
+.stat-num { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; }
+.stat-name { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); letter-spacing: 1px; margin-top: 2px; }
 
 /* WEIGHT SLIDERS */
 .weight-row { display: grid; grid-template-columns: 160px 1fr 50px; align-items: center; gap: 10px; margin-bottom: 10px; }
-.weight-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); }
-.weight-val { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; color: var(--cyan); text-align: right; }
+.weight-label { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text2); }
+.weight-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
 
 /* INTRADAY SNAPSHOT */
 .snapshot-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
-.snapshot-time { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--dim); width: 55px; flex-shrink: 0; }
-.snapshot-bias { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; width: 80px; flex-shrink: 0; }
-.snapshot-text { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text2); flex: 1; }
-.snapshot-conf { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2); }
+.snapshot-time { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--dim); width: 55px; flex-shrink: 0; }
+.snapshot-bias { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; width: 80px; flex-shrink: 0; }
+.snapshot-text { font-family: 'Rajdhani', sans-serif; font-size: 14px; color: var(--text2); flex: 1; }
+.snapshot-conf { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text2); }
 
 /* DIVIDER */
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
@@ -517,11 +530,11 @@ input[type="range"]::-webkit-slider-thumb {
 /* CONFIDENCE RING */
 .conf-ring-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .conf-ring { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; border: 3px solid var(--border); position: relative; }
-.conf-pct { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; }
-.conf-lbl { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--text3); }
+.conf-pct { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900; }
+.conf-lbl { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); }
 
 /* SECTION HEADER */
-.section-header { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; padding: 6px 0 4px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+.section-header { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; padding: 6px 0 4px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
 
 .inline-flex { display: flex; gap: 8px; align-items: center; }
 .spacer { flex: 1; }
@@ -532,19 +545,19 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* PRESETS */
 .preset-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-.preset-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+.preset-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Share Tech Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
 .preset-btn:hover { border-color: var(--cyan2); color: var(--cyan); }
 
 /* NEWS FLAG */
-.news-day-banner { background: rgba(255,136,0,0.1); border: 1px solid rgba(255,136,0,0.3); border-radius: 3px; padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--orange); display: none; }
+.news-day-banner { background: rgba(255,136,0,0.1); border: 1px solid rgba(255,136,0,0.3); border-radius: 3px; padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--orange); display: none; }
 .news-day-banner.active { display: block; }
 
 /* DEX VEX panel */
 .exposure-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .exp-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 8px; text-align: center; }
-.exp-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; }
-.exp-value { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; margin-top: 2px; }
-.exp-interp { font-family: 'Rajdhani', monospace; font-size: 10px; color: var(--text2); margin-top: 2px; line-height: 1.3; }
+.exp-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+.exp-value { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; margin-top: 2px; }
+.exp-interp { font-family: 'Rajdhani', monospace; font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.3; }
 
 /* PROXIMITY ALERT ROW */
 #proximity-alerts {
@@ -561,7 +574,7 @@ input[type="range"]::-webkit-slider-thumb {
 #proximity-alerts.visible { display: flex; }
 .prox-item {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--yellow);
   display: flex;
   align-items: center;
@@ -594,7 +607,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="logo-sub">ENGINE v2.0</div>
   </div>
   <div class="header-right">
-    <div id="es-price-display">ES <span id="es-price-val">--</span><span id="es-fv-badge">â‰ˆSPX</span></div>
+    <div id="es-price-display">ES <span id="es-price-val">--</span><span id="es-fv-badge">&asymp;SPX</span></div>
     <span id="clock">--:--:-- EST</span>
     <span id="session-badge" class="session-closed">LOADING</span>
   </div>
@@ -605,31 +618,32 @@ input[type="range"]::-webkit-slider-thumb {
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-spy"></div>
     <span style="color:var(--text2)">SPY</span>
-    <span id="status-spy" style="color:var(--text3)">â€”</span>
+    <span id="status-spy" style="color:var(--text3)">&mdash;</span>
     <span id="regime-spy"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-spx"></div>
     <span style="color:var(--text2)">SPX</span>
-    <span id="status-spx" style="color:var(--text3)">â€”</span>
+    <span id="status-spx" style="color:var(--text3)">&mdash;</span>
     <span id="regime-spx"></span>
     <span id="dex-trend-spx"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-qqq"></div>
     <span style="color:var(--text2)">QQQ</span>
-    <span id="status-qqq" style="color:var(--text3)">â€”</span>
+    <span id="status-qqq" style="color:var(--text3)">&mdash;</span>
     <span id="regime-qqq"></span>
   </div>
   <div class="data-status-item">
     <div class="status-dot status-idle" id="dot-vix"></div>
     <span style="color:var(--text2)">VIX</span>
-    <span id="status-vix" style="color:var(--text3)">â€”</span>
+    <span id="status-vix" style="color:var(--text3)">&mdash;</span>
     <span id="regime-vix"></span>
   </div>
-  <span id="last-fetch">Not fetched yet</span>
+  <span id="last-fetch">Ready &mdash; click Fetch Live Data</span>
   <span id="refresh-timer">Next refresh: --:--</span>
-  <button id="fetch-btn" onclick="fetchAllGEXData()">âš¡ FETCH LIVE DATA</button>
+  <span id="api-counter">API: 0/100</span>
+  <button id="fetch-btn" onclick="fetchAllGEXData()">&#9889; FETCH LIVE DATA</button>
 </div>
 
 <!-- REGIME CHANGE BANNER -->
@@ -640,18 +654,18 @@ input[type="range"]::-webkit-slider-thumb {
 
 <!-- ALERTS BAR -->
 <div id="alerts-bar">
-  <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ALERTS:</span>
-  <span id="no-alerts" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">â€” no active alerts â€”</span>
+  <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">ALERTS:</span>
+  <span id="no-alerts" style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">&mdash; no active alerts &mdash;</span>
 </div>
 
 <!-- TABS -->
 <div id="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('gameplan')">ðŸŽ¯ Game Plan</button>
-  <button class="tab-btn" onclick="switchTab('intraday')">âš¡ Intraday</button>
-  <button class="tab-btn" onclick="switchTab('gex')">ðŸ“Š GEX Data</button>
-  <button class="tab-btn" onclick="switchTab('patterns')">ðŸ“ Patterns</button>
-  <button class="tab-btn" onclick="switchTab('weights')">âš™ï¸ Weights</button>
-  <button class="tab-btn" onclick="switchTab('tradelog')">ðŸ“‹ Trade Log</button>
+  <button class="tab-btn active" onclick="switchTab('gameplan')">&#127919; Game Plan</button>
+  <button class="tab-btn" onclick="switchTab('intraday')">&#9889; Intraday</button>
+  <button class="tab-btn" onclick="switchTab('gex')">&#128202; GEX Data</button>
+  <button class="tab-btn" onclick="switchTab('patterns')">&#128269; Patterns</button>
+  <button class="tab-btn" onclick="switchTab('weights')">&#9881; Weights</button>
+  <button class="tab-btn" onclick="switchTab('tradelog')">&#128203; Trade Log</button>
 </div>
 
 <!-- ======================== GAME PLAN TAB ======================== -->
@@ -685,7 +699,7 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <div class="field-row"><div class="field-label">Put/Call Ratio</div><input type="number" id="gp-pcr" placeholder="0.85" step="0.01"></div>
         <div class="field-row"><div class="field-label">VIX9D vs VIX</div>
-          <select id="gp-vix9d"><option value="">-- select --</option><option value="contango">VIX9D &lt; VIX (Normal/Calm)</option><option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option><option value="flat">VIX9D â‰ˆ VIX (Flat)</option></select>
+          <select id="gp-vix9d"><option value="">-- select --</option><option value="contango">VIX9D &lt; VIX (Normal/Calm)</option><option value="inversion">VIX9D &gt; VIX (Near-term Fear)</option><option value="flat">VIX9D &asymp; VIX (Flat)</option></select>
         </div>
         <div class="field-row"><div class="field-label">VVIX</div><input type="number" id="gp-vvix" placeholder="95" step="0.1"></div>
       </div>
@@ -706,7 +720,7 @@ input[type="range"]::-webkit-slider-thumb {
           <select id="gp-news-impact" onchange="updateNewsBanner()"><option value="none">No major events</option><option value="low">Low impact</option><option value="medium">Medium impact</option><option value="high">HIGH IMPACT</option><option value="fomc">FOMC / Fed</option></select>
         </div>
         <div class="field-row"><div class="field-label">Event / Time</div><input type="text" id="gp-news-event" placeholder="CPI @ 8:30am EST"></div>
-        <div id="news-day-banner" class="news-day-banner mt-8">âš  HIGH IMPACT NEWS DAY â€” Confidence score will be reduced.</div>
+        <div id="news-day-banner" class="news-day-banner mt-8">&#9888; HIGH IMPACT NEWS DAY &mdash; Confidence score will be reduced.</div>
       </div>
     </div><!-- /LEFT -->
 
@@ -751,7 +765,7 @@ input[type="range"]::-webkit-slider-thumb {
           </div>
         </div>
         <div class="mt-12 inline-flex" style="justify-content:center;gap:10px">
-          <button class="btn btn-primary" onclick="runScoring()">âš¡ RUN SCORING ENGINE</button>
+          <button class="btn btn-primary" onclick="runScoring()">&#9889; RUN SCORING ENGINE</button>
           <button class="btn btn-ghost btn-sm" onclick="resetScoring()">RESET</button>
         </div>
       </div>
@@ -784,13 +798,13 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="panel-title inline-flex">
           <span>AI Game Plan Analysis</span>
           <div class="spacer"></div>
-          <button class="btn btn-primary btn-sm" onclick="generateAIGamePlan()">GENERATE â–¶</button>
+          <button class="btn btn-primary btn-sm" onclick="generateAIGamePlan()">GENERATE &#9654;</button>
         </div>
         <div id="ai-output" style="min-height:300px">Enter your data in the left panels, run the scoring engine, then hit GENERATE to produce your daily game plan.</div>
       </div>
       <div class="panel">
         <div class="panel-title">Key ES Levels Summary</div>
-        <div id="levels-summary"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” levels will populate after scoring â€”</div></div>
+        <div id="levels-summary"><div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text3);text-align:center;padding:10px">&mdash; levels will populate after scoring &mdash;</div></div>
       </div>
     </div><!-- /RIGHT -->
 
@@ -800,9 +814,8 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ======================== INTRADAY TAB ======================== -->
 <div id="tab-intraday" class="tab-panel">
 
-  <!-- ES LEVELS BOX - auto-populated from SPX live data -->
   <div id="es-levels-box">
-    <div class="es-levels-title">âš¡ LIVE ES KEY LEVELS (converted from SPX)</div>
+    <div class="es-levels-title">&#9889; LIVE ES KEY LEVELS (converted from SPX)</div>
     <div class="es-level-grid">
       <div class="es-level-item">
         <div class="es-level-name">GEX FLIP</div>
@@ -835,32 +848,30 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="es-level-spx" id="es-magnet-spx">SPX: --</div>
       </div>
     </div>
-    <!-- DEX/VEX/CHEX summary row -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
       <div style="text-align:center">
         <div class="es-level-name">DEX (Delta)</div>
-        <div class="es-level-value" id="id-dex-val" style="font-size:11px">--</div>
+        <div class="es-level-value" id="id-dex-val" style="font-size:13px">--</div>
         <div class="es-level-spx" id="id-dex-trend">trend: --</div>
       </div>
       <div style="text-align:center">
         <div class="es-level-name">VEX (Vanna)</div>
-        <div class="es-level-value" id="id-vex-val" style="font-size:11px">--</div>
+        <div class="es-level-value" id="id-vex-val" style="font-size:13px">--</div>
         <div class="es-level-spx" id="id-vex-interp">--</div>
       </div>
       <div style="text-align:center">
         <div class="es-level-name">CHEX (Charm)</div>
-        <div class="es-level-value" id="id-chex-val" style="font-size:11px">--</div>
+        <div class="es-level-value" id="id-chex-val" style="font-size:13px">--</div>
         <div class="es-level-spx" id="id-chex-interp">--</div>
       </div>
     </div>
-    <!-- Regime + GEX direction -->
     <div style="display:flex;gap:10px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">SPX REGIME:</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2)">SPX REGIME:</div>
       <div id="id-regime-badge"></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-left:12px">NET GEX:</div>
-      <div id="id-net-gex" style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700">--</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-left:12px">0DTE%:</div>
-      <div id="id-zero-dte" style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--orange)">--</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);margin-left:12px">NET GEX:</div>
+      <div id="id-net-gex" style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700">--</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);margin-left:12px">0DTE%:</div>
+      <div id="id-zero-dte" style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--orange)">--</div>
     </div>
   </div>
 
@@ -883,20 +894,20 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <div class="field-row"><div class="field-label">Notes</div><textarea id="id-notes" placeholder="What's happening right now..."></textarea></div>
         <div class="mt-8 inline-flex">
-          <button class="btn btn-primary" onclick="logSnapshot()">ðŸ“¸ LOG SNAPSHOT</button>
-          <button class="btn btn-ghost btn-sm" onclick="generateIntradayUpdate()">AI UPDATE â–¶</button>
+          <button class="btn btn-primary" onclick="logSnapshot()">&#128248; LOG SNAPSHOT</button>
+          <button class="btn btn-ghost btn-sm" onclick="generateIntradayUpdate()">AI UPDATE &#9654;</button>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">Session Windows â€” Live</div>
+        <div class="panel-title">Session Windows &mdash; Live</div>
         <div id="session-windows-intraday"></div>
-        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">Next key window: <span id="next-window" style="color:var(--cyan)">--</span></div>
+        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2)">Next key window: <span id="next-window" style="color:var(--cyan)">--</span></div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">AI Intraday Analysis</div>
-        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;min-height:150px;color:var(--text)">Fetch live data first, then log a snapshot and hit AI UPDATE to get current analysis with full GEX context.</div>
+        <div id="ai-intraday-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:14px;line-height:1.8;min-height:150px;color:var(--text)">Fetch live data first, then log a snapshot and hit AI UPDATE to get current analysis with full GEX context.</div>
       </div>
       <div class="panel">
         <div class="panel-title inline-flex">
@@ -904,7 +915,7 @@ input[type="range"]::-webkit-slider-thumb {
           <div class="spacer"></div>
           <button class="btn btn-ghost btn-sm" onclick="clearSnapshots()">CLEAR</button>
         </div>
-        <div id="snapshot-timeline"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” no snapshots logged today â€”</div></div>
+        <div id="snapshot-timeline"><div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text3);text-align:center;padding:10px">&mdash; no snapshots logged today &mdash;</div></div>
       </div>
     </div>
   </div>
@@ -919,7 +930,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="ticker-tab" onclick="switchTicker(this, 'qqq')">QQQ<div class="ticker-live-dot" id="live-dot-qqq"></div></div>
     <div class="ticker-tab" onclick="switchTicker(this, 'vix')">VIX<div class="ticker-live-dot" id="live-dot-vix"></div></div>
     <div style="flex:1"></div>
-    <button class="btn btn-ghost btn-sm" onclick="fetchAllGEXData()" style="font-size:9px">âš¡ REFRESH ALL</button>
+    <button class="btn btn-ghost btn-sm" onclick="fetchAllGEXData()" style="font-size:11px">&#9889; REFRESH ALL</button>
   </div>
 
   <!-- SPY -->
@@ -931,14 +942,14 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spy-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
     <div class="exposure-mini-grid" id="spy-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX (Delta Exposure)</div><div class="exp-value" id="spy-dex-val">--</div><div class="exp-interp" id="spy-dex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">VEX (Vanna Exposure)</div><div class="exp-value" id="spy-vex-val">--</div><div class="exp-interp" id="spy-vex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX (Charm Exposure)</div><div class="exp-value" id="spy-chex-val">--</div><div class="exp-interp" id="spy-chex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="spy-hedge-val">--</div><div class="exp-interp" id="spy-hedge-dir">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">DEX (Delta Exposure)</div><div class="exp-value" id="spy-dex-val">--</div><div class="exp-interp" id="spy-dex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">VEX (Vanna Exposure)</div><div class="exp-value" id="spy-vex-val">--</div><div class="exp-interp" id="spy-vex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX (Charm Exposure)</div><div class="exp-value" id="spy-chex-val">--</div><div class="exp-interp" id="spy-chex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (&uarr;1%)</div><div class="exp-value" id="spy-hedge-val">--</div><div class="exp-interp" id="spy-hedge-dir">&mdash;</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPY â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spy-data-age"></span></div>
+        <div class="panel-title">SPY &mdash; GEX Data <span style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spy-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spy-net-gex" placeholder="-230.9"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spy-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -952,7 +963,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spy-put-oi" placeholder="1200" step="0.1"></div>
       </div>
       <div class="panel">
-        <div class="panel-title">SPY â€” VR Range Data</div>
+        <div class="panel-title">SPY &mdash; VR Range Data</div>
         <div class="section-header">Option Volume Range</div>
         <div class="field-row"><div class="field-label">VR Top</div><input type="number" id="spy-vr-top" placeholder="656" step="0.5"></div>
         <div class="field-row"><div class="field-label">VR Bottom</div><input type="number" id="spy-vr-bot" placeholder="624" step="0.5"></div>
@@ -979,14 +990,14 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="spx-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
     <div class="exposure-mini-grid" id="spx-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="spx-dex-val">--</div><div class="exp-interp" id="spx-dex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="spx-vex-val">--</div><div class="exp-interp" id="spx-vex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="spx-chex-val">--</div><div class="exp-interp" id="spx-chex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="spx-hedge-val">--</div><div class="exp-interp" id="spx-hedge-dir">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="spx-dex-val">--</div><div class="exp-interp" id="spx-dex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="spx-vex-val">--</div><div class="exp-interp" id="spx-vex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="spx-chex-val">--</div><div class="exp-interp" id="spx-chex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (&uarr;1%)</div><div class="exp-value" id="spx-hedge-val">--</div><div class="exp-interp" id="spx-hedge-dir">&mdash;</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">SPX â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spx-data-age"></span></div>
+        <div class="panel-title">SPX &mdash; GEX Data <span style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="spx-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="spx-net-gex" placeholder="-850.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="spx-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -1000,7 +1011,7 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row"><div class="field-label">Total Put OI (K)</div><input type="number" id="spx-put-oi" placeholder="420" step="0.1"></div>
       </div>
       <div class="panel">
-        <div class="panel-title">SPX â€” VR Range Data</div>
+        <div class="panel-title">SPX &mdash; VR Range Data</div>
         <div class="section-header">Option Volume Range</div>
         <div class="field-row"><div class="field-label">VR Top</div><input type="number" id="spx-vr-top" placeholder="5720" step="5"></div>
         <div class="field-row"><div class="field-label">VR Bottom</div><input type="number" id="spx-vr-bot" placeholder="5480" step="5"></div>
@@ -1027,14 +1038,14 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="gex-live-card"><div class="gex-live-label">0DTE %</div><div class="gex-live-value" id="qqq-live-0dte" style="color:var(--orange)">--</div></div>
     </div>
     <div class="exposure-mini-grid" id="qqq-exp-mini" style="display:none;margin-bottom:12px">
-      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="qqq-dex-val">--</div><div class="exp-interp" id="qqq-dex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="qqq-vex-val">--</div><div class="exp-interp" id="qqq-vex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="qqq-chex-val">--</div><div class="exp-interp" id="qqq-chex-interp">â€”</div></div>
-      <div class="exp-box"><div class="exp-label">Hedging (â†‘1%)</div><div class="exp-value" id="qqq-hedge-val">--</div><div class="exp-interp" id="qqq-hedge-dir">â€”</div></div>
+      <div class="exp-box"><div class="exp-label">DEX</div><div class="exp-value" id="qqq-dex-val">--</div><div class="exp-interp" id="qqq-dex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">VEX</div><div class="exp-value" id="qqq-vex-val">--</div><div class="exp-interp" id="qqq-vex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">CHEX</div><div class="exp-value" id="qqq-chex-val">--</div><div class="exp-interp" id="qqq-chex-interp">&mdash;</div></div>
+      <div class="exp-box"><div class="exp-label">Hedging (&uarr;1%)</div><div class="exp-value" id="qqq-hedge-val">--</div><div class="exp-interp" id="qqq-hedge-dir">&mdash;</div></div>
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">QQQ â€” GEX Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="qqq-data-age"></span></div>
+        <div class="panel-title">QQQ &mdash; GEX Data <span style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="qqq-data-age"></span></div>
         <div class="section-header">Dealer Positioning</div>
         <div class="field-row"><div class="field-label">Net GEX ($M)</div><input type="number" id="qqq-net-gex" placeholder="-95.0"></div>
         <div class="field-row"><div class="field-label">Net GEX Direction</div><select id="qqq-gex-dir"><option value="">--</option><option value="negative">Negative (Amplifying)</option><option value="positive">Positive (Dampening)</option></select></div>
@@ -1048,15 +1059,15 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">QQQ â€” Context Notes</div>
+        <div class="panel-title">QQQ &mdash; Context Notes</div>
         <div class="section-header">NQ Confluence</div>
         <textarea id="qqq-notes" placeholder="QQQ-specific observations, NQ correlation..." style="min-height:120px;width:100%"></textarea>
         <div class="section-header mt-12">SPY vs SPX Alignment</div>
         <div class="field-row"><div class="field-label">Both Negative?</div>
           <select id="spy-spx-align"><option value="">--</option><option value="both-neg">Both Negative (high conviction)</option><option value="both-pos">Both Positive (high conviction)</option><option value="diverge">Diverging (reduce confidence)</option><option value="mixed">Mixed signals</option></select>
         </div>
-        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          When SPY + SPX GEX agree â†’ HIGH CONVICTION<br>When they diverge â†’ REDUCE SIZE / STAY OUT
+        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
+          When SPY + SPX GEX agree &rarr; HIGH CONVICTION<br>When they diverge &rarr; REDUCE SIZE / STAY OUT
         </div>
       </div>
     </div>
@@ -1072,7 +1083,7 @@ input[type="range"]::-webkit-slider-thumb {
     </div>
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-title">VIX â€” Options Data <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="vix-data-age"></span></div>
+        <div class="panel-title">VIX &mdash; Options Data <span style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-weight:normal" id="vix-data-age"></span></div>
         <div class="section-header">Vol Options Positioning</div>
         <div class="field-row"><div class="field-label">VIX Net GEX Dir</div>
           <select id="vix-gex-dir"><option value="">--</option><option value="call-heavy">Call Heavy (vol higher)</option><option value="put-heavy">Put Heavy (vol lower)</option><option value="neutral">Neutral</option></select>
@@ -1086,13 +1097,13 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">VIX â€” Context</div>
+        <div class="panel-title">VIX &mdash; Context</div>
         <div class="section-header">Term Structure</div>
         <div class="field-row"><div class="field-label">VX Term Structure</div>
           <select id="vx-ts"><option value="">--</option><option value="contango">Contango (normal)</option><option value="flat">Flat (uncertainty)</option><option value="inversion">Inversion (fear)</option></select>
         </div>
         <div class="field-row"><div class="field-label">VVIX</div><input type="number" id="vix-vvix" placeholder="95" step="0.1"></div>
-        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
+        <div class="mt-8" style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
           VIX GEX call-heavy = vol suppression likely<br>VIX GEX put-heavy = vol expansion risk<br>VIX9D &gt; VIX = near-term fear elevated
         </div>
       </div>
@@ -1125,8 +1136,8 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="panel-title">Pattern Score</div>
         <div id="pattern-score-display" style="text-align:center;padding:10px">
           <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900" id="pat-score-num" style="color:var(--text3)">--</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-top:4px">PATTERN CONFLUENCE SCORE</div>
-          <div id="pat-bias-label" style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text2);margin-top:6px">â€”</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);margin-top:4px">PATTERN CONFLUENCE SCORE</div>
+          <div id="pat-bias-label" style="font-family:'Rajdhani',sans-serif;font-size:15px;color:var(--text2);margin-top:6px">&mdash;</div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="calcPatternScore()" style="width:100%">CALCULATE</button>
       </div>
@@ -1147,21 +1158,21 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="weight-row"><div class="weight-label">Macro Context</div><input type="range" id="w-macro" min="0" max="20" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-macro">15%</div></div>
       <div class="divider"></div>
       <div class="section-header">Total Weight</div>
-      <div id="weight-total" style="font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--cyan);text-align:center;padding:8px">100%</div>
-      <div id="weight-warning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--orange);text-align:center;margin-top:4px">âš  Weights should sum to 100%</div>
+      <div id="weight-total" style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--cyan);text-align:center;padding:8px">100%</div>
+      <div id="weight-warning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--orange);text-align:center;margin-top:4px">&#9888; Weights should sum to 100%</div>
       <div class="divider"></div>
       <div class="section-header">News Day Penalty</div>
       <div class="weight-row"><div class="weight-label">Confidence Reduction</div><input type="range" id="w-news-penalty" min="0" max="50" value="20" oninput="updateWeights()"><div class="weight-val" id="wv-news-penalty">20%</div></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">Applied on HIGH IMPACT / FOMC days</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">Applied on HIGH IMPACT / FOMC days</div>
       <div class="divider"></div>
       <div class="section-header">SPY/SPX Divergence Penalty</div>
       <div class="weight-row"><div class="weight-label">Divergence Penalty</div><input type="range" id="w-div-penalty" min="0" max="30" value="15" oninput="updateWeights()"><div class="weight-val" id="wv-div-penalty">15%</div></div>
       <div class="divider"></div>
       <div class="section-header">Alert Thresholds</div>
       <div class="weight-row"><div class="weight-label">Flip Proximity (pts)</div><input type="range" id="w-flip-proximity" min="2" max="20" value="8" oninput="updateWeights()"><div class="weight-val" id="wv-flip-proximity">8</div></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ES points from GEX flip to trigger proximity alert</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">ES points from GEX flip to trigger proximity alert</div>
       <div class="weight-row"><div class="weight-label">VR Proximity (pts)</div><input type="range" id="w-vr-proximity" min="2" max="20" value="6" oninput="updateWeights()"><div class="weight-val" id="wv-vr-proximity">6</div></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">ES points from VR boundary to trigger proximity alert</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">ES points from VR boundary to trigger proximity alert</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
@@ -1178,28 +1189,29 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="field-row">
           <div class="field-label">Auto-Refresh</div>
           <select id="auto-refresh-interval" onchange="updateAutoRefresh()">
-            <option value="0">Off</option>
+            <option value="0" selected>Off</option>
             <option value="5">Every 5 min</option>
             <option value="10">Every 10 min</option>
-            <option value="15" selected>Every 15 min</option>
+            <option value="15">Every 15 min</option>
             <option value="30">Every 30 min</option>
           </select>
         </div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px">
-          15min = 8 calls/fetch Ã— 9 fetches = 72 daily API calls<br>
-          Stays within FlashAlpha Basic plan limit
+        <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3);margin-top:4px">
+          Auto-refresh is OFF by default to conserve API quota.<br>
+          Each fetch uses 8 of your 100 daily FlashAlpha calls.<br>
+          Quota resets at midnight UTC (8 PM EST).
         </div>
       </div>
       <div class="panel">
         <div class="panel-title">GEX Regime Reference</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:1.8;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
-          Negative GEX â†’ Dealers SHORT gamma<br>â†’ AMPLIFIES moves in both directions<br>â†’ Widen stop expectations<br><br>
-          Positive GEX â†’ Dealers LONG gamma<br>â†’ DAMPENS moves, mean-reversion bias<br>â†’ Tighter range, fades work better
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);line-height:1.8;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
+          Negative GEX &rarr; Dealers SHORT gamma<br>&rarr; AMPLIFIES moves in both directions<br>&rarr; Widen stop expectations<br><br>
+          Positive GEX &rarr; Dealers LONG gamma<br>&rarr; DAMPENS moves, mean-reversion bias<br>&rarr; Tighter range, fades work better
         </div>
       </div>
       <div class="panel">
         <div class="panel-title">VR Stats Reference</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);line-height:2;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);line-height:2;padding:8px;background:var(--bg3);border-radius:3px;border:1px solid var(--border)">
           VR (Volume Range): <span style="color:var(--green)">94.35% hit rate</span><br>
           pVR (Prob Vol Range): <span style="color:var(--yellow)">50.81% hit rate</span><br>
           Block Range: <span style="color:var(--cyan)">100% hit rate</span>
@@ -1256,12 +1268,13 @@ const state = {
   lastBias: 'NEUTRAL',
   lastConf: 0,
   liveData: {},
-  prevRegimes: {},       // track regime changes between fetches
-  prevDex: {},           // track DEX values between fetches for trend
+  prevRegimes: {},
+  prevDex: {},
   autoRefreshInterval: null,
   autoRefreshSecs: 0,
   autoRefreshCountdown: 0,
-  fetchCount: 0
+  fetchCount: 0,
+  apiCallsToday: 0
 };
 
 const BULL_PATTERNS = [
@@ -1292,7 +1305,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateSessionWindows, 30000);
   setDefaultDate();
   updateAutoRefresh();
-  fetchAllGEXData();
+  // NO auto-fetch on load â€” preserves FlashAlpha quota
+  document.getElementById('last-fetch').textContent = 'Ready \u2014 click Fetch Live Data';
 });
 
 function setDefaultDate() {
@@ -1301,15 +1315,24 @@ function setDefaultDate() {
   document.getElementById('tl-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
+// ===================== API COUNTER =====================
+function updateAPICounter(callsMade) {
+  state.apiCallsToday += callsMade;
+  const counter = document.getElementById('api-counter');
+  counter.textContent = `API: ${state.apiCallsToday}/100`;
+  counter.className = '';
+  if (state.apiCallsToday >= 80) counter.classList.add('danger');
+  else if (state.apiCallsToday >= 60) counter.classList.add('warning');
+}
+
 // ===================== ES CONVERSION =====================
 function getESBasis() {
   return parseFloat(document.getElementById('es-basis').value) || 2;
 }
 
-// Convert SPX price to ES equivalent
 function spxToES(spxPrice) {
   if (!spxPrice || spxPrice === 0) return 0;
-  return Math.round((spxPrice + getESBasis()) * 4) / 4; // round to nearest 0.25 (ES tick)
+  return Math.round((spxPrice + getESBasis()) * 4) / 4;
 }
 
 function fmtES(val) {
@@ -1322,43 +1345,28 @@ function updateAutoRefresh() {
   const sel = document.getElementById('auto-refresh-interval');
   const mins = parseInt(sel.value) || 0;
 
-  // Clear existing
-  if (state.autoRefreshInterval) {
-    clearInterval(state.autoRefreshInterval);
-    state.autoRefreshInterval = null;
-  }
-  if (state.countdownInterval) {
-    clearInterval(state.countdownInterval);
-    state.countdownInterval = null;
-  }
+  if (state.autoRefreshInterval) { clearInterval(state.autoRefreshInterval); state.autoRefreshInterval = null; }
+  if (state.countdownInterval) { clearInterval(state.countdownInterval); state.countdownInterval = null; }
 
   const timerEl = document.getElementById('refresh-timer');
 
-  if (mins === 0) {
-    timerEl.style.display = 'none';
-    return;
-  }
+  if (mins === 0) { timerEl.style.display = 'none'; return; }
 
   state.autoRefreshSecs = mins * 60;
   state.autoRefreshCountdown = state.autoRefreshSecs;
   timerEl.style.display = 'inline';
 
-  // Countdown ticker
   state.countdownInterval = setInterval(() => {
     state.autoRefreshCountdown--;
-    if (state.autoRefreshCountdown <= 0) {
-      state.autoRefreshCountdown = state.autoRefreshSecs;
-    }
+    if (state.autoRefreshCountdown <= 0) state.autoRefreshCountdown = state.autoRefreshSecs;
     const m = Math.floor(state.autoRefreshCountdown / 60);
     const s = state.autoRefreshCountdown % 60;
     timerEl.textContent = `Next refresh: ${m}:${String(s).padStart(2,'0')}`;
-    // Color urgency
     timerEl.className = '';
     if (state.autoRefreshCountdown <= 30) timerEl.classList.add('very-urgent');
     else if (state.autoRefreshCountdown <= 60) timerEl.classList.add('urgent');
   }, 1000);
 
-  // Actual fetch trigger
   state.autoRefreshInterval = setInterval(() => {
     fetchAllGEXData();
     state.autoRefreshCountdown = state.autoRefreshSecs;
@@ -1376,16 +1384,19 @@ async function fetchTicker(symbol) {
       fetch(`${PROXY}?symbol=${symbol}&endpoint=gex`)
     ]);
 
-    if (!levResp.ok) {
-      const err = await levResp.text();
-      throw new Error(`Levels HTTP ${levResp.status}: ${err.slice(0,120)}`);
+    if (!levResp.ok) throw new Error(`Levels HTTP ${levResp.status}`);
+
+    const levels = await levResp.json();
+
+    // Check for quota error
+    if (levels.status === 'ERROR') {
+      throw new Error(levels.error || 'API Error');
     }
 
-    const levels  = await levResp.json();
     const gexData = gexResp.ok ? await gexResp.json() : null;
 
     let netGex = 0, regime = 'undetermined';
-    if (gexData) {
+    if (gexData && gexData.status !== 'ERROR') {
       if (Array.isArray(gexData.strikes)) {
         netGex = gexData.strikes.reduce((sum, s) => sum + (s.net_gex || s.gex || 0), 0);
       } else if (Array.isArray(gexData.data)) {
@@ -1409,12 +1420,10 @@ async function fetchTicker(symbol) {
       as_of: new Date().toISOString()
     };
 
-    // --- REGIME CHANGE DETECTION ---
     if (state.prevRegimes[sym] && state.prevRegimes[sym] !== regime && regime !== 'undetermined') {
       fireRegimeChangeAlert(sym, state.prevRegimes[sym], regime);
     }
 
-    // --- DEX TREND TRACKING ---
     const prevDex = state.prevDex[sym] || null;
     const newDex = summary.exposures.net_dex;
     if (prevDex !== null && newDex !== 0) {
@@ -1432,7 +1441,10 @@ async function fetchTicker(symbol) {
     console.error(`FlashAlpha error for ${symbol}:`, e);
     setDotStatus(sym, 'error');
     const statusEl = document.getElementById(`status-${sym}`);
-    if (statusEl) { statusEl.textContent = 'ERR'; statusEl.style.color = 'var(--red)'; }
+    if (statusEl) {
+      statusEl.textContent = e.message.includes('Quota') ? 'QUOTA' : 'ERR';
+      statusEl.style.color = 'var(--red)';
+    }
     return false;
   }
 }
@@ -1440,33 +1452,34 @@ async function fetchTicker(symbol) {
 async function fetchAllGEXData() {
   const btn = document.getElementById('fetch-btn');
   btn.disabled = true;
-  btn.textContent = 'â³ FETCHING...';
+  btn.textContent = '\u23F3 FETCHING...';
   state.fetchCount++;
 
-  await Promise.all([
+  const results = await Promise.all([
     fetchTicker('SPY'),
     fetchTicker('SPX'),
     fetchTicker('QQQ'),
     fetchTicker('VIX')
   ]);
 
+  // Count successful fetches (2 calls each)
+  const successCount = results.filter(Boolean).length;
+  updateAPICounter(successCount * 2);
+
   const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
   const estTime = now.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   document.getElementById('last-fetch').textContent = `Last fetch: ${estTime} EST`;
 
   btn.disabled = false;
-  btn.textContent = 'âš¡ FETCH LIVE DATA';
+  btn.textContent = '\u26A1 FETCH LIVE DATA';
 
   autoSetAlignment();
-
-  // After all tickers fetched â€” run proximity checks and populate intraday ES levels
   populateIntradayESLevels();
   runProximityAlerts();
   runBiasChangeCheck();
 }
 
-// ===================== SPX â†’ ES INTRADAY POPULATE =====================
+// ===================== SPX to ES INTRADAY POPULATE =====================
 function populateIntradayESLevels() {
   const spxData = state.liveData['spx'];
   if (!spxData) return;
@@ -1481,7 +1494,6 @@ function populateIntradayESLevels() {
   const zeroPct = summary.zero_dte?.pct_of_total_gex || 0;
   const interp = summary.interpretation || {};
 
-  // Key SPX levels
   const spxFlip = levels.levels?.gamma_flip || 0;
   const spxCallWall = levels.levels?.call_wall || 0;
   const spxPutWall = levels.levels?.put_wall || 0;
@@ -1489,7 +1501,6 @@ function populateIntradayESLevels() {
   const spxVrBot = parseFloat(document.getElementById('spx-vr-bot').value) || 0;
   const spxMagnet = levels.levels?.zero_dte_magnet || 0;
 
-  // Convert all to ES
   const setESLevel = (valId, spxId, spxVal) => {
     const esVal = spxToES(spxVal);
     const valEl = document.getElementById(valId);
@@ -1505,30 +1516,23 @@ function populateIntradayESLevels() {
   setESLevel('es-vrbot-val',   'es-vrbot-spx',    spxVrBot);
   setESLevel('es-magnet-val',  'es-magnet-spx',   spxMagnet);
 
-  // ES current price in header
   if (spxPrice > 0) {
     const esPrice = spxToES(spxPrice);
     document.getElementById('es-price-val').textContent = fmtES(esPrice);
     document.getElementById('es-price-display').style.display = 'flex';
   }
 
-  // DEX/VEX/CHEX with trend
   const fmtGex = v => v === 0 ? '--' : `$${(v/1e6).toFixed(1)}M`;
   const dexEl = document.getElementById('id-dex-val');
   const dexTrend = document.getElementById('id-dex-trend');
-  if (dexEl) {
-    dexEl.textContent = fmtGex(netDex);
-    dexEl.style.color = netDex < 0 ? 'var(--red)' : netDex > 0 ? 'var(--green)' : 'var(--text2)';
-  }
+  if (dexEl) { dexEl.textContent = fmtGex(netDex); dexEl.style.color = netDex < 0 ? 'var(--red)' : netDex > 0 ? 'var(--green)' : 'var(--text2)'; }
   if (dexTrend) {
     const prevDexData = state.prevDex['spx'];
     if (prevDexData && prevDexData.prev !== null) {
-      const dir = netDex < prevDexData.prev ? 'â†“ bearish' : netDex > prevDexData.prev ? 'â†‘ bullish' : 'â†’ flat';
+      const dir = netDex < prevDexData.prev ? '\u2193 bearish' : '\u2191 bullish';
       dexTrend.textContent = `trend: ${dir}`;
-      dexTrend.style.color = netDex < prevDexData.prev ? 'var(--red)' : netDex > prevDexData.prev ? 'var(--green)' : 'var(--text3)';
-    } else {
-      dexTrend.textContent = 'trend: (next fetch)';
-    }
+      dexTrend.style.color = netDex < prevDexData.prev ? 'var(--red)' : 'var(--green)';
+    } else { dexTrend.textContent = 'trend: (next fetch)'; }
   }
 
   const vexEl = document.getElementById('id-vex-val');
@@ -1541,42 +1545,31 @@ function populateIntradayESLevels() {
   const chexInterp = document.getElementById('id-chex-interp');
   if (chexInterp) chexInterp.textContent = interp.charm || '--';
 
-  // Regime badge
   const regimeBadge = document.getElementById('id-regime-badge');
   if (regimeBadge) {
     const cls = regime === 'negative_gamma' ? 'regime-neg' : regime === 'positive_gamma' ? 'regime-pos' : 'regime-und';
-    const label = regime === 'negative_gamma' ? 'NEG Î³ â€” AMPLIFYING' : regime === 'positive_gamma' ? 'POS Î³ â€” DAMPENING' : 'UNDETERMINED';
+    const label = regime === 'negative_gamma' ? 'NEG \u03B3 \u2014 AMPLIFYING' : regime === 'positive_gamma' ? 'POS \u03B3 \u2014 DAMPENING' : 'UNDETERMINED';
     regimeBadge.innerHTML = `<span class="regime-badge ${cls}">${label}</span>`;
   }
 
-  // Net GEX display
   const netGexEl = document.getElementById('id-net-gex');
-  if (netGexEl) {
-    netGexEl.textContent = netGex === 0 ? '--' : `$${(netGex/1e6).toFixed(1)}M`;
-    netGexEl.style.color = netGex < 0 ? 'var(--red)' : 'var(--green)';
-  }
+  if (netGexEl) { netGexEl.textContent = netGex === 0 ? '--' : `$${(netGex/1e6).toFixed(1)}M`; netGexEl.style.color = netGex < 0 ? 'var(--red)' : 'var(--green)'; }
 
-  // 0DTE %
   const zeroDteEl = document.getElementById('id-zero-dte');
   if (zeroDteEl) zeroDteEl.textContent = zeroPct > 0 ? `${zeroPct.toFixed(1)}%` : '--';
 
-  // Auto-populate the current ES price field in intraday tab
   if (spxPrice > 0) {
     const idPriceEl = document.getElementById('id-price');
-    if (idPriceEl && !idPriceEl.value) {
-      idPriceEl.value = spxToES(spxPrice).toFixed(2);
-      idPriceEl.style.borderColor = 'rgba(0,212,255,0.4)';
-    }
+    if (idPriceEl && !idPriceEl.value) { idPriceEl.value = spxToES(spxPrice).toFixed(2); idPriceEl.style.borderColor = 'rgba(0,212,255,0.4)'; }
   }
 
-  // Show ES levels box
   document.getElementById('es-levels-box').style.display = 'block';
 }
 
 // ===================== REGIME CHANGE ALERT =====================
 function fireRegimeChangeAlert(sym, fromRegime, toRegime) {
-  const fromLabel = fromRegime === 'negative_gamma' ? 'NEGATIVE Î³' : 'POSITIVE Î³';
-  const toLabel = toRegime === 'negative_gamma' ? 'NEGATIVE Î³' : 'POSITIVE Î³';
+  const fromLabel = fromRegime === 'negative_gamma' ? 'NEGATIVE \u03B3' : 'POSITIVE \u03B3';
+  const toLabel = toRegime === 'negative_gamma' ? 'NEGATIVE \u03B3' : 'POSITIVE \u03B3';
   const isBearishFlip = toRegime === 'negative_gamma';
 
   const banner = document.getElementById('regime-change-banner');
@@ -1585,12 +1578,8 @@ function fireRegimeChangeAlert(sym, fromRegime, toRegime) {
   banner.style.background = isBearishFlip ? 'rgba(255,51,102,0.1)' : 'rgba(0,255,136,0.08)';
   banner.style.borderTopColor = isBearishFlip ? 'var(--red)' : 'var(--green)';
   banner.style.borderBottomColor = isBearishFlip ? 'var(--red)' : 'var(--green)';
-  banner.textContent = `âš¡ REGIME FLIP â€” ${sym.toUpperCase()}: ${fromLabel} â†’ ${toLabel} | ${isBearishFlip ? 'DEALERS NOW SHORT GAMMA â€” EXPECT AMPLIFIED MOVES' : 'DEALERS NOW LONG GAMMA â€” MEAN REVERSION MODE'}`;
-
-  // Audible alert
+  banner.textContent = `\u26A1 REGIME FLIP \u2014 ${sym.toUpperCase()}: ${fromLabel} \u2192 ${toLabel} | ${isBearishFlip ? 'DEALERS NOW SHORT GAMMA \u2014 EXPECT AMPLIFIED MOVES' : 'DEALERS NOW LONG GAMMA \u2014 MEAN REVERSION MODE'}`;
   playAlertTone(isBearishFlip ? 'bearish' : 'bullish');
-
-  // Auto-hide after 60 seconds
   setTimeout(() => { banner.style.display = 'none'; }, 60000);
 }
 
@@ -1617,24 +1606,14 @@ function runProximityAlerts() {
   const esMagnet = spxToES(spxMagnet);
 
   const alerts = [];
-
-  if (esFlip && Math.abs(currentESPrice - esFlip) <= flipProx) {
-    const dir = currentESPrice > esFlip ? 'above' : 'below';
-    alerts.push(`âš¡ GEX FLIP PROXIMITY: ES ${currentESPrice} is ${Math.abs(currentESPrice - esFlip).toFixed(2)}pts ${dir} flip @ ${esFlip}`);
-  }
-  if (esVrTop && Math.abs(currentESPrice - esVrTop) <= vrProx) {
-    alerts.push(`ðŸ”´ VR TOP PROXIMITY: ES approaching VR top @ ${esVrTop} (${Math.abs(currentESPrice - esVrTop).toFixed(2)}pts away)`);
-  }
-  if (esVrBot && Math.abs(currentESPrice - esVrBot) <= vrProx) {
-    alerts.push(`ðŸŸ¢ VR BOTTOM PROXIMITY: ES approaching VR bottom @ ${esVrBot} (${Math.abs(currentESPrice - esVrBot).toFixed(2)}pts away)`);
-  }
-  if (esMagnet && Math.abs(currentESPrice - esMagnet) <= 5) {
-    alerts.push(`ðŸ§² 0DTE MAGNET: ES within 5pts of magnet level @ ${esMagnet}`);
-  }
+  if (esFlip && Math.abs(currentESPrice - esFlip) <= flipProx) alerts.push(`\u26A1 GEX FLIP PROXIMITY: ES ${currentESPrice} is ${Math.abs(currentESPrice - esFlip).toFixed(2)}pts ${currentESPrice > esFlip ? 'above' : 'below'} flip @ ${esFlip}`);
+  if (esVrTop && Math.abs(currentESPrice - esVrTop) <= vrProx) alerts.push(`\uD83D\uDD34 VR TOP PROXIMITY: ES approaching VR top @ ${esVrTop} (${Math.abs(currentESPrice - esVrTop).toFixed(2)}pts away)`);
+  if (esVrBot && Math.abs(currentESPrice - esVrBot) <= vrProx) alerts.push(`\uD83D\uDFE2 VR BOTTOM PROXIMITY: ES approaching VR bottom @ ${esVrBot} (${Math.abs(currentESPrice - esVrBot).toFixed(2)}pts away)`);
+  if (esMagnet && Math.abs(currentESPrice - esMagnet) <= 5) alerts.push(`\uD83E\uDDF2 0DTE MAGNET: ES within 5pts of magnet level @ ${esMagnet}`);
 
   const container = document.getElementById('proximity-alerts');
   if (alerts.length > 0) {
-    container.innerHTML = alerts.map(a => `<div class="prox-item">âš  ${a}</div>`).join('');
+    container.innerHTML = alerts.map(a => `<div class="prox-item">\u26A0 ${a}</div>`).join('');
     container.classList.add('visible');
     if (alerts.some(a => a.includes('GEX FLIP'))) playAlertTone('neutral');
   } else {
@@ -1645,13 +1624,9 @@ function runProximityAlerts() {
 
 // ===================== BIAS CHANGE DETECTION =====================
 function runBiasChangeCheck() {
-  // Compare current GEX regimes across SPX + SPY â€” if they flipped direction vs prev fetch
   const spxCurrent = state.liveData['spx']?.summary?.regime;
   const spyCurrent = state.liveData['spy']?.summary?.regime;
-
-  // Cross-ticker divergence detection
   if (spxCurrent && spyCurrent && spxCurrent !== spyCurrent) {
-    // They're diverging â€” already handled in updateAlerts but reinforce here
     console.log('SPX/SPY divergence detected:', spxCurrent, 'vs', spyCurrent);
   }
 }
@@ -1664,32 +1639,20 @@ function playAlertTone(type) {
     const gainNode = ctx.createGain();
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
-
     if (type === 'bearish') {
       oscillator.frequency.setValueAtTime(880, ctx.currentTime);
       oscillator.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.5);
     } else if (type === 'bullish') {
       oscillator.frequency.setValueAtTime(440, ctx.currentTime);
       oscillator.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.5);
     } else {
-      // neutral / proximity
       oscillator.frequency.setValueAtTime(660, ctx.currentTime);
-      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.3);
     }
-  } catch(e) {
-    // Audio not available â€” silent fail
-  }
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
 }
 
 // ===================== POPULATE TICKER FIELDS =====================
@@ -1722,18 +1685,17 @@ function populateTickerFields(sym, summary, levels) {
   const regimeEl = document.getElementById(`regime-${sym}`);
   if (regimeEl) {
     const cls = regime === 'negative_gamma' ? 'regime-neg' : regime === 'positive_gamma' ? 'regime-pos' : 'regime-und';
-    const label = regime === 'negative_gamma' ? 'NEG Î³' : regime === 'positive_gamma' ? 'POS Î³' : 'UND';
+    const label = regime === 'negative_gamma' ? 'NEG \u03B3' : regime === 'positive_gamma' ? 'POS \u03B3' : 'UND';
     regimeEl.innerHTML = `<span class="regime-badge ${cls}">${label}</span>`;
   }
 
-  // DEX trend indicator in status bar (SPX only)
   if (sym === 'spx') {
     const dexTrendEl = document.getElementById('dex-trend-spx');
     if (dexTrendEl) {
       const prevDexData = state.prevDex['spx'];
       if (prevDexData && prevDexData.prev !== null && netDex !== 0) {
         const isMore = netDex < prevDexData.prev;
-        dexTrendEl.innerHTML = `<span class="dex-trend ${isMore ? 'dex-bearish' : 'dex-bullish'}">${isMore ? 'â†“DEX' : 'â†‘DEX'}</span>`;
+        dexTrendEl.innerHTML = `<span class="dex-trend ${isMore ? 'dex-bearish' : 'dex-bullish'}">${isMore ? '\u2193DEX' : '\u2191DEX'}</span>`;
       }
     }
   }
@@ -1746,11 +1708,8 @@ function populateTickerFields(sym, summary, levels) {
     document.getElementById(`${sym}-live-gex`).style.color = netGex < 0 ? 'var(--red)' : 'var(--green)';
     document.getElementById(`${sym}-live-regime`).textContent = regime.replace('_gamma','').toUpperCase();
     document.getElementById(`${sym}-live-regime`).style.color = regime === 'negative_gamma' ? 'var(--red)' : regime === 'positive_gamma' ? 'var(--green)' : 'var(--yellow)';
-    if (sym === 'vix') {
-      document.getElementById('vix-live-flip').textContent = gammaFlip ? gammaFlip.toFixed(2) : '--';
-    } else {
-      document.getElementById(`${sym}-live-0dte`).textContent = fmtPct(zeroPct);
-    }
+    if (sym === 'vix') { document.getElementById('vix-live-flip').textContent = gammaFlip ? gammaFlip.toFixed(2) : '--'; }
+    else { document.getElementById(`${sym}-live-0dte`).textContent = fmtPct(zeroPct); }
   }
 
   if (sym !== 'vix') {
@@ -1759,15 +1718,15 @@ function populateTickerFields(sym, summary, levels) {
       miniGrid.style.display = 'grid';
       document.getElementById(`${sym}-dex-val`).textContent = fmtGex(netDex);
       document.getElementById(`${sym}-dex-val`).style.color = netDex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-dex-interp`).textContent = interp.gamma || 'â€”';
+      document.getElementById(`${sym}-dex-interp`).textContent = interp.gamma || '\u2014';
       document.getElementById(`${sym}-vex-val`).textContent = fmtGex(netVex);
       document.getElementById(`${sym}-vex-val`).style.color = netVex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-vex-interp`).textContent = interp.vanna || 'â€”';
+      document.getElementById(`${sym}-vex-interp`).textContent = interp.vanna || '\u2014';
       document.getElementById(`${sym}-chex-val`).textContent = fmtGex(netChex);
       document.getElementById(`${sym}-chex-val`).style.color = netChex < 0 ? 'var(--red)' : 'var(--green)';
-      document.getElementById(`${sym}-chex-interp`).textContent = interp.charm || 'â€”';
+      document.getElementById(`${sym}-chex-interp`).textContent = interp.charm || '\u2014';
       document.getElementById(`${sym}-hedge-val`).textContent = hedgeNotional > 0 ? fmtB(hedgeNotional) : '--';
-      document.getElementById(`${sym}-hedge-dir`).textContent = hedgeDir ? `Dealers ${hedgeDir} on â†‘1%` : 'â€”';
+      document.getElementById(`${sym}-hedge-dir`).textContent = hedgeDir ? `Dealers ${hedgeDir} on \u21911%` : '\u2014';
     }
   }
 
@@ -1781,7 +1740,6 @@ function populateTickerFields(sym, summary, levels) {
     ageEl.textContent = mins < 60 ? `(${mins}m ago)` : `(${(mins/60).toFixed(1)}h ago)`;
   }
 
-  // Populate input fields
   if (sym === 'spy') {
     setField('spy-net-gex', (netGex/1e6).toFixed(1));
     setField('spy-flip', gammaFlip);
@@ -1862,20 +1820,12 @@ function autoSetAlignment() {
 
   if (spyGex !== 0 && spxGex !== 0) {
     const spyNeg = spyGex < 0, spxNeg = spxGex < 0;
-    let align = '';
-    if (spyNeg && spxNeg) align = 'both-neg';
-    else if (!spyNeg && !spxNeg) align = 'both-pos';
-    else align = 'diverge';
+    let align = spyNeg && spxNeg ? 'both-neg' : !spyNeg && !spxNeg ? 'both-pos' : 'diverge';
     setSelect('spy-spx-align', align);
   }
-
   if (spyGex !== 0 && qqqGex !== 0) {
     const spyNeg = spyGex < 0, qqqNeg = qqqGex < 0;
-    let qalign = '';
-    if (spyNeg && qqqNeg) qalign = 'aligned';
-    else if (qqqGex < spyGex) qalign = 'qqq-worse';
-    else if (spyGex < qqqGex) qalign = 'spy-worse';
-    else qalign = 'diverge';
+    let qalign = spyNeg && qqqNeg ? 'aligned' : qqqGex < spyGex ? 'qqq-worse' : spyGex < qqqGex ? 'spy-worse' : 'diverge';
     setSelect('qqq-align', qalign);
   }
 }
@@ -1910,10 +1860,10 @@ function getCurrentSession() {
   const mins = est.getHours() * 60 + est.getMinutes();
   if (mins >= 120 && mins < 300) return 'London Open (2-5am EST)';
   if (mins >= 420 && mins < 570) return 'Pre-Market (7-9:30am EST)';
-  if (mins >= 570 && mins < 660) return 'NY Open (9:30-11am EST) â€” highest volatility window';
-  if (mins >= 660 && mins < 840) return 'Mid-Day (11am-2pm EST) â€” typically lower volume';
-  if (mins >= 840 && mins < 945) return 'Afternoon/Close (2-3:45pm EST) â€” institutional activity picks up';
-  if (mins >= 945 && mins < 960) return 'MOC (3:45-4pm EST) â€” market-on-close orders dominate';
+  if (mins >= 570 && mins < 660) return 'NY Open (9:30-11am EST) \u2014 highest volatility window';
+  if (mins >= 660 && mins < 840) return 'Mid-Day (11am-2pm EST) \u2014 typically lower volume';
+  if (mins >= 840 && mins < 945) return 'Afternoon/Close (2-3:45pm EST) \u2014 institutional activity picks up';
+  if (mins >= 945 && mins < 960) return 'MOC (3:45-4pm EST) \u2014 market-on-close orders dominate';
   return 'After Hours / Closed';
 }
 
@@ -1922,12 +1872,12 @@ function updateSessionWindows() {
   const est = new Date(now);
   const mins = est.getHours() * 60 + est.getMinutes();
   const sessions = [
-    { name: 'London Open', time: '2:00â€“5:00 AM', start: 120, end: 300 },
-    { name: 'Pre-Market', time: '7:00â€“9:30 AM', start: 420, end: 570 },
-    { name: 'NY Open', time: '9:30â€“11:00 AM', start: 570, end: 660 },
-    { name: 'Mid-Day', time: '11:00 AMâ€“2:00 PM', start: 660, end: 840 },
-    { name: 'Afternoon / Close', time: '2:00â€“3:45 PM', start: 840, end: 945 },
-    { name: 'MOC', time: '3:45â€“4:00 PM', start: 945, end: 960 },
+    { name: 'London Open', time: '2:00\u20135:00 AM', start: 120, end: 300 },
+    { name: 'Pre-Market', time: '7:00\u20139:30 AM', start: 420, end: 570 },
+    { name: 'NY Open', time: '9:30\u201311:00 AM', start: 570, end: 660 },
+    { name: 'Mid-Day', time: '11:00 AM\u20132:00 PM', start: 660, end: 840 },
+    { name: 'Afternoon / Close', time: '2:00\u20133:45 PM', start: 840, end: 945 },
+    { name: 'MOC', time: '3:45\u20134:00 PM', start: 945, end: 960 },
   ];
   const buildHTML = (containerId) => {
     const container = document.getElementById(containerId);
@@ -1975,7 +1925,7 @@ function buildPatternLists() {
   BULL_PATTERNS.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pattern-item';
-    div.innerHTML = `<div class="pattern-check" style="border-color:var(--green2)">âœ“</div><div class="pattern-name">${p}</div>`;
+    div.innerHTML = `<div class="pattern-check" style="border-color:var(--green2)">\u2713</div><div class="pattern-name">${p}</div>`;
     div.dataset.type = 'bull'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bull'));
@@ -1985,7 +1935,7 @@ function buildPatternLists() {
   BEAR_PATTERNS.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pattern-item';
-    div.innerHTML = `<div class="pattern-check" style="border-color:var(--red2)">âœ“</div><div class="pattern-name">${p}</div>`;
+    div.innerHTML = `<div class="pattern-check" style="border-color:var(--red2)">\u2713</div><div class="pattern-name">${p}</div>`;
     div.dataset.type = 'bear'; div.dataset.active = 'false';
     div.querySelector('.pattern-check').style.opacity = '0';
     div.addEventListener('click', () => togglePattern(div, 'bear'));
@@ -2023,7 +1973,7 @@ function calcPatternScore() {
   document.getElementById('pat-score-num').textContent = score;
   document.getElementById('pat-score-num').style.color = score > 60 ? 'var(--green)' : score < 40 ? 'var(--red)' : 'var(--yellow)';
   const biasEl = document.getElementById('pat-bias-label');
-  if (bull.length === 0 && bear.length === 0) { biasEl.textContent = 'â€” no patterns selected â€”'; return; }
+  if (bull.length === 0 && bear.length === 0) { biasEl.textContent = '\u2014 no patterns selected \u2014'; return; }
   biasEl.textContent = `${bull.length} bullish / ${bear.length} bearish patterns selected`;
 }
 
@@ -2033,10 +1983,6 @@ function runScoring() {
   let gexScore = 50;
   const spyDir = document.getElementById('spy-gex-dir').value;
   const spxDir = document.getElementById('spx-gex-dir').value;
-  const spyFlip = parseFloat(document.getElementById('spy-flip').value) || 0;
-  const spxFlip = parseFloat(document.getElementById('spx-flip').value) || 0;
-  const spyNetGex = parseFloat(document.getElementById('spy-net-gex').value) || 0;
-  const spxNetGex = parseFloat(document.getElementById('spx-net-gex').value) || 0;
   const spySpxAlign = document.getElementById('spy-spx-align').value;
   let biasPoints = 0;
 
@@ -2050,8 +1996,6 @@ function runScoring() {
   gexScore = Math.max(0, Math.min(100, gexScore));
 
   let rangeScore = 50;
-  const spyVrTop = parseFloat(document.getElementById('spy-vr-top').value) || 0;
-  const spyVrBot = parseFloat(document.getElementById('spy-vr-bot').value) || 0;
   const priceVa = document.getElementById('gp-price-va').value;
   if (priceVa === 'below-val') { rangeScore -= 20; biasPoints -= 2; }
   if (priceVa === 'above-vah') { rangeScore += 15; biasPoints += 2; }
@@ -2119,7 +2063,6 @@ function runScoring() {
   else if (biasPoints >= 4) { biasLabel = 'LEAN BULLISH'; biasColor = 'var(--green)'; biasBg = 'rgba(0,255,136,0.06)'; biasBorder = 'rgba(0,204,102,0.5)'; }
   else if (biasPoints >= 1) { biasLabel = 'SLIGHT BULLISH'; biasColor = 'var(--cyan)'; biasBg = 'rgba(0,212,255,0.06)'; biasBorder = 'rgba(0,153,204,0.3)'; }
 
-  // Bias change detection from last score
   if (state.lastBias && state.lastBias !== biasLabel) {
     const wasBear = state.lastBias.includes('BEAR');
     const isBear = biasLabel.includes('BEAR');
@@ -2130,7 +2073,7 @@ function runScoring() {
       banner.style.background = isBear ? 'rgba(255,51,102,0.1)' : 'rgba(0,255,136,0.08)';
       banner.style.borderTopColor = isBear ? 'var(--red)' : 'var(--green)';
       banner.style.borderBottomColor = isBear ? 'var(--red)' : 'var(--green)';
-      banner.textContent = `ðŸ”„ BIAS FLIP â€” Scoring changed from ${state.lastBias} â†’ ${biasLabel}`;
+      banner.textContent = `\uD83D\uDD04 BIAS FLIP \u2014 Scoring changed from ${state.lastBias} \u2192 ${biasLabel}`;
       playAlertTone(isBear ? 'bearish' : 'bullish');
       setTimeout(() => { banner.style.display = 'none'; }, 30000);
     }
@@ -2162,7 +2105,6 @@ function runScoring() {
   document.getElementById('conf-pct').style.color = conf >= 70 ? 'var(--green)' : conf >= 50 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('conf-ring').style.borderColor = conf >= 70 ? 'var(--green2)' : conf >= 50 ? 'rgba(255,204,0,0.5)' : 'rgba(255,51,102,0.5)';
 
-  // Key ES levels in output boxes (converted from SPX)
   const spxFlipVal = parseFloat(document.getElementById('spx-flip').value) || 0;
   const spyFlipVal = parseFloat(document.getElementById('spy-flip').value) || 0;
   const esFlipSpx = spxToES(spxFlipVal);
@@ -2190,7 +2132,7 @@ function runScoring() {
 
 function buildLevelsSummary(d) {
   const el = document.getElementById('levels-summary');
-  const row = (label, value, color) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${label}</span><span style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:${color}">${value}</span></div>`;
+  const row = (label, value, color) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text3)">${label}</span><span style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:${color}">${value}</span></div>`;
   const rows = [];
   const esFlip = spxToES(d.spxFlip);
   if (esFlip) rows.push(row('GEX FLIP (ES)', fmtES(esFlip), 'var(--yellow)'));
@@ -2209,14 +2151,14 @@ function updateAlerts(d) {
   const noAlerts = document.getElementById('no-alerts');
   bar.querySelectorAll('.alert-pill').forEach(e => e.remove());
   const alerts = [];
-  if (d.spyDir === 'negative' && d.spxDir === 'negative') alerts.push({cls:'alert-danger', text:'âš¡ NEGATIVE GEX REGIME â€” Amplified moves expected'});
-  if (d.newsImpact === 'high' || d.newsImpact === 'fomc') alerts.push({cls:'alert-warn', text:'ðŸ“° HIGH IMPACT NEWS DAY â€” Reduce confluence weighting'});
-  if (d.vixLevel > 30) alerts.push({cls:'alert-warn', text:`ðŸ”¥ VIX ELEVATED (${d.vixLevel}) â€” Wider stops, expect volatility`});
-  if (d.spySpxAlign === 'diverge') alerts.push({cls:'alert-warn', text:'âš  SPY/SPX DIVERGING â€” Reduce position size'});
-  if (d.conf >= 75) alerts.push({cls:'alert-success', text:`âœ… HIGH CONFIDENCE SETUP â€” ${d.conf}% confluence score`});
-  if (d.conf < 40) alerts.push({cls:'alert-info', text:`â„¹ LOW CONFIDENCE (${d.conf}%) â€” Consider sitting out`});
-  if (d.biasLabel.includes('BEAR')) alerts.push({cls:'alert-danger', text:`ðŸ”´ BEARISH BIAS â€” ${d.biasLabel} | Favor short setups`});
-  else if (d.biasLabel.includes('BULL')) alerts.push({cls:'alert-success', text:`ðŸŸ¢ BULLISH BIAS â€” ${d.biasLabel} | Favor long setups`});
+  if (d.spyDir === 'negative' && d.spxDir === 'negative') alerts.push({cls:'alert-danger', text:'\u26A1 NEGATIVE GEX REGIME \u2014 Amplified moves expected'});
+  if (d.newsImpact === 'high' || d.newsImpact === 'fomc') alerts.push({cls:'alert-warn', text:'\uD83D\uDCF0 HIGH IMPACT NEWS DAY \u2014 Reduce confluence weighting'});
+  if (d.vixLevel > 30) alerts.push({cls:'alert-warn', text:`\uD83D\uDD25 VIX ELEVATED (${d.vixLevel}) \u2014 Wider stops, expect volatility`});
+  if (d.spySpxAlign === 'diverge') alerts.push({cls:'alert-warn', text:'\u26A0 SPY/SPX DIVERGING \u2014 Reduce position size'});
+  if (d.conf >= 75) alerts.push({cls:'alert-success', text:`\u2705 HIGH CONFIDENCE SETUP \u2014 ${d.conf}% confluence score`});
+  if (d.conf < 40) alerts.push({cls:'alert-info', text:`\u2139 LOW CONFIDENCE (${d.conf}%) \u2014 Consider sitting out`});
+  if (d.biasLabel.includes('BEAR')) alerts.push({cls:'alert-danger', text:`\uD83D\uDD34 BEARISH BIAS \u2014 ${d.biasLabel} | Favor short setups`});
+  else if (d.biasLabel.includes('BULL')) alerts.push({cls:'alert-success', text:`\uD83D\uDFE2 BULLISH BIAS \u2014 ${d.biasLabel} | Favor long setups`});
   if (alerts.length === 0) { noAlerts.style.display = 'block'; }
   else { noAlerts.style.display = 'none'; alerts.forEach(a => { const pill = document.createElement('span'); pill.className = 'alert-pill ' + a.cls; pill.textContent = a.text; bar.appendChild(pill); }); }
 }
@@ -2283,7 +2225,6 @@ async function generateAIGamePlan() {
     }
   };
 
-  // Full live DEX/VEX/CHEX context
   const liveContext = Object.entries(state.liveData).map(([sym, d]) => {
     if (!d.summary) return '';
     const exp = d.summary.exposures || {};
@@ -2292,7 +2233,6 @@ async function generateAIGamePlan() {
     return `${sym.toUpperCase()}: Price $${(d.summary.underlying_price||0).toFixed(2)} | NET GEX ${fmtM(exp.net_gex)} | DEX ${fmtM(exp.net_dex)} | VEX ${fmtM(exp.net_vex)} | CHEX ${fmtM(exp.net_chex)} | Gamma: ${interp.gamma||'N/A'} | Vanna: ${interp.vanna||'N/A'} | Charm: ${interp.charm||'N/A'}`;
   }).filter(Boolean).join('\n');
 
-  // DEX trend
   const dexTrendData = state.prevDex['spx'];
   const dexTrendStr = dexTrendData && dexTrendData.prev !== null
     ? `DEX TREND: ${dexTrendData.value < dexTrendData.prev ? 'BEARISH (getting more negative)' : 'BULLISH (getting less negative / more positive)'}`
@@ -2304,21 +2244,21 @@ async function generateAIGamePlan() {
 
 CURRENT SESSION: ${currentSession}
 BIAS: ${state.lastBias} | CONFIDENCE: ${state.lastConf}%
-NEWS: ${document.getElementById('gp-news-impact').value} â€” ${document.getElementById('gp-news-event').value || 'none'}
+NEWS: ${document.getElementById('gp-news-impact').value} \u2014 ${document.getElementById('gp-news-event').value || 'none'}
 OVERNIGHT: High ${document.getElementById('gp-globex-high').value || 'N/A'} / Low ${document.getElementById('gp-globex-low').value || 'N/A'} | Prev Close: ${document.getElementById('gp-prev-close').value || 'N/A'}
 
-SPX GEX (primary â€” converts to ES):
+SPX GEX (primary \u2014 converts to ES):
   Net GEX: ${gexData.spx.netGex || 'N/A'}M (${gexData.spx.dir}) | Notional Delta: $${gexData.spx.notional || 'N/A'}B
-  GEX Flip: SPX ${gexData.spx.flip || 'N/A'} â†’ ES ${gexData.spx.flipES || 'N/A'}
-  Call Wall: SPX ${gexData.spx.callWall || 'N/A'} â†’ ES ${gexData.spx.callWallES || 'N/A'}
-  Put Wall: SPX ${gexData.spx.putWall || 'N/A'} â†’ ES ${gexData.spx.putWallES || 'N/A'}
-  VR Range: SPX ${gexData.spx.vrBot || 'N/A'}â€“${gexData.spx.vrTop || 'N/A'} â†’ ES ${gexData.spx.vrBotES || 'N/A'}â€“${gexData.spx.vrTopES || 'N/A'}
-  0DTE Magnet: SPX ${gexData.spx.zeroMagnet || 'N/A'} â†’ ES ${gexData.spx.zeroMagnetES || 'N/A'}
+  GEX Flip: SPX ${gexData.spx.flip || 'N/A'} \u2192 ES ${gexData.spx.flipES || 'N/A'}
+  Call Wall: SPX ${gexData.spx.callWall || 'N/A'} \u2192 ES ${gexData.spx.callWallES || 'N/A'}
+  Put Wall: SPX ${gexData.spx.putWall || 'N/A'} \u2192 ES ${gexData.spx.putWallES || 'N/A'}
+  VR Range: SPX ${gexData.spx.vrBot || 'N/A'}\u2013${gexData.spx.vrTop || 'N/A'} \u2192 ES ${gexData.spx.vrBotES || 'N/A'}\u2013${gexData.spx.vrTopES || 'N/A'}
+  0DTE Magnet: SPX ${gexData.spx.zeroMagnet || 'N/A'} \u2192 ES ${gexData.spx.zeroMagnetES || 'N/A'}
 
 SPY GEX (confirmation):
   Net GEX: ${gexData.spy.netGex || 'N/A'}M (${gexData.spy.dir}) | Flip: $${gexData.spy.flip || 'N/A'}
   Call Wall: $${gexData.spy.callWall || 'N/A'} | Put Wall: $${gexData.spy.putWall || 'N/A'}
-  VR: $${gexData.spy.vrBot || 'N/A'}â€“$${gexData.spy.vrTop || 'N/A'} | pVR: $${gexData.spy.pvrBot || 'N/A'}â€“$${gexData.spy.pvrTop || 'N/A'}
+  VR: $${gexData.spy.vrBot || 'N/A'}\u2013$${gexData.spy.vrTop || 'N/A'} | pVR: $${gexData.spy.pvrBot || 'N/A'}\u2013$${gexData.spy.pvrTop || 'N/A'}
   0DTE Magnet: $${gexData.spy.zeroMagnet || 'N/A'}
 
 SPY/SPX ALIGNMENT: ${gexData.qqq.align || 'unknown'}
@@ -2326,7 +2266,7 @@ QQQ GEX: ${gexData.qqq.dir || 'N/A'} | Flip: ${gexData.qqq.flip || 'N/A'}
 
 VIX: ${gexData.vix.current || 'N/A'} (${gexData.vix.regime || 'N/A'}) | GEX Dir: ${gexData.vix.dir || 'N/A'} | Term Structure: ${gexData.vix.ts || 'N/A'} | VVIX: ${gexData.vix.vvix || 'N/A'}
 
-DEALER EXPOSURE (DEX/VEX/CHEX â€” full live data):
+DEALER EXPOSURE (DEX/VEX/CHEX):
 ${liveContext || 'Not yet fetched'}
 ${dexTrendStr}
 
@@ -2338,35 +2278,35 @@ PATTERNS (bearish): ${bear.join(', ') || 'none'}
 CHART OBSERVATIONS: ${freeText || 'none provided'}
 CONFLUENCE NOTES: ${confText || 'none provided'}
 
-Express ALL price targets and levels in ES futures terms. Use SPX levels only for reference.
+Express ALL price targets and levels in ES futures terms.
 
 Respond in this EXACT format:
-â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 SESSION: [current session name]
 MORNING BIAS: [BULLISH / BEARISH / NEUTRAL / LEAN BEARISH / etc]
 GEX REGIME: [NEGATIVE GAMMA (amplifying) / POSITIVE GAMMA (dampening)]
 GEX FLIP (ES): [ES level]
-TRADE RANGE (ES): [VR bottom ES] â€“ [VR top ES]
+TRADE RANGE (ES): [VR bottom ES] \u2013 [VR top ES]
 0DTE MAGNET (ES): [level]
 CONFIDENCE: [score]%
-â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 NARRATIVE:
 [2-3 sentence plain English game plan in ES terms]
 
 KEY ES LEVELS TO WATCH:
-â€¢ [ES Level 1 â€” significance]
-â€¢ [ES Level 2 â€” significance]
-â€¢ [ES Level 3 â€” significance]
+\u2022 [ES Level 1 \u2014 significance]
+\u2022 [ES Level 2 \u2014 significance]
+\u2022 [ES Level 3 \u2014 significance]
 
 DEALER POSITIONING CONTEXT:
 [1-2 sentences on what DEX/VEX/CHEX and GEX regime mean for expected price behavior today]
 
 TRADE SETUP:
-â€¢ Direction: [LONG / SHORT / WAIT]
-â€¢ Entry trigger: [specific ES condition]
-â€¢ Target (ES): [price]
-â€¢ Stop (ES): [price]
-â€¢ Invalidation: [ES condition]
+\u2022 Direction: [LONG / SHORT / WAIT]
+\u2022 Entry trigger: [specific ES condition]
+\u2022 Target (ES): [price]
+\u2022 Stop (ES): [price]
+\u2022 Invalidation: [ES condition]
 
 RISK FLAGS:
 [any specific risks, news events, VIX conditions, or conflicting signals]`;
@@ -2401,7 +2341,6 @@ async function generateIntradayUpdate() {
   const vixData = state.liveData['vix'];
   const currentSession = getCurrentSession();
 
-  // Full SPX live context for intraday
   let spxContext = 'No live data fetched yet.';
   if (spxData) {
     const { summary, levels } = spxData;
@@ -2419,14 +2358,11 @@ async function generateIntradayUpdate() {
   Price: $${(summary.underlying_price||0).toFixed(2)}
   GEX Regime: ${summary.regime || 'unknown'} | Net GEX: ${fmtM(exp.net_gex)}
   DEX: ${fmtM(exp.net_dex)} | VEX: ${fmtM(exp.net_vex)} | CHEX: ${fmtM(exp.net_chex)}
-  Gamma interpretation: ${interp.gamma || 'N/A'}
-  Vanna interpretation: ${interp.vanna || 'N/A'}
-  Charm interpretation: ${interp.charm || 'N/A'}
-  GEX Flip: SPX ${spxFlip || 'N/A'} â†’ ES ${spxFlip ? fmtES(spxToES(spxFlip)) : 'N/A'}
-  Call Wall: SPX ${spxCallWall || 'N/A'} â†’ ES ${spxCallWall ? fmtES(spxToES(spxCallWall)) : 'N/A'}
-  Put Wall: SPX ${spxPutWall || 'N/A'} â†’ ES ${spxPutWall ? fmtES(spxToES(spxPutWall)) : 'N/A'}
-  VR Range: SPX ${spxVrBot || 'N/A'}â€“${spxVrTop || 'N/A'} â†’ ES ${spxVrBot ? fmtES(spxToES(spxVrBot)) : 'N/A'}â€“${spxVrTop ? fmtES(spxToES(spxVrTop)) : 'N/A'}
-  0DTE Magnet: SPX ${spxMagnet || 'N/A'} â†’ ES ${spxMagnet ? fmtES(spxToES(spxMagnet)) : 'N/A'}`;
+  GEX Flip: SPX ${spxFlip || 'N/A'} \u2192 ES ${spxFlip ? fmtES(spxToES(spxFlip)) : 'N/A'}
+  Call Wall: SPX ${spxCallWall || 'N/A'} \u2192 ES ${spxCallWall ? fmtES(spxToES(spxCallWall)) : 'N/A'}
+  Put Wall: SPX ${spxPutWall || 'N/A'} \u2192 ES ${spxPutWall ? fmtES(spxToES(spxPutWall)) : 'N/A'}
+  VR Range: SPX ${spxVrBot || 'N/A'}\u2013${spxVrTop || 'N/A'} \u2192 ES ${spxVrBot ? fmtES(spxToES(spxVrBot)) : 'N/A'}\u2013${spxVrTop ? fmtES(spxToES(spxVrTop)) : 'N/A'}
+  0DTE Magnet: SPX ${spxMagnet || 'N/A'} \u2192 ES ${spxMagnet ? fmtES(spxToES(spxMagnet)) : 'N/A'}`;
   }
 
   const vixContext = vixData
@@ -2435,7 +2371,7 @@ async function generateIntradayUpdate() {
 
   const dexTrendData = state.prevDex['spx'];
   const dexTrend = dexTrendData && dexTrendData.prev !== null
-    ? `DEX TREND: ${dexTrendData.value < dexTrendData.prev ? 'â†“ BEARISH acceleration' : 'â†‘ BULLISH stabilization'}`
+    ? `DEX TREND: ${dexTrendData.value < dexTrendData.prev ? '\u2193 BEARISH acceleration' : '\u2191 BULLISH stabilization'}`
     : 'DEX TREND: insufficient data';
 
   const prompt = `You are an ES/MES futures trading analyst providing a concise, actionable intraday update. Think in ES prices.
@@ -2455,13 +2391,11 @@ ${spxContext}
 ${vixContext}
 ${dexTrend}
 
-SPY/SPX Alignment: ${document.getElementById('spy-spx-align').value || 'N/A'}
-
 Answer these 4 questions in 4-6 sentences total:
-1. Is the morning ${state.lastBias} bias still holding? Why or why not?
-2. What is the highest-probability next move in ES based on current GEX positioning?
-3. Which ES level is most critical right now and why?
-4. Any regime or bias change signals to watch for in this session window?
+1. Is the morning ${state.lastBias} bias still holding?
+2. What is the highest-probability next move in ES?
+3. Which ES level is most critical right now?
+4. Any regime or bias change signals to watch for?
 
 Keep it tight and actionable. Express everything in ES prices.`;
 
@@ -2496,8 +2430,6 @@ function logSnapshot() {
   };
   state.snapshots.unshift(snap);
   renderSnapshots();
-
-  // Re-run proximity alerts with new price
   runProximityAlerts();
   saveToStorage();
 }
@@ -2505,7 +2437,7 @@ function logSnapshot() {
 function renderSnapshots() {
   const container = document.getElementById('snapshot-timeline');
   if (state.snapshots.length === 0) {
-    container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3);text-align:center;padding:10px">â€” no snapshots logged today â€”</div>';
+    container.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:13px;color:var(--text3);text-align:center;padding:10px">\u2014 no snapshots logged today \u2014</div>';
     return;
   }
   container.innerHTML = state.snapshots.map(s => `<div class="snapshot-item"><div class="snapshot-time">${s.time}</div><div class="snapshot-bias" style="color:${s.bias.includes('BEAR')?'var(--red)':s.bias.includes('BULL')?'var(--green)':'var(--text2)'}">${s.bias}</div><div class="snapshot-text">ES@${s.price||'---'} | ${s.gexChange||'no change'} | ${s.priceVr||'unknown'}</div><div class="snapshot-conf">${s.conf||'--'}%</div></div>`).join('');
@@ -2520,7 +2452,6 @@ function updateWeights() {
     const vEl = document.getElementById('wv-' + f);
     if (el && vEl) {
       state.weights[f] = parseInt(el.value);
-      // For proximity fields don't add % sign
       vEl.textContent = (f === 'flip_proximity' || f === 'vr_proximity') ? el.value : el.value + '%';
     }
   });
@@ -2582,7 +2513,7 @@ function renderTrades() {
     tbody.innerHTML = '<tr><td colspan="11" style="color:var(--text3);padding:20px;font-style:italic">No trades logged yet</td></tr>';
     return;
   }
-  tbody.innerHTML = state.trades.map(t => `<tr><td>${t.date}</td><td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td><td>${t.entry}</td><td>${t.target||'--'}</td><td>${t.stop||'--'}</td><td>${t.exit}</td><td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td><td>${t.conf||'--'}%</td><td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td><td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes||'--'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">Ã—</button></td></tr>`).join('');
+  tbody.innerHTML = state.trades.map(t => `<tr><td>${t.date}</td><td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td><td>${t.entry}</td><td>${t.target||'--'}</td><td>${t.stop||'--'}</td><td>${t.exit}</td><td class="${parseFloat(t.plPts)>=0?'trade-win':'trade-loss'}">${parseFloat(t.plPts)>=0?'+':''}${t.plPts}</td><td>${t.conf||'--'}%</td><td class="${t.outcome==='WIN'?'trade-win':t.outcome==='LOSS'?'trade-loss':'trade-be'}">${t.outcome}</td><td style="max-width:160px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.notes||'--'}</td><td><button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">&times;</button></td></tr>`).join('');
 }
 
 function updateTradeStats() {
@@ -2592,7 +2523,7 @@ function updateTradeStats() {
   document.getElementById('tl-winrate').textContent = trades.length ? Math.round((wins/trades.length)*100) + '%' : '--%';
   const grossWin = trades.filter(t => t.outcome === 'WIN').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
   const grossLoss = trades.filter(t => t.outcome === 'LOSS').reduce((a, t) => a + Math.abs(parseFloat(t.plPts)||0), 0);
-  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin/grossLoss).toFixed(2) : grossWin > 0 ? 'âˆž' : '--';
+  document.getElementById('tl-pf').textContent = grossLoss > 0 ? (grossWin/grossLoss).toFixed(2) : grossWin > 0 ? '\u221E' : '--';
   const avgConf = trades.filter(t => t.conf).reduce((a, t) => a + parseFloat(t.conf), 0) / (trades.filter(t => t.conf).length || 1);
   document.getElementById('tl-avg-conf').textContent = trades.length ? Math.round(avgConf) + '%' : '--%';
 }
@@ -2608,7 +2539,8 @@ function saveToStorage() {
       snapshots: state.snapshots,
       weights: state.weights,
       lastBias: state.lastBias,
-      lastConf: state.lastConf
+      lastConf: state.lastConf,
+      apiCallsToday: state.apiCallsToday
     }));
   } catch(e) {}
 }
@@ -2628,6 +2560,16 @@ function loadFromStorage() {
     }
     if (saved.lastBias) state.lastBias = saved.lastBias;
     if (saved.lastConf) state.lastConf = saved.lastConf;
+    // Reset API counter each day
+    const today = new Date().toDateString();
+    const savedDate = localStorage.getItem('gex_api_date');
+    if (savedDate === today && saved.apiCallsToday) {
+      state.apiCallsToday = saved.apiCallsToday;
+      updateAPICounter(0);
+    } else {
+      localStorage.setItem('gex_api_date', today);
+      state.apiCallsToday = 0;
+    }
     renderSnapshots();
     updateTradeStats();
   } catch(e) {}
