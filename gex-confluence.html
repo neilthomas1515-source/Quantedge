@@ -1363,6 +1363,29 @@ function clearAllImages() {
   renderImagePreviews();
 }
 
+// Paste support â€” Ctrl+V pastes image into drop zone
+// Works on page, drop zone, and window level
+function handlePasteEvent(event) {
+  const items = (event.clipboardData || window.clipboardData)?.items;
+  if (!items) return;
+  const imageItems = Array.from(items).filter(i => i.type.startsWith('image/'));
+  if (imageItems.length === 0) return;
+  event.preventDefault();
+  imageItems.forEach(item => {
+    const file = item.getAsFile();
+    if (file) handleImageFiles([file]);
+  });
+}
+document.addEventListener('paste', handlePasteEvent);
+window.addEventListener('paste', handlePasteEvent);
+document.getElementById('img-drop-zone').addEventListener('paste', handlePasteEvent);
+
+// Make drop zone focusable so Ctrl+V works when clicked
+document.getElementById('img-drop-zone').setAttribute('tabindex', '0');
+document.getElementById('img-drop-zone').addEventListener('click', function(e) {
+  if (e.target.tagName !== 'BUTTON') this.focus();
+});
+
 // ===================== STATE =====================
 const state = {
   snapshots: [],
