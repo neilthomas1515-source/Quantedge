@@ -2716,11 +2716,8 @@ async function fetchSPXHistoricalLevels() {
     const todayStr = nowETDate.toDateString();
     const days = [];
     for (let i = 0; i < timestamps.length; i++) {
+      if (closes[i] == null || closes[i] === 0) continue;
       const d = new Date(timestamps[i] * 1000);
-      const isToday = d.toDateString() === todayStr;
-      const minsET = nowETDate.getHours() * 60 + nowETDate.getMinutes();
-      if (isToday && minsET < 975) continue;
-      if (closes[i] == null) continue;
       days.push({ date: d, high: highs[i], low: lows[i], close: closes[i] });
     }
     if (days.length < 2) throw new Error('Not enough completed days');
@@ -2788,11 +2785,8 @@ async function fetchSPXHistoricalLevels() {
     const todayStr = nowETDate.toDateString();
     const days = [];
     for (let i = 0; i < timestamps.length; i++) {
+      if (closes[i] == null || closes[i] === 0) continue;
       const d = new Date(timestamps[i] * 1000);
-      const isToday = d.toDateString() === todayStr;
-      const minsET = nowETDate.getHours() * 60 + nowETDate.getMinutes();
-      if (isToday && minsET < 975) continue;
-      if (closes[i] == null) continue;
       days.push({ date: d, high: highs[i], low: lows[i], close: closes[i] });
     }
     if (days.length < 2) throw new Error('Not enough completed days');
@@ -3007,6 +3001,7 @@ function loadFromStorage() {
 </script>
 </body>
 </html>
+
 
 
 
