@@ -2701,8 +2701,8 @@ async function fetchSPXHistoricalLevels() {
   const statusEl = document.getElementById('spx-hist-status');
   if (statusEl) { statusEl.textContent = 'Fetching...'; statusEl.style.color = 'var(--yellow)'; }
   try {
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=15d';
-    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const url = PROXY + '?source=yahoo&symbol=%5EGSPC';
+    const resp = await fetch(url);
     if (!resp.ok) throw new Error('Yahoo HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -2773,8 +2773,8 @@ async function fetchSPXHistoricalLevels() {
   const statusEl = document.getElementById('spx-hist-status');
   if (statusEl) { statusEl.textContent = 'Fetching...'; statusEl.style.color = 'var(--yellow)'; }
   try {
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=15d';
-    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const url = PROXY + '?source=yahoo&symbol=%5EGSPC';
+    const resp = await fetch(url);
     if (!resp.ok) throw new Error('Yahoo HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -3007,5 +3007,6 @@ function loadFromStorage() {
 </script>
 </body>
 </html>
+
 
 
