@@ -1086,6 +1086,9 @@ Prev Week: H ${g('m-prevwk-high')||'N/A'} / L ${g('m-prevwk-low')||'N/A'}
 Vol Profile: POC ${g('ai-poc')||'N/A'} | VAH ${g('ai-vah')||'N/A'} | VAL ${g('ai-val-vp')||'N/A'}
 ES vs NQ: ${g('ai-es-nq')||'N/A'}
 
+LAYER 4 - ECONOMIC CALENDAR:
+${getEconCalendarContext()}
+
 Use ES prices throughout. Respond in EXACTLY this format:
 ════════════════════════════════
 SIGNAL: [LONG ES / SHORT ES / WAIT]
@@ -1361,6 +1364,75 @@ if(typeof showToast!=='function'){
   }
 }
 
+// ── ECONOMIC CALENDAR ────────────────────────────────────────────────────────
+const FINNHUB_KEY = 'd75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90';
+const ES_EVENT_REACTIONS = {
+  'fomc':{avg:35,max:80,emoji:'🏦'},'federal reserve':{avg:35,max:80,emoji:'🏦'},
+  'interest rate':{avg:30,max:75,emoji:'🏦'},'cpi':{avg:22,max:55,emoji:'📊'},
+  'inflation':{avg:20,max:50,emoji:'📊'},'nfp':{avg:25,max:60,emoji:'💼'},
+  'nonfarm':{avg:25,max:60,emoji:'💼'},'jobs':{avg:18,max:45,emoji:'💼'},
+  'unemployment':{avg:15,max:40,emoji:'💼'},'gdp':{avg:18,max:45,emoji:'📈'},
+  'pce':{avg:15,max:35,emoji:'📊'},'ppi':{avg:12,max:30,emoji:'📊'},
+  'retail':{avg:14,max:35,emoji:'🛒'},'ism':{avg:12,max:28,emoji:'🏭'},
+  'manufacturing':{avg:10,max:25,emoji:'🏭'},'jolts':{avg:10,max:22,emoji:'💼'},
+  'housing':{avg:8,max:20,emoji:'🏠'},'durable':{avg:8,max:20,emoji:'🏭'},
+  'consumer confidence':{avg:10,max:25,emoji:'📊'},'jobless':{avg:8,max:18,emoji:'💼'},
+  'claims':{avg:8,max:18,emoji:'💼'},'default':{avg:6,max:15,emoji:'📅'}
+};
+function getEventReaction(n){const l=(n||'').toLowerCase();for(const[k,v]of Object.entries(ES_EVENT_REACTIONS)){if(l.includes(k))return v;}return ES_EVENT_REACTIONS.default;}
+function getImpactLabel(i){const x=(i||'').toLowerCase();if(x==='high'||x==='3')return{label:'HIGH',color:'#ff5252'};if(x==='medium'||x==='2')return{label:'MED',color:'#ffab40'};return{label:'LOW',color:'#888'};}
+async function fetchEconomicCalendar(){
+  try{
+    const today=new Date().toISOString().split('T')[0];
+    const url=`https://finnhub.io/api/v1/calendar/economic?from=${today}&to=${today}&token=${FINNHUB_KEY}`;
+    const resp=await fetch(url);if(!resp.ok)throw new Error('Finnhub '+resp.status);
+    const data=await resp.json();
+    const events=(data.economicCalendar||[]).filter(e=>!e.country||e.country==='US');
+    state.econCalendar=events;renderEconCalendar(events);updateSignalBarEvents(events);return events;
+  }catch(err){console.warn('[QuantEdge] Econ calendar:',err.message);state.econCalendar=[];return[];}
+}
+function renderEconCalendar(events){
+  let card=document.getElementById('econCalendarCard');
+  if(!card){
+    const target=document.getElementById('macroTab')||document.querySelector('.tab-pane')||document.body;
+    card=document.createElement('div');card.id='econCalendarCard';
+    card.style.cssText='background:#1a1a2e;border:1px solid #ffab4044;border-radius:10px;padding:18px 20px;margin:18px 0;';
+    target.insertBefore(card,target.firstChild);
+  }
+  if(events.length===0){card.innerHTML='<div style="font-size:1.1em;font-weight:700;color:#ffab40;margin-bottom:8px;">📅 Economic Calendar</div><div style="color:#888;font-size:.95em;">No US economic events today.</div>';return;}
+  const hasHigh=events.some(e=>(e.impact||'').toLowerCase()==='high'||e.impact==='3');
+  const rows=events.slice(0,8).map(e=>{
+    const imp=getImpactLabel(e.impact),rx=getEventReaction(e.event);
+    const time=e.time?`<span style="color:#888;font-size:.88em;">${e.time} EST</span>`:'';
+    const fc=e.estimate!=null?`<span style="color:#40c4ff;font-size:.88em;">F: ${e.estimate}</span>`:'';
+    const pr=e.prev!=null?`<span style="color:#888;font-size:.88em;">P: ${e.prev}</span>`:'';
+    const ac=e.actual!=null?`<span style="color:#00e676;font-size:.88em;font-weight:700;">A: ${e.actual}</span>`:'';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#0d0d1a;border-radius:6px;margin-bottom:5px;border-left:3px solid ${imp.color};"><div><span style="color:#e0e0e0;font-weight:600;">${rx.emoji} ${e.event||'Event'}</span><span style="margin-left:8px;background:${imp.color}22;color:${imp.color};font-size:.78em;padding:2px 7px;border-radius:4px;font-weight:700;">${imp.label}</span><div style="margin-top:3px;display:flex;gap:10px;">${time}${fc}${pr}${ac}</div></div><div style="text-align:right;white-space:nowrap;"><div style="color:#ffab40;font-size:.88em;font-weight:600;">±${rx.avg}pts avg</div><div style="color:#666;font-size:.78em;">max ±${rx.max}pts</div></div></div>`;
+  }).join('');
+  card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:1.1em;font-weight:700;color:#ffab40;">📅 Today's Economic Events${hasHigh?' <span style="color:#ff5252;font-size:.85em;">⚠️ HIGH IMPACT</span>':''}</div><div style="color:#666;font-size:.85em;">${events.length} event${events.length!==1?'s':''}</div></div>${rows}`;
+}
+function updateSignalBarEvents(events){
+  const high=(events||[]).filter(e=>(e.impact||'').toLowerCase()==='high'||e.impact==='3');
+  let el=document.getElementById('signalBarEvents');
+  if(!el){const bar=document.getElementById('signalBar')||document.querySelector('.signal-bar');if(bar){el=document.createElement('span');el.id='signalBarEvents';el.style.cssText='margin-left:14px;font-size:.95em;font-weight:700;';bar.appendChild(el);}}
+  if(!el)return;
+  if(high.length>0){el.textContent=`⚠️ ${high.map(e=>e.event).join(', ')}`;el.style.color='#ff5252';if(typeof showToast==='function')showToast(`⚠️ HIGH IMPACT EVENT TODAY: ${high.map(e=>e.event).join(', ')}`,'warn','#ff5252');}
+  else if(events.length>0){el.textContent=`📅 ${events.length} econ event${events.length!==1?'s':''}`;el.style.color='#ffab40';}
+  else{el.textContent='📅 No events';el.style.color='#666';}
+}
+function getEconCalendarContext(){
+  const events=state.econCalendar||[];
+  if(events.length===0)return'No US economic events scheduled today.';
+  return'TODAY\'S ECONOMIC EVENTS:\n'+events.map(e=>{
+    const imp=getImpactLabel(e.impact),rx=getEventReaction(e.event);
+    const est=e.estimate!=null?` | Forecast: ${e.estimate}`:'';
+    const prev=e.prev!=null?` | Prior: ${e.prev}`:'';
+    const act=e.actual!=null?` | ACTUAL: ${e.actual}`:'';
+    return`${rx.emoji} ${e.event} [${imp.label}]${e.time?' @ '+e.time+' EST':''}${est}${prev}${act} — hist avg ±${rx.avg}pts ES`;
+  }).join('\n');
+}
+window.addEventListener('DOMContentLoaded',()=>{ setTimeout(fetchEconomicCalendar,1500); });
+
 // STORAGE
 function saveToStorage(){try{localStorage.setItem('qe_master_v1',JSON.stringify({trades:state.trades,snapshots:state.snapshots,lastBias:state.lastBias,lastConf:state.lastConf}));}catch(e){}}
 function loadFromStorage(){
@@ -1374,6 +1446,7 @@ function loadFromStorage(){
 </script>
 </body>
 </html>
+
 
 
 
