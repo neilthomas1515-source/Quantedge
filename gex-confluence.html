@@ -1316,7 +1316,7 @@ function handleImageFiles(files) {
       const dataUrl = e.target.result;
       uploadedImages.push({ base64: dataUrl.split(',')[1], type: file.type, name: file.name });
       processed++;
-      if (processed === toProcess) renderImagePreviews();
+      if (processed === toProcess) { renderImagePreviews(); if(typeof extractInternalsFromImages==="function")extractInternalsFromImages(); }
     };
     reader.readAsDataURL(file);
   }
@@ -1438,6 +1438,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateSessionWindows, 30000);
   setDefaultDate();
   updateAutoRefresh();
+  if(typeof fetchSPXHistoricalLevels==="function")fetchSPXHistoricalLevels();
   // NO auto-fetch on load — preserves FlashAlpha quota
   document.getElementById('last-fetch').textContent = 'Ready \u2014 click Fetch Live Data';
 });
@@ -1610,6 +1611,7 @@ async function fetchAllGEXData() {
   populateIntradayESLevels();
   runProximityAlerts();
   runBiasChangeCheck();
+  if(typeof checkReversalSignals==="function")checkReversalSignals();
 }
 
 // ===================== SPX to ES INTRADAY POPULATE =====================
