@@ -902,10 +902,10 @@ function populateTickerFields(sym,summary,levels){
   const netGex=summary.exposures?.net_gex||0;
   const regime=summary.regime||'undetermined';
   const price=summary.underlying_price||0;
-  const gammaFlip=levels.levels?.gamma_flip||0;
-  const callWall=levels.levels?.call_wall||0;
-  const putWall=levels.levels?.put_wall||0;
-  const zeroMagnet=levels.levels?.zero_dte_magnet||0;
+  const gammaFlip=Math.round((levels.levels?.gamma_flip||0)*100)/100;
+  const callWall=Math.round((levels.levels?.call_wall||0)*100)/100;
+  const putWall=Math.round((levels.levels?.put_wall||0)*100)/100;
+  const zeroMagnet=Math.round((levels.levels?.zero_dte_magnet||0)*100)/100;
   const zeroPct=summary.zero_dte?.pct_of_total_gex||0;
   const fmtGex=v=>v===0?'--':'$'+(v/1e6).toFixed(1)+'M';
   const fmtPx=v=>v===0?'--':v.toFixed(2);
@@ -924,9 +924,9 @@ function populateTickerFields(sym,summary,levels){
     else{const lo=document.getElementById(sym+'-live-0dte');if(lo)lo.textContent=fmtPct(zeroPct);}
   }
   const ld=document.getElementById('live-dot-'+sym);if(ld)ld.classList.add('on');
-  if(sym==='spy'){setField('spy-net-gex',(netGex/1e6).toFixed(1));setField('spy-flip',gammaFlip);setField('spy-call-wall',callWall);setField('spy-put-wall',putWall);setField('spy-0dte-magnet',zeroMagnet);setSelect('spy-gex-dir',netGex<0?'negative':'positive');}
-  if(sym==='spx'){setField('spx-net-gex',(netGex/1e6).toFixed(1));setField('spx-flip',gammaFlip);setField('spx-call-wall',callWall);setField('spx-put-wall',putWall);setField('spx-0dte-magnet',zeroMagnet);setSelect('spx-gex-dir',netGex<0?'negative':'positive');updateSignalBar({regime,flip:gammaFlip?spxToES(gammaFlip).toFixed(2):null});}
-  if(sym==='qqq'){setField('qqq-net-gex',(netGex/1e6).toFixed(1));setField('qqq-flip',gammaFlip);setField('qqq-call-wall',callWall);setField('qqq-put-wall',putWall);setSelect('qqq-gex-dir',netGex<0?'negative':'positive');}
+  if(sym==='spy'){setField('spy-net-gex',(netGex/1e6).toFixed(1));setField('spy-flip',gammaFlip);setField('spy-call-wall',callWall);setField('spy-put-wall',putWall);setField('spy-0dte-magnet',zeroMagnet);setField('spy-vr-top',levels.levels?.vr_top||levels.levels?.var_range_top||0);setField('spy-vr-bot',levels.levels?.vr_bottom||levels.levels?.var_range_bottom||0);setSelect('spy-gex-dir',netGex<0?'negative':'positive');}
+  if(sym==='spx'){setField('spx-net-gex',(netGex/1e6).toFixed(1));setField('spx-flip',gammaFlip);setField('spx-call-wall',callWall);setField('spx-put-wall',putWall);setField('spx-0dte-magnet',zeroMagnet);setField('spx-vr-top',levels.levels?.vr_top||levels.levels?.var_range_top||0);setField('spx-vr-bot',levels.levels?.vr_bottom||levels.levels?.var_range_bottom||0);setField('spx-notional',levels.levels?.notional_delta||0);setSelect('spx-gex-dir',netGex<0?'negative':'positive');updateSignalBar({regime,flip:gammaFlip?spxToES(gammaFlip).toFixed(2):null});}
+  if(sym==='qqq'){setField('qqq-net-gex',(netGex/1e6).toFixed(1));setField('qqq-flip',gammaFlip);setField('qqq-call-wall',callWall);setField('qqq-put-wall',putWall);setField('qqq-vr-top',levels.levels?.vr_top||levels.levels?.var_range_top||0);setField('qqq-vr-bot',levels.levels?.vr_bottom||levels.levels?.var_range_bottom||0);setSelect('qqq-gex-dir',netGex<0?'negative':'positive');}
   if(sym==='vix'){setField('vix-current',price.toFixed(2));setField('vix-call-wall',callWall);setField('vix-put-wall',putWall);const vr=price<15?'low':price<25?'normal':price<35?'elevated':'high';setSelect('vix-regime',vr);}
   if(price>0&&sym==='spx'){const esP=spxToES(price);document.getElementById('dealer-es-price-display').textContent='ES \u2248 '+fmtES(esP);}
 }
