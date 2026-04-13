@@ -334,7 +334,7 @@ textarea{resize:vertical;min-height:60px;}
         <div class="field-row"><div class="field-label">Asia High</div><input type="number" id="m-asia-high" placeholder="5660.00" step="0.25"></div>
         <div class="field-row"><div class="field-label">Asia Low</div><input type="number" id="m-asia-low" placeholder="5625.00" step="0.25"></div>
         <div class="field-row"><div class="field-label">London High</div><input type="number" id="m-london-high" placeholder="5675.00" step="0.25"></div>
-        <div class="field-row"><div class="field-label">London Low</div><input type="number" id="m-london-low" placeholder="5610.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">London Low</div><input type="number" id="m-london-low" placeholder="" step="0.25"></div>
         <div style="margin-top:5px;font-family:var(--mono);font-size:10px;color:var(--t3)">These levels auto-feed into AI signal prompt.</div>
       </div>
     </div>
@@ -515,7 +515,7 @@ textarea{resize:vertical;min-height:60px;}
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">Intraday Snapshot</div>
-        <div class="field-row"><div class="field-label">Current ES Price</div><input type="number" id="id-price" placeholder="5641.25" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Current ES Price</div><input type="number" id="id-price" placeholder="" step="0.25"></div>
         <div class="field-row"><div class="field-label">Net GEX Change</div><select id="id-gex-change"><option value="">-- select --</option><option value="more-neg">More Negative</option><option value="less-neg">Less Negative</option><option value="flipped-neg">Flipped Negative</option><option value="flipped-pos">Flipped Positive</option><option value="more-pos">More Positive</option><option value="no-change">No Change</option></select></div>
         <div class="field-row"><div class="field-label">Price vs Flip</div><select id="id-price-flip"><option value="">-- select --</option><option value="above">Above GEX Flip</option><option value="below">Below GEX Flip</option><option value="at">Testing GEX Flip</option></select></div>
         <div class="field-row"><div class="field-label">Price vs VR</div><select id="id-price-vr"><option value="">-- select --</option><option value="inside">Inside VR</option><option value="above-top">Above VR Top</option><option value="below-bot">Below VR Bottom</option><option value="at-top">Testing VR Top</option><option value="at-bot">Testing VR Bottom</option></select></div>
@@ -565,9 +565,9 @@ textarea{resize:vertical;min-height:60px;}
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">Volume Profile</div>
-        <div class="field-row"><div class="field-label">POC</div><input type="number" id="ai-poc" placeholder="5645.00" step="0.25"></div>
-        <div class="field-row"><div class="field-label">VAH</div><input type="number" id="ai-vah" placeholder="5680.00" step="0.25"></div>
-        <div class="field-row"><div class="field-label">VAL</div><input type="number" id="ai-val-vp" placeholder="5610.00" step="0.25"></div>
+        <div class="field-row"><div class="field-label">POC</div><input type="number" id="ai-poc" placeholder="" step="0.25"></div>
+        <div class="field-row"><div class="field-label">VAH</div><input type="number" id="ai-vah" placeholder="" step="0.25"></div>
+        <div class="field-row"><div class="field-label">VAL</div><input type="number" id="ai-val-vp" placeholder="" step="0.25"></div>
         <div class="field-row"><div class="field-label">Price vs VA</div><select id="ai-price-va"><option value="">-- select --</option><option value="above-vah">Above VAH</option><option value="inside">Inside Value Area</option><option value="below-val">Below VAL</option><option value="at-poc">At / Near POC</option></select></div>
       </div>
       <div class="panel">
@@ -604,10 +604,10 @@ textarea{resize:vertical;min-height:60px;}
     <div class="grid-4">
       <div><div class="field-label" style="text-align:left;margin-bottom:3px">Date / Time</div><input type="text" id="tl-date" placeholder="2026-04-14 09:45"></div>
       <div><div class="field-label" style="text-align:left;margin-bottom:3px">Direction</div><select id="tl-dir"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
-      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Entry (ES)</div><input type="number" id="tl-entry" placeholder="5641.25" step="0.25"></div>
-      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Exit (ES)</div><input type="number" id="tl-exit" placeholder="5615.00" step="0.25"></div>
-      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Target</div><input type="number" id="tl-target" placeholder="5610.00" step="0.25"></div>
-      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Stop</div><input type="number" id="tl-stop-log" placeholder="5655.00" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Entry (ES)</div><input type="number" id="tl-entry" placeholder="" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Exit (ES)</div><input type="number" id="tl-exit" placeholder="" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Target</div><input type="number" id="tl-target" placeholder="" step="0.25"></div>
+      <div><div class="field-label" style="text-align:left;margin-bottom:3px">Stop</div><input type="number" id="tl-stop-log" placeholder="" step="0.25"></div>
       <div><div class="field-label" style="text-align:left;margin-bottom:3px">Confidence %</div><input type="number" id="tl-conf" placeholder="72" step="1" min="0" max="100"></div>
       <div><div class="field-label" style="text-align:left;margin-bottom:3px">Outcome</div><select id="tl-outcome"><option value="WIN">WIN</option><option value="LOSS">LOSS</option><option value="BE">BREAKEVEN</option></select></div>
     </div>
