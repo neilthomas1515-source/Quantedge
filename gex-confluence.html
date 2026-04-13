@@ -1032,10 +1032,82 @@ function checkReversalSignals() {
 }
 
 // ===================== FIX 3/4: IMAGE EXTRACT STUB =====================
-function extractInternalsFromImages() {
+async function extractInternalsFromImages() {
   if (uploadedImages.length===0) return;
   const statusEl = document.getElementById('internals-extract-status');
-  if (statusEl) { statusEl.style.display='block'; statusEl.textContent=`✓ ${uploadedImages.length} image(s) ready — AI will read all charts at generate time`; statusEl.style.color='var(--green)'; }
+  if (!statusEl) return;
+  statusEl.style.display='block';
+  statusEl.style.color='var(--yellow)';
+  statusEl.textContent='Reading chart data from image...';
+
+  const img = uploadedImages[0]; // use first image
+  const prompt = `You are reading a GEX or market internals chart image. Extract any visible data and return ONLY a JSON object with these exact keys (use null if not visible):
+{
+  "gex_flip": null,
+  "call_wall": null,
+  "put_wall": null,
+  "vr_top": null,
+  "vr_bottom": null,
+  "net_gex_direction": null,
+  "tick": null,
+  "regime": null,
+  "spx_price": null
+}
+
+For net_gex_direction use "negative" or "positive".
+For tick use "strong-bull", "bull", "neutral", "bear", or "strong-bear".
+For regime use "negative_gamma" or "positive_gamma".
+All price levels as numbers. Return ONLY the JSON, no other text.`;
+
+  try {
+    const resp = await fetch(PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: [
+            {type:'image', source:{type:'base64', media_type: img.type||'image/jpeg', data: img.base64}},
+            {type:'text', text: prompt}
+          ]
+        }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(b=>b.text||'').join('') || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    // Populate GEX fields if we got SPX prices
+    if (parsed.gex_flip) setField('spx-flip', parsed.gex_flip);
+    if (parsed.call_wall) setField('spx-call-wall', parsed.call_wall);
+    if (parsed.put_wall) setField('spx-put-wall', parsed.put_wall);
+    if (parsed.vr_top) setField('spx-vr-top', parsed.vr_top);
+    if (parsed.vr_bottom) setField('spx-vr-bot', parsed.vr_bottom);
+    if (parsed.net_gex_direction) setSelect('spx-gex-dir', parsed.net_gex_direction);
+    if (parsed.tick) setSelect('gp-tick', parsed.tick);
+    if (parsed.regime) {
+      setSelect('spx-gex-dir', parsed.regime === 'negative_gamma' ? 'negative' : 'positive');
+      setSelect('spy-gex-dir', parsed.regime === 'negative_gamma' ? 'negative' : 'positive');
+    }
+
+    // Build summary of what was extracted
+    const found = Object.entries(parsed).filter(([k,v])=>v!==null).map(([k,v])=>`${k}: ${v}`);
+    if (found.length > 0) {
+      statusEl.textContent = `✓ Extracted from image: ${found.join(' | ')}`;
+      statusEl.style.color = 'var(--green)';
+      // Auto-run scoring with new data
+      if (typeof runScoring === 'function') runScoring();
+    } else {
+      statusEl.textContent = '⚠ No GEX data found in image — AI will still read it at generate time';
+      statusEl.style.color = 'var(--yellow)';
+    }
+  } catch(e) {
+    statusEl.textContent = `✓ ${uploadedImages.length} image(s) ready — AI reads at generate time (extract failed: ${e.message})`;
+    statusEl.style.color = 'var(--cyan)';
+  }
 }
 
 </script>
