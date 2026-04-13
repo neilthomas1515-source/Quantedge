@@ -953,26 +953,43 @@ function loadFromStorage(){try{const saved=JSON.parse(localStorage.getItem('gex_
 async function fetchSPXHistoricalLevels() {
   const statusEl = document.getElementById('spx-hist-status');
   if (statusEl) { statusEl.textContent = 'Fetching...'; statusEl.style.color = 'var(--yellow)'; }
-  try {
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ES%3DF?interval=1d&range=10d';
-    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    const resp = await fetch(proxy);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
-    const q = data.chart.result[0].indicators.quote[0];
-    const len = q.close.length;
-    const prevClose = q.close[len-2], prevHigh = q.high[len-2], prevLow = q.low[len-2];
-    const prevWkHigh = Math.max(...q.high.slice(Math.max(0,len-6), len-1));
-    const prevWkLow  = Math.min(...q.low.slice(Math.max(0,len-6), len-1));
-    setField('gp-prev-close',  prevClose.toFixed(2));
-    setField('gp-prev-high',   prevHigh.toFixed(2));
-    setField('gp-prev-low',    prevLow.toFixed(2));
-    setField('gp-prevwk-high', prevWkHigh.toFixed(2));
-    setField('gp-prevwk-low',  prevWkLow.toFixed(2));
-    if (statusEl) { statusEl.textContent = 'ES filled (prev close ' + prevClose.toFixed(2) + ')'; statusEl.style.color = 'var(--green)'; }
-  } catch(e) {
-    if (statusEl) { statusEl.textContent = 'Auto-fill failed: ' + e.message; statusEl.style.color = 'var(--red)'; }
+  // Try multiple CORS proxies in sequence
+  const esUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/ES%3DF?interval=1d&range=10d';
+  const proxies = [
+    'https://corsproxy.io/?' + encodeURIComponent(esUrl),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(esUrl),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(esUrl)
+  ];
+  let lastErr = '';
+  for (let i = 0; i < proxies.length; i++) {
+    try {
+      const resp = await fetch(proxies[i]);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      const q = data.chart.result[0].indicators.quote[0];
+      const len = q.close.length;
+      // Filter out nulls
+      const closes = q.close.filter(function(v){return v!=null;});
+      const highs  = q.high.filter(function(v){return v!=null;});
+      const lows   = q.low.filter(function(v){return v!=null;});
+      const n = closes.length;
+      const prevClose = closes[n-2] || closes[n-1];
+      const prevHigh  = highs[n-2]  || highs[n-1];
+      const prevLow   = lows[n-2]   || lows[n-1];
+      const wkHigh = Math.max.apply(null, highs.slice(Math.max(0,n-6)));
+      const wkLow  = Math.min.apply(null, lows.slice(Math.max(0,n-6)));
+      setField('gp-prev-close',  prevClose.toFixed(2));
+      setField('gp-prev-high',   prevHigh.toFixed(2));
+      setField('gp-prev-low',    prevLow.toFixed(2));
+      setField('gp-prevwk-high', wkHigh.toFixed(2));
+      setField('gp-prevwk-low',  wkLow.toFixed(2));
+      if (statusEl) { statusEl.textContent = 'ES filled (prev close ' + prevClose.toFixed(2) + ')'; statusEl.style.color = 'var(--green)'; }
+      return;
+    } catch(e) {
+      lastErr = e.message;
+    }
   }
+  if (statusEl) { statusEl.textContent = 'Auto-fill failed: ' + lastErr; statusEl.style.color = 'var(--red)'; }
 }
 
 // FIX 5: REVERSAL SIGNALS
