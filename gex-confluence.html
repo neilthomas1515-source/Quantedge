@@ -346,7 +346,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
     </div>
     <div id="img-preview-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;"></div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-top:6px;">&#9888; Drop up to 5 images. AI reads all of them alongside GEX + macro data. Best used when FlashAlpha quota is burned.</div>
-    <div id="internals-extract-status" style="display:none;margin-top:6px;font-size:12px;padding:4px 8px;border-radius:2px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--cyan)">Reading internals from image...</div>
+    <div id="internals-extract-status" style="display:none;margin-top:6px;font-size:12px;padding:4px 8px;border-radius:2px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--cyan)">Ready</div>
+    <button id="read-image-btn" onclick="readImageData()" style="display:none;margin-top:8px;width:100%;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:7px;border:1px solid var(--cyan2);border-radius:3px;background:rgba(0,212,255,0.08);color:var(--cyan);cursor:pointer;">&#128247; READ IMAGE &amp; POPULATE FIELDS</button>
+    <div id="image-read-output" style="display:none;margin-top:8px;font-size:12px;padding:8px;border-radius:3px;background:var(--bg3);border:1px solid var(--border2);font-family:'Share Tech Mono',monospace;color:var(--text2);line-height:1.6;white-space:pre-wrap;max-height:120px;overflow-y:auto;"></div>
   </div>
   <div class="panel" style="flex:1">
     <div class="panel-title inline-flex"><span>AI Game Plan Analysis</span><div class="spacer"></div><button class="btn btn-primary btn-sm" onclick="generateAIGamePlan()">GENERATE &#9654;</button></div>
@@ -709,9 +711,11 @@ const PROXY = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
 let uploadedImages = [];
 function handleImageDrop(e){e.preventDefault();e.stopPropagation();const z=document.getElementById('img-drop-zone');z.style.borderColor='var(--border2)';z.style.background='var(--bg3)';handleImageFiles(e.dataTransfer.files);}
 function handleImageFiles(files){if(!files||files.length===0)return;const rem=5-uploadedImages.length;const top=Math.min(files.length,rem);let done=0;for(let i=0;i<top;i++){const f=files[i];if(!f.type.startsWith('image/'))continue;const r=new FileReader();r.onload=(e)=>{uploadedImages.push({base64:e.target.result.split(',')[1],type:f.type,name:f.name});done++;if(done===top){renderImagePreviews();extractInternalsFromImages();}};r.readAsDataURL(f);}}
-function renderImagePreviews(){const grid=document.getElementById('img-preview-grid'),label=document.getElementById('img-drop-label'),badge=document.getElementById('img-count-badge'),btn=document.getElementById('img-clear-all-btn'),zone=document.getElementById('img-drop-zone');if(uploadedImages.length===0){grid.style.display='none';label.style.display='block';badge.style.display='none';btn.style.display='none';zone.style.borderColor='var(--border2)';zone.style.background='var(--bg3)';return;}grid.style.display='grid';label.style.display=uploadedImages.length>=5?'none':'block';if(uploadedImages.length<5)label.innerHTML='&#128247; Drop more charts (up to 5 total)<br><span style="font-size:11px;color:var(--text3);">or click to browse</span>';badge.style.display='inline';badge.textContent=uploadedImages.length+' image'+(uploadedImages.length>1?'s':'')+' loaded';btn.style.display='inline';zone.style.borderColor='var(--cyan2)';zone.style.background='rgba(0,212,255,0.04)';grid.innerHTML=uploadedImages.map((img,i)=>`<div style="position:relative;"><img src="data:${img.type};base64,${img.base64}" style="width:100%;height:80px;object-fit:cover;border-radius:3px;border:1px solid var(--border2);"><button onclick="removeImage(${i})" style="position:absolute;top:2px;right:2px;background:var(--red2);border:none;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px;cursor:pointer;">&#10005;</button><div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.name}</div></div>`).join('');}
+function renderImagePreviews(){const grid=document.getElementById('img-preview-grid'),label=document.getElementById('img-drop-label'),badge=document.getElementById('img-count-badge'),btn=document.getElementById('img-clear-all-btn'),zone=document.getElementById('img-drop-zone');if(uploadedImages.length===0){grid.style.display='none';label.style.display='block';badge.style.display='none';btn.style.display='none';zone.style.borderColor='var(--border2)';zone.style.background='var(--bg3)';return;}grid.style.display='grid';label.style.display=uploadedImages.length>=5?'none':'block';if(uploadedImages.length<5)label.innerHTML='&#128247; Drop more charts (up to 5 total)<br><span style="font-size:11px;color:var(--text3);">or click to browse</span>';badge.style.display='inline';badge.textContent=uploadedImages.length+' image'+(uploadedImages.length>1?'s':'')+' loaded';btn.style.display='inline';zone.style.borderColor='var(--cyan2)';zone.style.background='rgba(0,212,255,0.04)';
+  const readBtn=document.getElementById('read-image-btn');if(readBtn)readBtn.style.display='block';
+  const statusEl2=document.getElementById('internals-extract-status');if(statusEl2){statusEl2.style.display='block';statusEl2.textContent=uploadedImages.length+' image(s) loaded — click READ IMAGE to extract GEX data';statusEl2.style.color='var(--cyan)';}grid.innerHTML=uploadedImages.map((img,i)=>`<div style="position:relative;"><img src="data:${img.type};base64,${img.base64}" style="width:100%;height:80px;object-fit:cover;border-radius:3px;border:1px solid var(--border2);"><button onclick="removeImage(${i})" style="position:absolute;top:2px;right:2px;background:var(--red2);border:none;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px;cursor:pointer;">&#10005;</button><div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.name}</div></div>`).join('');}
 function removeImage(i){uploadedImages.splice(i,1);renderImagePreviews();}
-function clearAllImages(){uploadedImages=[];document.getElementById('img-file-input').value='';renderImagePreviews();}
+function clearAllImages(){uploadedImages=[];document.getElementById('img-file-input').value='';renderImagePreviews();const rb=document.getElementById('read-image-btn');if(rb)rb.style.display='none';const ro=document.getElementById('image-read-output');if(ro)ro.style.display='none';const se=document.getElementById('internals-extract-status');if(se)se.style.display='none';}
 document.addEventListener('paste',e=>{const items=(e.clipboardData||window.clipboardData)?.items;if(!items)return;const imgs=Array.from(items).filter(i=>i.type.startsWith('image/'));if(!imgs.length)return;e.preventDefault();imgs.forEach(i=>{const f=i.getAsFile();if(f)handleImageFiles([f]);});});
 document.getElementById('img-drop-zone').setAttribute('tabindex','0');
 document.getElementById('img-drop-zone').addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')this.focus();});
@@ -945,171 +949,145 @@ function loadFromStorage(){try{const saved=JSON.parse(localStorage.getItem('gex_
 </script>
 
 <script>
-// ===================== FIX 1: SPX HISTORICAL LEVELS AUTO-FILL =====================
+// FIX 1: SPX AUTO-FILL using Yahoo Finance via allorigins proxy
 async function fetchSPXHistoricalLevels() {
   const statusEl = document.getElementById('spx-hist-status');
   if (statusEl) { statusEl.textContent = 'Fetching...'; statusEl.style.color = 'var(--yellow)'; }
-  const FINNHUB_KEY = 'd75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90';
   try {
-    const toTs = Math.floor(Date.now() / 1000);
-    const fromTs = toTs - (10 * 24 * 60 * 60);
-    const resp = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${toTs}&token=${FINNHUB_KEY}`);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ES%3DF?interval=1d&range=10d';
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    const resp = await fetch(proxy);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    if (!data || !data.c || data.c.length < 2) throw new Error('No data');
-    const len = data.c.length;
-    const prevClose = data.c[len - 2];
-    const prevHigh  = data.h[len - 2];
-    const prevLow   = data.l[len - 2];
-    const wkLen = Math.min(7, len - 1);
-    const prevWkHigh = Math.max(...data.h.slice(len - wkLen - 1, len - 1));
-    const prevWkLow  = Math.min(...data.l.slice(len - wkLen - 1, len - 1));
-    const basis = parseFloat(document.getElementById('es-basis').value) || 2;
-    const s2e = v => (Math.round((v * 10 + basis) * 4) / 4).toFixed(2);
-    setField('gp-prev-close',  s2e(prevClose));
-    setField('gp-prev-high',   s2e(prevHigh));
-    setField('gp-prev-low',    s2e(prevLow));
-    setField('gp-prevwk-high', s2e(prevWkHigh));
-    setField('gp-prevwk-low',  s2e(prevWkLow));
-    if (statusEl) { statusEl.textContent = `Filled (SPY prev $${prevClose.toFixed(2)} → ES ~${s2e(prevClose)})`; statusEl.style.color = 'var(--green)'; }
+    const q = data.chart.result[0].indicators.quote[0];
+    const len = q.close.length;
+    const prevClose = q.close[len-2], prevHigh = q.high[len-2], prevLow = q.low[len-2];
+    const prevWkHigh = Math.max(...q.high.slice(Math.max(0,len-6), len-1));
+    const prevWkLow  = Math.min(...q.low.slice(Math.max(0,len-6), len-1));
+    setField('gp-prev-close',  prevClose.toFixed(2));
+    setField('gp-prev-high',   prevHigh.toFixed(2));
+    setField('gp-prev-low',    prevLow.toFixed(2));
+    setField('gp-prevwk-high', prevWkHigh.toFixed(2));
+    setField('gp-prevwk-low',  prevWkLow.toFixed(2));
+    if (statusEl) { statusEl.textContent = 'ES filled (prev close ' + prevClose.toFixed(2) + ')'; statusEl.style.color = 'var(--green)'; }
   } catch(e) {
     if (statusEl) { statusEl.textContent = 'Auto-fill failed: ' + e.message; statusEl.style.color = 'var(--red)'; }
   }
 }
 
-// ===================== FIX 5: REVERSAL SIGNALS =====================
+// FIX 5: REVERSAL SIGNALS
 function checkReversalSignals() {
   const panel = document.getElementById('reversal-signal-panel');
   const countBadge = document.getElementById('reversal-signal-count');
   if (!panel) return;
-  const spxData = state.liveData['spx'];
-  const spyData = state.liveData['spy'];
-  if (!spxData && !spyData) {
-    panel.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px">- fetch live data to activate -</div>';
-    return;
-  }
+  const spxData = state.liveData['spx'], spyData = state.liveData['spy'];
+  if (!spxData && !spyData) { panel.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px">- fetch live data to activate -</div>'; return; }
   const signals = [];
   const now = new Date().toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false});
   const currentES = parseFloat(document.getElementById('id-price').value) || 0;
   if (spxData) {
-    const spxFlip = spxData.levels?.levels?.gamma_flip || 0;
+    const spxFlip = spxData.levels && spxData.levels.levels ? spxData.levels.levels.gamma_flip || 0 : 0;
     const esFlip = spxToES(spxFlip);
     if (esFlip && currentES) {
       const dist = Math.abs(currentES - esFlip);
-      if (dist <= 5) signals.push({type:'danger',icon:'⚡',title:'GEX FLIP CROSSOVER ZONE',detail:`ES ${currentES} is ${dist.toFixed(2)}pts ${currentES>esFlip?'above':'below'} flip @ ${esFlip.toFixed(2)} — HIGH REVERSAL PROBABILITY`});
-      else if (dist <= 15) signals.push({type:'warn',icon:'⚠',title:'APPROACHING GEX FLIP',detail:`ES ${currentES} is ${dist.toFixed(2)}pts from flip @ ${esFlip.toFixed(2)} — watch for crossover`});
+      if (dist <= 5) signals.push({type:'danger',icon:'⚡',title:'GEX FLIP CROSSOVER ZONE',detail:'ES ' + currentES + ' is ' + dist.toFixed(2) + 'pts ' + (currentES > esFlip ? 'above' : 'below') + ' flip @ ' + esFlip.toFixed(2) + ' — HIGH REVERSAL PROBABILITY'});
+      else if (dist <= 15) signals.push({type:'warn',icon:'⚠',title:'APPROACHING GEX FLIP',detail:'ES ' + currentES + ' is ' + dist.toFixed(2) + 'pts from flip @ ' + esFlip.toFixed(2)});
     }
-    const regime = spxData.summary?.regime || '';
-    const spyRegime = spyData?.summary?.regime || '';
-    if (regime && spyRegime && regime !== spyRegime) signals.push({type:'warn',icon:'⚠',title:'SPX/SPY REGIME DIVERGENCE',detail:`SPX is ${regime.replace('_gamma',' gamma')} but SPY is ${spyRegime.replace('_gamma',' gamma')} — reduce size`});
-    const netGex = spxData.summary?.exposures?.net_gex || 0;
-    const esVrTop = spxToES(parseFloat(document.getElementById('spx-vr-top').value)||0);
-    const esVrBot = spxToES(parseFloat(document.getElementById('spx-vr-bot').value)||0);
+    const regime = spxData.summary ? spxData.summary.regime || '' : '';
+    const spyRegime = spyData && spyData.summary ? spyData.summary.regime || '' : '';
+    if (regime && spyRegime && regime !== spyRegime) signals.push({type:'warn',icon:'⚠',title:'SPX/SPY REGIME DIVERGENCE',detail:'SPX is ' + regime.replace('_gamma',' gamma') + ' but SPY is ' + spyRegime.replace('_gamma',' gamma')});
+    const netGex = spxData.summary && spxData.summary.exposures ? spxData.summary.exposures.net_gex || 0 : 0;
+    const esVrTop = spxToES(parseFloat(document.getElementById('spx-vr-top').value) || 0);
+    const esVrBot = spxToES(parseFloat(document.getElementById('spx-vr-bot').value) || 0);
     if (netGex < 0 && currentES) {
-      if (esVrTop && Math.abs(currentES-esVrTop)<=8) signals.push({type:'danger',icon:'🔴',title:'NEG GEX + VR TOP TEST',detail:`Negative gamma + ES testing VR top @ ${esVrTop.toFixed(2)} — amplified rejection risk`});
-      if (esVrBot && Math.abs(currentES-esVrBot)<=8) signals.push({type:'danger',icon:'🟢',title:'NEG GEX + VR BOTTOM TEST',detail:`Negative gamma + ES testing VR bottom @ ${esVrBot.toFixed(2)} — amplified bounce or breakdown risk`});
+      if (esVrTop && Math.abs(currentES - esVrTop) <= 8) signals.push({type:'danger',icon:'🔴',title:'NEG GEX + VR TOP TEST',detail:'Negative gamma + ES testing VR top @ ' + esVrTop.toFixed(2)});
+      if (esVrBot && Math.abs(currentES - esVrBot) <= 8) signals.push({type:'danger',icon:'🟢',title:'NEG GEX + VR BOTTOM TEST',detail:'Negative gamma + ES testing VR bottom @ ' + esVrBot.toFixed(2)});
     }
   }
   const tick = document.getElementById('id-tick').value || document.getElementById('gp-tick').value;
   const bias = state.lastBias || '';
   if (tick && bias) {
-    const tBear = tick==='strong-bear'||tick==='bear';
-    const tBull = tick==='strong-bull'||tick==='bull';
-    if (tBear && bias.includes('BULL')) signals.push({type:'warn',icon:'⚡',title:'TICK DIVERGENCE — BULLISH BIAS WEAKENING',detail:`Bias is ${bias} but TICK is ${tick} — internals not confirming`});
-    else if (tBull && bias.includes('BEAR')) signals.push({type:'warn',icon:'⚡',title:'TICK DIVERGENCE — BEARISH BIAS WEAKENING',detail:`Bias is ${bias} but TICK is ${tick} — watch for long reversal`});
-    else if ((tBull&&bias.includes('BULL'))||(tBear&&bias.includes('BEAR'))) signals.push({type:'info',icon:'✅',title:'TICK CONFIRMING BIAS',detail:`TICK ${tick} aligns with ${bias} bias`});
+    const tBear = tick==='strong-bear'||tick==='bear', tBull = tick==='strong-bull'||tick==='bull';
+    if (tBear && bias.includes('BULL')) signals.push({type:'warn',icon:'⚡',title:'TICK DIVERGENCE — BULLISH BIAS WEAKENING',detail:'Bias is ' + bias + ' but TICK is ' + tick});
+    else if (tBull && bias.includes('BEAR')) signals.push({type:'warn',icon:'⚡',title:'TICK DIVERGENCE — BEARISH BIAS WEAKENING',detail:'Bias is ' + bias + ' but TICK is ' + tick});
+    else if ((tBull&&bias.includes('BULL'))||(tBear&&bias.includes('BEAR'))) signals.push({type:'info',icon:'✅',title:'TICK CONFIRMING BIAS',detail:'TICK ' + tick + ' aligns with ' + bias});
   }
-  if (signals.length===0) signals.push({type:'info',icon:'—',title:'NO ACTIVE REVERSAL SIGNALS',detail:'No GEX flip crossovers, regime flips, or TICK divergences detected.'});
+  if (!signals.length) signals.push({type:'info',icon:'—',title:'NO ACTIVE REVERSAL SIGNALS',detail:'No GEX flip crossovers, regime flips, or TICK divergences detected.'});
   const colors={danger:'var(--red)',warn:'var(--yellow)',info:'var(--cyan)'};
   const bgs={danger:'rgba(255,51,102,0.08)',warn:'rgba(255,204,0,0.06)',info:'rgba(0,212,255,0.05)'};
   const borders={danger:'rgba(255,51,102,0.3)',warn:'rgba(255,204,0,0.25)',info:'rgba(0,212,255,0.2)'};
-  panel.innerHTML = signals.map(s=>`<div style="margin-bottom:8px;padding:10px 12px;border-radius:3px;background:${bgs[s.type]};border:1px solid ${borders[s.type]}"><div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:${colors[s.type]};letter-spacing:1px;margin-bottom:4px">${s.icon} ${s.title}</div><div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);line-height:1.5">${s.detail}</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px">${now} EST</div></div>`).join('');
-  const activeCount = signals.filter(s=>s.type==='danger'||s.type==='warn').length;
-  if (countBadge) {
-    if (activeCount>0) { countBadge.textContent=activeCount+' SIGNAL'+(activeCount>1?'S':''); countBadge.style.cssText='display:inline;background:rgba(255,51,102,0.15);color:var(--red);border:1px solid rgba(255,51,102,0.3);padding:2px 8px;border-radius:2px;font-family:Share Tech Mono,monospace;font-size:11px'; }
-    else { countBadge.style.display='none'; }
-  }
+  panel.innerHTML = signals.map(function(s){return '<div style="margin-bottom:8px;padding:10px 12px;border-radius:3px;background:'+bgs[s.type]+';border:1px solid '+borders[s.type]+'"><div style="font-family:Orbitron,monospace;font-size:12px;font-weight:700;color:'+colors[s.type]+';margin-bottom:4px">'+s.icon+' '+s.title+'</div><div style="font-family:Share Tech Mono,monospace;font-size:12px;color:var(--text2)">'+s.detail+'</div><div style="font-size:10px;color:var(--text3);margin-top:4px">'+now+' EST</div></div>';}).join('');
+  const activeCount = signals.filter(function(s){return s.type==='danger'||s.type==='warn';}).length;
+  if (countBadge) { if (activeCount>0){countBadge.textContent=activeCount+' SIGNAL'+(activeCount>1?'S':'');countBadge.style.cssText='display:inline;background:rgba(255,51,102,0.15);color:var(--red);border:1px solid rgba(255,51,102,0.3);padding:2px 8px;border-radius:2px;font-size:11px';}else{countBadge.style.display='none';} }
 }
 
-// ===================== FIX 3/4: IMAGE EXTRACT STUB =====================
-async function extractInternalsFromImages() {
-  if (uploadedImages.length===0) return;
-  const statusEl = document.getElementById('internals-extract-status');
-  if (!statusEl) return;
-  statusEl.style.display='block';
-  statusEl.style.color='var(--yellow)';
-  statusEl.textContent='Reading chart data from image...';
+// FIX 3/4: IMAGE EXTRACT STUB
+function extractInternalsFromImages() { /* handled by READ IMAGE button */ }
 
-  const img = uploadedImages[0]; // use first image
-  const prompt = `You are reading a GEX or market internals chart image. Extract any visible data and return ONLY a JSON object with these exact keys (use null if not visible):
-{
-  "gex_flip": null,
-  "call_wall": null,
-  "put_wall": null,
-  "vr_top": null,
-  "vr_bottom": null,
-  "net_gex_direction": null,
-  "tick": null,
-  "regime": null,
-  "spx_price": null
-}
+// READ IMAGE & POPULATE FIELDS
+async function readImageData() {
+  if (uploadedImages.length === 0) return;
+  const btn = document.getElementById('read-image-btn');
+  const output = document.getElementById('image-read-output');
+  const status = document.getElementById('internals-extract-status');
+  btn.textContent = 'READING...';
+  btn.disabled = true;
+  if (output) { output.style.display = 'block'; output.textContent = 'Sending image to AI...'; }
 
-For net_gex_direction use "negative" or "positive".
-For tick use "strong-bull", "bull", "neutral", "bear", or "strong-bear".
-For regime use "negative_gamma" or "positive_gamma".
-All price levels as numbers. Return ONLY the JSON, no other text.`;
+  const img = uploadedImages[0];
+  const promptText = 'You are analyzing a GEX or market chart image for an ES futures trader. Extract ALL visible numeric data. Return ONLY a valid JSON object with these exact keys (use null if not visible in image): {"gex_flip":null,"call_wall":null,"put_wall":null,"vr_top":null,"vr_bottom":null,"net_gex_direction":null,"net_gex_value":null,"spx_price":null,"regime":null,"zero_dte_magnet":null,"tick_bias":null}. For net_gex_direction use the string negative or positive. For regime use negative_gamma or positive_gamma. For tick_bias use strong-bull, bull, neutral, bear, or strong-bear. Return ONLY the JSON object, nothing else.';
 
   try {
     const resp = await fetch(PROXY, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
+        max_tokens: 400,
         messages: [{
           role: 'user',
           content: [
-            {type:'image', source:{type:'base64', media_type: img.type||'image/jpeg', data: img.base64}},
-            {type:'text', text: prompt}
+            {type: 'image', source: {type: 'base64', media_type: img.type || 'image/jpeg', data: img.base64}},
+            {type: 'text', text: promptText}
           ]
         }]
       })
     });
+    if (!resp.ok) throw new Error('Worker HTTP ' + resp.status);
     const data = await resp.json();
-    const raw = data.content?.map(b=>b.text||'').join('') || '';
+    if (data.type === 'error') throw new Error(data.error ? data.error.message : 'API error');
+    const raw = (data.content || []).map(function(b){return b.text||'';}).join('').trim();
     const clean = raw.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
+    var parsed;
+    try { parsed = JSON.parse(clean); } catch(e) { throw new Error('Bad JSON: ' + raw.slice(0,80)); }
 
-    // Populate GEX fields if we got SPX prices
-    if (parsed.gex_flip) setField('spx-flip', parsed.gex_flip);
-    if (parsed.call_wall) setField('spx-call-wall', parsed.call_wall);
-    if (parsed.put_wall) setField('spx-put-wall', parsed.put_wall);
-    if (parsed.vr_top) setField('spx-vr-top', parsed.vr_top);
-    if (parsed.vr_bottom) setField('spx-vr-bot', parsed.vr_bottom);
-    if (parsed.net_gex_direction) setSelect('spx-gex-dir', parsed.net_gex_direction);
-    if (parsed.tick) setSelect('gp-tick', parsed.tick);
-    if (parsed.regime) {
-      setSelect('spx-gex-dir', parsed.regime === 'negative_gamma' ? 'negative' : 'positive');
-      setSelect('spy-gex-dir', parsed.regime === 'negative_gamma' ? 'negative' : 'positive');
-    }
+    var filled = [];
+    if (parsed.gex_flip)        { setField('spx-flip', parsed.gex_flip);         filled.push('GEX Flip: ' + parsed.gex_flip); }
+    if (parsed.call_wall)       { setField('spx-call-wall', parsed.call_wall);   filled.push('Call Wall: ' + parsed.call_wall); }
+    if (parsed.put_wall)        { setField('spx-put-wall', parsed.put_wall);     filled.push('Put Wall: ' + parsed.put_wall); }
+    if (parsed.vr_top)          { setField('spx-vr-top', parsed.vr_top);         filled.push('VR Top: ' + parsed.vr_top); }
+    if (parsed.vr_bottom)       { setField('spx-vr-bot', parsed.vr_bottom);      filled.push('VR Bot: ' + parsed.vr_bottom); }
+    if (parsed.net_gex_value)   { setField('spx-net-gex', parsed.net_gex_value); filled.push('Net GEX: ' + parsed.net_gex_value + 'M'); }
+    if (parsed.zero_dte_magnet) { setField('spx-0dte-magnet', parsed.zero_dte_magnet); filled.push('0DTE Magnet: ' + parsed.zero_dte_magnet); }
+    if (parsed.net_gex_direction) { setSelect('spx-gex-dir', parsed.net_gex_direction); setSelect('spy-gex-dir', parsed.net_gex_direction); filled.push('GEX Dir: ' + parsed.net_gex_direction); }
+    if (parsed.tick_bias)       { setSelect('gp-tick', parsed.tick_bias);        filled.push('TICK: ' + parsed.tick_bias); }
+    if (parsed.regime) { var dir = parsed.regime === 'negative_gamma' ? 'negative' : 'positive'; setSelect('spx-gex-dir', dir); setSelect('spy-gex-dir', dir); filled.push('Regime: ' + parsed.regime); }
 
-    // Build summary of what was extracted
-    const found = Object.entries(parsed).filter(([k,v])=>v!==null).map(([k,v])=>`${k}: ${v}`);
-    if (found.length > 0) {
-      statusEl.textContent = `✓ Extracted from image: ${found.join(' | ')}`;
-      statusEl.style.color = 'var(--green)';
-      // Auto-run scoring with new data
+    if (filled.length > 0) {
+      if (output) { output.textContent = 'POPULATED: ' + filled.join(' | '); output.style.color = 'var(--green)'; }
+      if (status) { status.textContent = filled.length + ' field(s) populated from image'; status.style.color = 'var(--green)'; }
       if (typeof runScoring === 'function') runScoring();
     } else {
-      statusEl.textContent = '⚠ No GEX data found in image — AI will still read it at generate time';
-      statusEl.style.color = 'var(--yellow)';
+      if (output) { output.textContent = 'No GEX data found in image. Raw: ' + raw.slice(0,150); output.style.color = 'var(--yellow)'; }
+      if (status) { status.textContent = 'No data extracted — try a clearer chart image'; status.style.color = 'var(--yellow)'; }
     }
   } catch(e) {
-    statusEl.textContent = `✓ ${uploadedImages.length} image(s) ready — AI reads at generate time (extract failed: ${e.message})`;
-    statusEl.style.color = 'var(--cyan)';
+    if (output) { output.textContent = 'Error: ' + e.message; output.style.color = 'var(--red)'; }
+    if (status) { status.textContent = 'Read failed: ' + e.message; status.style.color = 'var(--red)'; }
   }
+  btn.textContent = 'READ IMAGE & POPULATE FIELDS';
+  btn.disabled = false;
 }
-
 </script>
 </body>
 </html>
