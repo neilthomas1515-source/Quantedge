@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -214,7 +214,7 @@ textarea{resize:vertical;min-height:60px;}
     <div class="sb-level"><div class="sb-level-label">Stop (ES)</div><div class="sb-level-val" id="sb-stop" style="color:var(--red)">---</div></div>
     <div class="sb-level"><div class="sb-level-label">GEX Flip</div><div class="sb-level-val" id="sb-flip" style="color:var(--yellow)">---</div></div>
     <div class="sb-level"><div class="sb-level-label">Regime</div><div class="sb-level-val" id="sb-regime" style="color:var(--t3)">---</div></div>
-    <div class="sb-level"><div class="sb-level-label">Updated</div><div class="sb-level-val" id="sb-last-update" style="color:var(--t3);font-size:11px">---</div></div>
+    <div class="sb-level"><div class="sb-level-label">Updated</div><div class="sb-level-val" id="sb-last-update" style="color:var(--t3);font-size:11px">---</div></div><div class="sb-level"><div class="sb-level-label">Confluence</div><div class="sb-level-val" id="sb-confluence" style="color:var(--t3);font-size:12px;font-weight:600">---</div></div>
   </div>
   <div class="sb-right">
     <span id="sb-session" class="sess-closed">LOADING</span>
@@ -506,7 +506,7 @@ textarea{resize:vertical;min-height:60px;}
       <div style="text-align:center"><div class="es-level-name">CHEX (Charm)</div><div class="es-level-value" id="id-chex-val" style="font-size:13px">--</div><div class="es-level-spx" id="id-chex-interp">--</div></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:7px;padding-top:7px;border-top:1px solid var(--b1)">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--t2)">REGIME:</div><div id="id-regime-badge"></div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--t2)">REGIME:</div><div id="id-regime-badge"></div><div id="regime-duration" style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-left:10px">--</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--t2);margin-left:10px">NET GEX:</div><div id="id-net-gex" style="font-family:var(--mono);font-size:12px;font-weight:600">--</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--t2);margin-left:10px">0DTE%:</div><div id="id-zero-dte" style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--orange)">--</div>
     </div>
@@ -515,7 +515,7 @@ textarea{resize:vertical;min-height:60px;}
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="panel">
         <div class="panel-title">Intraday Snapshot</div>
-        <div class="field-row"><div class="field-label">Current ES Price</div><input type="number" id="id-price" placeholder="" step="0.25"></div>
+        <div class="field-row"><div class="field-label">Current ES Price</div><input type="number" id="id-price" placeholder="" step="0.25" onchange="autoPopulateIntradaySelects();runProximityAlerts();checkTriggers();runHighProbabilityDetector();"></div>
         <div class="field-row"><div class="field-label">Net GEX Change</div><select id="id-gex-change"><option value="">-- select --</option><option value="more-neg">More Negative</option><option value="less-neg">Less Negative</option><option value="flipped-neg">Flipped Negative</option><option value="flipped-pos">Flipped Positive</option><option value="more-pos">More Positive</option><option value="no-change">No Change</option></select></div>
         <div class="field-row"><div class="field-label">Price vs Flip</div><select id="id-price-flip"><option value="">-- select --</option><option value="above">Above GEX Flip</option><option value="below">Below GEX Flip</option><option value="at">Testing GEX Flip</option></select></div>
         <div class="field-row"><div class="field-label">Price vs VR</div><select id="id-price-vr"><option value="">-- select --</option><option value="inside">Inside VR</option><option value="above-top">Above VR Top</option><option value="below-bot">Below VR Bottom</option><option value="at-top">Testing VR Top</option><option value="at-bot">Testing VR Bottom</option></select></div>
@@ -560,6 +560,7 @@ textarea{resize:vertical;min-height:60px;}
 </div>
 
 <!-- ══ AI SIGNAL TAB ══ -->
+<div class="panel"><div class="panel-title">&#127919; Trigger Conditions</div><div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:8px">Set level + condition = auto-alert when both are met</div><div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center"><input type="number" id="trigger-level" placeholder="ES level" step="0.25" style="font-size:11px"><select id="trigger-dir" style="font-size:11px"><option value="above">Price &ge; level</option><option value="below">Price &le; level</option><option value="within5">Within 5pts</option></select><select id="trigger-cond" style="font-size:11px"><option value="any">Any condition</option><option value="tick-bull">+ TICK bullish</option><option value="tick-bear">+ TICK bearish</option><option value="neg-gamma">+ NEG gamma</option><option value="pos-gamma">+ POS gamma</option></select><button class="btn btn-primary btn-sm" onclick="addTrigger()">+ ADD</button></div><div id="trigger-list"><div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:8px">No active triggers</div></div><div class="mt-8 inline-flex"><button class="btn btn-ghost btn-sm" onclick="resetTriggers()">&#8635; RESET FIRED</button></div></div>
 <div id="tab-ai" class="tab-panel">
   <div class="grid-2">
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -638,6 +639,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadFromStorage();renderTrades();setDefaultDate();
   fetchSPXLevels();fetchMacroData();
   document.getElementById('sb-last-update').textContent='Ready';
+  schedulePregame();
+  setInterval(()=>{checkTriggers();runHighProbabilityDetector();},30000);
 });
 
 // TABS
@@ -734,6 +737,12 @@ async function fetchAllData(){
   autoSetAlignment();populateIntradayESLevels();runProximityAlerts();
   checkReversalSignals();updateMacroFromGEX();
   await generateUnifiedSignalAuto();
+  autoPopulateIntradaySelects();
+  calcLayerConfluence();
+  check0DTEPinRisk();
+  checkTriggers();
+  runHighProbabilityDetector();
+  if(state.liveData['spx'])updateRegimeDuration('spx',state.liveData['spx'].summary.regime||'undetermined');
 }
 
 // FLASHALPHA
@@ -1204,6 +1213,154 @@ function deleteTrade(id){state.trades=state.trades.filter(t=>t.id!==id);renderTr
 function clearTradeLog(){if(confirm('Clear all trades?')){state.trades=[];renderTrades();updateTradeStats();saveToStorage();}}
 function setDefaultDate(){const n=new Date();const p=x=>String(x).padStart(2,'0');const el=document.getElementById('tl-date');if(el)el.value=n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+' '+p(n.getHours())+':'+p(n.getMinutes());}
 
+// ── ENHANCEMENT 1: Auto-populate Price vs Flip/VR dropdowns ──────────────────
+function autoPopulateDropdowns(){
+  const price = parseFloat(document.getElementById('esPrice')?.value||state.esPrice||0);
+  if(!price) return;
+  const gex = state.gexData;
+  if(!gex) return;
+  const flip = parseFloat(gex.flipLevel||gex.gamma_flip||0);
+  const vr   = parseFloat(gex.vrLevel||gex.vol_resistance||0);
+  const vrSup= parseFloat(gex.vrSupport||gex.vol_support||0);
+  const pvfEl = document.getElementById('priceVsFlip');
+  if(pvfEl){ if(price>flip&&flip>0) pvfEl.value='above'; else if(price<flip&&flip>0) pvfEl.value='below'; else pvfEl.value='at'; }
+  const pvrEl = document.getElementById('priceVsVR');
+  if(pvrEl){ if(price>=vr&&vr>0) pvrEl.value='above_vr'; else if(price<=vrSup&&vrSup>0) pvrEl.value='below_vs'; else pvrEl.value='between'; }
+}
+function autoPopulateIntradaySelects(){ autoPopulateDropdowns(); }
+// ── ENHANCEMENT 2: Confluence score on signal bar ────────────────────────────
+function computeConfluenceScore(){
+  let bull=0,bear=0,total=0;
+  const macro=state.macroData||{};
+  if(macro.vix!==undefined){total++;if(macro.vix<20)bull++;else bear++;}
+  const gex=state.gexData||{};
+  if(gex.netGamma!==undefined||gex.net_gamma!==undefined){total++;const ng=parseFloat(gex.netGamma||gex.net_gamma||0);if(ng>0)bull++;else bear++;}
+  const price=parseFloat(state.esPrice||0),flip=parseFloat(gex.flipLevel||gex.gamma_flip||0);
+  if(price&&flip){total++;if(price>flip)bull++;else bear++;}
+  if(total===0)return;
+  const bias=bull>=bear?'BULL':'BEAR',count=bull>=bear?bull:bear,label=`${count}/${total} ${bias}`;
+  let el=document.getElementById('confluenceScore');
+  if(!el){const bar=document.getElementById('signalBar')||document.querySelector('.signal-bar');if(bar){el=document.createElement('span');el.id='confluenceScore';el.style.cssText='margin-left:18px;font-size:1.05em;font-weight:700;letter-spacing:.04em;';bar.appendChild(el);}}
+  if(el){el.textContent=`⚡ ${label}`;el.style.color=bias==='BULL'?'#00e676':'#ff5252';}
+  state.confluenceLabel=label;state.confluenceBias=bias;
+}
+function calcLayerConfluence(){ computeConfluenceScore(); }
+// ── ENHANCEMENT 3: 0DTE Pin Risk Detector ────────────────────────────────────
+function check0DTEPinRisk(){
+  const gex=state.gexData||{},price=parseFloat(state.esPrice||0);if(!price)return;
+  const dte0pct=parseFloat(gex.dte0Pct||gex.zero_dte_pct||0);
+  const magnet=parseFloat(gex.magnetLevel||gex.gamma_magnet||gex.flipLevel||gex.gamma_flip||0);if(!magnet)return;
+  const dist=Math.abs(price-magnet),atRisk=(dte0pct>=30)&&(dist<=15);
+  let el=document.getElementById('pinRiskAlert');
+  if(!el){const bar=document.getElementById('signalBar')||document.querySelector('.signal-bar');if(bar){el=document.createElement('span');el.id='pinRiskAlert';el.style.cssText='margin-left:14px;font-size:.97em;font-weight:700;display:none;';bar.appendChild(el);}}
+  if(el){if(atRisk){el.textContent=`📍 PIN RISK: ${dist.toFixed(1)}pts from ${magnet} (${dte0pct.toFixed(0)}% 0DTE)`;el.style.color='#ffab40';el.style.display='inline';if(typeof showToast==='function')showToast(`⚠️ 0DTE Pin Risk — Price within ${dist.toFixed(1)}pts of ${magnet}`,'warn');}else{el.style.display='none';}}
+}
+// ── ENHANCEMENT 4: Regime Duration Tracker ───────────────────────────────────
+function updateRegimeDuration(sym,regime){
+  const now=Date.now(),r=regime||'undetermined';
+  if(state.currentRegime!==r){state.currentRegime=r;state.regimeStartTime=now;}
+  const elapsed=now-(state.regimeStartTime||now);
+  const mins=Math.floor(elapsed/60000),hrs=Math.floor(mins/60),minsRem=mins%60;
+  const durStr=hrs>0?`${hrs}h ${minsRem}m`:`${mins}m`;
+  let el=document.getElementById('regimeDuration');
+  if(!el){const bar=document.getElementById('signalBar')||document.querySelector('.signal-bar');if(bar){el=document.createElement('span');el.id='regimeDuration';el.style.cssText='margin-left:14px;font-size:.93em;opacity:.85;';bar.appendChild(el);}}
+  if(el){el.textContent=`⏱ ${r.toUpperCase()} ${durStr}`;el.style.color=(r==='positive'||r==='POSITIVE')?'#00e676':'#ff5252';}
+}
+// ── ENHANCEMENT 5: High-Probability Alert System ─────────────────────────────
+function checkHighProbabilityAlerts(){
+  const gex=state.gexData||{},macro=state.macroData||{};
+  const price=parseFloat(state.esPrice||0);if(!price)return;
+  const flip=parseFloat(gex.flipLevel||gex.gamma_flip||0);
+  const vr=parseFloat(gex.vrLevel||gex.vol_resistance||0);
+  const vrSup=parseFloat(gex.vrSupport||gex.vol_support||0);
+  const ng=parseFloat(gex.netGamma||gex.net_gamma||0),vix=parseFloat(macro.vix||0);
+  const alerts=[];
+  const macroBull=vix>0&&vix<20,macroMid=vix>=20&&vix<25,gexBull=ng>0,priceAbove=flip>0&&price>flip;
+  if(macroMid&&!gexBull&&!priceAbove)alerts.push({msg:'⚡ 3-LAYER BEAR ALIGN: Elevated VIX + Negative GEX + Price Below Flip',color:'#ff5252'});
+  if(macroBull&&gexBull&&priceAbove)alerts.push({msg:'⚡ 3-LAYER BULL ALIGN: Low VIX + Positive GEX + Price Above Flip',color:'#00e676'});
+  if(vr>0&&Math.abs(price-vr)<=5)alerts.push({msg:`🎯 Price AT Vol Resistance: ${vr}`,color:'#ffab40'});
+  if(vrSup>0&&Math.abs(price-vrSup)<=5)alerts.push({msg:`🎯 Price AT Vol Support: ${vrSup}`,color:'#ffab40'});
+  if(flip>0&&Math.abs(price-flip)<=3)alerts.push({msg:`🔀 Flip Test: Price ${price} vs Flip ${flip}`,color:'#40c4ff'});
+  if(typeof showToast==='function')alerts.forEach(a=>showToast(a.msg,'alert',a.color));
+  if(alerts.length>0){state.lastHPAlert=alerts[0].msg;state.lastHPAlertTime=Date.now();}
+}
+function runHighProbabilityDetector(){ checkHighProbabilityAlerts(); }
+// ── ENHANCEMENT 6: Trigger Conditions Panel ──────────────────────────────────
+function initTriggerConditions(){
+  if(document.getElementById('triggerPanel'))return;
+  const container=document.getElementById('intradayTab')||document.querySelector('.tab-content.active')||document.body;
+  const panel=document.createElement('div');
+  panel.id='triggerPanel';
+  panel.style.cssText='background:#1a1a2e;border:1px solid #40c4ff44;border-radius:10px;padding:18px 20px;margin:18px 0;';
+  panel.innerHTML=`<div style="font-size:1.1em;font-weight:700;color:#40c4ff;margin-bottom:12px;">🎯 Trigger Conditions</div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;"><input id="triggerLevel" type="number" placeholder="ES Level (e.g. 5250)" step="0.25" style="background:#0d0d1a;border:1px solid #40c4ff55;color:#e0e0e0;padding:7px 12px;border-radius:6px;font-size:1em;width:170px;"><select id="triggerCondition" style="background:#0d0d1a;border:1px solid #40c4ff55;color:#e0e0e0;padding:7px 12px;border-radius:6px;font-size:1em;"><option value="crosses_above">Crosses Above</option><option value="crosses_below">Crosses Below</option><option value="touches">Touches (±2pts)</option><option value="holds_above">Holds Above 5min</option><option value="holds_below">Holds Below 5min</option></select><button onclick="addTrigger()" style="background:#40c4ff;color:#0d0d1a;border:none;padding:7px 18px;border-radius:6px;font-size:1em;font-weight:700;cursor:pointer;">+ Add Alert</button></div><div id="triggerList" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;"></div>`;
+  container.insertBefore(panel,container.firstChild);
+  renderTriggerList();
+}
+function addTrigger(){
+  const level=parseFloat(document.getElementById('triggerLevel')?.value||0);
+  const cond=document.getElementById('triggerCondition')?.value||'crosses_above';
+  if(!level){if(typeof showToast==='function')showToast('Enter a valid ES level','warn');return;}
+  if(!state.triggers)state.triggers=[];
+  state.triggers.push({id:Date.now(),level,cond,fired:false,created:Date.now()});
+  saveToStorage();renderTriggerList();
+  if(typeof showToast==='function')showToast(`✅ Alert set: ${cond.replace(/_/g,' ')} ${level}`,'info');
+}
+function removeTrigger(id){
+  if(!state.triggers)return;
+  state.triggers=state.triggers.filter(t=>t.id!==id);
+  saveToStorage();renderTriggerList();
+}
+function renderTriggerList(){
+  const el=document.getElementById('triggerList');if(!el)return;
+  if(!state.triggers||state.triggers.length===0){el.innerHTML='<span style="color:#666;font-size:.92em;">No active triggers</span>';return;}
+  el.innerHTML=state.triggers.map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#0d0d1a;border:1px solid ${t.fired?'#00e67633':'#40c4ff22'};border-radius:6px;padding:6px 12px;font-size:.95em;"><span style="color:${t.fired?'#00e676':'#e0e0e0'};">${t.cond.replace(/_/g,' ')} <strong>${t.level}</strong>${t.fired?' ✅ FIRED':''}</span><button onclick="removeTrigger(${t.id})" style="background:none;border:none;color:#ff525288;cursor:pointer;font-size:1.1em;">✕</button></div>`).join('');
+}
+function checkTriggers(){
+  if(!state.triggers||!state.esPrice)return;
+  const price=parseFloat(state.esPrice),prev=parseFloat(state.prevEsPrice||price);
+  state.triggers.forEach(t=>{
+    if(t.fired)return;
+    let fired=false;
+    switch(t.cond){
+      case 'crosses_above':fired=prev<=t.level&&price>t.level;break;
+      case 'crosses_below':fired=prev>=t.level&&price<t.level;break;
+      case 'touches':fired=Math.abs(price-t.level)<=2;break;
+      default:fired=Math.abs(price-t.level)<=1;
+    }
+    if(fired){t.fired=true;if(typeof showToast==='function')showToast(`🔔 TRIGGER FIRED: ${t.cond.replace(/_/g,' ')} ${t.level}`,'alert','#ffab40');saveToStorage();renderTriggerList();}
+  });
+  state.prevEsPrice=price;
+}
+// ── ENHANCEMENT 7: Pregame Auto-Fire at 9:00 AM EST ──────────────────────────
+(function schedulePregame(){
+  function msUntilPregame(){
+    const now=new Date(),est=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const target=new Date(est);target.setHours(9,0,0,0);
+    if(est>=target)target.setDate(target.getDate()+1);
+    return target-est;
+  }
+  function firePregame(){
+    const est=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const day=est.getDay();if(day===0||day===6){schedulePregameTimer();return;}
+    if(typeof showToast==='function')showToast('🌅 PREGAME AUTO-FIRE: Fetching all layers...','info','#40c4ff');
+    if(typeof fetchAllData==='function')fetchAllData();
+    setTimeout(()=>{if(typeof generateUnifiedSignalAuto==='function')generateUnifiedSignalAuto();},5000);
+    schedulePregameTimer();
+  }
+  function schedulePregameTimer(){const ms=msUntilPregame();console.log(`[QuantEdge] Pregame in ${(ms/3600000).toFixed(1)}h`);setTimeout(firePregame,ms);}
+  schedulePregameTimer();
+})();
+// ── TOAST HELPER (safe no-op if already defined) ─────────────────────────────
+if(typeof showToast!=='function'){
+  function showToast(msg,type,color){
+    const t=document.createElement('div');
+    t.style.cssText=`position:fixed;bottom:${20+(document._toastCount||0)*56}px;right:20px;z-index:99999;background:#1a1a2e;border:1px solid ${color||'#40c4ff'};color:${color||'#40c4ff'};padding:12px 20px;border-radius:8px;font-size:1em;font-weight:600;max-width:380px;box-shadow:0 4px 20px #0008;`;
+    t.textContent=msg;document.body.appendChild(t);
+    document._toastCount=(document._toastCount||0)+1;
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>{t.remove();document._toastCount=Math.max(0,(document._toastCount||1)-1);},400);},5000);
+  }
+}
+
 // STORAGE
 function saveToStorage(){try{localStorage.setItem('qe_master_v1',JSON.stringify({trades:state.trades,snapshots:state.snapshots,lastBias:state.lastBias,lastConf:state.lastConf}));}catch(e){}}
 function loadFromStorage(){
@@ -1217,3 +1374,9 @@ function loadFromStorage(){
 </script>
 </body>
 </html>
+
+
+
+
+
+
