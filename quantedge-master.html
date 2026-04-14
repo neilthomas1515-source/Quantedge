@@ -843,7 +843,7 @@ async function fetchSPXLevels(){
 }
 
 // ECON CALENDAR
-async function fetchEconCalendar(){ await fetchEconomicCalendar(); return; const _unused=()=>{
+async function fetchEconCalendar(){ await fetchEconomicCalendar(); } async function _fetchEconCalendarLegacy(){
   const el=document.getElementById('econ-calendar');
   el.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:10px">Loading...</div>';
   try{
@@ -1457,6 +1457,7 @@ function loadFromStorage(){
 </script>
 </body>
 </html>
+
 
 
 
