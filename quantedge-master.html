@@ -843,7 +843,7 @@ async function fetchSPXLevels(){
 }
 
 // ECON CALENDAR
-async function fetchEconCalendar(){
+async function fetchEconCalendar(){ await fetchEconomicCalendar(); return; const _unused=()=>{
   const el=document.getElementById('econ-calendar');
   el.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:10px">Loading...</div>';
   try{
@@ -1406,7 +1406,7 @@ function renderEconCalendar(events){
   let card=document.getElementById('econCalendarCard');
   if(!card){
     const target=document.getElementById('macroTab')||document.querySelector('.tab-pane')||document.body;
-    card=document.createElement('div');card.id='econCalendarCard';
+    card=document.getElementById('econ-calendar')||document.createElement('div');card.id='econCalendarCard';
     card.style.cssText='background:#1a1a2e;border:1px solid #ffab4044;border-radius:10px;padding:18px 20px;margin:18px 0;';
     target.insertBefore(card,target.firstChild);
   }
@@ -1457,6 +1457,7 @@ function loadFromStorage(){
 </script>
 </body>
 </html>
+
 
 
 
