@@ -241,6 +241,7 @@ textarea{resize:vertical;min-height:60px;}
   <button class="tab-btn" onclick="switchTab('intraday')">&#9889; Intraday</button>
   <button class="tab-btn" onclick="switchTab('ai')">&#129504; AI Signal</button>
   <button class="tab-btn" onclick="switchTab('tradelog')">&#128203; Trade Log</button>
+  <button class="tab-btn" onclick="switchTab('liveflow')">&#9889; Live Flow</button>
 </div>
 
 <!-- ══ MACRO TAB ══ -->
@@ -1455,6 +1456,140 @@ function loadFromStorage(){
   }catch(e){}
 }
 </script>
+<!-- ══ LIVE FLOW TAB ══ -->
+<div id="tab-liveflow" class="tab-panel">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+    <div id="schwab-status-dot" style="width:9px;height:9px;border-radius:50%;background:var(--t3);flex-shrink:0;"></div>
+    <span id="schwab-status-label" style="font-family:var(--mono);font-size:12px;color:var(--t3);">Schwab server &#8212; not connected</span>
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-sm" onclick="fetchSchwabAll()">&#9889; REFRESH</button>
+    <button class="btn btn-ghost btn-sm" onclick="checkSchwabStatus()">CHECK STATUS</button>
+    <span id="schwab-last-update" style="font-family:var(--mono);font-size:11px;color:var(--t3);">--</span>
+  </div>
+  <div class="grid-3" style="margin-bottom:14px;">
+    <div class="panel"><div class="panel-title">ES Live Quote</div>
+      <div style="text-align:center;padding:10px 0;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:2px;margin-bottom:4px;">LAST PRICE</div>
+        <div id="es-live-price" style="font-family:var(--orb);font-size:38px;font-weight:900;color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,0.3);">---</div>
+        <div id="es-live-change" style="font-family:var(--mono);font-size:14px;margin-top:4px;color:var(--t3);">---</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">BID</div><div id="es-bid" style="font-family:var(--mono);font-size:14px;color:var(--red);">--</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">ASK</div><div id="es-ask" style="font-family:var(--mono);font-size:14px;color:var(--green);">--</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">OPEN</div><div id="es-open" style="font-family:var(--mono);font-size:13px;color:var(--t1);">--</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">CLOSE</div><div id="es-close" style="font-family:var(--mono);font-size:13px;color:var(--t1);">--</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">HIGH</div><div id="es-high" style="font-family:var(--mono);font-size:13px;color:var(--green);">--</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:6px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">LOW</div><div id="es-low" style="font-family:var(--mono);font-size:13px;color:var(--red);">--</div></div>
+      </div>
+    </div>
+    <div class="panel"><div class="panel-title">Current Positions</div><div id="schwab-positions-list"><div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:20px;">&#8212; no positions loaded &#8212;</div></div></div>
+    
+  </div>
+  <div class="panel">
+    <div class="panel-title inline-flex"><span>Today's Orders</span><div class="spacer"></div><span id="schwab-order-count" style="font-family:var(--mono);font-size:10px;color:var(--t3);"></span></div>
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">TIME</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">SYMBOL</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">SIDE</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">QTY</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">PRICE</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">STATUS</th>
+        <th style="background:var(--bg2);border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--t2);text-align:center;">TYPE</th>
+      </tr></thead>
+      <tbody id="schwab-orders-body"><tr><td colspan="7" style="border:1px solid var(--b1);color:var(--t3);padding:16px;text-align:center;font-family:var(--mono);font-size:11px;">No orders loaded</td></tr></tbody>
+    </table></div>
+  </div>
+  <div class="panel mt-12" style="background:rgba(0,212,255,0.02);border-color:rgba(0,212,255,0.15);">
+    <div class="panel-title">Server Info</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--t3);line-height:2;">Server: <span style="color:var(--cyan)">http://127.0.0.1:5000</span> &nbsp;&mdash;&nbsp; Start: <span style="color:var(--yellow)">python C:\Users\neilt\Downloads\schwab3.py</span><br>Token file: <span id="schwab-token-file" style="color:var(--t2);">--</span> &nbsp;&mdash;&nbsp; Age: <span id="schwab-token-age" style="color:var(--t2);">--</span>s &nbsp;&mdash;&nbsp; Expires: <span id="schwab-token-expires" style="color:var(--t2);">--</span>s</div>
+  </div>
+</div>
+<script>
+const SCHWAB_SERVER='http://127.0.0.1:5000';
+async function checkSchwabStatus(){
+  const dot=document.getElementById('schwab-status-dot'),label=document.getElementById('schwab-status-label');
+  try{
+    const r=await fetch(SCHWAB_SERVER+'/schwab/status',{signal:AbortSignal.timeout(3000)});
+    const d=await r.json();
+    const age=d.token_age_seconds||0,exp=d.token_expires_in_seconds||0;
+    dot.style.background=d.token_ok?'var(--green)':'var(--yellow)';
+    label.textContent='Schwab server running | token '+(d.token_ok?'OK':'expired')+' | age '+age+'s';
+    label.style.color=d.token_ok?'var(--green)':'var(--yellow)';
+    const tf=document.getElementById('schwab-token-file');if(tf)tf.textContent=d.file||'--';
+    const ta=document.getElementById('schwab-token-age');if(ta)ta.textContent=age;
+    const te=document.getElementById('schwab-token-expires');if(te){te.textContent=exp;te.style.color=exp<300?'var(--red)':exp<600?'var(--yellow)':'var(--green)';}
+    return d.token_ok;
+  }catch(e){
+    dot.style.background='var(--red)';
+    label.textContent='Schwab server offline - run: python C:\\Users\\neilt\\Downloads\\schwab3.py';
+    label.style.color='var(--red)';return false;
+  }
+}
+
+  }catch(e2){const lp=document.getElementById('es-live-price');if(lp){lp.textContent='ERR';lp.style.color='var(--red)';}return null;}
+}
+async function fetchSchwabPositions(){
+  try{
+    const r=await fetch(SCHWAB_SERVER+'/schwab/positions',{signal:AbortSignal.timeout(5000)});
+    const positions=await r.json();
+    if(positions.error){document.getElementById('schwab-positions-list').innerHTML='<div style="color:var(--red);padding:10px;font-family:var(--mono);font-size:11px;">Error: '+positions.error+'</div>';return;}
+    if(!positions.length){document.getElementById('schwab-positions-list').innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:20px;">\u2014 no open positions \u2014</div>';return;}
+    document.getElementById('schwab-positions-list').innerHTML=positions.map(p=>{
+      const sym=p.instrument?.symbol||'--',qty=p.longQuantity||p.shortQuantity||0;
+      const side=p.longQuantity>0?'LONG':'SHORT',avg=p.averagePrice||0;
+      const mktVal=p.marketValue||0,plDay=p.currentDayProfitLoss||0,plPct=p.currentDayProfitLossPercentage||0;
+      return'<div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:8px 10px;margin-bottom:6px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;"><span style="font-family:var(--cond);font-size:15px;font-weight:700;color:var(--t1);">'+sym+'</span><span style="font-family:var(--mono);font-size:11px;font-weight:600;color:'+(side==='LONG'?'var(--green)':'var(--red)')+';">'+side+' '+qty+'</span><span style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-left:auto;">Avg: $'+avg.toFixed(2)+'</span></div><div style="display:flex;gap:12px;"><span style="font-family:var(--mono);font-size:11px;color:var(--t2);">Mkt: $'+mktVal.toFixed(2)+'</span><span style="font-family:var(--mono);font-size:11px;color:'+(plDay>=0?'var(--green)':'var(--red)')+';">P&L: '+(plDay>=0?'+':'')+plDay.toFixed(2)+'</span></div></div>';
+    }).join('');
+  }catch(e){document.getElementById('schwab-positions-list').innerHTML='<div style="color:var(--red);padding:10px;font-family:var(--mono);font-size:11px;">'+e.message+'</div>';}
+}
+async function fetchSchwabOrders(){
+  try{
+    const r=await fetch(SCHWAB_SERVER+'/schwab/orders',{signal:AbortSignal.timeout(8000)});
+    const orders=await r.json();
+    if(orders.error){document.getElementById('schwab-orders-body').innerHTML='<tr><td colspan="7" style="border:1px solid var(--b1);color:var(--red);padding:10px;text-align:center;font-family:var(--mono);font-size:11px;">'+orders.error+'</td></tr>';return;}
+    const oc=document.getElementById('schwab-order-count');if(oc)oc.textContent=orders.length+' order'+(orders.length!==1?'s':'');
+    if(!orders.length){document.getElementById('schwab-orders-body').innerHTML='<tr><td colspan="7" style="border:1px solid var(--b1);color:var(--t3);padding:16px;text-align:center;font-family:var(--mono);font-size:11px;">No orders today</td></tr>';return;}
+    document.getElementById('schwab-orders-body').innerHTML=orders.map(o=>{
+      const leg=(o.orderLegCollection||[])[0]||{};
+      const sym=leg.instrument?.symbol||'--',side=leg.instruction||'--';
+      const qty=o.quantity||0,price=o.price||o.stopPrice||0;
+      const status=o.status||'--',type=o.orderType||'--';
+      const entered=o.enteredTime?new Date(o.enteredTime).toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):'--';
+      const sc=side.includes('BUY')?'var(--green)':side.includes('SELL')?'var(--red)':'var(--t2)';
+      const stc=status==='FILLED'?'var(--green)':status==='CANCELED'?'var(--red)':status==='WORKING'?'var(--yellow)':'var(--t2)';
+      return'<tr><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;text-align:center;">'+entered+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--cond);font-size:13px;font-weight:700;text-align:center;">'+sym+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;font-weight:600;text-align:center;color:'+sc+';">'+side+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;text-align:center;">'+qty+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;text-align:center;">'+(price?'$'+price.toFixed(2):'MKT')+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;font-weight:600;text-align:center;color:'+stc+';">'+status+'</td><td style="border:1px solid var(--b1);padding:5px 8px;font-family:var(--mono);font-size:11px;text-align:center;color:var(--t3);">'+type+'</td></tr>';
+    }).join('');
+  }catch(e){document.getElementById('schwab-orders-body').innerHTML='<tr><td colspan="7" style="border:1px solid var(--b1);color:var(--red);padding:10px;text-align:center;font-family:var(--mono);font-size:11px;">'+e.message+'</td></tr>';}
+}
+async function fetchSchwabAccounts(){
+  try{
+    const r=await fetch(SCHWAB_SERVER+'/schwab/accounts',{signal:AbortSignal.timeout(5000)});
+    const accounts=await r.json();
+    if(accounts.error){document.getElementById('schwab-accounts-list').innerHTML='<div style="color:var(--red);padding:10px;font-family:var(--mono);font-size:11px;">'+accounts.error+'</div>';return;}
+    if(!accounts.length){document.getElementById('schwab-accounts-list').innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--t3);text-align:center;padding:20px;">\u2014 no accounts \u2014</div>';return;}
+    document.getElementById('schwab-accounts-list').innerHTML=accounts.map(a=>{
+      const sa=a.securitiesAccount||{},bal=sa.currentBalances||{};
+      const acctNum=sa.accountNumber||'--',type=sa.type||'--';
+      const liq=a.aggregatedBalance?.currentLiquidationValue||bal.liquidationValue||0;
+      const bp=bal.buyingPower||bal.availableFunds||0;
+      const isDT=sa.isDayTrader?'&#9888; PDT':'';
+      return'<div style="background:var(--bg2);border:1px solid var(--b1);border-radius:2px;padding:8px 10px;margin-bottom:6px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cyan);">'+acctNum+'</span><span style="font-family:var(--mono);font-size:10px;color:var(--t3);background:var(--bg3);padding:2px 6px;border-radius:2px;">'+type+'</span><span style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-left:auto;">'+isDT+'</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"><div style="background:var(--bg3);border:1px solid var(--b1);border-radius:2px;padding:5px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">LIQUIDATION</div><div style="font-family:var(--mono);font-size:13px;color:var(--t1);">$'+liq.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div><div style="background:var(--bg3);border:1px solid var(--b1);border-radius:2px;padding:5px;text-align:center;"><div style="font-family:var(--mono);font-size:9px;color:var(--t3);">BUYING POWER</div><div style="font-family:var(--mono);font-size:13px;color:var(--green);">$'+bp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div></div></div>';
+    }).join('');
+  }catch(e){document.getElementById('schwab-accounts-list').innerHTML='<div style="color:var(--red);padding:10px;font-family:var(--mono);font-size:11px;">'+e.message+'</div>';}
+}
+async function fetchSchwabAll(){
+  const now=new Date().toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  document.getElementById('schwab-last-update').textContent='Fetching...';
+  await checkSchwabStatus();
+  await Promise.all([fetchSchwabQuote(),fetchSchwabPositions(),fetchSchwabOrders(),fetchSchwabAccounts()]);
+  document.getElementById('schwab-last-update').textContent='Updated: '+now+' EST';
+}
+</script>
+<script>
+
+</script>
+<script>async function fetchSchwabQuote(){try{const r=await fetch("https://finnhub.io/api/v1/quote?symbol=SPY&token=d75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90");const d=await r.json();const spy=d.c||0,spyH=d.h||0,spyL=d.l||0,spyO=d.o||0,spyPc=d.pc||0;const es=spy*10,esH=spyH*10,esL=spyL*10,esO=spyO*10,esPc=spyPc*10;const chg=es-esPc,chgPct=esPc?((chg/esPc)*100):0;const fmt=v=>v?v.toFixed(2):"--";const lp=document.getElementById("es-live-price");if(lp){lp.textContent=es.toFixed(2);lp.style.color=chg>=0?"var(--green)":"var(--red)";}const lc=document.getElementById("es-live-change");if(lc){lc.textContent="SPYx10 | "+(chg>=0?"+":"")+chg.toFixed(2)+" ("+(chgPct>=0?"+":"")+chgPct.toFixed(2)+"%)";lc.style.color=chg>=0?"var(--green)":"var(--red)";}const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=fmt(v);};set("es-open",esO);set("es-high",esH);set("es-low",esL);set("es-close",esPc);const ip=document.getElementById("id-price");if(ip&&!ip.value)ip.value=es.toFixed(2);return es;}catch(e){const lp=document.getElementById("es-live-price");if(lp){lp.textContent="ERR";lp.style.color="var(--red)";}return null;}}</script>
 </body>
 </html>
 
