@@ -1088,7 +1088,7 @@ Vol Profile: POC ${g('ai-poc')||'N/A'} | VAH ${g('ai-vah')||'N/A'} | VAL ${g('ai
 ES vs NQ: ${g('ai-es-nq')||'N/A'}
 
 LAYER 4 - LIVE POSITIONS (from Schwab):
-${getSchwabPositionsContext()}
+${typeof getSchwabPositionsContext!=="undefined"?getSchwabPositionsContext():"No positions loaded"}
 
 LAYER 5 - ECONOMIC CALENDAR:
 ${getEconCalendarContext()}
