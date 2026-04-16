@@ -51,7 +51,7 @@ body {
    TOPBAR
 ══════════════════════════════════════ */
 #topbar {
-  height: 48px;
+  height: 54px;
   background: var(--s1);
   border-bottom: 1px solid var(--b1);
   display: flex;
@@ -64,15 +64,15 @@ body {
 .logo {
   font-family: var(--sans);
   font-weight: 900;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--cyan);
   letter-spacing: -1px;
   margin-right: 8px;
   flex-shrink: 0;
 }
-.logo-v { color: var(--t3); font-weight: 400; font-size: 13px; }
+.logo-v { color: var(--t2); font-weight: 400; font-size: 14px; }
 
-.top-divider { width:1px; height:24px; background:var(--b1); margin:0 14px; flex-shrink:0; }
+.top-divider { width:1px; height:28px; background:var(--b2); margin:0 14px; flex-shrink:0; }
 
 /* live price strip */
 #price-strip {
@@ -106,18 +106,18 @@ body {
   text-align: right;
 }
 .clock-time {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--cyan);
   letter-spacing: 1px;
 }
 .clock-status {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 .clock-countdown {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--t2);
   letter-spacing: 0.5px;
   margin-top: 1px;
@@ -132,9 +132,9 @@ body {
 ══════════════════════════════════════ */
 #body {
   display: grid;
-  grid-template-columns: 375px 1fr;
+  grid-template-columns: 480px 1fr;
   grid-template-rows: 1fr auto;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 54px);
   overflow: hidden;
 }
 #left  { grid-column: 1; grid-row: 1; }
@@ -211,18 +211,32 @@ body {
 .layer-btn.on.l-fibs     { background: rgba(255,170,0,0.15); border-color: var(--amber2);  color: var(--amber2); }
 
 .viz-collapse-btn {
-  margin-left: auto;
-  padding: 2px 8px;
-  background: transparent;
-  border: 1px solid var(--b2);
+  margin-left: 4px;
+  padding: 3px 10px;
+  background: var(--s3);
+  border: 1px solid var(--b3);
   border-radius: 3px;
-  color: var(--t3);
-  font-size: 11px;
+  color: var(--t1);
+  font-size: 12px;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s;
+  font-weight: 600;
 }
-.viz-collapse-btn:hover { color: var(--t1); }
+.viz-collapse-btn:hover { color: var(--white); border-color: var(--cyan2); background: var(--b2); }
+#viz-fullscreen-btn {
+  margin-left: 0;
+  color: var(--cyan);
+  border-color: var(--cyan2);
+  background: rgba(0,212,255,0.08);
+  font-size: 14px;
+}
+#viz-fullscreen-btn:hover { background: rgba(0,212,255,0.18); color: var(--white); }
+#viz-panel.fullscreen #viz-fullscreen-btn {
+  color: var(--red);
+  border-color: var(--red2);
+  background: rgba(255,51,85,0.1);
+}
 
 /* price status bar */
 #viz-status {
@@ -630,11 +644,11 @@ body {
 /* ── SESSION P&L STRIP ── */
 #pnl-strip { display:flex; gap:16px; align-items:center; flex-shrink:0; }
 .pnl-item { display:flex; flex-direction:column; align-items:center; }
-.pnl-label { font-size:8px; letter-spacing:1.5px; color:var(--t3); text-transform:uppercase; }
-.pnl-val { font-size:14px; font-weight:700; }
+.pnl-label { font-size:9px; letter-spacing:1.5px; color:var(--t2); text-transform:uppercase; font-weight:600; }
+.pnl-val { font-size:16px; font-weight:700; }
 .pnl-val.pos { color:var(--green); }
 .pnl-val.neg { color:var(--red); }
-.pnl-val.neutral { color:var(--t2); }
+.pnl-val.neutral { color:var(--t1); }
 
 /* ── SIGNAL HISTORY BAR ── */
 #signal-history-bar {
@@ -963,11 +977,159 @@ table.log-table {
 #signal-area {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 16px 16px 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
+
+/* pre-signal dashboard */
+#presignal-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.psd-row {
+  display: grid;
+  gap: 10px;
+}
+.psd-row.cols2 { grid-template-columns: 1fr 1fr; }
+.psd-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.psd-row.cols4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.psd-card {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 5px;
+  padding: 12px 14px;
+}
+.psd-card-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t2);
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-family: var(--sans);
+}
+.psd-card-value {
+  font-size: 22px;
+  font-weight: 900;
+  font-family: var(--sans);
+  line-height: 1;
+  color: var(--white);
+}
+.psd-card-sub {
+  font-size: 11px;
+  color: var(--t2);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* readiness items */
+.readiness-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.readiness-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: 3px;
+  background: var(--s3);
+  border: 1px solid var(--b1);
+  font-size: 11px;
+  color: var(--t2);
+  transition: all 0.2s;
+}
+.readiness-item.filled {
+  background: rgba(0,255,136,0.05);
+  border-color: rgba(0,255,136,0.2);
+  color: var(--t1);
+}
+.readiness-item.missing {
+  opacity: 0.5;
+}
+.readiness-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--t4);
+  border: 1px solid var(--b3);
+}
+.readiness-item.filled .readiness-dot {
+  background: var(--green);
+  border-color: var(--green2);
+  box-shadow: 0 0 5px rgba(0,255,136,0.5);
+}
+
+/* session period card */
+.period-card {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 5px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.period-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.6)} }
+.period-info { flex: 1; }
+.period-name {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+}
+.period-note { font-size: 11px; color: var(--t2); margin-top: 3px; line-height: 1.4; }
+.period-countdown { font-size: 20px; font-weight: 700; font-family: var(--mono); color: var(--cyan); flex-shrink: 0; }
+
+/* gap display card */
+.gap-card {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 5px;
+  padding: 12px 14px;
+}
+.gap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.gap-row:last-child { margin-bottom: 0; }
+.gap-key { font-size: 10px; color: var(--t2); letter-spacing: 1px; text-transform: uppercase; }
+.gap-val-lg {
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 900;
+}
+.gap-val-lg.up { color: var(--green); }
+.gap-val-lg.dn { color: var(--red); }
+.gap-val-lg.flat { color: var(--t2); }
+.gap-fill-bar {
+  height: 4px;
+  background: var(--b2);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.gap-fill-progress {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--amber2), var(--amber));
+  transition: width 0.5s ease;
+}
+.gap-fill-progress.filled { background: linear-gradient(to right, var(--green2), var(--green)); }
 
 /* structured signal cards */
 .signal-grid {
@@ -1617,11 +1779,79 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- signal output area -->
   <div id="signal-area">
-    <div class="signal-empty" id="signal-empty">
-      <div class="empty-icon">◈</div>
-      <div class="empty-title">No Signal Generated</div>
-      <div class="empty-sub">Fill in your inputs on the left — session levels, internals, GEX context — then hit Generate Signal.</div>
-      <div class="empty-hint">Press <kbd>Ctrl+Enter</kbd> to generate from anywhere</div>
+    <div id="presignal-dash">
+
+      <!-- Session Period -->
+      <div class="period-card" id="psd-period">
+        <div class="period-dot" id="psd-period-dot" style="background:var(--cyan)"></div>
+        <div class="period-info">
+          <div class="period-name" id="psd-period-name">Loading…</div>
+          <div class="period-note" id="psd-period-note"></div>
+        </div>
+        <div class="period-countdown" id="psd-countdown">—</div>
+      </div>
+
+      <!-- Gap + RS row -->
+      <div class="psd-row cols2">
+        <div class="gap-card">
+          <div class="psd-card-label">Gap Analysis</div>
+          <div class="gap-row">
+            <span class="gap-key">Direction</span>
+            <span class="gap-val-lg" id="psd-gap-dir">—</span>
+          </div>
+          <div class="gap-row">
+            <span class="gap-key">Size</span>
+            <span style="font-size:14px;font-weight:700;color:var(--white)" id="psd-gap-size">—</span>
+          </div>
+          <div class="gap-row">
+            <span class="gap-key">Fill @</span>
+            <span style="font-size:13px;color:var(--t1)" id="psd-gap-fill">—</span>
+          </div>
+          <div class="gap-fill-bar">
+            <div class="gap-fill-progress" id="psd-gap-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="psd-card">
+          <div class="psd-card-label">Live Prices</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:10px;color:var(--t2)">ES~</span>
+              <span style="font-size:20px;font-weight:900;font-family:var(--sans);color:var(--white)" id="psd-es">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:10px;color:var(--t2)">VIX</span>
+              <span style="font-size:16px;font-weight:700;color:var(--amber)" id="psd-vix">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:10px;color:var(--t2)">RS vs SPY</span>
+              <span style="font-size:13px;font-weight:600;color:var(--t1)" id="psd-rs">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Readiness -->
+      <div class="psd-card">
+        <div class="psd-card-label">Data Readiness &nbsp;<span id="psd-ready-score" style="color:var(--cyan);font-size:12px"></span></div>
+        <div class="readiness-grid" id="psd-readiness-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Key Levels snapshot -->
+      <div class="psd-card">
+        <div class="psd-card-label">Key Levels Loaded</div>
+        <div class="psd-row cols4" id="psd-levels-grid" style="gap:6px">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Generate prompt -->
+      <div style="text-align:center;padding:10px 0 4px">
+        <div style="font-size:12px;color:var(--t3)">Ready to generate? Press <kbd style="background:var(--s3);border:1px solid var(--b3);border-radius:3px;padding:1px 6px;color:var(--cyan);font-family:var(--mono)">Ctrl+Enter</kbd> or click Generate Signal</div>
+      </div>
+
     </div>
   </div>
 
@@ -1640,6 +1870,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <button class="layer-btn l-fibs"         id="lb-fibs"      onclick="toggleLayer('fibs')">Fibs</button>
     <div class="viz-divider"></div>
     <span style="font-size:9px;color:var(--t4)">Signal levels always visible</span>
+    <div style="flex:1"></div>
     <button class="viz-collapse-btn" id="viz-collapse-btn" onclick="toggleVizPanel()">▼ Hide</button>
     <button class="viz-collapse-btn" id="viz-fullscreen-btn" onclick="toggleVizFullscreen()" title="Fullscreen map">⛶</button>
   </div>
@@ -2423,12 +2654,14 @@ async function generateSignal() {
   msgContent.push({ type:'text', text: prompt });
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // Route through Cloudflare Worker to avoid CORS on GitHub Pages
+    const res = await fetch(`${CLOUDFLARE_WORKER}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        source: 'anthropic',
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        max_tokens: 1500,
         messages: [{ role: 'user', content: msgContent }]
       })
     });
@@ -2446,7 +2679,6 @@ async function generateSignal() {
     lastConfidence = parsed.confidence;
     addToHistory(parsed);
     renderSignal(parsed);
-    extractSignalLevels(parsed);
     extractSignalLevels(parsed);
     document.getElementById('last-gen-time').textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' }) + ' EST';
 
@@ -3265,6 +3497,132 @@ window.addEventListener('resize', () => { if (!vizCollapsed) drawViz(); });
 
 
 // ══════════════════════════════════════════════════
+// PRE-SIGNAL DASHBOARD
+// ══════════════════════════════════════════════════
+const READINESS_ITEMS = [
+  { id: 'gex-regime',    label: 'GEX Regime' },
+  { id: 'vix-level',     label: 'VIX Level' },
+  { id: 'tick',          label: '$TICK' },
+  { id: 'vwap',          label: 'VWAP' },
+  { id: 'vah',           label: 'Vol Profile' },
+  { id: 'morning-thesis',label: 'Thesis' },
+  { id: 'asia-hi',       label: 'Asia Levels' },
+  { id: 'lon-hi',        label: 'London Levels' },
+  { id: 'on-hi',         label: 'O/N Range' },
+  { id: 'bookmap-notes', label: 'Order Flow' },
+];
+
+function updatePresignalDash() {
+  const dash = document.getElementById('presignal-dash');
+  if (!dash || dash.style.display === 'none') return;
+
+  const pad = n => String(n).padStart(2,'0');
+  const est = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const h = est.getHours(), m = est.getMinutes(), s = est.getSeconds();
+  const totalSec = h*3600 + m*60 + s;
+
+  // Session period
+  const sp = getSessionPeriod();
+  const periodColors = { open:'#00ff88', pre:'#ffaa00', lunch:'#cc8800', power:'#00ff88', close:'#ff3355', after:'#3a5568' };
+  const col = periodColors[sp.cls] || 'var(--cyan)';
+  const dotEl  = document.getElementById('psd-period-dot');
+  const nameEl = document.getElementById('psd-period-name');
+  const noteEl = document.getElementById('psd-period-note');
+  if (dotEl)  dotEl.style.background = col;
+  if (nameEl) { nameEl.textContent = sp.label; nameEl.style.color = col; }
+  if (noteEl) noteEl.textContent = sp.note || '';
+
+  // Countdown
+  const transitions = [570,585,630,690,750,810,870,900,930].map(t=>t*60);
+  const nextT = transitions.find(t => t > totalSec);
+  const cdEl = document.getElementById('psd-countdown');
+  if (cdEl && nextT) {
+    const left = nextT - totalSec;
+    cdEl.textContent = `${Math.floor(left/60)}:${pad(left%60)}`;
+    cdEl.style.color = left < 300 ? 'var(--amber)' : 'var(--cyan)';
+  } else if (cdEl) { cdEl.textContent = ''; }
+
+  // Gap
+  const gap = (dayLevels.prevClose && dayLevels.todayOpen) ? dayLevels.todayOpen - dayLevels.prevClose : null;
+  const es  = priceData['ES'];
+  const dirEl  = document.getElementById('psd-gap-dir');
+  const sizeEl = document.getElementById('psd-gap-size');
+  const fillEl = document.getElementById('psd-gap-fill');
+  const barEl  = document.getElementById('psd-gap-bar');
+  if (gap !== null) {
+    if (dirEl)  { dirEl.textContent = gap > 1 ? 'Gap Up ▲' : gap < -1 ? 'Gap Down ▼' : 'Flat →'; dirEl.className = `gap-val-lg ${gap>1?'up':gap<-1?'dn':'flat'}`; }
+    if (sizeEl) sizeEl.textContent = (gap>=0?'+':'') + gap.toFixed(2) + ' pts';
+    if (fillEl) fillEl.textContent = dayLevels.prevClose?.toFixed(2) || '—';
+    const filled = es && (gap > 0 ? es <= dayLevels.prevClose : gap < 0 ? es >= dayLevels.prevClose : false);
+    if (barEl) {
+      const pct = filled ? 100 : es && gap ? Math.min(100, Math.abs((es - dayLevels.todayOpen) / gap) * 100) : 0;
+      barEl.style.width = pct.toFixed(0) + '%';
+      barEl.className = 'gap-fill-progress' + (filled ? ' filled' : '');
+    }
+  }
+
+  // Live prices
+  const esEl  = document.getElementById('psd-es');
+  const vixEl = document.getElementById('psd-vix');
+  const rsEl  = document.getElementById('psd-rs');
+  if (esEl  && priceData['ES'])  esEl.textContent  = priceData['ES'].toFixed(2);
+  if (vixEl && priceData['VIX']) {
+    vixEl.textContent = priceData['VIX'].toFixed(2);
+    vixEl.style.color = priceData['VIX'] > 20 ? 'var(--red)' : priceData['VIX'] > 15 ? 'var(--amber)' : 'var(--green)';
+  }
+  if (rsEl) {
+    const diff = (priceData['ES']||0) - (priceData['SPY']||0)*10;
+    rsEl.textContent = Math.abs(diff) < 2 ? 'Neutral' : diff > 0 ? `Leading +${diff.toFixed(1)}` : `Lagging ${diff.toFixed(1)}`;
+    rsEl.style.color = Math.abs(diff) < 2 ? 'var(--t2)' : diff > 0 ? 'var(--green)' : 'var(--red)';
+  }
+
+  // Readiness
+  const rGrid = document.getElementById('psd-readiness-grid');
+  const rScore = document.getElementById('psd-ready-score');
+  if (rGrid) {
+    let filled = 0;
+    rGrid.innerHTML = READINESS_ITEMS.map(item => {
+      const val = document.getElementById(item.id)?.value?.trim();
+      const ok  = item.id === 'gex-regime' ? !!(val || gexHistory.length) : !!val;
+      if (ok) filled++;
+      return `<div class="readiness-item ${ok?'filled':'missing'}"><div class="readiness-dot"></div><span>${item.label}</span></div>`;
+    }).join('');
+    if (rScore) { rScore.textContent = `${filled}/${READINESS_ITEMS.length}`; rScore.style.color = filled>=7?'var(--green)':filled>=4?'var(--amber)':'var(--red)'; }
+  }
+
+  // Key levels
+  const lGrid = document.getElementById('psd-levels-grid');
+  if (lGrid) {
+    const gv = id => { const v=parseFloat(document.getElementById(id)?.value); return isNaN(v)?null:v; };
+    const levs = [
+      {label:'Prev C', val:dayLevels.prevClose},
+      {label:'Open',   val:dayLevels.todayOpen},
+      {label:'PDH',    val:dayLevels.pdh},
+      {label:'PDL',    val:dayLevels.pdl},
+      {label:'Wk Hi',  val:dayLevels.wkHigh},
+      {label:'Wk Lo',  val:dayLevels.wkLow},
+      {label:'VWAP',   val:gv('vwap')},
+      {label:'POC',    val:gv('poc')},
+    ];
+    lGrid.innerHTML = levs.map(l=>`
+      <div style="background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:5px 6px;text-align:center">
+        <div style="font-size:8px;letter-spacing:1px;color:var(--t2);text-transform:uppercase;font-weight:600;margin-bottom:2px">${l.label}</div>
+        <div style="font-size:13px;font-weight:700;color:${l.val?'var(--cyan)':'var(--t4)'};font-family:var(--mono)">${l.val?l.val.toFixed(2):'—'}</div>
+      </div>`).join('');
+  }
+}
+
+setInterval(updatePresignalDash, 5000);
+
+// Hide dash when signal renders
+const _origRenderSignalPSD = renderSignal;
+renderSignal = function(s) {
+  const dash = document.getElementById('presignal-dash');
+  if (dash) dash.style.display = 'none';
+  _origRenderSignalPSD(s);
+};
+
+// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 document.getElementById('quota-count').textContent = quotaUsed;
@@ -3275,6 +3633,7 @@ renderGEXHistory();
 fetchDayLevels();
 connectWebSocket();
 startVizLoop();
+updatePresignalDash();
 setInterval(() => {
   const sp = getSessionPeriod();
   const pb = document.getElementById('viz-period-badge');
