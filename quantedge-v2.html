@@ -23,10 +23,10 @@
   --amber:    #ffaa00;
   --amber2:   #cc8800;
   --white:    #e8f0f8;
-  --t1:       #b0c8e0;
-  --t2:       #6a8ea8;
-  --t3:       #3a5568;
-  --t4:       #253545;
+  --t1:       #d0e4f4;
+  --t2:       #8aaec8;
+  --t3:       #4e6e88;
+  --t4:       #2e4555;
   --mono:     'IBM Plex Mono', monospace;
   --sans:     'Barlow', sans-serif;
 }
@@ -38,7 +38,7 @@ body {
   background: var(--bg);
   color: var(--t1);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -83,20 +83,21 @@ body {
 }
 .px-item { display:flex; align-items:baseline; gap:5px; }
 .px-sym {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.5px;
-  color: var(--t3);
+  color: var(--t2);
   text-transform: uppercase;
+  font-weight: 600;
 }
 .px-val {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--white);
   transition: color 0.3s;
-  min-width: 60px;
+  min-width: 62px;
 }
-.px-val.up { color: var(--green); }
-.px-val.dn { color: var(--red); }
+.px-val.up { color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.4); }
+.px-val.dn { color: var(--red);   text-shadow: 0 0 8px rgba(255,51,85,0.4); }
 .px-chg { font-size: 10px; color: var(--t3); }
 
 /* clock */
@@ -114,6 +115,12 @@ body {
   font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+.clock-countdown {
+  font-size: 9px;
+  color: var(--t2);
+  letter-spacing: 0.5px;
+  margin-top: 1px;
 }
 .status-open  { color: var(--green); }
 .status-pre   { color: var(--amber); }
@@ -147,6 +154,16 @@ body {
   overflow: hidden;
 }
 #viz-panel.collapsed { height: 32px; }
+#viz-panel.fullscreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  grid-column: unset;
+  grid-row: unset;
+  border-top: none;
+}
 
 #viz-toolbar {
   display: flex;
@@ -314,26 +331,35 @@ body {
 
 .sect {
   border-bottom: 1px solid var(--b1);
-  padding: 11px 13px;
+  padding: 10px 13px;
   flex-shrink: 0;
 }
 
 .sect-hd {
   font-family: var(--sans);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--cyan);
   margin-bottom: 9px;
   display: flex;
   align-items: center;
   gap: 6px;
+  text-shadow: 0 0 12px rgba(0,212,255,0.4);
 }
+.sect-hd.amber { color: var(--amber); text-shadow: 0 0 12px rgba(255,170,0,0.4); }
+.sect-hd.amber .hd-line { background: linear-gradient(to right, var(--amber2), transparent); }
+.sect-hd.green  { color: var(--green); text-shadow: 0 0 12px rgba(0,255,136,0.3); }
+.sect-hd.green .hd-line { background: linear-gradient(to right, var(--green2), transparent); }
+.sect-hd.purple { color: #a78bfa; text-shadow: 0 0 12px rgba(167,139,250,0.3); }
+.sect-hd.purple .hd-line { background: linear-gradient(to right, #7c3aed, transparent); }
+.sect-hd.white  { color: var(--white); text-shadow: none; }
+.sect-hd.white .hd-line { background: linear-gradient(to right, var(--b3), transparent); }
 .sect-hd .hd-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(to right, var(--b2), transparent);
+  background: linear-gradient(to right, var(--b3), transparent);
 }
 
 /* ── GEX UPLOAD ── */
@@ -418,20 +444,21 @@ body {
 }
 .auto-level-item {
   background: var(--s2);
-  border: 1px solid var(--b1);
+  border: 1px solid var(--b2);
   border-radius: 3px;
   padding: 5px 6px;
   text-align: center;
 }
 .auto-level-label {
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 1px;
-  color: var(--t3);
+  color: var(--t2);
   text-transform: uppercase;
   margin-bottom: 2px;
+  font-weight: 600;
 }
 .auto-level-val {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--cyan);
   font-family: var(--mono);
@@ -439,7 +466,7 @@ body {
 .auto-level-val.stale { color: var(--t3); }
 .auto-levels-note {
   font-size: 9px;
-  color: var(--t4);
+  color: var(--t3);
   text-align: right;
   margin-bottom: 2px;
 }
@@ -483,18 +510,19 @@ body {
   gap: 3px;
 }
 .field label {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1px;
-  color: var(--t3);
+  color: var(--t2);
   text-transform: uppercase;
+  font-weight: 600;
 }
 .field input, .field select {
   background: var(--s2);
-  border: 1px solid var(--b1);
+  border: 1px solid var(--b2);
   border-radius: 3px;
   color: var(--white);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
   padding: 5px 7px;
   width: 100%;
   transition: border-color 0.15s;
@@ -896,19 +924,19 @@ table.log-table {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 14px;
+  padding: 6px 14px;
   border-bottom: 1px solid var(--b1);
   background: var(--s1);
   flex-shrink: 0;
 }
 #btn-generate {
-  padding: 8px 20px;
+  padding: 5px 14px;
   background: linear-gradient(135deg, var(--cyan2), #006699);
   border: none;
   border-radius: 4px;
   color: var(--white);
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -949,137 +977,123 @@ table.log-table {
 }
 .sig-card {
   background: var(--s2);
-  border: 1px solid var(--b1);
+  border: 1px solid var(--b2);
   border-radius: 5px;
-  padding: 12px 13px;
+  padding: 14px 14px;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.2s;
 }
 .sig-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
 }
-.sig-card.bull::before { background: var(--green); }
-.sig-card.bear::before { background: var(--red); }
-.sig-card.neutral::before { background: var(--amber); }
-.sig-card.info::before { background: var(--cyan2); }
+.sig-card.bull { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.03); }
+.sig-card.bear { border-color: rgba(255,51,85,0.3); background: rgba(255,51,85,0.03); }
+.sig-card.neutral { border-color: rgba(255,170,0,0.3); background: rgba(255,170,0,0.03); }
+.sig-card.bull::before { background: linear-gradient(to right, var(--green), transparent); }
+.sig-card.bear::before { background: linear-gradient(to right, var(--red), transparent); }
+.sig-card.neutral::before { background: linear-gradient(to right, var(--amber), transparent); }
+.sig-card.info::before { background: linear-gradient(to right, var(--cyan2), transparent); }
 
 .sig-card-label {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--t3);
-  margin-bottom: 6px;
+  color: var(--t2);
+  margin-bottom: 7px;
+  font-weight: 600;
 }
 .sig-card-value {
   font-family: var(--sans);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
   letter-spacing: -0.5px;
   line-height: 1;
 }
-.sig-card-value.bull { color: var(--green); }
-.sig-card-value.bear { color: var(--red); }
-.sig-card-value.neutral { color: var(--amber); }
-.sig-card-value.info { color: var(--cyan); }
+.sig-card-value.bull { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.5); }
+.sig-card-value.bear { color: var(--red); text-shadow: 0 0 20px rgba(255,51,85,0.5); }
+.sig-card-value.neutral { color: var(--amber); text-shadow: 0 0 20px rgba(255,170,0,0.4); }
+.sig-card-value.info { color: var(--cyan); text-shadow: 0 0 16px rgba(0,212,255,0.4); }
 .sig-card-sub {
-  font-size: 10px;
-  color: var(--t3);
-  margin-top: 4px;
+  font-size: 11px;
+  color: var(--t2);
+  margin-top: 5px;
 }
 
 /* confidence bar */
-.conf-bar-wrap {
-  margin-top: 6px;
-}
+.conf-bar-wrap { margin-top: 8px; }
 .conf-bar-bg {
-  height: 4px;
-  background: var(--b1);
-  border-radius: 2px;
+  height: 6px;
+  background: var(--b2);
+  border-radius: 3px;
   overflow: hidden;
 }
 .conf-bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
   background: linear-gradient(to right, var(--cyan2), var(--cyan));
+  box-shadow: 0 0 8px rgba(0,212,255,0.4);
 }
-.conf-bar-fill.high { background: linear-gradient(to right, var(--green2), var(--green)); }
-.conf-bar-fill.mid { background: linear-gradient(to right, var(--amber2), var(--amber)); }
-.conf-bar-fill.low { background: linear-gradient(to right, var(--red2), var(--red)); }
+.conf-bar-fill.high { background: linear-gradient(to right, var(--green2), var(--green)); box-shadow: 0 0 10px rgba(0,255,136,0.4); }
+.conf-bar-fill.mid  { background: linear-gradient(to right, var(--amber2), var(--amber)); box-shadow: 0 0 8px rgba(255,170,0,0.4); }
+.conf-bar-fill.low  { background: linear-gradient(to right, var(--red2), var(--red));     box-shadow: 0 0 8px rgba(255,51,85,0.4); }
 
 /* wide signal cards */
-.signal-grid-wide {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+.signal-grid-wide { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .sig-card-wide {
   background: var(--s2);
-  border: 1px solid var(--b1);
+  border: 1px solid var(--b2);
   border-radius: 5px;
-  padding: 12px 13px;
+  padding: 12px 14px;
 }
 .sig-card-wide .sig-card-label {
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--t3);
-  margin-bottom: 6px;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--t2); margin-bottom: 7px; font-weight: 600;
 }
-.sig-card-wide .content {
-  font-size: 13px;
-  color: var(--t1);
-  line-height: 1.6;
-}
+.sig-card-wide .content { font-size: 14px; color: var(--t1); line-height: 1.6; }
 .sig-card-wide .content strong { color: var(--white); }
 
 /* full-width narrative */
 .sig-narrative {
   background: var(--s2);
-  border: 1px solid var(--b1);
+  border: 1px solid var(--b2);
   border-left: 3px solid var(--cyan2);
   border-radius: 5px;
-  padding: 13px 15px;
+  padding: 14px 16px;
 }
 .sig-narrative-label {
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--t3);
-  margin-bottom: 8px;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--t2); margin-bottom: 10px; font-weight: 600;
 }
-.sig-narrative-text {
-  font-size: 13px;
-  color: var(--t1);
-  line-height: 1.8;
-}
-.sig-narrative-text p { margin-bottom: 6px; }
+.sig-narrative-text { font-size: 14px; color: var(--t1); line-height: 1.9; }
+.sig-narrative-text p { margin-bottom: 8px; }
 .sig-narrative-text p:last-child { margin-bottom: 0; }
 
 /* empty state */
 .signal-empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--t4);
+  flex: 1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:14px;
 }
-.signal-empty .empty-icon {
-  font-size: 40px;
-  opacity: 0.3;
-}
+.signal-empty .empty-icon { font-size: 48px; opacity: 0.15; color: var(--cyan); }
 .signal-empty .empty-title {
-  font-family: var(--sans);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--t3);
+  font-family: var(--sans); font-size: 18px; font-weight: 700; color: var(--t2);
 }
-.signal-empty .empty-sub { font-size: 11px; color: var(--t4); text-align: center; max-width: 300px; line-height: 1.6; }
+.signal-empty .empty-sub {
+  font-size: 13px; color: var(--t3); text-align:center; max-width:340px; line-height:1.7;
+}
+.signal-empty .empty-hint {
+  display: flex; gap: 8px; align-items: center;
+  padding: 8px 16px; background: var(--s2); border: 1px solid var(--b2);
+  border-radius: 4px; font-size: 12px; color: var(--t2);
+}
+.signal-empty .empty-hint kbd {
+  background: var(--s3); border: 1px solid var(--b3); border-radius: 3px;
+  padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--cyan);
+}
 
 /* error state */
 .signal-error {
@@ -1172,6 +1186,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   <div id="clock-area">
     <div class="clock-time" id="clock-time">--:--:--</div>
     <div class="clock-status" id="clock-status">— EST</div>
+    <div class="clock-countdown" id="clock-countdown"></div>
   </div>
 </div>
 
@@ -1214,7 +1229,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- SESSION LEVELS -->
   <div class="sect">
-    <div class="sect-hd">Session Levels
+    <div class="sect-hd amber">Session Levels
       <button class="btn-cal-refresh" id="btn-levels-refresh" onclick="fetchDayLevels()" title="Refresh from Finnhub" style="margin-left:4px;font-size:9px;padding:2px 7px">⟳ Refresh</button>
       <div class="hd-line"></div>
     </div>
@@ -1270,7 +1285,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- VOLUME PROFILE -->
   <div class="sect">
-    <div class="sect-hd">Volume Profile <div class="hd-line"></div></div>
+    <div class="sect-hd amber">Volume Profile <div class="hd-line"></div></div>
     <div class="input-grid">
       <div class="field"><label>VAH</label><input type="number" id="vah" placeholder="—" step="0.25"></div>
       <div class="field"><label>VAL</label><input type="number" id="val" placeholder="—" step="0.25"></div>
@@ -1285,7 +1300,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- MARKET INTERNALS -->
   <div class="sect">
-    <div class="sect-hd">Market Internals <div class="hd-line"></div></div>
+    <div class="sect-hd green">Market Internals <div class="hd-line"></div></div>
     <div class="input-grid">
       <div class="field">
         <label>$TICK</label>
@@ -1400,7 +1415,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- MORNING BIAS -->
   <div class="sect">
-    <div class="sect-hd">Morning Bias <div class="hd-line"></div></div>
+    <div class="sect-hd purple">Morning Bias <div class="hd-line"></div></div>
     <!-- Gap analysis — auto-populated when day levels load -->
     <div id="gap-display" class="gap-display" style="display:none">
       <div class="gap-item">
@@ -1436,7 +1451,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- ECON CALENDAR -->
   <div class="sect">
-    <div class="sect-hd">Econ Calendar
+    <div class="sect-hd purple">Econ Calendar
       <button class="btn-cal-refresh" id="btn-cal-refresh" onclick="fetchEconCalendar()" style="margin-left:4px;font-size:9px;padding:2px 7px">⟳ Load</button>
       <div class="hd-line"></div>
     </div>
@@ -1447,7 +1462,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- BOOKMAP / ORDER FLOW -->
   <div class="sect">
-    <div class="sect-hd">Order Flow Notes <div class="hd-line"></div></div>
+    <div class="sect-hd green">Order Flow Notes <div class="hd-line"></div></div>
     <div class="field">
       <label>Bookmap / Tape Observations</label>
       <textarea id="bookmap-notes" placeholder="e.g. Heavy absorption at 5590, iceberg seller at 5610, cumulative delta diverging bullish..." rows="3"></textarea>
@@ -1456,7 +1471,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- FIBONACCI LEVELS -->
   <div class="sect">
-    <div class="sect-hd">Fibonacci Levels <div class="hd-line"></div></div>
+    <div class="sect-hd amber">Fibonacci Levels <div class="hd-line"></div></div>
     <div class="input-grid" style="margin-bottom:6px">
       <div class="field"><label>Fib High (Anchor)</label><input type="number" id="fib-hi" placeholder="—" step="0.25" oninput="calcFibs()"></div>
       <div class="field"><label>Fib Low (Anchor)</label><input type="number" id="fib-lo" placeholder="—" step="0.25" oninput="calcFibs()"></div>
@@ -1474,7 +1489,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- INDICATOR SNAPSHOTS -->
   <div class="sect">
-    <div class="sect-hd">Indicator Snapshots <div class="hd-line"></div></div>
+    <div class="sect-hd white">Indicator Snapshots <div class="hd-line"></div></div>
     <div class="snap-note">Paste any indicator screenshot into a slot. AI reads all slots simultaneously.</div>
     <div id="snap-grid" class="snap-grid">
       <!-- Slots rendered by JS -->
@@ -1484,7 +1499,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- SCHWAB POSITIONS -->
   <div class="sect">
-    <div class="sect-hd">Live Positions <div class="hd-line"></div></div>
+    <div class="sect-hd green">Live Positions <div class="hd-line"></div></div>
     <div class="schwab-row">
       <div class="schwab-dot" id="schwab-dot"></div>
       <span class="schwab-label" id="schwab-label">Schwab offline</span>
@@ -1506,7 +1521,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   <!-- TRADE LOG -->
   <div class="sect" style="flex:1">
-    <div class="sect-hd">Trade Log <div class="hd-line"></div></div>
+    <div class="sect-hd white">Trade Log <div class="hd-line"></div></div>
     <div class="log-input-row">
       <input id="log-side" placeholder="L/S">
       <input id="log-entry" type="number" placeholder="Entry" step="0.25">
@@ -1605,7 +1620,8 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="signal-empty" id="signal-empty">
       <div class="empty-icon">◈</div>
       <div class="empty-title">No Signal Generated</div>
-      <div class="empty-sub">Fill in your inputs on the left — session levels, internals, GEX context — then click Generate Signal.</div>
+      <div class="empty-sub">Fill in your inputs on the left — session levels, internals, GEX context — then hit Generate Signal.</div>
+      <div class="empty-hint">Press <kbd>Ctrl+Enter</kbd> to generate from anywhere</div>
     </div>
   </div>
 
@@ -1625,6 +1641,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="viz-divider"></div>
     <span style="font-size:9px;color:var(--t4)">Signal levels always visible</span>
     <button class="viz-collapse-btn" id="viz-collapse-btn" onclick="toggleVizPanel()">▼ Hide</button>
+    <button class="viz-collapse-btn" id="viz-fullscreen-btn" onclick="toggleVizFullscreen()" title="Fullscreen map">⛶</button>
   </div>
   <div id="viz-status">
     <div class="viz-ws-dot" id="viz-ws-dot"></div>
@@ -1695,6 +1712,32 @@ function updateClock() {
   const el = document.getElementById('clock-status');
   el.textContent = status + ' · EST';
   el.className = 'clock-status ' + cls;
+
+  // Session period countdown
+  const countdown = document.getElementById('clock-countdown');
+  if (countdown) {
+    // Key session transitions
+    const transitions = [
+      { at: 570,  label: 'Open Drive' },
+      { at: 585,  label: 'Early Session' },
+      { at: 630,  label: 'Late Morning' },
+      { at: 690,  label: 'Lunch Chop' },
+      { at: 750,  label: 'Early PM' },
+      { at: 810,  label: 'Power Hour setup' },
+      { at: 870,  label: 'Power Hour' },
+      { at: 900,  label: 'MOC Window' },
+      { at: 930,  label: 'Close' },
+    ];
+    const totalSec = totalMin * 60 + s;
+    const next = transitions.find(t => t.at * 60 > totalSec);
+    if (next) {
+      const secsLeft = next.at * 60 - totalSec;
+      const mm = Math.floor(secsLeft / 60), ss = secsLeft % 60;
+      countdown.textContent = `${next.label} in ${mm}:${pad(ss)}`;
+    } else {
+      countdown.textContent = '';
+    }
+  }
 }
 setInterval(updateClock, 1000);
 updateClock();
@@ -2917,6 +2960,23 @@ function toggleLayer(layer) {
   if (btn) btn.classList.toggle('on', vizLayers[layer]);
   drawViz();
 }
+
+function toggleVizFullscreen() {
+  const panel = document.getElementById('viz-panel');
+  const btn   = document.getElementById('viz-fullscreen-btn');
+  const isFs  = panel.classList.toggle('fullscreen');
+  btn.textContent = isFs ? '✕' : '⛶';
+  btn.title = isFs ? 'Exit fullscreen' : 'Fullscreen map';
+  setTimeout(drawViz, 50);
+}
+
+// ESC to exit fullscreen
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const panel = document.getElementById('viz-panel');
+    if (panel.classList.contains('fullscreen')) toggleVizFullscreen();
+  }
+});
 
 function toggleVizPanel() {
   vizCollapsed = !vizCollapsed;
