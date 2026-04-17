@@ -38,8 +38,8 @@ body {
   background: var(--bg);
   color: var(--t1);
   font-family: var(--mono);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 /* scrollbar */
@@ -131,7 +131,7 @@ body {
    ECON CALENDAR BAR
 ══════════════════════════════════════ */
 #cal-bar {
-  height: 34px;
+  height: 42px;
   background: var(--s2);
   border-bottom: 1px solid var(--b1);
   flex-shrink: 0;
@@ -173,13 +173,13 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 3px;
   border: 1px solid var(--b2);
   background: var(--s3);
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 .cal-bar-event.high { border-color: rgba(255,51,85,0.4); background: rgba(255,51,85,0.06); }
 .cal-bar-event.medium { border-color: rgba(255,170,0,0.3); background: rgba(255,170,0,0.04); }
@@ -192,6 +192,7 @@ body {
 .cal-bar-event .cb-time { color: var(--cyan2); font-size: 10px; }
 .cal-bar-event .cb-name { color: var(--t1); }
 .cal-bar-event.high .cb-name { color: var(--white); font-weight: 600; }
+.cb-data { font-size: 10px; color: var(--t3); margin-left: 3px; }
 .cal-bar-load {
   padding: 3px 10px;
   background: var(--s3);
@@ -212,9 +213,9 @@ body {
 ══════════════════════════════════════ */
 #body {
   display: grid;
-  grid-template-columns: 480px 1fr;
+  grid-template-columns: 520px 1fr;
   grid-template-rows: 1fr auto;
-  height: calc(100vh - 88px); /* 54px topbar + 34px cal bar */
+  height: calc(100vh - 96px); /* 54px topbar + 42px cal bar */
   overflow: hidden;
 }
 #left  { grid-column: 1; grid-row: 1; }
@@ -431,7 +432,7 @@ body {
 
 .sect-hd {
   font-family: var(--sans);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -552,7 +553,7 @@ body {
   font-weight: 600;
 }
 .auto-level-val {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--cyan);
   font-family: var(--mono);
@@ -604,7 +605,7 @@ body {
   gap: 3px;
 }
 .field label {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: var(--t2);
   text-transform: uppercase;
@@ -616,8 +617,8 @@ body {
   border-radius: 3px;
   color: var(--white);
   font-family: var(--mono);
-  font-size: 14px;
-  padding: 5px 7px;
+  font-size: 15px;
+  padding: 6px 8px;
   width: 100%;
   transition: border-color 0.15s;
   -webkit-appearance: none;
@@ -1250,7 +1251,7 @@ table.log-table {
 }
 .sig-card-value {
   font-family: var(--sans);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: -0.5px;
   line-height: 1;
@@ -1296,7 +1297,7 @@ table.log-table {
   font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
   color: var(--t2); margin-bottom: 7px; font-weight: 600;
 }
-.sig-card-wide .content { font-size: 14px; color: var(--t1); line-height: 1.6; }
+.sig-card-wide .content { font-size: 15px; color: var(--t1); line-height: 1.6; }
 .sig-card-wide .content strong { color: var(--white); }
 
 /* full-width narrative */
@@ -1311,7 +1312,7 @@ table.log-table {
   font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
   color: var(--t2); margin-bottom: 10px; font-weight: 600;
 }
-.sig-narrative-text { font-size: 14px; color: var(--t1); line-height: 1.9; }
+.sig-narrative-text { font-size: 15px; color: var(--t1); line-height: 1.9; }
 .sig-narrative-text p { margin-bottom: 8px; }
 .sig-narrative-text p:last-child { margin-bottom: 0; }
 
@@ -2058,8 +2059,8 @@ updateClock();
 // LIVE PRICES — FINNHUB
 // ══════════════════════════════════════════════════
 const SYMBOLS = [
-  { id: 'px-spy',  fin: 'SPX',  label: 'SPX'  },
-  { id: 'px-spx',  fin: 'SPX',  label: 'SPX'  },
+  { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
+  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' },
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
   { id: 'px-vix',  fin: 'VIX',  label: 'VIX',  invert: true },
   { id: 'px-dxy',  fin: 'DX-Y.NYB', label: 'DXY' },
@@ -2124,12 +2125,13 @@ async function refreshPrices() {
     el.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
   }
 
-  // ES~ = SPX directly (no multiplier)
-  const spx = priceData['SPX'];
-  if (spx) {
+  // ES~ = SPY*10 + basis
+  const spy = priceData['SPY'];
+  if (spy) {
+    const esPrice = +(spy * 10 + esBasis).toFixed(2);
     const esEl = document.getElementById('px-es');
-    if (esEl) esEl.textContent = spx.toFixed(2);
-    priceData['ES'] = spx;
+    if (esEl) esEl.textContent = esPrice.toFixed(2);
+    priceData['ES'] = esPrice;
   }
 }
 
@@ -2144,12 +2146,12 @@ async function fetchSPYNow() {
   btn.classList.add('fetching');
   btn.textContent = '⟳ Fetching…';
   try {
-    const data = await fetchPrice({ fin: 'SPX' });
+    const data = await fetchPrice({ fin: 'SPY' });
     if (!data || !data.c) throw new Error('No data returned');
 
-    const prev = priceData['SPX'] || data.c;
-    priceData['SPX'] = data.c;
-    const esPrice = +data.c.toFixed(2);
+    const prev = priceData['SPY'] || data.c;
+    priceData['SPY'] = data.c;
+    const esPrice = +(data.c * 10 + esBasis).toFixed(2);
     priceData['ES'] = esPrice;
 
     const spyEl = document.getElementById('px-spy');
@@ -2193,17 +2195,17 @@ async function fetchDayLevels() {
 
   try {
     // ── 1. Quote: prev close, today open, PDH/PDL (locked on first fetch only) ──
-    const qRes = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=SPX`);
+    const qRes = await fetch(`https://finnhub.io/api/v1/quote?symbol=SPY&token=${FINNHUB_KEY}`);
     const q = await qRes.json();
     if (!q || !q.pc) throw new Error('No quote data returned');
 
-    // SPX = ES scale directly, no multiplier needed
-    const prevClose = +q.pc.toFixed(2);
-    const todayOpen = q.o  ? +q.o.toFixed(2)  : null;
+    // SPY*10 = ES scale
+    const prevClose = +(q.pc * 10).toFixed(2);
+    const todayOpen = q.o  ? +(q.o  * 10).toFixed(2) : null;
 
     // Only lock PDH/PDL if not already set (first fetch = pre-market snapshot)
-    if (dayLevels.pdh === null && q.h) dayLevels.pdh = +q.h.toFixed(2);
-    if (dayLevels.pdl === null && q.l) dayLevels.pdl = +q.l.toFixed(2);
+    if (dayLevels.pdh === null && q.h) dayLevels.pdh = +(q.h * 10).toFixed(2);
+    if (dayLevels.pdl === null && q.l) dayLevels.pdl = +(q.l * 10).toFixed(2);
 
     dayLevels.prevClose = prevClose;
     dayLevels.todayOpen = todayOpen;
@@ -2212,23 +2214,23 @@ async function fetchDayLevels() {
     const to   = Math.floor(Date.now() / 1000);
     const from = to - (8 * 24 * 60 * 60); // 8 days back covers full prior week
     try {
-      const wk = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPX&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`)).json();
+      const wk = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`)).json();
       if (wk && wk.h && wk.h.length >= 1) {
         // Index 0 = prior week candle (most recent completed week)
         const idx = wk.h.length >= 2 ? wk.h.length - 2 : 0;
-        dayLevels.wkHigh = +wk.h[idx].toFixed(2);
-        dayLevels.wkLow  = +wk.l[idx].toFixed(2);
+        dayLevels.wkHigh = +(wk.h[idx]*10).toFixed(2);
+        dayLevels.wkLow  = +(wk.l[idx]*10).toFixed(2);
       }
     } catch { /* weekly candle unavailable on plan — silently skip */ }
 
     // ── 3. Monthly candle (M resolution) ──
     const fromMo = to - (65 * 24 * 60 * 60); // ~2 months back
     try {
-      const mo = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPX&resolution=M&from=${fromMo}&to=${to}&token=${FINNHUB_KEY}`)).json();
+      const mo = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=M&from=${fromMo}&to=${to}&token=${FINNHUB_KEY}`)).json();
       if (mo && mo.h && mo.h.length >= 2) {
         const idx = mo.h.length - 2; // prior completed month
-        dayLevels.moHigh = +mo.h[idx].toFixed(2);
-        dayLevels.moLow  = +mo.l[idx].toFixed(2);
+        dayLevels.moHigh = +(mo.h[idx]*10).toFixed(2);
+        dayLevels.moLow  = +(mo.l[idx]*10).toFixed(2);
       }
     } catch { /* monthly candle unavailable on plan — silently skip */ }
 
@@ -2252,7 +2254,7 @@ async function fetchDayLevels() {
 
     const fetchTime = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
     const pdhNote = dayLevels.pdh ? ` · PDH ${dayLevels.pdh} / PDL ${dayLevels.pdl}` : '';
-    document.getElementById('auto-levels-note').textContent = `SPX · fetched ${fetchTime} EST${pdhNote} (PDH/PDL locked)`;
+    document.getElementById('auto-levels-note').textContent = `SPY×10+basis · fetched ${fetchTime} EST${pdhNote} (PDH/PDL locked)`;
     showToast(`Levels loaded — Close ${prevClose} / Open ${todayOpen} / PDH ${dayLevels.pdh} / PDL ${dayLevels.pdl}`, 'ok');
     updateGapDisplay();
 
@@ -2583,7 +2585,7 @@ document.querySelectorAll('#left input, #left select').forEach(el => {
 function buildPrompt() {
   const g = id => (document.getElementById(id)?.value || '').trim();
   const esPrice  = priceData['ES']  ? priceData['ES'].toFixed(2)  : 'unknown';
-  const spyPrice = priceData['SPX'] ? priceData['SPX'].toFixed(2) : 'unknown';
+  const spyPrice = priceData['SPY'] ? priceData['SPY'].toFixed(2) : 'unknown';
   const vixLive  = priceData['VIX'] ? priceData['VIX'].toFixed(2) : 'unknown';
   const dxyLive  = priceData['DX-Y.NYB'] ? priceData['DX-Y.NYB'].toFixed(2) : 'unknown';
   const contracts = g('contracts') || '2';
@@ -3044,10 +3046,14 @@ async function fetchEconCalendar() {
       const impact  = e.impact === 'high' ? 'high' : e.impact === 'medium' ? 'medium' : 'low';
       const timeStr = e.time ? e.time.slice(0, 5) + ' ET' : '—';
       const name    = escHtml(e.event || e.name || '—');
+      const prev    = e.prev  !== undefined && e.prev  !== null ? ` P:${e.prev}`  : '';
+      const est     = e.estimate !== undefined && e.estimate !== null ? ` E:${e.estimate}` : '';
+      const actual  = e.actual !== undefined && e.actual !== null ? ` A:${e.actual}` : '';
       return `<div class="cal-bar-event ${impact}">
         <div class="cb-dot"></div>
         <span class="cb-time">${timeStr}</span>
         <span class="cb-name">${name}</span>
+        ${(prev||est||actual) ? `<span class="cb-data">${prev}${est}${actual}</span>` : ''}
       </div>`;
     }).join('');
     scheduleAutoTrigger();
@@ -3187,9 +3193,9 @@ function updateGapDisplay() {
 // ══════════════════════════════════════════════════
 function calcRS() {
   const es  = priceData['ES'];
-  const spy = priceData['SPX'];
+  const spy = priceData['SPY'];
   if (!es || !spy) return 'insufficient data';
-  const esImplied = spy;
+  const esImplied = spy * 10;
   const diff = es - esImplied;
   if (Math.abs(diff) < 2)  return 'ES in line with SPY (neutral RS)';
   if (diff > 0) return `ES leading SPY by ${diff.toFixed(2)} pts (ES showing relative strength — bullish divergence)`;
@@ -3212,7 +3218,7 @@ function connectWebSocket() {
   try {
     wsConn = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_KEY}`);
     wsConn.onopen = () => {
-      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPX' }));
+      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPY' }));
       document.getElementById('viz-ws-dot').className = 'viz-ws-dot live';
     };
     wsConn.onmessage = e => {
@@ -3221,7 +3227,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = +spyPrice.toFixed(2); // SPX = ES directly
+      const esPrice  = +(spyPrice * 10 + esBasis).toFixed(2); // SPY*10+basis
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
@@ -3229,7 +3235,7 @@ function connectWebSocket() {
       // Update topbar
       const spyEl = document.getElementById('px-spy');
       const esEl  = document.getElementById('px-es');
-      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPX_prev']||spyPrice) ? ' up' : ' dn'); }
+      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPY_prev']||spyPrice) ? ' up' : ' dn'); }
       if (esEl)  { esEl.textContent  = esPrice.toFixed(2);  esEl.className  = 'px-val' + (esPrice > prev ? ' up' : esPrice < prev ? ' dn' : ''); }
       priceData['SPX_prev'] = spyPrice;
 
@@ -3268,7 +3274,7 @@ function updateVizStatus(esPrice, prev) {
   // RS
   const rsEl = document.getElementById('viz-rs');
   if (rsEl) {
-    const diff = esPrice - (priceData['SPX'] || esPrice);
+    const diff = esPrice - ((priceData['SPY']||0) * 10);
     rsEl.textContent = diff > 2 ? `+${diff.toFixed(1)} (leading)` : diff < -2 ? `${diff.toFixed(1)} (lagging)` : 'neutral';
     rsEl.className = diff > 2 ? 'pos' : diff < -2 ? 'neg' : '';
   }
@@ -3686,7 +3692,7 @@ function updatePresignalDash() {
     vixEl.style.color = priceData['VIX'] > 20 ? 'var(--red)' : priceData['VIX'] > 15 ? 'var(--amber)' : 'var(--green)';
   }
   if (rsEl) {
-    const diff = (priceData['ES']||0) - (priceData['SPX']||0);
+    const diff = (priceData['ES']||0) - ((priceData['SPY']||0)*10);
     rsEl.textContent = Math.abs(diff) < 2 ? 'Neutral' : diff > 0 ? `Leading +${diff.toFixed(1)}` : `Lagging ${diff.toFixed(1)}`;
     rsEl.style.color = Math.abs(diff) < 2 ? 'var(--t2)' : diff > 0 ? 'var(--green)' : 'var(--red)';
   }
