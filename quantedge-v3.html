@@ -1395,7 +1395,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <span class="px-val" id="px-spy">—</span>
     </div>
     <div class="px-item">
-      <span class="px-sym">SPX</span>
+      <span class="px-sym">SPY</span>
       <span class="px-val" id="px-spx">—</span>
     </div>
     <div class="px-item">
@@ -2009,15 +2009,13 @@ function todayKey() {
 let esBasis = 0;
 
 async function fetchESBasis() {
-  // Fetch ES1! once via Cloudflare worker to get real futures price
   try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=ES1%21`);
-    const data = await res.json();
-    if (data && data.c && data.c > 5000 && priceData['SPX']) {
-      esBasis = +(data.c - priceData['SPX']).toFixed(2);
+    const es = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1%21&token=${FINNHUB_KEY}`)).json();
+    const spx = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
+    if (es && es.c && spx && spx.c && es.c > 5000) {
+      esBasis = +(es.c - spx.c).toFixed(2);
     }
   } catch { esBasis = 0; }
-  // Apply basis to ES display
   updateESDisplay();
 }
 
@@ -2088,8 +2086,8 @@ updateClock();
 // LIVE PRICES — FINNHUB
 // ══════════════════════════════════════════════════
 const SYMBOLS = [
-  { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
-  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' },
+  { id: 'px-spy',  fin: 'SPX',  label: 'SPX'  },
+  { id: 'px-spx',  fin: 'SPY',  label: 'SPY'  },
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
   { id: 'px-vix',  fin: 'VIX',  label: 'VIX',  invert: true },
   { id: 'px-dxy',  fin: 'DX-Y.NYB', label: 'DXY' },
@@ -2142,7 +2140,8 @@ async function fetchSPYNow() {
   btn.classList.add('fetching');
   btn.textContent = '⟳ Fetching…';
   try {
-    const data = await fetchPrice({ fin: 'SPX' });
+    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`);
+    const data = await res.json();
     if (!data || !data.c) throw new Error('No data returned');
 
     const prev = priceData['SPX'] || data.c;
@@ -2191,8 +2190,7 @@ async function fetchDayLevels() {
 
   try {
     // ── 1. Quote: prev close, today open, PDH/PDL (locked on first fetch only) ──
-    const qRes = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=SPX`);
-    const q = await qRes.json();
+    const q = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
     if (!q || !q.pc) throw new Error('No quote data returned');
 
     // SPY*10 = ES scale
@@ -3245,7 +3243,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = +(spyPrice + esBasis).toFixed(2); // SPX+basis
+      const esPrice  = +(spyPrice + esBasis).toFixed(2);
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
