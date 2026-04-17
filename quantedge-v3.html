@@ -2100,19 +2100,19 @@ const SYMBOLS = [
 
 
 async function fetchPrice(sym) {
+  // Try direct Finnhub first (most reliable for ETFs)
   try {
-    // Try Cloudflare worker first
-    const url = `${CLOUDFLARE_WORKER}?source=finnhub&symbol=${sym.fin}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
+    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym.fin}&token=${FINNHUB_KEY}`);
     const data = await res.json();
-    return data;
-  } catch {
-    try {
-      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym.fin}&token=${FINNHUB_KEY}`);
-      return await res.json();
-    } catch { return null; }
-  }
+    if (data && data.c && data.c > 0) return data;
+  } catch {}
+  // Fallback to Cloudflare worker
+  try {
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=${sym.fin}`);
+    const data = await res.json();
+    if (data && data.c && data.c > 0) return data;
+  } catch {}
+  return null;
 }
 
 async function refreshPrices() {
