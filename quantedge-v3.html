@@ -2012,8 +2012,8 @@ let esBasisFetched = false;
 async function fetchESBasis() {
   try {
     const es = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1%21&token=${FINNHUB_KEY}`)).json();
-    if (es && es.c && es.c > 5000 && priceData['SPX']) {
-      esBasis = +(es.c - priceData['SPX']).toFixed(2);
+    if (es && es.c && es.c > 5000 && (priceData['SPX'] || priceData['SPY'])) {
+      esBasis = +(es.c - (priceData['SPX'] || priceData['SPY']*10)).toFixed(2);
       esBasisFetched = true;
       updateESDisplay();
     }
@@ -2021,7 +2021,8 @@ async function fetchESBasis() {
 }
 
 function updateESDisplay() {
-  const spx = priceData['SPX'];
+  // Use SPX from Yahoo if available, otherwise SPY*10
+  const spx = priceData['SPX'] || (priceData['SPY'] ? priceData['SPY'] * 10 : null);
   if (!spx) return;
   const es = +(spx + esBasis).toFixed(2);
   priceData['ES'] = es;
@@ -2087,8 +2088,8 @@ updateClock();
 // LIVE PRICES — FINNHUB
 // ══════════════════════════════════════════════════
 const SYMBOLS = [
-  { id: 'px-spy',  fin: 'SPX',  label: 'SPX'  },
-  { id: 'px-spx',  fin: 'SPY',  label: 'SPY'  },
+  { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
+  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' },
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
   { id: 'px-vix',  fin: 'VIX',  label: 'VIX',  invert: true },
   { id: 'px-dxy',  fin: 'DX-Y.NYB', label: 'DXY' },
@@ -2126,7 +2127,7 @@ async function refreshPrices() {
     el.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
   }
 
-  // ES = SPX + basis
+  // ES = SPX + basis (SPX updated by Yahoo fetches)
   if (priceData['SPX']) updateESDisplay();
 }
 
@@ -2141,7 +2142,7 @@ async function fetchSPYNow() {
   btn.classList.add('fetching');
   btn.textContent = '⟳ Fetching…';
   try {
-    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`);
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EGSPC`);
     const data = await res.json();
     if (!data || !data.c) throw new Error('No data returned');
 
@@ -2191,7 +2192,18 @@ async function fetchDayLevels() {
 
   try {
     // ── 1. Quote: prev close, today open, PDH/PDL — SPX direct, same as qm-final ──
-    const q = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
+    const qRes = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EGSPC`);
+    const qData = await qRes.json();
+    // Yahoo Finance response structure
+    const result = qData?.chart?.result?.[0];
+    const meta = result?.meta;
+    const q = meta ? {
+      pc: meta.chartPreviousClose || meta.previousClose,
+      o:  result.indicators?.quote?.[0]?.open?.[result.indicators.quote[0].open.length-1] || meta.regularMarketOpen,
+      c:  meta.regularMarketPrice,
+      h:  meta.regularMarketDayHigh,
+      l:  meta.regularMarketDayLow,
+    } : null;
     if (!q || !q.pc) throw new Error('No quote data returned');
 
     // SPX values are already ES scale — no multiplier needed
@@ -2204,12 +2216,15 @@ async function fetchDayLevels() {
 
     dayLevels.prevClose = prevClose;
     dayLevels.todayOpen = todayOpen;
+    if (q && q.c) { priceData['SPX'] = q.c; updateESDisplay(); }
+    // Update SPX display
+    const spxDisplayEl = document.getElementById('px-spx'); if(spxDisplayEl && q && q.c) spxDisplayEl.textContent = q.c.toFixed(2);
 
     // ── 2. Weekly candle (W resolution) ──
     const to   = Math.floor(Date.now() / 1000);
     const from = to - (8 * 24 * 60 * 60); // 8 days back covers full prior week
     try {
-      const wk = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPX&resolution=W&from=${from}&to=${to}&token=${FINNHUB_KEY}`)).json();
+      const wk = await (await fetch(`https://finnhub.io/api/v1/stock/candle?from=${from}&to=${to}&token=${FINNHUB_KEY}`)).json();
       if (wk && wk.h && wk.h.length >= 1) {
         // Index 0 = prior week candle (most recent completed week)
         const idx = wk.h.length >= 2 ? wk.h.length - 2 : 0;
@@ -2221,7 +2236,7 @@ async function fetchDayLevels() {
     // ── 3. Monthly candle (M resolution) ──
     const fromMo = to - (65 * 24 * 60 * 60); // ~2 months back
     try {
-      const mo = await (await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPX&resolution=M&from=${fromMo}&to=${to}&token=${FINNHUB_KEY}`)).json();
+      const mo = await (await fetch(`https://finnhub.io/api/v1/stock/candle?from=${fromMo}&to=${to}&token=${FINNHUB_KEY}`)).json();
       if (mo && mo.h && mo.h.length >= 2) {
         const idx = mo.h.length - 2; // prior completed month
         dayLevels.moHigh = +mo.h[idx].toFixed(2);
@@ -2580,7 +2595,7 @@ document.querySelectorAll('#left input, #left select').forEach(el => {
 function buildPrompt() {
   const g = id => (document.getElementById(id)?.value || '').trim();
   const esPrice  = priceData['ES']  ? priceData['ES'].toFixed(2)  : 'unknown';
-  const spyPrice = priceData['SPX'] ? priceData['SPX'].toFixed(2) : 'unknown';
+  const spyPrice = (priceData['SPX'] || priceData['SPY']) ? (priceData['SPX'] || priceData['SPY']).toFixed(2) : 'unknown';
   const vixLive  = priceData['VIX'] ? priceData['VIX'].toFixed(2) : 'unknown';
   const dxyLive  = priceData['DX-Y.NYB'] ? priceData['DX-Y.NYB'].toFixed(2) : 'unknown';
   const contracts = g('contracts') || '2';
@@ -3210,9 +3225,9 @@ function updateGapDisplay() {
 // ══════════════════════════════════════════════════
 function calcRS() {
   const es  = priceData['ES'];
-  const spy = priceData['SPX'];
+  const spy = priceData['SPX'] || priceData['SPY'];
   if (!es || !spy) return 'insufficient data';
-  const esImplied = spy;
+  const esImplied = priceData['SPX'] ? spy : spy * 10;
   const diff = es - esImplied;
   if (Math.abs(diff) < 2)  return 'ES in line with SPY (neutral RS)';
   if (diff > 0) return `ES leading SPY by ${diff.toFixed(2)} pts (ES showing relative strength — bullish divergence)`;
@@ -3235,7 +3250,7 @@ function connectWebSocket() {
   try {
     wsConn = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_KEY}`);
     wsConn.onopen = () => {
-      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPX' }));
+      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPY' }));
       document.getElementById('viz-ws-dot').className = 'viz-ws-dot live';
     };
     wsConn.onmessage = e => {
@@ -3244,7 +3259,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = +(spyPrice + esBasis).toFixed(2);
+      const esPrice  = +(spyPrice * 10 + esBasis).toFixed(2);
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
@@ -3252,7 +3267,7 @@ function connectWebSocket() {
       // Update topbar
       const spyEl = document.getElementById('px-spy');
       const esEl  = document.getElementById('px-es');
-      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPX_prev']||spyPrice) ? ' up' : ' dn'); }
+      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPY_prev']||spyPrice) ? ' up' : ' dn'); }
       if (esEl)  { esEl.textContent  = esPrice.toFixed(2);  esEl.className  = 'px-val' + (esPrice > prev ? ' up' : esPrice < prev ? ' dn' : ''); }
       priceData['SPX_prev'] = spyPrice;
 
