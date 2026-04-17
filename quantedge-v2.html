@@ -128,13 +128,93 @@ body {
 .status-closed{ color: var(--t3); }
 
 /* ══════════════════════════════════════
+   ECON CALENDAR BAR
+══════════════════════════════════════ */
+#cal-bar {
+  height: 34px;
+  background: var(--s2);
+  border-bottom: 1px solid var(--b1);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.cal-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 100%;
+  padding: 0 14px;
+}
+.cal-bar-label {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+.cal-bar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--b2);
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.cal-bar-events {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+.cal-bar-empty { font-size: 11px; color: var(--t4); }
+.cal-bar-event {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--b2);
+  background: var(--s3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.cal-bar-event.high { border-color: rgba(255,51,85,0.4); background: rgba(255,51,85,0.06); }
+.cal-bar-event.medium { border-color: rgba(255,170,0,0.3); background: rgba(255,170,0,0.04); }
+.cal-bar-event .cb-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.cal-bar-event.high .cb-dot { background: var(--red); box-shadow: 0 0 4px var(--red); }
+.cal-bar-event.medium .cb-dot { background: var(--amber); }
+.cal-bar-event.low .cb-dot { background: var(--t3); }
+.cal-bar-event .cb-time { color: var(--cyan2); font-size: 10px; }
+.cal-bar-event .cb-name { color: var(--t1); }
+.cal-bar-event.high .cb-name { color: var(--white); font-weight: 600; }
+.cal-bar-load {
+  padding: 3px 10px;
+  background: var(--s3);
+  border: 1px solid var(--b2);
+  border-radius: 3px;
+  color: var(--t2);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.cal-bar-load:hover { color: var(--cyan); border-color: var(--cyan2); }
+
+/* ══════════════════════════════════════
    BODY LAYOUT
 ══════════════════════════════════════ */
 #body {
   display: grid;
   grid-template-columns: 480px 1fr;
   grid-template-rows: 1fr auto;
-  height: calc(100vh - 54px);
+  height: calc(100vh - 88px); /* 54px topbar + 34px cal bar */
   overflow: hidden;
 }
 #left  { grid-column: 1; grid-row: 1; }
@@ -1352,6 +1432,18 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   </div>
 </div>
 
+<!-- ══════════════════════ ECON CALENDAR BAR ══════════════════════ -->
+<div id="cal-bar">
+  <div class="cal-bar-inner">
+    <div class="cal-bar-label">ECON</div>
+    <div class="cal-bar-divider"></div>
+    <div id="cal-bar-events" class="cal-bar-events">
+      <span class="cal-bar-empty">Click Load to fetch today's events</span>
+    </div>
+    <button class="cal-bar-load" id="btn-cal-refresh" onclick="fetchEconCalendar()">⟳ Load</button>
+  </div>
+</div>
+
 <!-- ══════════════════════ BODY ══════════════════════ -->
 <div id="body">
 
@@ -1608,17 +1700,6 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="field">
       <label>News / Headlines</label>
       <textarea id="news-headlines" placeholder="e.g. JPM earnings beat, tech selling off pre-market. China PMI weak overnight. Fed Waller hawkish..." rows="2"></textarea>
-    </div>
-  </div>
-
-  <!-- ECON CALENDAR -->
-  <div class="sect">
-    <div class="sect-hd purple">Econ Calendar
-      <button class="btn-cal-refresh" id="btn-cal-refresh" onclick="fetchEconCalendar()" style="margin-left:4px;font-size:9px;padding:2px 7px">⟳ Load</button>
-      <div class="hd-line"></div>
-    </div>
-    <div class="cal-strip" id="cal-strip">
-      <div class="cal-empty">Click Load to fetch today's events</div>
     </div>
   </div>
 
@@ -1993,10 +2074,10 @@ async function fetchESBasis() {
     const res = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=ES1!`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data && data.c && priceData['SPX']) {
-      esBasis = data.c - priceData['SPX'];
+    if (data && data.c && priceData['SPY']) {
+      esBasis = data.c - (priceData['SPY'] * 10);
       esBasisFetched = true;
-      console.log(`ES basis: ${esBasis.toFixed(2)} pts (ES1! ${data.c} - SPX ${priceData['SPX']})`);
+      console.log(`ES basis: ${esBasis.toFixed(2)} pts (ES1! ${data.c} - SPY×10 ${(priceData['SPY']*10).toFixed(2)})`);
     }
   } catch {
     // Fallback — try direct Finnhub
@@ -2004,7 +2085,7 @@ async function fetchESBasis() {
       const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1!&token=${FINNHUB_KEY}`);
       const data = await res.json();
       if (data && data.c && priceData['SPX']) {
-        esBasis = data.c - priceData['SPX'];
+        esBasis = data.c - (priceData['SPY'] * 10);
         esBasisFetched = true;
         console.log(`ES basis (direct): ${esBasis.toFixed(2)} pts`);
       }
@@ -2043,13 +2124,12 @@ async function refreshPrices() {
     el.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
   }
 
-  // ES = SPX + futures basis (auto-calculated at load)
+  // ES~ = SPX directly (no multiplier)
   const spx = priceData['SPX'];
   if (spx) {
-    const esPrice = +(spx + esBasis).toFixed(2);
     const esEl = document.getElementById('px-es');
-    if (esEl) esEl.textContent = esPrice.toFixed(2);
-    priceData['ES'] = esPrice;
+    if (esEl) esEl.textContent = spx.toFixed(2);
+    priceData['ES'] = spx;
   }
 }
 
@@ -2069,7 +2149,7 @@ async function fetchSPYNow() {
 
     const prev = priceData['SPX'] || data.c;
     priceData['SPX'] = data.c;
-    const esPrice = +(data.c + esBasis).toFixed(2);
+    const esPrice = +data.c.toFixed(2);
     priceData['ES'] = esPrice;
 
     const spyEl = document.getElementById('px-spy');
@@ -2085,7 +2165,7 @@ async function fetchSPYNow() {
 
     const now = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12:false });
     document.getElementById('spy-fetch-time').textContent = now + ' EST';
-    showToast(`SPX ${data.c.toFixed(2)} → ES~ ${esPrice.toFixed(2)} (basis ${esBasis>=0?'+':''}${esBasis.toFixed(1)})`, 'ok');
+    showToast(`SPX ${data.c.toFixed(2)} → ES~ ${esPrice.toFixed(2)}`, 'ok');
     scheduleAutoTrigger();
   } catch (e) {
     showToast('SPX fetch failed: ' + e.message, 'err');
@@ -2113,12 +2193,13 @@ async function fetchDayLevels() {
 
   try {
     // ── 1. Quote: prev close, today open, PDH/PDL (locked on first fetch only) ──
-    const q = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
+    const qRes = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=SPX`);
+    const q = await qRes.json();
     if (!q || !q.pc) throw new Error('No quote data returned');
 
-    // SPX values are already ES-scale — no multiplication needed
+    // SPX = ES scale directly, no multiplier needed
     const prevClose = +q.pc.toFixed(2);
-    const todayOpen = q.o ? +q.o.toFixed(2) : null;
+    const todayOpen = q.o  ? +q.o.toFixed(2)  : null;
 
     // Only lock PDH/PDL if not already set (first fetch = pre-market snapshot)
     if (dayLevels.pdh === null && q.h) dayLevels.pdh = +q.h.toFixed(2);
@@ -2546,12 +2627,11 @@ function buildPrompt() {
 - 0.618: ${(fibHi-(fibHi-fibLo)*0.618).toFixed(2)} | 0.786: ${(fibHi-(fibHi-fibLo)*0.786).toFixed(2)}
 - 1.272 ext: ${(fibHi-(fibHi-fibLo)*1.272).toFixed(2)} | 1.618 ext: ${(fibHi-(fibHi-fibLo)*1.618).toFixed(2)}` : '- Not set';
 
-  // Econ calendar
-  const calEvents = Array.from(document.querySelectorAll('.cal-event')).map(el => {
-    const time   = el.querySelector('.cal-time')?.textContent || '';
-    const name   = el.querySelector('.cal-name')?.textContent || '';
-    const impact = el.querySelector('.cal-impact')?.className.includes('high') ? 'HIGH' :
-                   el.querySelector('.cal-impact')?.className.includes('medium') ? 'MED' : 'LOW';
+  // Econ calendar — read from top bar
+  const calEvents = Array.from(document.querySelectorAll('.cal-bar-event')).map(el => {
+    const time   = el.querySelector('.cb-time')?.textContent || '';
+    const name   = el.querySelector('.cb-name')?.textContent || '';
+    const impact = el.classList.contains('high') ? 'HIGH' : el.classList.contains('medium') ? 'MED' : 'LOW';
     return `  ${time} [${impact}] ${name}`;
   }).join('\n') || '  None loaded';
 
@@ -2944,8 +3024,8 @@ function calcFibs() {
 async function fetchEconCalendar() {
   const btn = document.getElementById('btn-cal-refresh');
   btn.textContent = '⟳ …'; btn.disabled = true;
-  const strip = document.getElementById('cal-strip');
-  strip.innerHTML = '<div class="cal-empty">Loading…</div>';
+  const bar = document.getElementById('cal-bar-events');
+  bar.innerHTML = '<span class="cal-bar-empty">Loading…</span>';
   try {
     const today = new Date().toISOString().slice(0, 10);
     const url = `https://finnhub.io/api/v1/calendar/economic?from=${today}&to=${today}&token=${FINNHUB_KEY}`;
@@ -2955,22 +3035,24 @@ async function fetchEconCalendar() {
       .filter(e => e.country === 'US')
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
-    if (!events.length) { strip.innerHTML = '<div class="cal-empty">No US events today</div>'; return; }
+    if (!events.length) {
+      bar.innerHTML = '<span class="cal-bar-empty">No US events today</span>';
+      return;
+    }
 
-    strip.innerHTML = events.slice(0, 8).map(e => {
-      const impact = e.impact === 'high' ? 'high' : e.impact === 'medium' ? 'medium' : 'low';
+    bar.innerHTML = events.slice(0, 10).map(e => {
+      const impact  = e.impact === 'high' ? 'high' : e.impact === 'medium' ? 'medium' : 'low';
       const timeStr = e.time ? e.time.slice(0, 5) + ' ET' : '—';
-      const prev = e.prev !== undefined && e.prev !== null ? `prev: ${e.prev}` : '';
-      return `<div class="cal-event">
-        <div class="cal-impact ${impact}"></div>
-        <span class="cal-time">${timeStr}</span>
-        <span class="cal-name">${escHtml(e.event || e.name || '—')}</span>
-        <span class="cal-prev">${prev}</span>
+      const name    = escHtml(e.event || e.name || '—');
+      return `<div class="cal-bar-event ${impact}">
+        <div class="cb-dot"></div>
+        <span class="cb-time">${timeStr}</span>
+        <span class="cb-name">${name}</span>
       </div>`;
     }).join('');
     scheduleAutoTrigger();
   } catch (e) {
-    strip.innerHTML = '<div class="cal-empty">Failed to load — check key</div>';
+    bar.innerHTML = '<span class="cal-bar-empty" style="color:var(--red)">Failed to load</span>';
   } finally {
     btn.textContent = '⟳ Load'; btn.disabled = false;
   }
@@ -3139,7 +3221,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = +(spyPrice + esBasis).toFixed(2); // SPX + futures basis
+      const esPrice  = +spyPrice.toFixed(2); // SPX = ES directly
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
@@ -3664,10 +3746,10 @@ updateSessionPnL();
 renderSnapGrid();
 renderGEXHistory();
 fetchDayLevels();
+fetchEconCalendar(); // auto-load calendar on open
 connectWebSocket();
 startVizLoop();
 updatePresignalDash();
-// Fetch ES basis after SPX loads (500ms delay to ensure SPX is in priceData)
 refreshPrices().then(() => setTimeout(fetchESBasis, 1000));
 setInterval(() => {
   const sp = getSessionPeriod();
