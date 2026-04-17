@@ -1984,6 +1984,37 @@ const SYMBOLS = [
   { id: 'px-dxy',  fin: 'DX-Y.NYB', label: 'DXY' },
 ];
 
+// Futures basis — ES1! minus SPX, calculated once at load
+let esBasis = 0;
+let esBasisFetched = false;
+
+async function fetchESBasis() {
+  try {
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&symbol=ES1!`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (data && data.c && priceData['SPX']) {
+      esBasis = data.c - priceData['SPX'];
+      esBasisFetched = true;
+      console.log(`ES basis: ${esBasis.toFixed(2)} pts (ES1! ${data.c} - SPX ${priceData['SPX']})`);
+    }
+  } catch {
+    // Fallback — try direct Finnhub
+    try {
+      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1!&token=${FINNHUB_KEY}`);
+      const data = await res.json();
+      if (data && data.c && priceData['SPX']) {
+        esBasis = data.c - priceData['SPX'];
+        esBasisFetched = true;
+        console.log(`ES basis (direct): ${esBasis.toFixed(2)} pts`);
+      }
+    } catch {
+      esBasis = 0; // SPX as-is
+      console.log('ES1! unavailable — using SPX directly (basis=0)');
+    }
+  }
+}
+
 async function fetchPrice(sym) {
   try {
     // Try Cloudflare worker first
@@ -2012,12 +2043,13 @@ async function refreshPrices() {
     el.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
   }
 
-  // ES ~ SPX directly
+  // ES = SPX + futures basis (auto-calculated at load)
   const spx = priceData['SPX'];
   if (spx) {
+    const esPrice = +(spx + esBasis).toFixed(2);
     const esEl = document.getElementById('px-es');
-    esEl.textContent = spx.toFixed(2);
-    priceData['ES'] = spx;
+    if (esEl) esEl.textContent = esPrice.toFixed(2);
+    priceData['ES'] = esPrice;
   }
 }
 
@@ -2037,7 +2069,8 @@ async function fetchSPYNow() {
 
     const prev = priceData['SPX'] || data.c;
     priceData['SPX'] = data.c;
-    priceData['ES']  = data.c;
+    const esPrice = +(data.c + esBasis).toFixed(2);
+    priceData['ES'] = esPrice;
 
     const spyEl = document.getElementById('px-spy');
     const esEl  = document.getElementById('px-es');
@@ -2046,19 +2079,19 @@ async function fetchSPYNow() {
       spyEl.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
     }
     if (esEl) {
-      esEl.textContent = data.c.toFixed(2);
-      esEl.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
+      esEl.textContent = esPrice.toFixed(2);
+      esEl.className = 'px-val' + (esPrice > (prev + esBasis) ? ' up' : esPrice < (prev + esBasis) ? ' dn' : '');
     }
 
     const now = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12:false });
     document.getElementById('spy-fetch-time').textContent = now + ' EST';
-    showToast(`SPX ${data.c.toFixed(2)} → ES~ ${data.c.toFixed(2)}`, 'ok');
+    showToast(`SPX ${data.c.toFixed(2)} → ES~ ${esPrice.toFixed(2)} (basis ${esBasis>=0?'+':''}${esBasis.toFixed(1)})`, 'ok');
     scheduleAutoTrigger();
   } catch (e) {
-    showToast('SPY fetch failed: ' + e.message, 'err');
+    showToast('SPX fetch failed: ' + e.message, 'err');
   } finally {
     btn.classList.remove('fetching');
-    btn.textContent = '⬇ SPY Price';
+    btn.textContent = '⬇ SPX Price';
   }
 }
 
@@ -3106,7 +3139,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = spyPrice; // SPX ≈ ES directly
+      const esPrice  = +(spyPrice + esBasis).toFixed(2); // SPX + futures basis
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
@@ -3634,6 +3667,8 @@ fetchDayLevels();
 connectWebSocket();
 startVizLoop();
 updatePresignalDash();
+// Fetch ES basis after SPX loads (500ms delay to ensure SPX is in priceData)
+refreshPrices().then(() => setTimeout(fetchESBasis, 1000));
 setInterval(() => {
   const sp = getSessionPeriod();
   const pb = document.getElementById('viz-period-badge');
