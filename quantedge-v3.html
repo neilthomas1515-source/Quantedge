@@ -2007,16 +2007,17 @@ function todayKey() {
 // ES BASIS — SPX + basis = ES display
 // ══════════════════════════════════════════════════
 let esBasis = 0;
+let esBasisFetched = false;
 
 async function fetchESBasis() {
   try {
     const es = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1%21&token=${FINNHUB_KEY}`)).json();
-    const spx = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
-    if (es && es.c && spx && spx.c && es.c > 5000) {
-      esBasis = +(es.c - spx.c).toFixed(2);
+    if (es && es.c && es.c > 5000 && priceData['SPX']) {
+      esBasis = +(es.c - priceData['SPX']).toFixed(2);
+      esBasisFetched = true;
+      updateESDisplay();
     }
   } catch { esBasis = 0; }
-  updateESDisplay();
 }
 
 function updateESDisplay() {
@@ -2189,11 +2190,11 @@ async function fetchDayLevels() {
   document.getElementById('auto-levels-note').textContent = 'Fetching from Finnhub…';
 
   try {
-    // ── 1. Quote: prev close, today open, PDH/PDL (locked on first fetch only) ──
+    // ── 1. Quote: prev close, today open, PDH/PDL — SPX direct, same as qm-final ──
     const q = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=SPX&token=${FINNHUB_KEY}`)).json();
     if (!q || !q.pc) throw new Error('No quote data returned');
 
-    // SPY*10 = ES scale
+    // SPX values are already ES scale — no multiplier needed
     const prevClose = +q.pc.toFixed(2);
     const todayOpen = q.o ? +q.o.toFixed(2) : null;
 
