@@ -1429,6 +1429,12 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="clock-status" id="clock-status">— EST</div>
     <div class="clock-countdown" id="clock-countdown"></div>
   </div>
+  <div class="top-divider"></div>
+  <!-- Reversal Alert Indicator -->
+  <div id="reversal-indicator" style="display:flex;align-items:center;gap:6px;padding:0 10px;cursor:pointer" onclick="toggleReversalPanel()" title="Reversal Alert Monitor">
+    <div id="reversal-dot" style="width:8px;height:8px;border-radius:50%;background:var(--t4);transition:all 0.3s"></div>
+    <span id="reversal-label" style="font-size:10px;letter-spacing:1px;color:var(--t3);text-transform:uppercase;font-family:var(--sans)">Monitor</span>
+  </div>
 </div>
 
 <!-- ══════════════════════ ECON CALENDAR BAR ══════════════════════ -->
@@ -1441,6 +1447,27 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
     <button class="cal-bar-load" id="btn-cal-refresh" onclick="fetchEconCalendar()">⟳ Load</button>
   </div>
+</div>
+
+<!-- ══════════════════════ REVERSAL ALERT PANEL ══════════════════════ -->
+<div id="reversal-panel" style="display:none;position:fixed;top:102px;right:10px;width:320px;background:var(--s2);border:1px solid var(--b2);border-radius:6px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1)">
+    <span style="font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--white)">⚡ REVERSAL MONITOR</span>
+    <button onclick="toggleReversalPanel()" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px">✕</button>
+  </div>
+  <div id="reversal-conditions" style="padding:10px 14px;display:flex;flex-direction:column;gap:6px">
+    <!-- populated by JS -->
+  </div>
+  <div id="reversal-score-bar" style="padding:8px 14px;border-top:1px solid var(--b1)">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--t2);letter-spacing:1px;text-transform:uppercase">Reversal Probability</span>
+      <span id="reversal-pct" style="font-size:12px;font-weight:700;color:var(--t1)">0%</span>
+    </div>
+    <div style="height:4px;background:var(--b2);border-radius:2px;overflow:hidden">
+      <div id="reversal-bar" style="height:100%;width:0%;border-radius:2px;background:var(--amber);transition:width 0.5s"></div>
+    </div>
+  </div>
+  <div id="reversal-signal-text" style="padding:8px 14px;font-size:11px;color:var(--t2);border-top:1px solid var(--b1);display:none"></div>
 </div>
 
 <!-- ══════════════════════ BODY ══════════════════════ -->
@@ -4072,6 +4099,164 @@ renderSignal = function(s) {
 };
 
 // ══════════════════════════════════════════════════
+// REVERSAL ALERT SYSTEM
+// ══════════════════════════════════════════════════
+let reversalPanelOpen = false;
+let lastReversalAlert = 0;
+let reversalAlertActive = false;
+
+function toggleReversalPanel() {
+  reversalPanelOpen = !reversalPanelOpen;
+  document.getElementById('reversal-panel').style.display = reversalPanelOpen ? 'block' : 'none';
+}
+
+function checkReversalConditions() {
+  const es       = priceData['ES'];
+  const vix      = priceData['VIX'];
+  const tick     = parseFloat(document.getElementById('tick')?.value) || null;
+  const trin     = parseFloat(document.getElementById('trin')?.value) || null;
+  const vwap     = parseFloat(document.getElementById('vwap')?.value) || null;
+  const flip     = currentSignalLevels.flip;
+  const entry    = currentSignalLevels.entry;
+  const sp       = getSessionPeriod();
+
+  const conditions = [];
+  let score = 0;
+
+  // 1. Price near GEX flip level (within 0.3%)
+  if (es && flip) {
+    const dist = Math.abs(es - flip);
+    const pct  = dist / es * 100;
+    const near = pct < 0.3;
+    const crossed = priceData['ES_prev'] && ((priceData['ES_prev'] < flip && es > flip) || (priceData['ES_prev'] > flip && es < flip));
+    if (crossed) { score += 35; conditions.push({ label: '⚡ GEX Flip CROSSED', value: `${flip.toFixed(2)}`, state: 'alert' }); }
+    else if (near) { score += 20; conditions.push({ label: '⚠ Near GEX Flip', value: `${flip.toFixed(2)} (${dist.toFixed(1)}pts away)`, state: 'warn' }); }
+    else { conditions.push({ label: 'GEX Flip', value: flip.toFixed(2), state: 'ok' }); }
+  }
+
+  // 2. TICK extreme
+  if (tick !== null) {
+    if (tick > 900)  { score += 25; conditions.push({ label: '⚡ TICK Extreme High', value: `+${tick}`, state: 'alert' }); }
+    else if (tick < -900) { score += 25; conditions.push({ label: '⚡ TICK Extreme Low', value: tick, state: 'alert' }); }
+    else if (Math.abs(tick) > 600) { score += 10; conditions.push({ label: '⚠ TICK Elevated', value: tick > 0 ? `+${tick}` : tick, state: 'warn' }); }
+    else { conditions.push({ label: 'TICK', value: tick > 0 ? `+${tick}` : tick, state: 'ok' }); }
+  }
+
+  // 3. VWAP proximity (within 3pts)
+  if (es && vwap) {
+    const dist = Math.abs(es - vwap);
+    if (dist < 3) { score += 20; conditions.push({ label: '⚠ At VWAP', value: `ES ${es.toFixed(2)} / VWAP ${vwap.toFixed(2)}`, state: 'warn' }); }
+    else { conditions.push({ label: 'VWAP Distance', value: `${dist.toFixed(1)}pts ${es > vwap ? 'above' : 'below'}`, state: 'ok' }); }
+  }
+
+  // 4. VIX spike
+  if (vix) {
+    if (vix > 25) { score += 15; conditions.push({ label: '⚠ VIX Elevated', value: vix.toFixed(2), state: 'warn' }); }
+    else { conditions.push({ label: 'VIX', value: vix.toFixed(2), state: 'ok' }); }
+  }
+
+  // 5. Session reversal window
+  if (['open','power'].includes(sp.cls)) {
+    score += 5;
+    conditions.push({ label: '⚠ Reversal Window', value: sp.label, state: 'warn' });
+  }
+
+  // 6. Price at key level (entry/target/stop)
+  if (es && entry) {
+    const dist = Math.abs(es - entry);
+    if (dist < 2) { score += 10; conditions.push({ label: '⚠ At Entry Level', value: entry.toFixed(2), state: 'warn' }); }
+  }
+
+  // Update UI
+  const pct = Math.min(100, score);
+  const color = pct >= 70 ? 'var(--red)' : pct >= 40 ? 'var(--amber)' : 'var(--green2)';
+
+  document.getElementById('reversal-bar').style.width = pct + '%';
+  document.getElementById('reversal-bar').style.background = color;
+  document.getElementById('reversal-pct').textContent = pct + '%';
+  document.getElementById('reversal-pct').style.color = color;
+
+  // Update dot in topbar
+  const dot = document.getElementById('reversal-dot');
+  const lbl = document.getElementById('reversal-label');
+  if (pct >= 70) {
+    dot.style.background = 'var(--red)';
+    dot.style.boxShadow = '0 0 8px var(--red)';
+    dot.style.animation = 'pulse-dot 0.8s infinite';
+    lbl.textContent = 'REVERSAL';
+    lbl.style.color = 'var(--red)';
+  } else if (pct >= 40) {
+    dot.style.background = 'var(--amber)';
+    dot.style.boxShadow = '0 0 6px var(--amber)';
+    dot.style.animation = 'pulse-dot 1.5s infinite';
+    lbl.textContent = 'Watch';
+    lbl.style.color = 'var(--amber)';
+  } else {
+    dot.style.background = 'var(--green2)';
+    dot.style.boxShadow = 'none';
+    dot.style.animation = 'none';
+    lbl.textContent = 'Monitor';
+    lbl.style.color = 'var(--t3)';
+  }
+
+  // Render conditions list
+  const panel = document.getElementById('reversal-conditions');
+  if (panel) {
+    panel.innerHTML = conditions.map(c => {
+      const col = c.state === 'alert' ? 'var(--red)' : c.state === 'warn' ? 'var(--amber)' : 'var(--t3)';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--b1)">
+        <span style="font-size:11px;color:${col}">${c.label}</span>
+        <span style="font-size:11px;color:var(--t1);font-family:var(--mono)">${c.value}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Fire alert if score crosses 70 and enough time has passed
+  const now = Date.now();
+  if (pct >= 70 && now - lastReversalAlert > 120000) {
+    lastReversalAlert = now;
+    fireReversalAlert(pct, conditions);
+  }
+
+  // Store prev ES for crossover detection
+  if (es) priceData['ES_prev'] = es;
+}
+
+function fireReversalAlert(score, conditions) {
+  const alertMsg = conditions.filter(c => c.state === 'alert' || c.state === 'warn').map(c => c.label.replace(/[⚡⚠]/g,'')).join(' + ');
+  showToast(`⚡ REVERSAL ALERT (${score}%) — ${alertMsg}`, 'warn');
+
+  // Show signal text
+  const sigText = document.getElementById('reversal-signal-text');
+  if (sigText) {
+    sigText.style.display = 'block';
+    sigText.innerHTML = `<span style="color:var(--red);font-weight:700">⚡ HIGH REVERSAL PROBABILITY</span><br>${alertMsg}`;
+  }
+
+  // Open panel automatically
+  if (!reversalPanelOpen) toggleReversalPanel();
+
+  // Audio alert
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [440, 550, 440].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.2);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + i * 0.15 + 0.2);
+    });
+  } catch {}
+}
+
+// Run every 15 seconds
+setInterval(checkReversalConditions, 15000);
+
+// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 document.getElementById('quota-count').textContent = quotaUsed;
@@ -4086,6 +4271,7 @@ connectWebSocket();
 startVizLoop();
 updatePresignalDash();
 refreshPrices();
+setTimeout(checkReversalConditions, 5000); // initial check after data loads
 setInterval(() => {
   const sp = getSessionPeriod();
   const pb = document.getElementById('viz-period-badge');
