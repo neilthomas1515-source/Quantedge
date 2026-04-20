@@ -2037,7 +2037,7 @@ let esBasisFetched = false;
 function recalcESFairValue() {
   if (!priceData['SPX']) return;
   const spx = priceData['SPX'];
-  const rate = 0.048;
+  const rate = 0.045;
   const divYield = 0.015;
   // Find next ES expiry (3rd Friday of Mar/Jun/Sep/Dec)
   const today = new Date();
@@ -2149,8 +2149,8 @@ const SYMBOLS = [
   { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
   { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' }, // updated by Yahoo fetch
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
-  { id: 'px-vix',  fin: 'VIXY', label: 'VIX'  }, // VIXY ETF proxy for VIX
-  { id: 'px-dxy',  fin: 'UUP',  label: 'DXY~' }, // UUP ETF proxy for DXY
+  { id: 'px-vix',  fin: 'VIXY', label: 'VIX',  storeAs: 'VIX'        },
+  { id: 'px-dxy',  fin: 'UUP',  label: 'DXY~', storeAs: 'DX-Y.NYB'   },
 ];
 
 // Futures basis — ES1! minus SPX, calculated once at load
@@ -2179,8 +2179,9 @@ async function refreshPrices() {
     if (!data || !data.c) continue;
     const el = document.getElementById(sym.id);
     if (!el) continue;
-    const prev = priceData[sym.fin] || data.c;
-    priceData[sym.fin] = data.c;
+    const key = sym.storeAs || sym.fin;
+    const prev = priceData[key] || data.c;
+    priceData[key] = data.c;
     el.textContent = data.c.toFixed(2);
     el.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
   }
@@ -2565,7 +2566,8 @@ function setActiveZone(zone) {
   if (zone === 'of')      document.getElementById('of-drop-zone')?.classList.add('upload-zone-active');
   if (zone?.startsWith('snap-')) {
     const idx = parseInt(zone.split('-')[1]);
-    document.querySelectorAll('.snap-slot')[idx]?.classList.add('upload-zone-active');
+    const slots = document.querySelectorAll('.snap-slot');
+    if (slots[idx]) slots[idx].classList.add('upload-zone-active');
   }
   if (zone) showToast(`${zone === 'gex' ? 'GEX' : zone === 'of' ? 'Order Flow' : 'Indicator'} zone active — Ctrl+V to paste`, 'ok');
 }
@@ -2617,18 +2619,19 @@ function renderSnapGrid() {
           onchange="snapSlots[${slot.id}].label=this.value"
           title="Click to rename">
         <div class="snap-slot-btns">
-          <button class="snap-slot-btn" onclick="triggerSnapFile(${slot.id})">⬆ Upload</button>
+          <button class="snap-slot-btn" onclick="setActiveZone('snap-'+slot.id)" title="Click to activate, then Ctrl+V">⊕ Activate</button>
           ${slot.base64 ? `<button class="snap-slot-btn del" onclick="clearSnapSlot(${slot.id})">✕</button>` : ''}
         </div>
       </div>
       <div class="snap-drop ${slot.base64 ? 'has-image' : ''}"
-        onclick="triggerSnapFile(${slot.id})"
+        onclick="setActiveZone('snap-${slot.id}')"
+        ondblclick="triggerSnapFile(${slot.id})"
         ondragover="event.preventDefault();this.classList.add('drag-over')"
         ondragleave="this.classList.remove('drag-over')"
         ondrop="handleSnapDrop(event,${slot.id})">
         ${slot.base64
           ? `<img src="${slot.dataUrl}" alt="${escHtml(slot.label)}">`
-          : `<div class="snap-drop-hint"><strong>Click</strong>, drag, or focus + Ctrl+V</div>`}
+          : `<div class="snap-drop-hint">Click → Ctrl+V to paste<br><small>Double-click to browse</small></div>`}
       </div>
       <textarea class="snap-desc" rows="1"
         placeholder="Describe what this shows (feeds AI)…"
