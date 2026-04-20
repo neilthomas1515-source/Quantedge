@@ -1458,7 +1458,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="sect-hd">GEX Chart <div class="hd-line"></div></div>
 
     <!-- Current GEX drop zone -->
-    <div id="gex-drop" onclick="setActiveZone('gex');document.getElementById('gex-file').click();">
+    <div id="gex-drop" onclick="setActiveZone('gex')" ondblclick="document.getElementById('gex-file').click();">
       <div id="gex-placeholder">
         <div class="drop-hint"><strong>Click</strong>, drag &amp; drop, or <strong>Ctrl+V</strong></div>
         <div class="drop-kbd">Paste latest QTA / FlashAlpha screenshot</div>
@@ -1720,12 +1720,13 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
     <!-- Image upload zone for bookmap/L2/T&S screenshots -->
     <div id="of-drop-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:12px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s;background:var(--s2)"
-      onclick="setActiveZone('of');document.getElementById('of-file-input').click();"
+      onclick="setActiveZone('of')"
+      ondblclick="document.getElementById('of-file-input').click()"
       ondragover="event.preventDefault();this.style.borderColor='var(--green2)'"
       ondragleave="this.style.borderColor='var(--b2)'"
       ondrop="event.preventDefault();this.style.borderColor='var(--b2)';handleOFDrop(event)">
-      <div style="font-size:12px;color:var(--t2)">📊 Click, drag & drop, or <kbd style="background:var(--s3);border:1px solid var(--b2);border-radius:2px;padding:1px 5px;font-size:10px">Ctrl+V</kbd></div>
-      <div style="font-size:10px;color:var(--t3);margin-top:3px">Paste Bookmap / L2 / Time & Sales screenshot</div>
+      <div style="font-size:12px;color:var(--t2)">📊 Click to activate → <kbd style="background:var(--s3);border:1px solid var(--b2);border-radius:2px;padding:1px 5px;font-size:10px">Ctrl+V</kbd> to paste</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px">Double-click to browse · Drag & drop also works</div>
     </div>
     <input type="file" id="of-file-input" accept="image/*" style="display:none" onchange="handleOFFile(this.files[0])">
 
@@ -2040,8 +2041,8 @@ let esBasisFetched = false;
 function recalcESFairValue() {
   if (!priceData['SPX']) return;
   const spx = priceData['SPX'];
-  const rate = 0.053;
-  const divYield = 0.013;
+  const rate = 0.050;
+  const divYield = 0.015;
   // Find next ES expiry (3rd Friday of Mar/Jun/Sep/Dec)
   const today = new Date();
   let expiry = null;
