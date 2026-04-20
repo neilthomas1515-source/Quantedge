@@ -1685,16 +1685,19 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         <span class="gap-fill-status" id="gap-fill-status">—</span>
       </div>
     </div>
-    <div class="bias-selector" style="margin-bottom:7px">
-      <div class="bias-btn" id="bias-bull" onclick="setBias('bull')">▲ Bull</div>
-      <div class="bias-btn" id="bias-bear" onclick="setBias('bear')">▼ Bear</div>
-      <div class="bias-btn" id="bias-neutral" onclick="setBias('neutral')">◆ Neutral</div>
-      <div class="bias-btn" id="bias-fade" onclick="setBias('fade')">↩ Fade</div>
+
+    <!-- AI Bias Output -->
+    <div id="bias-card" style="background:var(--s3);border:1px solid var(--b2);border-radius:5px;padding:10px 12px;margin-bottom:8px;min-height:60px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div id="bias-direction" style="font-family:var(--sans);font-size:20px;font-weight:900;color:var(--t3)">—</div>
+        <div id="bias-confidence-bar" style="flex:1;height:4px;background:var(--b2);border-radius:2px;overflow:hidden"><div id="bias-conf-fill" style="height:100%;width:0%;background:var(--green);border-radius:2px;transition:width 0.5s"></div></div>
+        <div id="bias-conf-pct" style="font-size:11px;color:var(--t2)"></div>
+      </div>
+      <div id="bias-reasoning" style="font-size:12px;color:var(--t2);line-height:1.5">Click Generate Bias to get AI analysis</div>
     </div>
-    <div class="field" style="margin-bottom:6px">
-      <label>Thesis</label>
-      <textarea id="morning-thesis" placeholder="e.g. GEX positive, above VWAP, targeting PDH. Watching for open drive above ON high..." rows="2"></textarea>
-    </div>
+
+    <button id="btn-bias" onclick="generateMorningBias()" style="width:100%;padding:7px;background:linear-gradient(135deg,#6b21a8,#4c1d95);border:none;border-radius:4px;color:var(--white);font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;margin-bottom:8px">⚡ Generate Bias</button>
+
     <div class="field" style="margin-bottom:6px">
       <label>Key Events Today</label>
       <input type="text" id="morning-events" placeholder="e.g. CPI 8:30, Fed speaker 2pm, FOMC minutes">
@@ -1703,6 +1706,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <label>News / Headlines</label>
       <textarea id="news-headlines" placeholder="e.g. JPM earnings beat, tech selling off pre-market. China PMI weak overnight. Fed Waller hawkish..." rows="2"></textarea>
     </div>
+    <textarea id="morning-thesis" style="display:none"></textarea>
   </div>
 
   <!-- BOOKMAP / ORDER FLOW -->
@@ -2580,7 +2584,7 @@ function hasEnoughData() {
     !!document.getElementById('tick').value,
     !!gexHistory.length,
     !!priceData['ES'],
-    !!document.getElementById('morning-thesis').value,
+    !!currentBias,
     !!document.getElementById('vah').value,
   ];
   return checks.filter(Boolean).length >= 4;
@@ -2627,7 +2631,7 @@ function buildPrompt() {
   const schwabPos   = document.getElementById('schwab-pos').textContent || 'offline';
   const manualPos   = g('pos-manual');
   const morningBias = currentBias ? currentBias.toUpperCase() : 'not set';
-  const thesis      = g('morning-thesis');
+  const thesis      = document.getElementById('morning-thesis')?.value || '';
   const events      = g('morning-events');
   const bookmap     = g('bookmap-notes');
   const news        = g('news-headlines');
@@ -3007,10 +3011,103 @@ function showToast(msg, type) {
 let currentBias = null;
 function setBias(bias) {
   currentBias = bias;
-  ['bull','bear','neutral','fade'].forEach(b => {
-    document.getElementById('bias-' + b).className = 'bias-btn' + (b === bias ? ' active-' + b : '');
-  });
   scheduleAutoTrigger();
+}
+
+// ══════════════════════════════════════════════════
+// AI MORNING BIAS GENERATOR
+// ══════════════════════════════════════════════════
+async function generateMorningBias() {
+  const btn = document.getElementById('btn-bias');
+  const card = document.getElementById('bias-card');
+  const dirEl = document.getElementById('bias-direction');
+  const reasonEl = document.getElementById('bias-reasoning');
+  const confFill = document.getElementById('bias-conf-fill');
+  const confPct = document.getElementById('bias-conf-pct');
+
+  btn.disabled = true;
+  btn.textContent = '⟳ Analyzing…';
+  reasonEl.textContent = 'Reading market data…';
+
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+
+  const prompt = `You are an ES futures morning bias analyst. Based on the data below, determine the most probable directional bias for today's ES trading session.
+
+OVERNIGHT DATA:
+- O/N High: ${g('on-hi') || '—'} | O/N Low: ${g('on-lo') || '—'}
+- Asia High: ${g('asia-hi') || '—'} | Asia Low: ${g('asia-lo') || '—'}
+- London High: ${g('lon-hi') || '—'} | London Low: ${g('lon-lo') || '—'}
+
+SESSION LEVELS:
+- Prev Close: ${dayLevels.prevClose?.toFixed(2) || '—'}
+- Today Open: ${dayLevels.todayOpen?.toFixed(2) || '—'}
+- PDH: ${dayLevels.pdh?.toFixed(2) || '—'} | PDL: ${dayLevels.pdl?.toFixed(2) || '—'}
+- Week High: ${dayLevels.wkHigh?.toFixed(2) || '—'} | Week Low: ${dayLevels.wkLow?.toFixed(2) || '—'}
+- Gap: ${dayLevels.prevClose && dayLevels.todayOpen ? (dayLevels.todayOpen - dayLevels.prevClose).toFixed(2) + ' pts' : '—'}
+
+VOLUME PROFILE:
+- VAH: ${g('vah') || '—'} | VAL: ${g('val') || '—'} | POC: ${g('poc') || '—'}
+- VWAP: ${g('vwap') || '—'}
+- VWAP +1SD: ${g('vwap-1sd-up') || '—'} | VWAP -1SD: ${g('vwap-1sd-dn') || '—'}
+
+MARKET INTERNALS:
+- TICK: ${g('tick') || '—'} | TRIN: ${g('trin') || '—'}
+- ADSPD: ${g('adspd') || '—'}
+
+GEX CONTEXT:
+- Regime: ${g('gex-regime') || '—'}
+- Net GEX: ${g('gex-level') || '—'}
+
+KEY EVENTS: ${g('morning-events') || 'None noted'}
+NEWS: ${g('news-headlines') || 'None noted'}
+
+Respond ONLY with this JSON — no other text:
+{
+  "bias": "BULL" | "BEAR" | "NEUTRAL",
+  "confidence": 0-100,
+  "reasoning": "2-3 sentence explanation of the bias based on the data above"
+}`;
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'anthropic',
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(b => b.type === 'text')?.text || '';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    currentBias = parsed.bias.toLowerCase();
+
+    // Update bias card
+    const colors = { BULL: 'var(--green)', BEAR: 'var(--red)', NEUTRAL: 'var(--amber)' };
+    const icons  = { BULL: '▲ BULL', BEAR: '▼ BEAR', NEUTRAL: '◆ NEUTRAL' };
+    dirEl.textContent = icons[parsed.bias] || parsed.bias;
+    dirEl.style.color = colors[parsed.bias] || 'var(--cyan)';
+    reasonEl.textContent = parsed.reasoning;
+    confFill.style.width = parsed.confidence + '%';
+    confFill.style.background = colors[parsed.bias] || 'var(--cyan)';
+    confPct.textContent = parsed.confidence + '%';
+
+    card.style.borderColor = parsed.bias === 'BULL' ? 'rgba(0,255,136,0.3)' : parsed.bias === 'BEAR' ? 'rgba(255,51,85,0.3)' : 'rgba(255,170,0,0.3)';
+
+    // Also populate morning-thesis for use in main signal prompt
+    const thesisEl = document.getElementById('morning-thesis');
+    if (thesisEl) thesisEl.value = parsed.reasoning;
+
+    scheduleAutoTrigger();
+  } catch(e) {
+    reasonEl.textContent = 'Failed: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Generate Bias';
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -3661,7 +3758,7 @@ const READINESS_ITEMS = [
   { id: 'tick',          label: '$TICK' },
   { id: 'vwap',          label: 'VWAP' },
   { id: 'vah',           label: 'Vol Profile' },
-  { id: 'morning-thesis',label: 'Thesis' },
+  { id: 'morning-thesis',label: 'Bias' },
   { id: 'asia-hi',       label: 'Asia Levels' },
   { id: 'lon-hi',        label: 'London Levels' },
   { id: 'on-hi',         label: 'O/N Range' },
