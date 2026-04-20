@@ -1393,7 +1393,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
     <div class="px-item">
       <span class="px-sym">SPX</span>
-      <span class="px-val" id="px-spy">—</span>
+      <span class="px-val" id="px-spx">—</span>
     </div>
     <div class="px-item">
       <span class="px-sym">QQQ</span>
@@ -2037,7 +2037,7 @@ let esBasisFetched = false;
 function recalcESFairValue() {
   if (!priceData['SPX']) return;
   const spx = priceData['SPX'];
-  const rate = 0.045;
+  const rate = 0.047;
   const divYield = 0.015;
   // Find next ES expiry (3rd Friday of Mar/Jun/Sep/Dec)
   const today = new Date();
@@ -2146,11 +2146,7 @@ updateClock();
 // LIVE PRICES — FINNHUB
 // ══════════════════════════════════════════════════
 const SYMBOLS = [
-  { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
-  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' }, // updated by Yahoo fetch
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
-  { id: 'px-vix',  fin: 'VIXY', label: 'VIX',  storeAs: 'VIX'        },
-  { id: 'px-dxy',  fin: 'UUP',  label: 'DXY~', storeAs: 'DX-Y.NYB'   },
 ];
 
 // Futures basis — ES1! minus SPX, calculated once at load
@@ -2325,6 +2321,33 @@ async function fetchDayLevels() {
     updateESDisplay();
     const spxEl = document.getElementById('px-spx');
     if (spxEl) spxEl.textContent = yd.close.toFixed(2);
+
+    // Fetch VIX via Yahoo
+    try {
+      const vixRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX');
+      const vixData = await vixRes.json();
+      const vixPrice = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (vixPrice) {
+        priceData['VIX'] = vixPrice;
+        const vixEl = document.getElementById('px-vix');
+        if (vixEl) {
+          vixEl.textContent = vixPrice.toFixed(2);
+          vixEl.style.color = vixPrice > 25 ? 'var(--red)' : vixPrice > 18 ? 'var(--amber)' : 'var(--green)';
+        }
+      }
+    } catch {}
+
+    // Fetch DXY via Yahoo
+    try {
+      const dxyRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB');
+      const dxyData = await dxyRes.json();
+      const dxyPrice = dxyData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (dxyPrice) {
+        priceData['DX-Y.NYB'] = dxyPrice;
+        const dxyEl = document.getElementById('px-dxy');
+        if (dxyEl) dxyEl.textContent = dxyPrice.toFixed(2);
+      }
+    } catch {}
 
     const lbl = yd.date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
     const fetchTime = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
