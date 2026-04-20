@@ -2920,16 +2920,13 @@ MARKET INTERNALS:
 - NQ: ${g('nq-bias') || 'N/A'} | YM: ${g('ym-bias') || 'N/A'} | RTY: ${g('rty-bias') || 'N/A'}
 
 GEX / MACRO CONTEXT:
-- VIX Level: ${g('vix-level') || vixLive} | VIX Trend: ${g('vix-trend') || 'N/A'}
 - VIX (live): ${vixLive} | VIX Trend: ${g('vix-trend') || 'N/A'}
 - DXY (live): ${dxyLive} | DXY Direction: ${g('dxy-dir') || 'N/A'}
 - NQ Bias vs ES: ${g('nq-bias') || 'N/A'}
 - 0DTE Expiry: ${g('is-0dte') || 'no'}
-${gexHistory.length ? `- GEX Screenshots: ${gexHistory.length} snapshot(s) provided. THESE ARE THE PRIMARY DATA SOURCE. Read the actual GEX bars, Max Pain, NRC, flip zone, call walls, put walls directly from the images. All strikes shown are in SPY scale. Current SPY/ES ratio = ${(parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2)} (ES ${esPrice} ÷ SPX ${spyPrice}). Convert SPY strikes to ES by multiplying by this ratio. Reference ES levels in all output, not SPY strikes.` : '- GEX Chart: not uploaded — rely on manual entries above'}
-
-CRITICAL GEX SCALE NOTE: GEX screenshots show SPY option strikes (~555-580 range). To convert to ES scale: SPY strike × ${spyPrice ? (parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2) : '12.70'} = ES equivalent. Example: SPY 570 × ${spyPrice ? (parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2) : '12.70'} = ES ${spyPrice ? (570 * parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(0) : '~7239'}. Always express levels in ES scale in your response. Never output raw SPY strike numbers without ES conversion.
-
-${snapSlots.filter(s=>s.base64).length ? `INDICATOR SNAPSHOTS: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')} — analyze each image provided.` : ''}
+- ES Current Price: ${esPrice} | SPX: ${spyPrice}
+${gexHistory.length ? `- GEX: ${gexHistory.length} screenshot(s) attached. Read GEX bars, Max Pain, NRC, flip zone, call walls, put walls FROM THE IMAGES ONLY. The screenshots use SPY option strikes. Express all levels in ES scale (current ES = ${esPrice}). Do not mention SPY strike numbers in your response.` : '- GEX: no screenshot uploaded'}
+${snapSlots.filter(s=>s.base64).length ? `- Indicator snapshots: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')}` : ''}
 
 ORDER FLOW / BOOKMAP:
 ${bookmap || 'No observations entered'}
@@ -4059,7 +4056,7 @@ function updatePresignalDash() {
     let filled = 0;
     rGrid.innerHTML = READINESS_ITEMS.map(item => {
       const val = document.getElementById(item.id)?.value?.trim();
-      const ok  = item.id === 'gex-regime' ? !!(val || gexHistory.length) : !!val;
+      const ok  = item.id === 'gex-regime' ? !!(gexHistory.length) : !!val;
       if (ok) filled++;
       return `<div class="readiness-item ${ok?'filled':'missing'}"><div class="readiness-dot"></div><span>${item.label}</span></div>`;
     }).join('');
