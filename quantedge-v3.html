@@ -2037,8 +2037,8 @@ let esBasisFetched = false;
 async function fetchESBasis() {
   try {
     const es = await (await fetch(`https://finnhub.io/api/v1/quote?symbol=ES1%21&token=${FINNHUB_KEY}`)).json();
-    if (es && es.c && es.c > 5000 && (priceData['SPX'] || priceData['SPY'])) {
-      esBasis = +(es.c - (priceData['SPX'] || priceData['SPY']*10)).toFixed(2);
+    if (es && es.c && es.c > 5000 && priceData['SPX']) {
+      esBasis = +(es.c - priceData['SPX']).toFixed(2);
       esBasisFetched = true;
       updateESDisplay();
     }
@@ -2046,13 +2046,15 @@ async function fetchESBasis() {
 }
 
 function updateESDisplay() {
-  // Use SPX from Yahoo if available, otherwise SPY*10
-  const spx = priceData['SPX'] || (priceData['SPY'] ? priceData['SPY'] * 10 : null);
+  const spx = priceData['SPX'];
   if (!spx) return;
   const es = +(spx + esBasis).toFixed(2);
   priceData['ES'] = es;
   const el = document.getElementById('px-es');
   if (el) el.textContent = es.toFixed(2);
+  // Show basis info in topbar
+  const esEl = document.getElementById('px-es');
+  if (esEl) esEl.title = `SPX ${spx.toFixed(2)} + basis ${esBasis >= 0 ? '+' : ''}${esBasis.toFixed(1)}`;
 }
 
 // ══════════════════════════════════════════════════
@@ -2492,20 +2494,22 @@ function deleteOFSnapshot(idx) {
   renderOFHistory();
 }
 
-// Ctrl+V paste for OF zone
+// Ctrl+V paste — OF zone gets priority when bookmap-notes or OF zone is focused
 document.addEventListener('paste', e => {
   const items = e.clipboardData?.items;
   if (!items) return;
-  // Only paste to OF if GEX zone doesn't have focus / not already handling
+  const active = document.activeElement;
+  const inOFZone = active?.id === 'bookmap-notes' || active?.id === 'of-drop-zone' || document.getElementById('of-drop-zone')?.contains(active);
   for (const item of items) {
     if (item.type.startsWith('image/')) {
-      // If active element is in OF section, use OF handler
-      const active = document.activeElement;
-      const ofSect = document.getElementById('of-drop-zone');
-      if (ofSect && (active === ofSect || ofSect.contains(active) || active.id === 'bookmap-notes')) {
+      if (inOFZone) {
+        // Send to OF handler
         setOFImage(item.getAsFile());
         e.stopPropagation();
+        e.preventDefault();
+        return;
       }
+      // Otherwise GEX handler takes it (handled elsewhere)
     }
   }
 });
@@ -3473,7 +3477,7 @@ function connectWebSocket() {
   try {
     wsConn = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_KEY}`);
     wsConn.onopen = () => {
-      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPY' }));
+      wsConn.send(JSON.stringify({ type: 'subscribe', symbol: 'SPX' }));
       document.getElementById('viz-ws-dot').className = 'viz-ws-dot live';
     };
     wsConn.onmessage = e => {
@@ -3482,7 +3486,7 @@ function connectWebSocket() {
       const trade = data.data[data.data.length - 1];
       if (!trade) return;
       const spyPrice = trade.p;
-      const esPrice  = +(spyPrice * 10 + esBasis).toFixed(2);
+      const esPrice  = +(spyPrice + esBasis).toFixed(2); // SPX + basis
       const prev = priceData['ES'] || esPrice;
       priceData['SPX'] = spyPrice;
       priceData['ES']  = esPrice;
@@ -3490,7 +3494,7 @@ function connectWebSocket() {
       // Update topbar
       const spyEl = document.getElementById('px-spy');
       const esEl  = document.getElementById('px-es');
-      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPY_prev']||spyPrice) ? ' up' : ' dn'); }
+      if (spyEl) { spyEl.textContent = spyPrice.toFixed(2); spyEl.className = 'px-val' + (spyPrice > (priceData['SPX_prev']||spyPrice) ? ' up' : ' dn'); }
       if (esEl)  { esEl.textContent  = esPrice.toFixed(2);  esEl.className  = 'px-val' + (esPrice > prev ? ' up' : esPrice < prev ? ' dn' : ''); }
       priceData['SPX_prev'] = spyPrice;
 
