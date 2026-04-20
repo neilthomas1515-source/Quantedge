@@ -1392,12 +1392,8 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <span class="px-chg" id="px-es-chg"></span>
     </div>
     <div class="px-item">
-      <span class="px-sym">SPY</span>
-      <span class="px-val" id="px-spy">—</span>
-    </div>
-    <div class="px-item">
       <span class="px-sym">SPX</span>
-      <span class="px-val" id="px-spx">—</span>
+      <span class="px-val" id="px-spy">—</span>
     </div>
     <div class="px-item">
       <span class="px-sym">QQQ</span>
@@ -2041,7 +2037,7 @@ let esBasisFetched = false;
 function recalcESFairValue() {
   if (!priceData['SPX']) return;
   const spx = priceData['SPX'];
-  const rate = 0.050;
+  const rate = 0.048;
   const divYield = 0.015;
   // Find next ES expiry (3rd Friday of Mar/Jun/Sep/Dec)
   const today = new Date();
@@ -2820,13 +2816,12 @@ function buildPrompt() {
   return `You are QuantEdge Signal Engine — an elite ES/MES futures intraday trading AI. The trader uses ${contracts} ES/MES contracts as their default size.
 
 LIVE MARKET DATA:
-- ES~ (SPX, current): ${esPrice}
-- SPX: ${spyPrice}
+- ES Futures price: ${esPrice} (= SPX ${spyPrice} + fair value basis ${esBasis >= 0 ? "+" : ""}${esBasis.toFixed(1)} pts)
+- NOTE: All session levels below are in SPX/ES scale (~${spyPrice} range). ES trades at a small premium to SPX due to futures fair value.
 - VIX (live): ${vixLive}
 - DXY (live): ${dxyLive}
 - EST Time: ${new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}
 - Session Period: ${sessionPeriod.label} — ${sessionPeriod.note}
-- ES vs SPY Relative Strength: ${rsNote}
 
 GAP ANALYSIS:
 ${gapInfo}
@@ -2843,14 +2838,14 @@ ECONOMIC CALENDAR (today):
 ${calEvents}
 
 SESSION LEVELS:
-- Prev Close (ES~): ${dayLevels.prevClose !== null ? dayLevels.prevClose.toFixed(2) : 'N/A'}
-- Today Open (ES~): ${dayLevels.todayOpen !== null ? dayLevels.todayOpen.toFixed(2) : 'N/A'}
-- PDH (ES~, locked at open): ${dayLevels.pdh !== null ? dayLevels.pdh.toFixed(2) : 'N/A'}
-- PDL (ES~, locked at open): ${dayLevels.pdl !== null ? dayLevels.pdl.toFixed(2) : 'N/A'}
-- Prior Week High (ES~): ${dayLevels.wkHigh !== null ? dayLevels.wkHigh.toFixed(2) : 'N/A'}
-- Prior Week Low (ES~): ${dayLevels.wkLow !== null ? dayLevels.wkLow.toFixed(2) : 'N/A'}
-- Prior Month High (ES~): ${dayLevels.moHigh !== null ? dayLevels.moHigh.toFixed(2) : 'N/A'}
-- Prior Month Low (ES~): ${dayLevels.moLow !== null ? dayLevels.moLow.toFixed(2) : 'N/A'}
+- Prev Close (SPX): ${dayLevels.prevClose !== null ? dayLevels.prevClose.toFixed(2) : 'N/A'}
+- Today Open (SPX): ${dayLevels.todayOpen !== null ? dayLevels.todayOpen.toFixed(2) : 'N/A'}
+- PDH (SPX yesterday high): ${dayLevels.pdh !== null ? dayLevels.pdh.toFixed(2) : 'N/A'}
+- PDL (SPX yesterday low): ${dayLevels.pdl !== null ? dayLevels.pdl.toFixed(2) : 'N/A'}
+- Prior Week High (SPX): ${dayLevels.wkHigh !== null ? dayLevels.wkHigh.toFixed(2) : 'N/A'}
+- Prior Week Low (SPX): ${dayLevels.wkLow !== null ? dayLevels.wkLow.toFixed(2) : 'N/A'}
+- Prior Month High (SPX): ${dayLevels.moHigh !== null ? dayLevels.moHigh.toFixed(2) : 'N/A'}
+- Prior Month Low (SPX): ${dayLevels.moLow !== null ? dayLevels.moLow.toFixed(2) : 'N/A'}
 - Overnight High: ${g('on-hi') || 'N/A'} / Overnight Low: ${g('on-lo') || 'N/A'}
 - Asia: H=${g('asia-hi') || 'N/A'} / L=${g('asia-lo') || 'N/A'}
 - London: H=${g('lon-hi') || 'N/A'} / L=${g('lon-lo') || 'N/A'}
@@ -3491,13 +3486,14 @@ function updateGapDisplay() {
 // ══════════════════════════════════════════════════
 function calcRS() {
   const es  = priceData['ES'];
-  const spy = priceData['SPX'] || priceData['SPY'];
-  if (!es || !spy) return 'insufficient data';
-  const esImplied = priceData['SPX'] ? spy : spy * 10;
-  const diff = es - esImplied;
-  if (Math.abs(diff) < 2)  return 'ES in line with SPY (neutral RS)';
-  if (diff > 0) return `ES leading SPY by ${diff.toFixed(2)} pts (ES showing relative strength — bullish divergence)`;
-  return `ES lagging SPY by ${Math.abs(diff).toFixed(2)} pts (ES showing relative weakness — bearish divergence)`;
+  const spx = priceData['SPX'];
+  if (!es || !spx) return 'N/A';
+  const diff = +(es - spx).toFixed(1);
+  // diff should equal esBasis — deviation from that shows unusual premium/discount
+  const deviation = +(diff - esBasis).toFixed(1);
+  if (Math.abs(deviation) < 1) return `ES at fair value (basis +${esBasis.toFixed(1)} pts above SPX)`;
+  if (deviation > 1) return `ES at +${deviation.toFixed(1)} pts above fair value (bullish premium)`;
+  return `ES at ${deviation.toFixed(1)} pts below fair value (bearish discount)`;
 }
 
 // ══════════════════════════════════════════════════
