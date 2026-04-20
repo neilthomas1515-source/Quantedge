@@ -2273,15 +2273,27 @@ async function fetchDayLevels() {
     const q  = result.indicators?.quote?.[0];
     if (!ts || !q) throw new Error('No quotes');
 
-    // Build days array exactly like qm-final
+    // Fetch 1mo of data to get proper week high/low history
+    const respFull = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
+    if (!respFull.ok) throw new Error('HTTP ' + respFull.status);
+    const dataFull = await respFull.json();
+    const resultFull = dataFull.chart?.result?.[0];
+    const tsFull = resultFull?.timestamp;
+    const qFull  = resultFull?.indicators?.quote?.[0];
+    const metaFull = resultFull?.meta;
+
+    // Build days array from 1mo data
     const days = [];
-    for (let i = 0; i < ts.length; i++) {
-      if (!q.close[i]) continue;
-      days.push({ date: new Date(ts[i] * 1000), high: q.high[i], low: q.low[i], close: q.close[i] });
+    for (let i = 0; i < tsFull.length; i++) {
+      if (!qFull.close[i]) continue;
+      days.push({ date: new Date(tsFull[i] * 1000), high: qFull.high[i], low: qFull.low[i], close: qFull.close[i], open: qFull.open[i] });
     }
     if (days.length < 2) throw new Error('Not enough days');
 
-    const yd = days[days.length - 1]; // yesterday
+    const yd = days[days.length - 1]; // most recent completed day
+
+    // Today's open from meta
+    const todayOpenVal = metaFull?.regularMarketOpen || null;
 
     // Week calc exactly like qm-final
     const gw = d => { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()+3-(x.getDay()+6)%7); const w = new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w)/864e5-3+(w.getDay()+6)%7)/7); };
@@ -2294,19 +2306,13 @@ async function fetchDayLevels() {
 
     const fmt = v => v ? v.toFixed(2) : '';
 
-    // Populate session level fields
-    const fill = (id, v) => {
-      const el = document.getElementById(id);
-      if (el && v) { el.value = v; el.style.borderColor = 'rgba(0,255,136,0.4)'; el.style.background = 'rgba(0,255,136,0.03)'; }
-    };
-
     // Store in dayLevels
     dayLevels.prevClose = yd.close;
-    dayLevels.todayOpen = null; // open not in historical — stays manual
+    dayLevels.todayOpen = todayOpenVal ? +todayOpenVal.toFixed(2) : null;
     if (dayLevels.pdh === null) dayLevels.pdh = yd.high;
     if (dayLevels.pdl === null) dayLevels.pdl = yd.low;
-    dayLevels.wkHigh = wh;
-    dayLevels.wkLow  = wl;
+    dayLevels.wkHigh = isFinite(wh) ? +wh.toFixed(2) : null;
+    dayLevels.wkLow  = isFinite(wl) ? +wl.toFixed(2) : null;
 
     // Update display elements
     const setVal = (id, val) => {
@@ -2990,8 +2996,8 @@ async function generateSignal() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         source: 'anthropic',
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
+        model: 'claude-opus-4-5',
+        max_tokens: 2000,
         messages: [{ role: 'user', content: msgContent }]
       })
     });
@@ -3273,8 +3279,8 @@ Respond ONLY with this JSON — no other text:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         source: 'anthropic',
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
+        model: 'claude-opus-4-5',
+        max_tokens: 400,
         messages: [{ role: 'user', content: prompt }]
       })
     });
