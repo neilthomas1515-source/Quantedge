@@ -1609,13 +1609,13 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
   </div>
 
-  <!-- MACRO / GEX CONTEXT -->
+  <!-- MACRO / GEX CONTEXT — auto from live data -->
   <div class="sect">
-    <div class="sect-hd">Macro + GEX Context <div class="hd-line"></div></div>
-    <div class="input-grid">
+    <div class="sect-hd">Macro Context <div class="hd-line"></div></div>
+    <div class="input-grid" style="margin-bottom:6px">
       <div class="field">
-        <label>VIX Level</label>
-        <input type="number" id="vix-level" placeholder="e.g. 18.5" step="0.1">
+        <label>VIX <span style="color:var(--t3);font-size:9px">(live)</span></label>
+        <div style="padding:6px 8px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;font-size:15px;font-weight:700;color:var(--amber)" id="vix-display">—</div>
       </div>
       <div class="field">
         <label>VIX Trend</label>
@@ -1627,23 +1627,8 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         </select>
       </div>
       <div class="field">
-        <label>GEX Regime</label>
-        <select id="gex-regime">
-          <option value="">—</option>
-          <option value="pos_high">Positive High</option>
-          <option value="pos_low">Positive Low</option>
-          <option value="neg">Negative</option>
-          <option value="flip">Near Flip</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Regime Duration</label>
-        <select id="regime-dur">
-          <option value="">—</option>
-          <option value="new">New (&lt;30 min)</option>
-          <option value="mid">Established (30m–2h)</option>
-          <option value="mature">Mature (&gt;2h)</option>
-        </select>
+        <label>DXY <span style="color:var(--t3);font-size:9px">(live)</span></label>
+        <div style="padding:6px 8px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;font-size:15px;font-weight:700;color:var(--t1)" id="dxy-display">—</div>
       </div>
       <div class="field">
         <label>DXY Direction</label>
@@ -1661,13 +1646,23 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
           <option value="yes">Yes (SPX/SPY)</option>
         </select>
       </div>
-    </div>
-    <div style="margin-top:6px">
       <div class="field">
-        <label>Key GEX Levels (manual notes)</label>
-        <input type="text" id="gex-notes" placeholder="e.g. +GEX wall 5600, flip 5540, -GEX zone 5500">
+        <label>NQ Bias</label>
+        <select id="nq-bias">
+          <option value="">—</option>
+          <option value="leading">Leading</option>
+          <option value="lagging">Lagging</option>
+          <option value="inline">In-line</option>
+        </select>
       </div>
     </div>
+    <!-- Hidden fields kept for prompt compatibility -->
+    <input type="hidden" id="gex-regime" value="">
+    <input type="hidden" id="regime-dur" value="">
+    <input type="hidden" id="gex-notes" value="">
+    <input type="hidden" id="vix-level" value="">
+    <input type="hidden" id="ym-bias" value="">
+    <input type="hidden" id="rty-bias" value="">
   </div>
 
   <!-- MORNING BIAS -->
@@ -2719,11 +2714,11 @@ async function fetchVIXandDXY() {
     const vixPrice = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if (vixPrice) {
       priceData['VIX'] = vixPrice;
+      const col = vixPrice > 25 ? 'var(--red)' : vixPrice > 18 ? 'var(--amber)' : 'var(--green)';
       const el = document.getElementById('px-vix');
-      if (el) {
-        el.textContent = vixPrice.toFixed(2);
-        el.style.color = vixPrice > 25 ? 'var(--red)' : vixPrice > 18 ? 'var(--amber)' : 'var(--green)';
-      }
+      if (el) { el.textContent = vixPrice.toFixed(2); el.style.color = col; }
+      const disp = document.getElementById('vix-display');
+      if (disp) { disp.textContent = vixPrice.toFixed(2); disp.style.color = col; }
     }
   } catch {}
   // DXY via Yahoo DX-Y.NYB
@@ -2735,6 +2730,8 @@ async function fetchVIXandDXY() {
       priceData['DX-Y.NYB'] = dxyPrice;
       const el = document.getElementById('px-dxy');
       if (el) el.textContent = dxyPrice.toFixed(2);
+      const disp = document.getElementById('dxy-display');
+      if (disp) disp.textContent = dxyPrice.toFixed(2);
     }
   } catch {}
 }
@@ -2897,14 +2894,15 @@ MARKET INTERNALS:
 
 GEX / MACRO CONTEXT:
 - VIX Level: ${g('vix-level') || vixLive} | VIX Trend: ${g('vix-trend') || 'N/A'}
-- GEX Regime: ${g('gex-regime') || 'N/A'} | Duration: ${g('regime-dur') || 'N/A'}
-- DXY Direction: ${g('dxy-dir') || 'N/A'}
-- 0DTE Expiry: ${g('is-0dte')}
-- GEX Key Levels: ${g('gex-notes') || 'N/A'}
-${gexHistory.length ? `- GEX Timeline: ${gexHistory.length} snapshot(s) provided oldest→newest. Analyze evolution — identify regime shifts, wall movement, flip zone proximity, continuation vs reversal signals.` : '- GEX Chart: not uploaded'}
-${snapSlots.filter(s=>s.base64).length ? `- Indicator Snapshots: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')} — analyze each image provided.` : '- Indicator Snapshots: none uploaded'}
+- VIX (live): ${vixLive} | VIX Trend: ${g('vix-trend') || 'N/A'}
+- DXY (live): ${dxyLive} | DXY Direction: ${g('dxy-dir') || 'N/A'}
+- NQ Bias vs ES: ${g('nq-bias') || 'N/A'}
+- 0DTE Expiry: ${g('is-0dte') || 'no'}
+${gexHistory.length ? `- GEX Screenshots: ${gexHistory.length} snapshot(s) provided. THESE ARE THE PRIMARY DATA SOURCE. Read the actual GEX bars, Max Pain, NRC, flip zone, call walls, put walls directly from the images. All strikes shown are in SPY scale. Current SPY/ES ratio = ${(parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2)} (ES ${esPrice} ÷ SPX ${spyPrice}). Convert SPY strikes to ES by multiplying by this ratio. Reference ES levels in all output, not SPY strikes.` : '- GEX Chart: not uploaded — rely on manual entries above'}
 
-CRITICAL GEX SCALE NOTE: All GEX screenshots are from FlashAlpha and show SPY/SPX option strikes. SPY strikes (~560-580) must be multiplied by ~12.7 to get ES equivalent (e.g. SPY 560 = ES ~7112, SPY 570 = ES ~7239). Do NOT reference raw SPY strike numbers as ES levels. Convert all strikes to ES scale when making trade recommendations. Current ES price is ${esPrice} for reference.
+CRITICAL GEX SCALE NOTE: GEX screenshots show SPY option strikes (~555-580 range). To convert to ES scale: SPY strike × ${spyPrice ? (parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2) : '12.70'} = ES equivalent. Example: SPY 570 × ${spyPrice ? (parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(2) : '12.70'} = ES ${spyPrice ? (570 * parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(0) : '~7239'}. Always express levels in ES scale in your response. Never output raw SPY strike numbers without ES conversion.
+
+${snapSlots.filter(s=>s.base64).length ? `INDICATOR SNAPSHOTS: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')} — analyze each image provided.` : ''}
 
 ORDER FLOW / BOOKMAP:
 ${bookmap || 'No observations entered'}
