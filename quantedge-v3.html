@@ -1391,11 +1391,11 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <span class="px-chg" id="px-es-chg"></span>
     </div>
     <div class="px-item">
-      <span class="px-sym">SPX</span>
+      <span class="px-sym">SPY</span>
       <span class="px-val" id="px-spy">—</span>
     </div>
     <div class="px-item">
-      <span class="px-sym">SPY</span>
+      <span class="px-sym">SPX</span>
       <span class="px-val" id="px-spx">—</span>
     </div>
     <div class="px-item">
@@ -2089,10 +2089,10 @@ updateClock();
 // ══════════════════════════════════════════════════
 const SYMBOLS = [
   { id: 'px-spy',  fin: 'SPY',  label: 'SPY'  },
-  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' },
+  { id: 'px-spx',  fin: 'SPY',  label: 'SPX~' }, // updated by Yahoo fetch
   { id: 'px-qqq',  fin: 'QQQ',  label: 'QQQ'  },
-  { id: 'px-vix',  fin: 'VIX',  label: 'VIX',  invert: true },
-  { id: 'px-dxy',  fin: 'DX-Y.NYB', label: 'DXY' },
+  { id: 'px-vix',  fin: 'VIXY', label: 'VIX'  }, // VIXY ETF proxy for VIX
+  { id: 'px-dxy',  fin: 'UUP',  label: 'DXY~' }, // UUP ETF proxy for DXY
 ];
 
 // Futures basis — ES1! minus SPX, calculated once at load
@@ -2142,29 +2142,38 @@ async function fetchSPYNow() {
   btn.classList.add('fetching');
   btn.textContent = '⟳ Fetching…';
   try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EGSPC`);
-    const data = await res.json();
-    if (!data || !data.c) throw new Error('No data returned');
+    // Exact same method as qm-final
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const result = data.chart?.result?.[0];
+    if (!result) throw new Error('No data');
+    const ts = result.timestamp;
+    const q  = result.indicators?.quote?.[0];
+    if (!ts || !q) throw new Error('No quotes');
 
-    const prev = priceData['SPX'] || data.c;
-    priceData['SPX'] = data.c;
-    const esPrice = +(data.c + esBasis).toFixed(2);
+    const days = [];
+    for (let i = 0; i < ts.length; i++) {
+      if (!q.close[i]) continue;
+      days.push({ date: new Date(ts[i]*1000), high: q.high[i], low: q.low[i], close: q.close[i] });
+    }
+    if (days.length < 2) throw new Error('Not enough days');
+    const yd = days[days.length - 1];
+
+    const spxPrice = yd.close;
+    const prev = priceData['SPX'] || spxPrice;
+    priceData['SPX'] = spxPrice;
+    const esPrice = +(spxPrice + esBasis).toFixed(2);
     priceData['ES'] = esPrice;
 
-    const spyEl = document.getElementById('px-spy');
+    const spxEl = document.getElementById('px-spx');
     const esEl  = document.getElementById('px-es');
-    if (spyEl) {
-      spyEl.textContent = data.c.toFixed(2);
-      spyEl.className = 'px-val' + (data.c > prev ? ' up' : data.c < prev ? ' dn' : '');
-    }
-    if (esEl) {
-      esEl.textContent = esPrice.toFixed(2);
-      esEl.className = 'px-val' + (esPrice > (prev + esBasis) ? ' up' : esPrice < (prev + esBasis) ? ' dn' : '');
-    }
+    if (spxEl) { spxEl.textContent = spxPrice.toFixed(2); spxEl.className = 'px-val' + (spxPrice > prev ? ' up' : spxPrice < prev ? ' dn' : ''); }
+    if (esEl)  { esEl.textContent = esPrice.toFixed(2); }
 
-    const now = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12:false });
+    const now = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
     document.getElementById('spy-fetch-time').textContent = now + ' EST';
-    showToast(`SPX ${data.c.toFixed(2)} → ES~ ${esPrice.toFixed(2)}`, 'ok');
+    showToast(`SPX ${spxPrice.toFixed(2)} → ES~ ${esPrice.toFixed(2)}`, 'ok');
     scheduleAutoTrigger();
   } catch (e) {
     showToast('SPX fetch failed: ' + e.message, 'err');
@@ -2188,88 +2197,82 @@ let dayLevels = {
 async function fetchDayLevels() {
   const btn = document.getElementById('btn-levels-refresh');
   if (btn) { btn.textContent = '⟳ …'; btn.disabled = true; }
-  document.getElementById('auto-levels-note').textContent = 'Fetching from Finnhub…';
+  document.getElementById('auto-levels-note').textContent = 'Fetching…';
 
   try {
-    // ── 1. Quote: prev close, today open, PDH/PDL — SPX direct, same as qm-final ──
-    const qRes = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EGSPC`);
-    const qData = await qRes.json();
-    // Yahoo Finance response structure
-    const result = qData?.chart?.result?.[0];
-    const meta = result?.meta;
-    const q = meta ? {
-      pc: meta.chartPreviousClose || meta.previousClose,
-      o:  result.indicators?.quote?.[0]?.open?.[result.indicators.quote[0].open.length-1] || meta.regularMarketOpen,
-      c:  meta.regularMarketPrice,
-      h:  meta.regularMarketDayHigh,
-      l:  meta.regularMarketDayLow,
-    } : null;
-    if (!q || !q.pc) throw new Error('No quote data returned');
+    // Exact same method as qm-final fetchSPXLevels
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const result = data.chart?.result?.[0];
+    if (!result) throw new Error('No data');
+    const ts = result.timestamp;
+    const q  = result.indicators?.quote?.[0];
+    if (!ts || !q) throw new Error('No quotes');
 
-    // SPX values are already ES scale — no multiplier needed
-    const prevClose = +q.pc.toFixed(2);
-    const todayOpen = q.o ? +q.o.toFixed(2) : null;
+    // Build days array exactly like qm-final
+    const days = [];
+    for (let i = 0; i < ts.length; i++) {
+      if (!q.close[i]) continue;
+      days.push({ date: new Date(ts[i] * 1000), high: q.high[i], low: q.low[i], close: q.close[i] });
+    }
+    if (days.length < 2) throw new Error('Not enough days');
 
-    // Only lock PDH/PDL if not already set (first fetch = pre-market snapshot)
-    if (dayLevels.pdh === null && q.h) dayLevels.pdh = +q.h.toFixed(2);
-    if (dayLevels.pdl === null && q.l) dayLevels.pdl = +q.l.toFixed(2);
+    const yd = days[days.length - 1]; // yesterday
 
-    dayLevels.prevClose = prevClose;
-    dayLevels.todayOpen = todayOpen;
-    if (q && q.c) { priceData['SPX'] = q.c; updateESDisplay(); }
-    // Update SPX display
-    const spxDisplayEl = document.getElementById('px-spx'); if(spxDisplayEl && q && q.c) spxDisplayEl.textContent = q.c.toFixed(2);
+    // Week calc exactly like qm-final
+    const gw = d => { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()+3-(x.getDay()+6)%7); const w = new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w)/864e5-3+(w.getDay()+6)%7)/7); };
+    const gy = d => new Date(d).getFullYear();
+    let yw = gw(yd.date), yy = gy(yd.date);
+    const lw = days.filter(d => { const w=gw(d.date), y=gy(d.date); return yw===1?(y===yy-1&&w>=52):(y===yy&&w===yw-1); });
+    const lwDays = lw.length ? lw : days.slice(-6,-1);
+    const wh = Math.max(...lwDays.map(d => d.high));
+    const wl = Math.min(...lwDays.map(d => d.low));
 
-    // ── 2. Weekly candle (W resolution) ──
-    const to   = Math.floor(Date.now() / 1000);
-    const from = to - (8 * 24 * 60 * 60); // 8 days back covers full prior week
-    try {
-      const wk = await (await fetch(`https://finnhub.io/api/v1/stock/candle?from=${from}&to=${to}&token=${FINNHUB_KEY}`)).json();
-      if (wk && wk.h && wk.h.length >= 1) {
-        // Index 0 = prior week candle (most recent completed week)
-        const idx = wk.h.length >= 2 ? wk.h.length - 2 : 0;
-        dayLevels.wkHigh = +wk.h[idx].toFixed(2);
-        dayLevels.wkLow  = +wk.l[idx].toFixed(2);
-      }
-    } catch { /* weekly candle unavailable on plan — silently skip */ }
+    const fmt = v => v ? v.toFixed(2) : '';
 
-    // ── 3. Monthly candle (M resolution) ──
-    const fromMo = to - (65 * 24 * 60 * 60); // ~2 months back
-    try {
-      const mo = await (await fetch(`https://finnhub.io/api/v1/stock/candle?from=${fromMo}&to=${to}&token=${FINNHUB_KEY}`)).json();
-      if (mo && mo.h && mo.h.length >= 2) {
-        const idx = mo.h.length - 2; // prior completed month
-        dayLevels.moHigh = +mo.h[idx].toFixed(2);
-        dayLevels.moLow  = +mo.l[idx].toFixed(2);
-      }
-    } catch { /* monthly candle unavailable on plan — silently skip */ }
+    // Populate session level fields
+    const fill = (id, v) => {
+      const el = document.getElementById(id);
+      if (el && v) { el.value = v; el.style.borderColor = 'rgba(0,255,136,0.4)'; el.style.background = 'rgba(0,255,136,0.03)'; }
+    };
 
-    dayLevels.fetchedAt = new Date();
+    // Store in dayLevels
+    dayLevels.prevClose = yd.close;
+    dayLevels.todayOpen = null; // open not in historical — stays manual
+    if (dayLevels.pdh === null) dayLevels.pdh = yd.high;
+    if (dayLevels.pdl === null) dayLevels.pdl = yd.low;
+    dayLevels.wkHigh = wh;
+    dayLevels.wkLow  = wl;
 
-    // ── Update display ──
+    // Update display elements
     const setVal = (id, val) => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.textContent = val !== null ? val.toFixed(2) : '—';
+      el.textContent = val !== null && val !== undefined ? val.toFixed(2) : '—';
       el.className = 'auto-level-val' + (val === null ? ' stale' : '');
     };
-    setVal('lvl-prev-close', prevClose);
-    setVal('lvl-today-open', todayOpen);
+    setVal('lvl-prev-close', dayLevels.prevClose);
+    setVal('lvl-today-open', dayLevels.todayOpen);
     setVal('lvl-pdh',   dayLevels.pdh);
     setVal('lvl-pdl',   dayLevels.pdl);
     setVal('lvl-wk-hi', dayLevels.wkHigh);
     setVal('lvl-wk-lo', dayLevels.wkLow);
-    setVal('lvl-mo-hi', dayLevels.moHigh);
-    setVal('lvl-mo-lo', dayLevels.moLow);
 
-    const fetchTime = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
-    const pdhNote = dayLevels.pdh ? ` · PDH ${dayLevels.pdh} / PDL ${dayLevels.pdl}` : '';
-    document.getElementById('auto-levels-note').textContent = `SPY×10+basis · fetched ${fetchTime} EST${pdhNote} (PDH/PDL locked)`;
-    showToast(`Levels loaded — Close ${prevClose} / Open ${todayOpen} / PDH ${dayLevels.pdh} / PDL ${dayLevels.pdl}`, 'ok');
+    // Store SPX current price and update ES display
+    priceData['SPX'] = yd.close;
+    updateESDisplay();
+    const spxEl = document.getElementById('px-spx');
+    if (spxEl) spxEl.textContent = yd.close.toFixed(2);
+
+    const lbl = yd.date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const fetchTime = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
+    document.getElementById('auto-levels-note').textContent = `SPX loaded (${lbl}+) · fetched ${fetchTime} EST · PDH ${dayLevels.pdh?.toFixed(2)} / PDL ${dayLevels.pdl?.toFixed(2)} (locked)`;
+    showToast(`SPX loaded — Close ${yd.close.toFixed(2)} / PDH ${dayLevels.pdh?.toFixed(2)} / PDL ${dayLevels.pdl?.toFixed(2)}`, 'ok');
     updateGapDisplay();
 
   } catch (e) {
-    document.getElementById('auto-levels-note').textContent = 'Fetch failed — check Finnhub key';
+    document.getElementById('auto-levels-note').textContent = 'Auto-fill failed: ' + e.message;
     showToast('Day levels fetch failed: ' + e.message, 'err');
   } finally {
     if (btn) { btn.textContent = '⟳ Refresh'; btn.disabled = false; }
