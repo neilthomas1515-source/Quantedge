@@ -2184,6 +2184,9 @@ async function refreshPrices() {
 
   // ES = SPX + basis (SPX updated by Yahoo fetches)
   if (priceData['SPX']) updateESDisplay();
+
+  // VIX and DXY via Yahoo — update every refresh cycle
+  fetchVIXandDXY();
 }
 
 refreshPrices();
