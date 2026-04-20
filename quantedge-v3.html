@@ -1495,6 +1495,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <button class="btn-gex-clear" onclick="clearGEX()" title="Clear current">✕</button>
     </div>
     <div class="gex-quota">FlashAlpha quota: <span id="quota-count">0</span>/100 &nbsp;·&nbsp; SPY: <span id="spy-fetch-time">—</span></div>
+    <div id="gex-fa-data" style="display:none;padding:4px 0"></div>
 
     <!-- GEX History Timeline -->
     <div class="gex-hist-hd">
@@ -2713,23 +2714,60 @@ function addSnapSlot() {
   renderSnapGrid();
 }
 
+// Stored FlashAlpha GEX data
+let gexData = { spy: null, spx: null, fetchedAt: null };
+
 async function fetchGEX() {
   if (quotaUsed >= 100) { showToast('FlashAlpha daily quota exhausted (100/100)', 'warn'); return; }
   showToast('Fetching FlashAlpha GEX…', '');
   try {
-    const endpoints = ['spy', 'spx'];
-    for (const ep of endpoints) {
-      const url = `${CLOUDFLARE_WORKER}?source=flashalpha&endpoint=${ep}&symbol=SPY`;
-      await fetch(url);
-    }
+    const [spyRes, spxRes] = await Promise.all([
+      fetch(`${CLOUDFLARE_WORKER}?source=flashalpha&endpoint=exposure&symbol=SPY`),
+      fetch(`${CLOUDFLARE_WORKER}?source=flashalpha&endpoint=exposure&symbol=SPX`)
+    ]);
+    const spyData = await spyRes.json();
+    const spxData = await spxRes.json();
+
+    // Store parsed GEX data
+    if (spyData && !spyData.error) gexData.spy = spyData;
+    if (spxData && !spxData.error) gexData.spx = spxData;
+    gexData.fetchedAt = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
+
     quotaUsed += 2;
     localStorage.setItem('qe-v2-quota-' + todayKey(), quotaUsed);
     document.getElementById('quota-count').textContent = quotaUsed;
-    showToast('GEX data fetched. Paste screenshot from FlashAlpha.', 'ok');
-    fetchVIXandDXY(); // refresh VIX/DXY on every GEX fetch
+
+    // Update GEX display in UI
+    updateGEXDisplay();
+    fetchVIXandDXY();
     scheduleAutoTrigger();
+    showToast(`GEX data fetched (SPY + SPX) @ ${gexData.fetchedAt}. Paste screenshot for visual confirmation.`, 'ok');
   } catch (e) {
     showToast('FlashAlpha fetch failed: ' + e.message, 'err');
+  }
+}
+
+function updateGEXDisplay() {
+  // Show key GEX levels below fetch button
+  const spy = gexData.spy;
+  const spx = gexData.spx;
+  if (!spy && !spx) return;
+
+  const fmt = v => v != null ? parseFloat(v).toFixed(2) : '—';
+  const lines = [];
+
+  if (spy) {
+    lines.push(`SPY: NetGEX ${fmt(spy.netGex || spy.net_gex)} | Flip ${fmt(spy.flipPoint || spy.flip_point || spy.zero_gamma)} | CallWall ${fmt(spy.callWall || spy.call_wall)} | PutWall ${fmt(spy.putWall || spy.put_wall)} | MaxPain ${fmt(spy.maxPain || spy.max_pain)}`);
+  }
+  if (spx) {
+    lines.push(`SPX: NetGEX ${fmt(spx.netGex || spx.net_gex)} | Flip ${fmt(spx.flipPoint || spx.flip_point || spx.zero_gamma)} | CallWall ${fmt(spx.callWall || spx.call_wall)} | PutWall ${fmt(spx.putWall || spx.put_wall)} | MaxPain ${fmt(spx.maxPain || spx.max_pain)}`);
+  }
+
+  // Display under fetch button
+  const noteEl = document.getElementById('gex-fa-data');
+  if (noteEl) {
+    noteEl.innerHTML = lines.map(l => `<div style="font-size:10px;color:var(--cyan2);font-family:var(--mono);margin-top:2px">${l}</div>`).join('');
+    noteEl.style.display = 'block';
   }
 }
 
@@ -2874,90 +2912,62 @@ function buildPrompt() {
   return `You are QuantEdge Signal Engine — an elite ES/MES futures intraday trading AI. The trader uses ${contracts} ES/MES contracts as their default size.
 
 LIVE MARKET DATA:
-- ES Futures price: ${esPrice} (= SPX ${spyPrice} + fair value basis ${esBasis >= 0 ? "+" : ""}${esBasis.toFixed(1)} pts)
-- NOTE: All session levels below are in SPX/ES scale (~${spyPrice} range). ES trades at a small premium to SPX due to futures fair value.
-- VIX (live): ${vixLive}
-- DXY (live): ${dxyLive}
+- ES Futures: ${esPrice} | SPX: ${spyPrice} | VIX: ${vixLive} | DXY: ${dxyLive}
+- Session: ${sessionPeriod.label} — ${sessionPeriod.note}
 - EST Time: ${new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}
-- Session Period: ${sessionPeriod.label} — ${sessionPeriod.note}
 
 GAP ANALYSIS:
 ${gapInfo}
 
-NEWS / HEADLINES:
-${news || 'None entered'}
-
-TRADER MORNING BIAS:
-- Directional Bias: ${morningBias}
-- Thesis: ${thesis || 'not entered'}
-- Key Events: ${events || 'none noted'}
-
-ECONOMIC CALENDAR (today):
-${calEvents}
-
-SESSION LEVELS:
-- Prev Close (SPX): ${dayLevels.prevClose !== null ? dayLevels.prevClose.toFixed(2) : 'N/A'}
-- Today Open (SPX): ${dayLevels.todayOpen !== null ? dayLevels.todayOpen.toFixed(2) : 'N/A'}
-- PDH (SPX yesterday high): ${dayLevels.pdh !== null ? dayLevels.pdh.toFixed(2) : 'N/A'}
-- PDL (SPX yesterday low): ${dayLevels.pdl !== null ? dayLevels.pdl.toFixed(2) : 'N/A'}
-- Prior Week High (SPX): ${dayLevels.wkHigh !== null ? dayLevels.wkHigh.toFixed(2) : 'N/A'}
-- Prior Week Low (SPX): ${dayLevels.wkLow !== null ? dayLevels.wkLow.toFixed(2) : 'N/A'}
-- Prior Month High (SPX): ${dayLevels.moHigh !== null ? dayLevels.moHigh.toFixed(2) : 'N/A'}
-- Prior Month Low (SPX): ${dayLevels.moLow !== null ? dayLevels.moLow.toFixed(2) : 'N/A'}
-- Overnight High: ${g('on-hi') || 'N/A'} / Overnight Low: ${g('on-lo') || 'N/A'}
-- Asia: H=${g('asia-hi') || 'N/A'} / L=${g('asia-lo') || 'N/A'}
-- London: H=${g('lon-hi') || 'N/A'} / L=${g('lon-lo') || 'N/A'}
-
-FIBONACCI LEVELS:${fibLines}
+SESSION LEVELS (SPX/ES scale):
+- Prev Close: ${dayLevels.prevClose?.toFixed(2) || 'N/A'} | Today Open: ${dayLevels.todayOpen?.toFixed(2) || 'N/A'}
+- PDH: ${dayLevels.pdh?.toFixed(2) || 'N/A'} | PDL: ${dayLevels.pdl?.toFixed(2) || 'N/A'}
+- Week High: ${dayLevels.wkHigh?.toFixed(2) || 'N/A'} | Week Low: ${dayLevels.wkLow?.toFixed(2) || 'N/A'}
+- O/N High: ${g('on-hi') || 'N/A'} | O/N Low: ${g('on-lo') || 'N/A'}
+- Asia High: ${g('asia-hi') || 'N/A'} | Asia Low: ${g('asia-lo') || 'N/A'}
+- London High: ${g('lon-hi') || 'N/A'} | London Low: ${g('lon-lo') || 'N/A'}
 
 VOLUME PROFILE:
 - VAH: ${g('vah') || 'N/A'} | VAL: ${g('val') || 'N/A'} | POC: ${g('poc') || 'N/A'} | VWAP: ${g('vwap') || 'N/A'}
 ${vwapSD}
 
 MARKET INTERNALS:
-- $TICK: ${g('tick') || 'N/A'} | $TICK/Q: ${g('tickq') || 'N/A'}
-- ADSPD: ${g('adspd') || 'N/A'} | TRIN: ${g('trin') || 'N/A'}
-- NQ: ${g('nq-bias') || 'N/A'} | YM: ${g('ym-bias') || 'N/A'} | RTY: ${g('rty-bias') || 'N/A'}
+- TICK: ${g('tick') || 'N/A'} | TICKQ: ${g('tickq') || 'N/A'} | ADSPD: ${g('adspd') || 'N/A'} | TRIN: ${g('trin') || 'N/A'}
+- NQ Bias: ${g('nq-bias') || 'N/A'} | 0DTE: ${g('is-0dte') || 'no'} | VIX Trend: ${g('vix-trend') || 'N/A'}
 
-GEX / MACRO CONTEXT:
-- VIX (live): ${vixLive} | VIX Trend: ${g('vix-trend') || 'N/A'}
-- DXY (live): ${dxyLive} | DXY Direction: ${g('dxy-dir') || 'N/A'}
-- NQ Bias vs ES: ${g('nq-bias') || 'N/A'}
-- 0DTE Expiry: ${g('is-0dte') || 'no'}
-- ES Current Price: ${esPrice} | SPX: ${spyPrice}
-${gexHistory.length ? `- GEX: ${gexHistory.length} screenshot(s) attached. Read GEX bars, Max Pain, NRC, flip zone, call walls, put walls FROM THE IMAGES ONLY. The screenshots use SPY option strikes. Express all levels in ES scale (current ES = ${esPrice}). Do not mention SPY strike numbers in your response.` : '- GEX: no screenshot uploaded'}
-${snapSlots.filter(s=>s.base64).length ? `- Indicator snapshots: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')}` : ''}
+FIBONACCI:${fibLines}
 
-ORDER FLOW / BOOKMAP:
+GEX ANALYSIS:
+${(gexData.spy || gexData.spx) ? `FlashAlpha Live GEX Data (fetched ${gexData.fetchedAt || 'this session'}):
+${gexData.spy ? `SPY GEX: Net=${gexData.spy.netGex||gexData.spy.net_gex||'?'} | Flip/ZeroGamma=${gexData.spy.flipPoint||gexData.spy.flip_point||gexData.spy.zero_gamma||'?'} | CallWall=${gexData.spy.callWall||gexData.spy.call_wall||'?'} | PutWall=${gexData.spy.putWall||gexData.spy.put_wall||'?'} | MaxPain=${gexData.spy.maxPain||gexData.spy.max_pain||'?'}` : ''}
+${gexData.spx ? `SPX GEX: Net=${gexData.spx.netGex||gexData.spx.net_gex||'?'} | Flip/ZeroGamma=${gexData.spx.flipPoint||gexData.spx.flip_point||gexData.spx.zero_gamma||'?'} | CallWall=${gexData.spx.callWall||gexData.spx.call_wall||'?'} | PutWall=${gexData.spx.putWall||gexData.spx.put_wall||'?'} | MaxPain=${gexData.spx.maxPain||gexData.spx.max_pain||'?'}` : ''}
+Use these GEX levels to identify dealer positioning, flip zones, and key strike walls. SPY strikes — convert to ES scale using ratio ${esPrice}/${spyPrice} = ${(parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(3)}x.` : 'No FlashAlpha data fetched yet.'}
+${gexHistory.length ? `\n${gexHistory.length} GEX screenshot(s) attached for visual confirmation of dealer positioning. Current ES = ${esPrice}.` : ''}\n${snapSlots.filter(s=>s.base64).length ? `\nINDICATOR SNAPSHOTS: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')}` : ''}
+
+ORDER FLOW:
 ${bookmap || 'No observations entered'}
 
-LIVE POSITIONS:
-- Schwab: ${schwabPos}
-- Manual override: ${manualPos || 'none'}
+MORNING BIAS: ${morningBias} | Thesis: ${thesis || 'not set'}
+NEWS: ${news || 'none'}
+ECONOMIC CALENDAR:
+${calEvents}
 
-PRE-SIGNAL CHECKLIST (trader-assessed):
-- GEX regime confirmed: ${checks.gexConfirmed}
-- VIX trend aligned: ${checks.vixAligned}
-- TICK neutral (not extreme): ${checks.tickNeutral}
-- 0DTE expiry risk: ${checks.zerodte}
-- At key session level: ${checks.atKeyLevel}
-- Breadth confirming: ${checks.breadthOk}
-- NQ/RTY leading: ${checks.nqLeading}
-- GEX flip risk imminent: ${checks.flipRisk}
+POSITIONS: Schwab: ${schwabPos} | Manual: ${manualPos || 'none'}
 
-INSTRUCTIONS:
-Analyze all inputs holistically. Factor in the session period — behavior at ${sessionPeriod.label} is different from other periods. Consider gap analysis and whether the gap has been filled. Note ES/SPY relative strength divergence if present. Consider whether AI signal aligns or conflicts with trader's morning bias — call this out explicitly. Reference specific price levels. Size risk commentary to ${contracts} contracts. Be direct and actionable.
+CHECKLIST: GEX confirmed=${checks.gexConfirmed} | VIX aligned=${checks.vixAligned} | TICK ok=${checks.tickNeutral} | Key level=${checks.atKeyLevel} | Breadth=${checks.breadthOk} | NQ leading=${checks.nqLeading} | Flip risk=${checks.flipRisk}
 
-Respond ONLY with valid JSON (no markdown, no extra text):
+Analyze everything holistically. Use GEX images as primary dealer positioning data. Reference ES price levels throughout. Factor session period behavior. Call out bias alignment/conflict explicitly. Be direct and actionable for ${contracts} contracts.
+
+Respond ONLY with valid JSON (no markdown):
 {
   "bias": "BULL" | "BEAR" | "NEUTRAL",
   "confidence": 0-100,
   "bias_alignment": "CONFIRMS" | "CONFLICTS" | "PARTIAL",
-  "key_level": "most important price level as a number string e.g. 5590.25",
-  "entry": "entry price as a number string e.g. 5585.00",
-  "target": "target price as a number string e.g. 5610.00",
-  "stop": "stop/invalidation price as a number string e.g. 5572.00",
-  "bias_flip": "price where bias flips as a number string e.g. 5560.00",
+  "key_level": "most important ES price level e.g. 7122.65",
+  "entry": "entry ES price e.g. 7125.00",
+  "target": "target ES price e.g. 7155.00",
+  "stop": "stop ES price e.g. 7105.00",
+  "bias_flip": "ES price where bias flips e.g. 7100.00",
   "trigger": "specific condition to enter",
   "regime_note": "1-2 sentences on GEX regime impact",
   "risk_flags": ["list", "of", "risk", "factors"],
@@ -3274,8 +3284,8 @@ MARKET INTERNALS:
 - ADSPD: ${g('adspd') || '—'}
 
 GEX CONTEXT:
-- Regime: ${g('gex-regime') || '—'}
-- Net GEX: ${g('gex-level') || '—'}
+${(gexData.spy || gexData.spx) ? `FlashAlpha Live: SPY Flip=${gexData.spy?.flipPoint||gexData.spy?.flip_point||gexData.spy?.zero_gamma||'?'} | SPX Flip=${gexData.spx?.flipPoint||gexData.spx?.flip_point||gexData.spx?.zero_gamma||'?'} | Net GEX ${(gexData.spy?.netGex||gexData.spy?.net_gex||0) > 0 ? 'POSITIVE (dampening)' : 'NEGATIVE (amplifying)'}` : 'No FlashAlpha data.'}
+${gexHistory.length ? `${gexHistory.length} GEX screenshot(s) attached. Current ES = ${priceData['ES']?.toFixed(2) || '—'}.` : 'No GEX screenshot uploaded.'}
 
 KEY EVENTS: ${g('morning-events') || 'None noted'}
 NEWS: ${g('news-headlines') || 'None noted'}
