@@ -1536,6 +1536,10 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
       <div class="field"><label>Asia Low</label><input type="number" id="asia-lo" placeholder="—" step="0.25"></div>
       <div class="field"><label>London High</label><input type="number" id="lon-hi" placeholder="—" step="0.25"></div>
       <div class="field"><label>London Low</label><input type="number" id="lon-lo" placeholder="—" step="0.25"></div>
+      <div class="field" style="grid-column:1/-1">
+        <label>ES Current Price <span style="color:var(--t3);font-size:9px;letter-spacing:0">(pre-market / manual override until live feed)</span></label>
+        <input type="number" id="es-manual-price" placeholder="e.g. 5285.00" step="0.25" oninput="if(this.value){priceData['ES']=+this.value;updateESDisplay();document.getElementById('px-es').textContent=(+this.value).toFixed(2);}">
+      </div>
     </div>
   </div>
 
@@ -1712,6 +1716,23 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   <!-- BOOKMAP / ORDER FLOW -->
   <div class="sect">
     <div class="sect-hd green">Order Flow Notes <div class="hd-line"></div></div>
+
+    <!-- Image upload zone for bookmap/L2/T&S screenshots -->
+    <div id="of-drop-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:12px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s;background:var(--s2)"
+      onclick="document.getElementById('of-file-input').click()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--green2)'"
+      ondragleave="this.style.borderColor='var(--b2)'"
+      ondrop="event.preventDefault();this.style.borderColor='var(--b2)';handleOFDrop(event)">
+      <div style="font-size:12px;color:var(--t2)">📊 Click, drag & drop, or <kbd style="background:var(--s3);border:1px solid var(--b2);border-radius:2px;padding:1px 5px;font-size:10px">Ctrl+V</kbd></div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px">Paste Bookmap / L2 / Time & Sales screenshot</div>
+    </div>
+    <input type="file" id="of-file-input" accept="image/*" style="display:none" onchange="handleOFFile(this.files[0])">
+
+    <!-- OF snapshot history -->
+    <div id="of-history" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+    <!-- Current OF image (sent to AI) -->
+    <img id="of-preview" style="display:none;width:100%;border-radius:4px;border:1px solid var(--b2);margin-bottom:8px" alt="Order flow snapshot">
+
     <div class="field">
       <label>Bookmap / Tape Observations</label>
       <textarea id="bookmap-notes" placeholder="e.g. Heavy absorption at 5590, iceberg seller at 5610, cumulative delta diverging bullish..." rows="3"></textarea>
@@ -2397,6 +2418,98 @@ function deleteGEXSnapshot(idx) {
   renderGEXHistory();
 }
 
+// ══════════════════════════════════════════════════
+// ORDER FLOW IMAGE HANDLER
+// ══════════════════════════════════════════════════
+let ofImageBase64 = null;
+let ofImageMime   = null;
+let ofHistory     = []; // max 4 snapshots
+
+function handleOFDrop(e) {
+  const file = e.dataTransfer.files[0];
+  if (file) setOFImage(file);
+}
+function handleOFFile(file) {
+  if (file) setOFImage(file);
+}
+
+function setOFImage(file) {
+  if (!file || !file.type.startsWith('image/')) { showToast('Not an image file', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const result = e.target.result;
+    const b64  = result.split(',')[1];
+    const mime = file.type;
+    const time = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false, hour:'2-digit', minute:'2-digit' });
+
+    ofHistory.unshift({ base64: b64, mime, time, dataUrl: result });
+    if (ofHistory.length > 4) ofHistory.pop();
+
+    ofImageBase64 = b64;
+    ofImageMime   = mime;
+    document.getElementById('of-preview').src = result;
+    document.getElementById('of-preview').style.display = 'block';
+
+    renderOFHistory();
+    scheduleAutoTrigger();
+    showToast(`Order flow snapshot saved @ ${time}`, 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderOFHistory() {
+  const strip = document.getElementById('of-history');
+  if (!strip) return;
+  strip.innerHTML = ofHistory.map((h, i) => `
+    <div style="position:relative;cursor:pointer;border:1px solid ${i===0?'var(--green2)':'var(--b2)'};border-radius:3px;overflow:hidden;width:70px;height:50px" onclick="restoreOFSnapshot(${i})">
+      <img src="${h.dataUrl}" style="width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);font-size:8px;color:var(--t1);text-align:center;padding:1px">${h.time}</div>
+      <div onclick="event.stopPropagation();deleteOFSnapshot(${i})" style="position:absolute;top:1px;right:2px;font-size:9px;color:var(--red);cursor:pointer">✕</div>
+    </div>
+  `).join('');
+}
+
+function restoreOFSnapshot(idx) {
+  const h = ofHistory[idx];
+  if (!h) return;
+  ofImageBase64 = h.base64;
+  ofImageMime   = h.mime;
+  document.getElementById('of-preview').src = h.dataUrl;
+  document.getElementById('of-preview').style.display = 'block';
+  showToast(`Restored OF snapshot @ ${h.time}`, 'ok');
+}
+
+function deleteOFSnapshot(idx) {
+  ofHistory.splice(idx, 1);
+  if (!ofHistory.length) {
+    ofImageBase64 = null; ofImageMime = null;
+    document.getElementById('of-preview').style.display = 'none';
+  } else if (idx === 0) {
+    ofImageBase64 = ofHistory[0].base64;
+    ofImageMime   = ofHistory[0].mime;
+    document.getElementById('of-preview').src = ofHistory[0].dataUrl;
+  }
+  renderOFHistory();
+}
+
+// Ctrl+V paste for OF zone
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  // Only paste to OF if GEX zone doesn't have focus / not already handling
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      // If active element is in OF section, use OF handler
+      const active = document.activeElement;
+      const ofSect = document.getElementById('of-drop-zone');
+      if (ofSect && (active === ofSect || ofSect.contains(active) || active.id === 'bookmap-notes')) {
+        setOFImage(item.getAsFile());
+        e.stopPropagation();
+      }
+    }
+  }
+});
+
 function clearGEX() {
   gexImageBase64 = null; gexImageMime = null;
   gexPreview.src = ''; gexPreview.style.display = 'none';
@@ -2601,7 +2714,9 @@ document.querySelectorAll('#left input, #left select').forEach(el => {
 // ══════════════════════════════════════════════════
 function buildPrompt() {
   const g = id => (document.getElementById(id)?.value || '').trim();
-  const esPrice  = priceData['ES']  ? priceData['ES'].toFixed(2)  : 'unknown';
+  // Use manual ES price if entered, otherwise use calculated price
+  const esManual = parseFloat(document.getElementById('es-manual-price')?.value);
+  const esPrice  = esManual ? esManual.toFixed(2) : priceData['ES'] ? priceData['ES'].toFixed(2) : 'unknown';
   const spyPrice = (priceData['SPX'] || priceData['SPY']) ? (priceData['SPX'] || priceData['SPY']).toFixed(2) : 'unknown';
   const vixLive  = priceData['VIX'] ? priceData['VIX'].toFixed(2) : 'unknown';
   const dxyLive  = priceData['DX-Y.NYB'] ? priceData['DX-Y.NYB'].toFixed(2) : 'unknown';
@@ -2772,6 +2887,13 @@ async function generateSignal() {
   const gexForAI = [...gexHistory].reverse();
   gexForAI.forEach((h, i) => {
     msgContent.push({ type:'text', text:`[GEX SNAPSHOT ${i+1}/${gexForAI.length} @ ${h.time} EST]` });
+    msgContent.push({ type:'image', source:{ type:'base64', media_type:h.mime, data:h.base64 } });
+  });
+
+  // Order flow snapshots
+  const ofForAI = [...ofHistory].reverse();
+  ofForAI.forEach((h, i) => {
+    msgContent.push({ type:'text', text:`[ORDER FLOW SNAPSHOT ${i+1}/${ofForAI.length} @ ${h.time} EST — Bookmap/L2/T&S]` });
     msgContent.push({ type:'image', source:{ type:'base64', media_type:h.mime, data:h.base64 } });
   });
 
@@ -3039,6 +3161,7 @@ OVERNIGHT DATA:
 - London High: ${g('lon-hi') || '—'} | London Low: ${g('lon-lo') || '—'}
 
 SESSION LEVELS:
+- ES Current Price: ${document.getElementById('es-manual-price')?.value || priceData['ES']?.toFixed(2) || '—'}
 - Prev Close: ${dayLevels.prevClose?.toFixed(2) || '—'}
 - Today Open: ${dayLevels.todayOpen?.toFixed(2) || '—'}
 - PDH: ${dayLevels.pdh?.toFixed(2) || '—'} | PDL: ${dayLevels.pdl?.toFixed(2) || '—'}
