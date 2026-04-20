@@ -2106,9 +2106,10 @@ function updateESDisplay() {
   priceData['ES'] = es;
   const el = document.getElementById('px-es');
   if (el) el.textContent = es.toFixed(2);
-  // Show basis info in topbar
   const esEl = document.getElementById('px-es');
   if (esEl) esEl.title = `SPX ${spx.toFixed(2)} + basis ${esBasis >= 0 ? '+' : ''}${esBasis.toFixed(1)}`;
+  // Check reversal on every price update (catches flip crossovers in real time)
+  if (typeof checkReversalOnPriceUpdate === 'function') checkReversalOnPriceUpdate();
 }
 
 // ══════════════════════════════════════════════════
@@ -2953,22 +2954,37 @@ POSITIONS: Schwab: ${schwabPos} | Manual: ${manualPos || 'none'}
 
 CHECKLIST: GEX confirmed=${checks.gexConfirmed} | VIX aligned=${checks.vixAligned} | TICK ok=${checks.tickNeutral} | Key level=${checks.atKeyLevel} | Breadth=${checks.breadthOk} | NQ leading=${checks.nqLeading} | Flip risk=${checks.flipRisk}
 
-Analyze everything holistically. Use GEX images as primary dealer positioning data. Reference ES price levels throughout. Factor session period behavior. Call out bias alignment/conflict explicitly. Be direct and actionable for ${contracts} contracts.
+Analyze everything holistically using this reasoning sequence:
+STEP 1 - MACRO REGIME: Assess VIX level/trend and DXY direction. Is volatility expanding or contracting? Does DXY support or resist equity moves?
+STEP 2 - DEALER POSITIONING: From GEX images, identify net GEX (positive=dampening, negative=amplifying), key call/put walls, flip zone, Max Pain. Where are dealers positioned?
+STEP 3 - INTERNALS CONFIRMATION: Does TICK/ADSPD/TRIN confirm or conflict with the directional bias? Is NQ leading or lagging?
+STEP 4 - SESSION CONTEXT: What does the session period (${sessionPeriod.label}) mean for price behavior? Is this a trend period or reversal window?
+STEP 5 - LEVEL CONFLUENCE: Which price levels have the most confluence (GEX wall + volume profile node + session level)? Where is the highest probability entry?
+STEP 6 - SIGNAL SYNTHESIS: Combine all layers into a directional conviction score. Call out any conflicts between layers.
+
+Use GEX images as primary dealer positioning data. Reference specific ES price levels. Be direct and actionable for ${contracts} contracts.
 
 Respond ONLY with valid JSON (no markdown):
 {
   "bias": "BULL" | "BEAR" | "NEUTRAL",
   "confidence": 0-100,
+  "confidence_breakdown": {
+    "macro": 0-100,
+    "gex": 0-100,
+    "internals": 0-100,
+    "session": 0-100,
+    "levels": 0-100
+  },
   "bias_alignment": "CONFIRMS" | "CONFLICTS" | "PARTIAL",
   "key_level": "most important ES price level e.g. 7122.65",
   "entry": "entry ES price e.g. 7125.00",
   "target": "target ES price e.g. 7155.00",
   "stop": "stop ES price e.g. 7105.00",
   "bias_flip": "ES price where bias flips e.g. 7100.00",
-  "trigger": "specific condition to enter",
-  "regime_note": "1-2 sentences on GEX regime impact",
+  "trigger": "specific price action condition to enter",
+  "regime_note": "1-2 sentences on GEX dealer positioning impact",
   "risk_flags": ["list", "of", "risk", "factors"],
-  "narrative": "4-6 sentences: bias rationale, session period context, gap/RS analysis, morning bias alignment, key confluences, position sizing for ${contracts} contracts"
+  "narrative": "5-7 sentences walking through each reasoning layer: macro assessment, GEX positioning, internals read, session context, level confluence, and final conviction. Mention any layer conflicts."
 }`;
 }
 
@@ -3073,6 +3089,9 @@ function renderSignal(s) {
     <div class="sig-card-label">Confidence</div>
     <div class="sig-card-value info">${conf}%</div>
     <div class="conf-bar-wrap"><div class="conf-bar-bg"><div class="conf-bar-fill ${confClass}" style="width:${conf}%"></div></div></div>
+    ${s.confidence_breakdown ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">
+      ${Object.entries(s.confidence_breakdown).map(([k,v]) => `<span style="font-size:9px;padding:1px 5px;background:var(--b1);border-radius:2px;color:${v>=70?'var(--green)':v>=40?'var(--amber)':'var(--t3)'}">${k} ${v}%</span>`).join('')}
+    </div>` : ''}
   </div>
   <div class="sig-card ${alignClass}">
     <div class="sig-card-label">vs Morning Bias</div>
@@ -3286,11 +3305,22 @@ ${gexHistory.length ? `${gexHistory.length} GEX screenshot(s) attached. Current 
 KEY EVENTS: ${g('morning-events') || 'None noted'}
 NEWS: ${g('news-headlines') || 'None noted'}
 
+Determine the highest probability directional bias for today using this framework:
+1. GAP ANALYSIS: Is there a gap? Direction, size, fill probability?
+2. OVERNIGHT CONTEXT: Where did O/N high/low form relative to prior close? Is price accepted above/below key levels?
+3. GEX POSITIONING: From screenshots — are dealers net long or short gamma? Where is the flip zone relative to current price?
+4. MACRO ALIGNMENT: VIX and DXY — do they support the directional bias?
+5. KEY LEVELS: Which session levels (PDH, PDL, VWAP, week high/low) are most likely to act as magnets or resistance today?
+
 Respond ONLY with this JSON — no other text:
 {
   "bias": "BULL" | "BEAR" | "NEUTRAL",
   "confidence": 0-100,
-  "reasoning": "2-3 sentence explanation of the bias based on the data above"
+  "strength": "STRONG" | "MODERATE" | "WEAK",
+  "primary_driver": "single most important factor driving the bias",
+  "key_levels_to_watch": ["level1", "level2", "level3"],
+  "gap_assessment": "gap direction, size, fill probability",
+  "reasoning": "3-4 sentences covering gap context, overnight structure, GEX positioning, and macro alignment. Be specific about price levels."
 }`;
 
   try {
@@ -3313,18 +3343,36 @@ Respond ONLY with this JSON — no other text:
     // Update bias card
     const colors = { BULL: 'var(--green)', BEAR: 'var(--red)', NEUTRAL: 'var(--amber)' };
     const icons  = { BULL: '▲ BULL', BEAR: '▼ BEAR', NEUTRAL: '◆ NEUTRAL' };
+    const strengthColor = { STRONG: 'var(--green)', MODERATE: 'var(--amber)', WEAK: 'var(--t3)' };
+
     dirEl.textContent = icons[parsed.bias] || parsed.bias;
     dirEl.style.color = colors[parsed.bias] || 'var(--cyan)';
-    reasonEl.textContent = parsed.reasoning;
     confFill.style.width = parsed.confidence + '%';
     confFill.style.background = colors[parsed.bias] || 'var(--cyan)';
     confPct.textContent = parsed.confidence + '%';
-
     card.style.borderColor = parsed.bias === 'BULL' ? 'rgba(0,255,136,0.3)' : parsed.bias === 'BEAR' ? 'rgba(255,51,85,0.3)' : 'rgba(255,170,0,0.3)';
 
-    // Also populate morning-thesis for use in main signal prompt
+    // Build enhanced reasoning display
+    let displayHTML = '';
+    if (parsed.strength) {
+      displayHTML += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+        <span style="font-size:10px;letter-spacing:1px;color:var(--t3);text-transform:uppercase">Strength</span>
+        <span style="font-size:11px;font-weight:700;color:${strengthColor[parsed.strength] || 'var(--amber)'}">${parsed.strength}</span>
+        ${parsed.primary_driver ? `<span style="font-size:10px;color:var(--t2)">· ${parsed.primary_driver}</span>` : ''}
+      </div>`;
+    }
+    if (parsed.gap_assessment) {
+      displayHTML += `<div style="font-size:10px;color:var(--cyan2);margin-bottom:4px">Gap: ${parsed.gap_assessment}</div>`;
+    }
+    if (parsed.key_levels_to_watch?.length) {
+      displayHTML += `<div style="font-size:10px;color:var(--t3);margin-bottom:4px">Watch: ${parsed.key_levels_to_watch.join(' · ')}</div>`;
+    }
+    displayHTML += `<div style="font-size:11px;color:var(--t1);line-height:1.6">${parsed.reasoning}</div>`;
+    reasonEl.innerHTML = displayHTML;
+
+    // Populate morning-thesis for main signal prompt
     const thesisEl = document.getElementById('morning-thesis');
-    if (thesisEl) thesisEl.value = parsed.reasoning;
+    if (thesisEl) thesisEl.value = `${parsed.bias} (${parsed.strength || parsed.confidence + '%'}) — ${parsed.reasoning}`;
 
     scheduleAutoTrigger();
   } catch(e) {
@@ -4106,7 +4154,9 @@ renderSignal = function(s) {
 // ══════════════════════════════════════════════════
 let reversalPanelOpen = false;
 let lastReversalAlert = 0;
-let reversalAlertActive = false;
+let prevES = null;
+let prevTick = null;
+let tickDivergenceCount = 0;
 
 function toggleReversalPanel() {
   reversalPanelOpen = !reversalPanelOpen;
@@ -4121,142 +4171,167 @@ function checkReversalConditions() {
   const vwap     = parseFloat(document.getElementById('vwap')?.value) || null;
   const flip     = currentSignalLevels.flip;
   const entry    = currentSignalLevels.entry;
+  const target   = currentSignalLevels.target;
+  const stop     = currentSignalLevels.stop;
   const sp       = getSessionPeriod();
 
   const conditions = [];
   let score = 0;
 
-  // 1. Price near GEX flip level (within 0.3%)
+  // 1. GEX Flip level — price crossed or within 2pts
   if (es && flip) {
     const dist = Math.abs(es - flip);
-    const pct  = dist / es * 100;
-    const near = pct < 0.3;
-    const crossed = priceData['ES_prev'] && ((priceData['ES_prev'] < flip && es > flip) || (priceData['ES_prev'] > flip && es < flip));
-    if (crossed) { score += 35; conditions.push({ label: '⚡ GEX Flip CROSSED', value: `${flip.toFixed(2)}`, state: 'alert' }); }
-    else if (near) { score += 20; conditions.push({ label: '⚠ Near GEX Flip', value: `${flip.toFixed(2)} (${dist.toFixed(1)}pts away)`, state: 'warn' }); }
-    else { conditions.push({ label: 'GEX Flip', value: flip.toFixed(2), state: 'ok' }); }
+    const crossed = prevES && ((prevES < flip && es >= flip) || (prevES > flip && es <= flip));
+    if (crossed) {
+      score += 40;
+      conditions.push({ label: '⚡ GEX Flip CROSSED', value: `${flip.toFixed(2)}`, state: 'alert' });
+    } else if (dist <= 2) {
+      score += 25;
+      conditions.push({ label: '⚠ At GEX Flip Zone', value: `${flip.toFixed(2)} (${dist.toFixed(1)}pts)`, state: 'warn' });
+    } else if (dist <= 5) {
+      score += 10;
+      conditions.push({ label: 'Near GEX Flip', value: `${flip.toFixed(2)} (${dist.toFixed(1)}pts)`, state: 'ok' });
+    } else {
+      conditions.push({ label: 'GEX Flip', value: flip.toFixed(2), state: 'ok' });
+    }
   }
 
-  // 2. TICK extreme
+  // 2. TICK extreme + divergence detection
   if (tick !== null) {
-    if (tick > 900)  { score += 25; conditions.push({ label: '⚡ TICK Extreme High', value: `+${tick}`, state: 'alert' }); }
+    // Check TICK divergence: price moving one direction but TICK failing to confirm
+    if (prevES && prevTick !== null && es && tick) {
+      const esMoveUp   = es > prevES + 1;
+      const esMoveDown = es < prevES - 1;
+      const tickWeak   = Math.abs(tick) < 300;
+      if ((esMoveUp && tick < 0) || (esMoveDown && tick > 0)) {
+        tickDivergenceCount++;
+      } else {
+        tickDivergenceCount = Math.max(0, tickDivergenceCount - 1);
+      }
+      if (tickDivergenceCount >= 2) {
+        score += 30;
+        conditions.push({ label: '⚡ TICK Divergence', value: `Price ${esMoveUp ? '↑' : '↓'} but TICK ${tick > 0 ? '+' : ''}${tick}`, state: 'alert' });
+      }
+    }
+
+    if (tick > 900)       { score += 25; conditions.push({ label: '⚡ TICK Extreme High', value: `+${tick}`, state: 'alert' }); }
     else if (tick < -900) { score += 25; conditions.push({ label: '⚡ TICK Extreme Low', value: tick, state: 'alert' }); }
     else if (Math.abs(tick) > 600) { score += 10; conditions.push({ label: '⚠ TICK Elevated', value: tick > 0 ? `+${tick}` : tick, state: 'warn' }); }
     else { conditions.push({ label: 'TICK', value: tick > 0 ? `+${tick}` : tick, state: 'ok' }); }
   }
 
-  // 3. VWAP proximity (within 3pts)
+  // 3. VWAP proximity
   if (es && vwap) {
     const dist = Math.abs(es - vwap);
-    if (dist < 3) { score += 20; conditions.push({ label: '⚠ At VWAP', value: `ES ${es.toFixed(2)} / VWAP ${vwap.toFixed(2)}`, state: 'warn' }); }
+    if (dist < 2) { score += 15; conditions.push({ label: '⚠ At VWAP', value: `${vwap.toFixed(2)} (${dist.toFixed(1)}pts)`, state: 'warn' }); }
     else { conditions.push({ label: 'VWAP Distance', value: `${dist.toFixed(1)}pts ${es > vwap ? 'above' : 'below'}`, state: 'ok' }); }
   }
 
-  // 4. VIX spike
-  if (vix) {
-    if (vix > 25) { score += 15; conditions.push({ label: '⚠ VIX Elevated', value: vix.toFixed(2), state: 'warn' }); }
-    else { conditions.push({ label: 'VIX', value: vix.toFixed(2), state: 'ok' }); }
+  // 4. At signal target or stop
+  if (es && target && Math.abs(es - target) < 2) {
+    score += 15;
+    conditions.push({ label: '⚠ At Signal Target', value: target.toFixed(2), state: 'warn' });
+  }
+  if (es && stop && Math.abs(es - stop) < 2) {
+    score += 20;
+    conditions.push({ label: '⚡ Near Stop Level', value: stop.toFixed(2), state: 'alert' });
   }
 
-  // 5. Session reversal window
-  if (['open','power'].includes(sp.cls)) {
+  // 5. VIX elevated
+  if (vix && vix > 25) { score += 10; conditions.push({ label: '⚠ VIX Elevated', value: vix.toFixed(2), state: 'warn' }); }
+
+  // 6. Session reversal window
+  if (['open', 'power'].includes(sp.cls)) {
     score += 5;
     conditions.push({ label: '⚠ Reversal Window', value: sp.label, state: 'warn' });
   }
 
-  // 6. Price at key level (entry/target/stop)
-  if (es && entry) {
-    const dist = Math.abs(es - entry);
-    if (dist < 2) { score += 10; conditions.push({ label: '⚠ At Entry Level', value: entry.toFixed(2), state: 'warn' }); }
-  }
+  // Update prev values for divergence tracking
+  prevES   = es;
+  prevTick = tick;
 
   // Update UI
   const pct = Math.min(100, score);
   const color = pct >= 70 ? 'var(--red)' : pct >= 40 ? 'var(--amber)' : 'var(--green2)';
 
-  document.getElementById('reversal-bar').style.width = pct + '%';
+  document.getElementById('reversal-bar').style.width  = pct + '%';
   document.getElementById('reversal-bar').style.background = color;
-  document.getElementById('reversal-pct').textContent = pct + '%';
-  document.getElementById('reversal-pct').style.color = color;
+  document.getElementById('reversal-pct').textContent  = pct + '%';
+  document.getElementById('reversal-pct').style.color  = color;
 
-  // Update dot in topbar
   const dot = document.getElementById('reversal-dot');
   const lbl = document.getElementById('reversal-label');
   if (pct >= 70) {
-    dot.style.background = 'var(--red)';
-    dot.style.boxShadow = '0 0 8px var(--red)';
-    dot.style.animation = 'pulse-dot 0.8s infinite';
+    dot.style.background  = 'var(--red)';
+    dot.style.boxShadow   = '0 0 8px var(--red)';
+    dot.style.animation   = 'pulse-dot 0.8s infinite';
     lbl.textContent = 'REVERSAL';
     lbl.style.color = 'var(--red)';
   } else if (pct >= 40) {
-    dot.style.background = 'var(--amber)';
-    dot.style.boxShadow = '0 0 6px var(--amber)';
-    dot.style.animation = 'pulse-dot 1.5s infinite';
+    dot.style.background  = 'var(--amber)';
+    dot.style.boxShadow   = '0 0 6px var(--amber)';
+    dot.style.animation   = 'pulse-dot 1.5s infinite';
     lbl.textContent = 'Watch';
     lbl.style.color = 'var(--amber)';
   } else {
-    dot.style.background = 'var(--green2)';
-    dot.style.boxShadow = 'none';
-    dot.style.animation = 'none';
+    dot.style.background  = 'var(--green2)';
+    dot.style.boxShadow   = 'none';
+    dot.style.animation   = 'none';
     lbl.textContent = 'Monitor';
     lbl.style.color = 'var(--t3)';
   }
 
-  // Render conditions list
   const panel = document.getElementById('reversal-conditions');
   if (panel) {
     panel.innerHTML = conditions.map(c => {
       const col = c.state === 'alert' ? 'var(--red)' : c.state === 'warn' ? 'var(--amber)' : 'var(--t3)';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--b1)">
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--b1)">
         <span style="font-size:11px;color:${col}">${c.label}</span>
         <span style="font-size:11px;color:var(--t1);font-family:var(--mono)">${c.value}</span>
       </div>`;
     }).join('');
   }
 
-  // Fire alert if score crosses 70 and enough time has passed
   const now = Date.now();
   if (pct >= 70 && now - lastReversalAlert > 120000) {
     lastReversalAlert = now;
     fireReversalAlert(pct, conditions);
   }
+}
 
-  // Store prev ES for crossover detection
-  if (es) priceData['ES_prev'] = es;
+// Also check immediately when ES price updates (catches flip crossovers in real time)
+function checkReversalOnPriceUpdate() {
+  if (currentSignalLevels.flip) checkReversalConditions();
 }
 
 function fireReversalAlert(score, conditions) {
-  const alertMsg = conditions.filter(c => c.state === 'alert' || c.state === 'warn').map(c => c.label.replace(/[⚡⚠]/g,'')).join(' + ');
+  const alertMsg = conditions.filter(c => c.state === 'alert' || c.state === 'warn').map(c => c.label.replace(/[⚡⚠]/g, '').trim()).join(' + ');
   showToast(`⚡ REVERSAL ALERT (${score}%) — ${alertMsg}`, 'warn');
 
-  // Show signal text
   const sigText = document.getElementById('reversal-signal-text');
   if (sigText) {
     sigText.style.display = 'block';
-    sigText.innerHTML = `<span style="color:var(--red);font-weight:700">⚡ HIGH REVERSAL PROBABILITY</span><br>${alertMsg}`;
+    sigText.innerHTML = `<span style="color:var(--red);font-weight:700">⚡ HIGH REVERSAL PROBABILITY ${score}%</span><br>${alertMsg}`;
   }
 
-  // Open panel automatically
   if (!reversalPanelOpen) toggleReversalPanel();
 
-  // Audio alert
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [440, 550, 440].forEach((freq, i) => {
+    [523, 659, 523].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value = freq;
       osc.type = 'sine';
-      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.2);
-      osc.start(ctx.currentTime + i * 0.15);
-      osc.stop(ctx.currentTime + i * 0.15 + 0.2);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.25);
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.25);
     });
   } catch {}
 }
 
-// Run every 15 seconds
 setInterval(checkReversalConditions, 15000);
 
 // ══════════════════════════════════════════════════
