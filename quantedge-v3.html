@@ -2201,7 +2201,7 @@ async function fetchSPYNow() {
   btn.textContent = '⟳ Fetching…';
   try {
     // Exact same method as qm-final
-    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC');
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -2263,48 +2263,38 @@ async function fetchDayLevels() {
   document.getElementById('auto-levels-note').textContent = 'Fetching…';
 
   try {
-    // Exact same method as qm-final fetchSPXLevels
-    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC');
+    // Single fetch — 1mo of SPX data gives us everything we need
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
     if (!result) throw new Error('No data');
-    const ts = result.timestamp;
-    const q  = result.indicators?.quote?.[0];
+    const ts   = result.timestamp;
+    const q    = result.indicators?.quote?.[0];
+    const meta = result.meta;
     if (!ts || !q) throw new Error('No quotes');
 
-    // Fetch 1mo of data to get proper week high/low history
-    const respFull = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
-    if (!respFull.ok) throw new Error('HTTP ' + respFull.status);
-    const dataFull = await respFull.json();
-    const resultFull = dataFull.chart?.result?.[0];
-    const tsFull = resultFull?.timestamp;
-    const qFull  = resultFull?.indicators?.quote?.[0];
-    const metaFull = resultFull?.meta;
-
-    // Build days array from 1mo data
+    // Build days array
     const days = [];
-    for (let i = 0; i < tsFull.length; i++) {
-      if (!qFull.close[i]) continue;
-      days.push({ date: new Date(tsFull[i] * 1000), high: qFull.high[i], low: qFull.low[i], close: qFull.close[i], open: qFull.open[i] });
+    for (let i = 0; i < ts.length; i++) {
+      if (!q.close[i]) continue;
+      days.push({ date: new Date(ts[i]*1000), high: q.high[i], low: q.low[i], close: q.close[i], open: q.open[i] });
     }
     if (days.length < 2) throw new Error('Not enough days');
 
     const yd = days[days.length - 1]; // most recent completed day
 
-    // Today's open from meta
-    const todayOpenVal = metaFull?.regularMarketOpen || null;
+    // Today's open — from meta, or first open of most recent day in quotes
+    const todayOpenVal = meta?.regularMarketOpen || meta?.regularMarketPreviousClose || q.open[q.open.length - 1] || null;
 
-    // Week calc exactly like qm-final
+    // Week calc — find last week's days
     const gw = d => { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()+3-(x.getDay()+6)%7); const w = new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w)/864e5-3+(w.getDay()+6)%7)/7); };
     const gy = d => new Date(d).getFullYear();
-    let yw = gw(yd.date), yy = gy(yd.date);
+    const yw = gw(yd.date), yy = gy(yd.date);
     const lw = days.filter(d => { const w=gw(d.date), y=gy(d.date); return yw===1?(y===yy-1&&w>=52):(y===yy&&w===yw-1); });
     const lwDays = lw.length ? lw : days.slice(-6,-1);
     const wh = Math.max(...lwDays.map(d => d.high));
     const wl = Math.min(...lwDays.map(d => d.low));
-
-    const fmt = v => v ? v.toFixed(2) : '';
 
     // Store in dayLevels
     dayLevels.prevClose = yd.close;
@@ -2913,6 +2903,8 @@ GEX / MACRO CONTEXT:
 - GEX Key Levels: ${g('gex-notes') || 'N/A'}
 ${gexHistory.length ? `- GEX Timeline: ${gexHistory.length} snapshot(s) provided oldest→newest. Analyze evolution — identify regime shifts, wall movement, flip zone proximity, continuation vs reversal signals.` : '- GEX Chart: not uploaded'}
 ${snapSlots.filter(s=>s.base64).length ? `- Indicator Snapshots: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')} — analyze each image provided.` : '- Indicator Snapshots: none uploaded'}
+
+CRITICAL GEX SCALE NOTE: All GEX screenshots are from FlashAlpha and show SPY/SPX option strikes. SPY strikes (~560-580) must be multiplied by ~12.7 to get ES equivalent (e.g. SPY 560 = ES ~7112, SPY 570 = ES ~7239). Do NOT reference raw SPY strike numbers as ES levels. Convert all strikes to ES scale when making trade recommendations. Current ES price is ${esPrice} for reference.
 
 ORDER FLOW / BOOKMAP:
 ${bookmap || 'No observations entered'}
