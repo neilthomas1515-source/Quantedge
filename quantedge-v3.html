@@ -2938,11 +2938,8 @@ MARKET INTERNALS:
 FIBONACCI:${fibLines}
 
 GEX ANALYSIS:
-${(gexData.spy || gexData.spx) ? `FlashAlpha Live GEX Data (fetched ${gexData.fetchedAt || 'this session'}):
-${gexData.spy ? `SPY GEX: Net=${gexData.spy.netGex||gexData.spy.net_gex||'?'} | Flip/ZeroGamma=${gexData.spy.flipPoint||gexData.spy.flip_point||gexData.spy.zero_gamma||'?'} | CallWall=${gexData.spy.callWall||gexData.spy.call_wall||'?'} | PutWall=${gexData.spy.putWall||gexData.spy.put_wall||'?'} | MaxPain=${gexData.spy.maxPain||gexData.spy.max_pain||'?'}` : ''}
-${gexData.spx ? `SPX GEX: Net=${gexData.spx.netGex||gexData.spx.net_gex||'?'} | Flip/ZeroGamma=${gexData.spx.flipPoint||gexData.spx.flip_point||gexData.spx.zero_gamma||'?'} | CallWall=${gexData.spx.callWall||gexData.spx.call_wall||'?'} | PutWall=${gexData.spx.putWall||gexData.spx.put_wall||'?'} | MaxPain=${gexData.spx.maxPain||gexData.spx.max_pain||'?'}` : ''}
-Use these GEX levels to identify dealer positioning, flip zones, and key strike walls. SPY strikes — convert to ES scale using ratio ${esPrice}/${spyPrice} = ${(parseFloat(esPrice)/parseFloat(spyPrice)).toFixed(3)}x.` : 'No FlashAlpha data fetched yet.'}
-${gexHistory.length ? `\n${gexHistory.length} GEX screenshot(s) attached for visual confirmation of dealer positioning. Current ES = ${esPrice}.` : ''}\n${snapSlots.filter(s=>s.base64).length ? `\nINDICATOR SNAPSHOTS: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')}` : ''}
+${gexHistory.length ? `${gexHistory.length} GEX screenshot(s) attached. Read dealer positioning directly from images. Current ES = ${esPrice}.` : 'No GEX screenshot uploaded.'}
+${snapSlots.filter(s=>s.base64).length ? `INDICATOR SNAPSHOTS: ${snapSlots.filter(s=>s.base64).map(s => s.label + (s.desc ? ' ('+s.desc+')' : '')).join(', ')}` : ''}
 
 ORDER FLOW:
 ${bookmap || 'No observations entered'}
@@ -3284,7 +3281,6 @@ MARKET INTERNALS:
 - ADSPD: ${g('adspd') || '—'}
 
 GEX CONTEXT:
-${(gexData.spy || gexData.spx) ? `FlashAlpha Live: SPY Flip=${gexData.spy?.flipPoint||gexData.spy?.flip_point||gexData.spy?.zero_gamma||'?'} | SPX Flip=${gexData.spx?.flipPoint||gexData.spx?.flip_point||gexData.spx?.zero_gamma||'?'} | Net GEX ${(gexData.spy?.netGex||gexData.spy?.net_gex||0) > 0 ? 'POSITIVE (dampening)' : 'NEGATIVE (amplifying)'}` : 'No FlashAlpha data.'}
 ${gexHistory.length ? `${gexHistory.length} GEX screenshot(s) attached. Current ES = ${priceData['ES']?.toFixed(2) || '—'}.` : 'No GEX screenshot uploaded.'}
 
 KEY EVENTS: ${g('morning-events') || 'None noted'}
