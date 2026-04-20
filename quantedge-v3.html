@@ -2230,6 +2230,10 @@ async function fetchSPYNow() {
     const now = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
     document.getElementById('spy-fetch-time').textContent = now + ' EST';
     showToast(`SPX ${spxPrice.toFixed(2)} → ES~ ${esPrice.toFixed(2)}`, 'ok');
+
+    // Also refresh VIX and DXY
+    fetchVIXandDXY();
+
     scheduleAutoTrigger();
   } catch (e) {
     showToast('SPX fetch failed: ' + e.message, 'err');
@@ -2322,32 +2326,8 @@ async function fetchDayLevels() {
     const spxEl = document.getElementById('px-spx');
     if (spxEl) spxEl.textContent = yd.close.toFixed(2);
 
-    // Fetch VIX via Yahoo
-    try {
-      const vixRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX');
-      const vixData = await vixRes.json();
-      const vixPrice = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (vixPrice) {
-        priceData['VIX'] = vixPrice;
-        const vixEl = document.getElementById('px-vix');
-        if (vixEl) {
-          vixEl.textContent = vixPrice.toFixed(2);
-          vixEl.style.color = vixPrice > 25 ? 'var(--red)' : vixPrice > 18 ? 'var(--amber)' : 'var(--green)';
-        }
-      }
-    } catch {}
-
-    // Fetch DXY via Yahoo
-    try {
-      const dxyRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB');
-      const dxyData = await dxyRes.json();
-      const dxyPrice = dxyData?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (dxyPrice) {
-        priceData['DX-Y.NYB'] = dxyPrice;
-        const dxyEl = document.getElementById('px-dxy');
-        if (dxyEl) dxyEl.textContent = dxyPrice.toFixed(2);
-      }
-    } catch {}
+    // Fetch VIX and DXY via Yahoo
+    fetchVIXandDXY();
 
     const lbl = yd.date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
     const fetchTime = new Date().toLocaleTimeString('en-US', { timeZone:'America/New_York', hour12:false });
@@ -2725,10 +2705,39 @@ async function fetchGEX() {
     localStorage.setItem('qe-v2-quota-' + todayKey(), quotaUsed);
     document.getElementById('quota-count').textContent = quotaUsed;
     showToast('GEX data fetched. Paste screenshot from FlashAlpha.', 'ok');
+    fetchVIXandDXY(); // refresh VIX/DXY on every GEX fetch
     scheduleAutoTrigger();
   } catch (e) {
     showToast('FlashAlpha fetch failed: ' + e.message, 'err');
   }
+}
+
+async function fetchVIXandDXY() {
+  // VIX via Yahoo ^VIX
+  try {
+    const vixRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX');
+    const vixData = await vixRes.json();
+    const vixPrice = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (vixPrice) {
+      priceData['VIX'] = vixPrice;
+      const el = document.getElementById('px-vix');
+      if (el) {
+        el.textContent = vixPrice.toFixed(2);
+        el.style.color = vixPrice > 25 ? 'var(--red)' : vixPrice > 18 ? 'var(--amber)' : 'var(--green)';
+      }
+    }
+  } catch {}
+  // DXY via Yahoo DX-Y.NYB
+  try {
+    const dxyRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB');
+    const dxyData = await dxyRes.json();
+    const dxyPrice = dxyData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (dxyPrice) {
+      priceData['DX-Y.NYB'] = dxyPrice;
+      const el = document.getElementById('px-dxy');
+      if (el) el.textContent = dxyPrice.toFixed(2);
+    }
+  } catch {}
 }
 
 // ══════════════════════════════════════════════════
