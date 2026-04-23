@@ -3469,7 +3469,7 @@ document.addEventListener('DOMContentLoaded', initAll);
 // ── RITHMIC LIVE FLOW BRIDGE POLL ──
 async function pollRithmicBridge() {
   try {
-    const res = await fetch('http://localhost:8765/flow', { signal: AbortSignal.timeout(1500) });
+    const res = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev?source=rithmic', { signal: AbortSignal.timeout(3000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const d = await res.json();
     const dot = document.getElementById('rithmic-dot');
