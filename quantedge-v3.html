@@ -3032,7 +3032,7 @@ async function generateSignal() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        source: 'anthropic',
+        type: 'anthropic',
         model: 'claude-opus-4-5',
         max_tokens: 2000,
         messages: [{ role: 'user', content: msgContent }]
@@ -3328,7 +3328,7 @@ Respond ONLY with this JSON — no other text:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        source: 'anthropic',
+        type: 'anthropic',
         model: 'claude-opus-4-5',
         max_tokens: 400,
         messages: [{ role: 'user', content: prompt }]
