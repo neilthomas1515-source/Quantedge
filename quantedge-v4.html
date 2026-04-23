@@ -2198,6 +2198,10 @@ async function fetchDayLevels() {
     prevDayClose=pc; window.prevDayClose=pc;
     setAutoLevel('lvl-prev-close',pc.toFixed(2));
     setAutoLevel('lvl-today-open',todayO.toFixed(2));
+    // Today's high/low as proxy for intraday range
+    setAutoLevel('lvl-pdh',todayH.toFixed(2));
+    setAutoLevel('lvl-pdl',todayL.toFixed(2));
+    window.prevDayHigh=todayH; window.prevDayLow=todayL;
     // For PDH/PDL we need yesterday - use Finnhub candles with longer window
     try {
       const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-60*86400;
