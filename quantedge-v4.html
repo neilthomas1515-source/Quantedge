@@ -2191,25 +2191,35 @@ async function refreshPrices() {
 async function fetchDayLevels() {
   const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching…';
   try {
-    const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-45*86400;
-    const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${nowTs}&token=${FINNHUB_KEY}`);
-    const d=await res.json();
-    if(d.s!=='ok'||!d.c||d.c.length<2)throw new Error('No candle data: '+d.s);
-    const n=d.c.length;
-    const pdh=d.h[n-2]*10,pdl=d.l[n-2]*10,pdc=d.c[n-2]*10,pdo=d.o[n-1]*10;
-    prevDayClose=pdc;window.prevDayClose=pdc;window.prevDayHigh=pdh;window.prevDayLow=pdl;
-    setAutoLevel('lvl-prev-close',pdc.toFixed(2));
-    setAutoLevel('lvl-pdh',pdh.toFixed(2));
-    setAutoLevel('lvl-pdl',pdl.toFixed(2));
-    setAutoLevel('lvl-today-open',pdo.toFixed(2));
-    const sl=Math.min(5,n-1);
-    setAutoLevel('lvl-wk-hi',(Math.max(...d.h.slice(-sl))*10).toFixed(2));
-    setAutoLevel('lvl-wk-lo',(Math.min(...d.l.slice(-sl))*10).toFixed(2));
-    setAutoLevel('lvl-mo-hi',(Math.max(...d.h)*10).toFixed(2));
-    setAutoLevel('lvl-mo-lo',(Math.min(...d.l)*10).toFixed(2));
+    // Use Finnhub quote for SPY to get prev close, high, low
+    const q = await fetchFinnhubDirect('SPY');
+    // q.c=current, q.h=today high, q.l=today low, q.o=today open, q.pc=prev close
+    const pc=q.pc*10, todayH=q.h*10, todayL=q.l*10, todayO=q.o*10, cur=q.c*10;
+    prevDayClose=pc; window.prevDayClose=pc;
+    setAutoLevel('lvl-prev-close',pc.toFixed(2));
+    setAutoLevel('lvl-today-open',todayO.toFixed(2));
+    // For PDH/PDL we need yesterday - use Finnhub candles with longer window
+    try {
+      const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-60*86400;
+      const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${nowTs}&token=${FINNHUB_KEY}`);
+      const d=await res.json();
+      if(d.s==='ok'&&d.c&&d.c.length>=2){
+        const n=d.c.length;
+        const pdh=d.h[n-2]*10,pdl=d.l[n-2]*10,pdc2=d.c[n-2]*10;
+        window.prevDayHigh=pdh;window.prevDayLow=pdl;
+        setAutoLevel('lvl-pdh',pdh.toFixed(2));
+        setAutoLevel('lvl-pdl',pdl.toFixed(2));
+        // Week hi/lo from last 5 bars
+        const sl=Math.min(5,n-1);
+        setAutoLevel('lvl-wk-hi',(Math.max(...d.h.slice(-sl))*10).toFixed(2));
+        setAutoLevel('lvl-wk-lo',(Math.min(...d.l.slice(-sl))*10).toFixed(2));
+        setAutoLevel('lvl-mo-hi',(Math.max(...d.h)*10).toFixed(2));
+        setAutoLevel('lvl-mo-lo',(Math.min(...d.l)*10).toFixed(2));
+      }
+    } catch(e2){console.warn('Candle fetch:',e2.message);}
     if(note)note.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     updateGapAnalysis(window.liveESPrice||priceData['ES']);
-    showToast(`Levels: PDH ${pdh.toFixed(0)} / PDL ${pdl.toFixed(0)} / PC ${pdc.toFixed(0)}`,'ok');
+    showToast(`Prev Close: ${pc.toFixed(0)} | Today O: ${todayO.toFixed(0)}`,'ok');
   } catch(e){if(note)note.textContent='Error: '+e.message;console.error('fetchDayLevels:',e);}
 }
 
