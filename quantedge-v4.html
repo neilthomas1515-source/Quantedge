@@ -1637,7 +1637,7 @@ async function fetchOptionsFlow(){
   optFlow.lastUpdate=now;
   try{
     const ts=Math.floor(new Date(new Date().setHours(21,0,0,0)).getTime()/1000);
-    const r=await fetch(`https://query1.finance.yahoo.com/v7/finance/options/SPY?date=${ts}`);
+    const r=await fetch(`https://query1.finance.yahoo.com/v7/finance/options/SPY${ts?'?date='+ts:''}`);
     const d=await r.json(),chain=d?.optionChain?.result?.[0];if(!chain)return;
     const calls=chain.options?.[0]?.calls||[],puts=chain.options?.[0]?.puts||[];
     const tv=calls.reduce((s,c)=>s+(c.volume||0),0),pv=puts.reduce((s,p)=>s+(p.volume||0),0);
@@ -1971,11 +1971,23 @@ async function checkEconRelease(){
 const mtfSt={tfs:{daily:{bias:null},h4:{bias:null},h1:{bias:null},m15:{bias:null}},alignment:null,score:0,lastUpdate:0};
 async function fetchMTFData(){
   const now=Date.now();if(now-mtfSt.lastUpdate<300000)return;mtfSt.lastUpdate=now;
-  for(const[key,interval,range]of[['daily','1d','3mo'],['h4','1h','5d'],['h1','1h','2d'],['m15','15m','1d']]){
+  const nowTs=Math.floor(Date.now()/1000);
+  const configs=[
+    {key:'daily',resolution:'D',  from:nowTs-90*86400},
+    {key:'h4',   resolution:'60', from:nowTs-10*86400},
+    {key:'h1',   resolution:'60', from:nowTs-3*86400},
+    {key:'m15',  resolution:'15', from:nowTs-2*86400},
+  ];
+  for(const cfg of configs){
     try{
-      const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=${interval}&range=${range}`);
-      const d=await r.json(),res=d?.chart?.result?.[0];
-      if(res){const closes=res.indicators?.quote?.[0]?.close?.filter(Boolean)||[];if(closes.length>=10){const n=closes.length,cur=closes[n-1],ema20=calcEMA(closes,20),ema50=calcEMA(closes,Math.min(50,n-1));let score=0;if(cur>ema20)score++;else score--;if(cur>ema50)score++;else score--;mtfSt.tfs[key]={bias:score>=2?'BULLISH':score<=-2?'BEARISH':'NEUTRAL'};}}
+      const r=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=${cfg.resolution}&from=${cfg.from}&to=${nowTs}&token=${FINNHUB_KEY}`);
+      const d=await r.json();
+      if(d.s==='ok'&&d.c&&d.c.length>=10){
+        const closes=d.c,n=closes.length,cur=closes[n-1];
+        const ema20=calcEMA(closes,20),ema50=calcEMA(closes,Math.min(50,n-1));
+        let score=0;if(cur>ema20)score++;else score--;if(cur>ema50)score++;else score--;
+        mtfSt.tfs[cfg.key]={bias:score>=2?'BULLISH':score<=-2?'BEARISH':'NEUTRAL'};
+      }
     }catch(e){}
   }
   updateMTFDisplay();
@@ -2005,7 +2017,7 @@ function updateMTFDisplay(){
 // ══════════════════════════════════════════════════
 async function fetchDarkPoolData(){
   try{
-    const r=await fetch('https://query1.finance.yahoo.com/v7/finance/options/SPY');
+    const r=await fetch(`https://query1.finance.yahoo.com/v7/finance/options/SPY${ts?'?date='+ts:''}`);
     const d=await r.json(),chain=d?.optionChain?.result?.[0];if(!chain)return;
     const all=[...(chain.options?.[0]?.calls||[]),...(chain.options?.[0]?.puts||[])];
     const avgOI=all.reduce((s,o)=>s+(o.openInterest||0),0)/all.length;
@@ -2070,218 +2082,150 @@ function updateJournalDisplay(){
   if(el)el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px"><div><span style="color:#555">Win Rate</span><br><b style="color:${parseFloat(wr)>=50?'#00ff88':'#ff4444'}">${wr}%</b></div><div><span style="color:#555">Trades</span><br><b>${t.length}</b></div><div><span style="color:#555">Avg Win</span><br><b style="color:#00ff88">+$${aw}</b></div></div>`;
 }
 // ══════════════════════════════════════════════════
-// PART 5a: CLOCK, MARKET STATUS, GAP, PRICE FETCHES
+// PART 5a: CLOCK + PRICES
+// Yahoo fetched DIRECTLY from browser (not worker)
+// Worker only used for FlashAlpha + Anthropic
 // ══════════════════════════════════════════════════
-
-const priceData = { ES:null, SPX:null, NQ:null, VIX:null, DXY:null };
+const priceData = {};
 let prevDayClose = null;
 
-// ── CLOCK & MARKET STATUS ──
 function getESTNow() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
 }
 function getMarketPeriod(est) {
-  const h = est.getHours(), m = est.getMinutes(), tot = h * 60 + m;
-  if (tot < 4*60)          return { name:'Closed', cls:'closed', note:'', color:'#444', dotColor:'#444' };
-  if (tot < 9*60+30)       return { name:'Pre-Market', cls:'pre', note:'Futures active', color:'#ffaa00', dotColor:'#ffaa00' };
-  if (tot === 9*60+30)     return { name:'🔔 OPEN', cls:'open', note:'Market just opened', color:'#00ff88', dotColor:'#00ff88' };
-  if (tot < 10*60)         return { name:'Power Hour Open', cls:'power', note:'High volatility — ORB window', color:'#00d4ff', dotColor:'#00d4ff' };
-  if (tot < 12*60)         return { name:'AM Session', cls:'open', note:'Primary trading window', color:'#00ff88', dotColor:'#00ff88' };
-  if (tot < 14*60)         return { name:'Lunch Chop', cls:'lunch', note:'Low volume — reduce size', color:'#8aaec8', dotColor:'#8aaec8' };
-  if (tot < 15*60)         return { name:'PM Session', cls:'open', note:'Institutional flow returns', color:'#00ff88', dotColor:'#00ff88' };
-  if (tot < 15*60+30)      return { name:'Power Hour Close', cls:'power', note:'Watch for reversals', color:'#00d4ff', dotColor:'#00d4ff' };
-  if (tot < 16*60)         return { name:'MOC / Close', cls:'close', note:'Market-on-close orders active', color:'#ff4444', dotColor:'#ff4444' };
-  if (tot < 18*60)         return { name:'After Hours', cls:'after', note:'Low liquidity', color:'#cc8800', dotColor:'#cc8800' };
-  return { name:'Futures/Globex', cls:'pre', note:'Overnight session', color:'#ffaa00', dotColor:'#ffaa00' };
+  const h=est.getHours(),m=est.getMinutes(),tot=h*60+m;
+  if(tot<4*60)         return{name:'Closed',          cls:'closed',note:'',color:'#444',dotColor:'#444'};
+  if(tot<9*60+30)      return{name:'Pre-Market',      cls:'pre',   note:'Futures active',color:'#ffaa00',dotColor:'#ffaa00'};
+  if(tot===9*60+30)    return{name:'🔔 OPEN',         cls:'open',  note:'Market just opened',color:'#00ff88',dotColor:'#00ff88'};
+  if(tot<10*60)        return{name:'Power Hour Open', cls:'power', note:'ORB window',color:'#00d4ff',dotColor:'#00d4ff'};
+  if(tot<12*60)        return{name:'AM Session',      cls:'open',  note:'Primary window',color:'#00ff88',dotColor:'#00ff88'};
+  if(tot<14*60)        return{name:'Lunch Chop',      cls:'lunch', note:'Low volume',color:'#8aaec8',dotColor:'#8aaec8'};
+  if(tot<15*60)        return{name:'PM Session',      cls:'open',  note:'Institutional flow',color:'#00ff88',dotColor:'#00ff88'};
+  if(tot<15*60+30)     return{name:'Power Hour Close',cls:'power', note:'Watch reversals',color:'#00d4ff',dotColor:'#00d4ff'};
+  if(tot<16*60)        return{name:'MOC / Close',     cls:'close', note:'MOC orders',color:'#ff4444',dotColor:'#ff4444'};
+  if(tot<18*60)        return{name:'After Hours',     cls:'after', note:'Low liquidity',color:'#cc8800',dotColor:'#cc8800'};
+  return                      {name:'Futures/Globex', cls:'pre',   note:'Overnight',color:'#ffaa00',dotColor:'#ffaa00'};
 }
 function getNextTransition(est) {
-  const h = est.getHours(), m = est.getMinutes(), s = est.getSeconds(), tot = h * 60 + m;
-  const transitions = [4*60, 9*60+30, 12*60, 14*60, 15*60, 15*60+30, 16*60, 18*60];
-  const next = transitions.find(t => t > tot);
-  if (!next) return null;
-  const diff = (next - tot) * 60 - s;
-  const mm = Math.floor(diff / 60), ss = diff % 60;
-  return `${mm}m ${ss}s`;
+  const h=est.getHours(),m=est.getMinutes(),s=est.getSeconds(),tot=h*60+m;
+  const tr=[4*60,9*60+30,12*60,14*60,15*60,15*60+30,16*60,18*60];
+  const next=tr.find(t=>t>tot);if(!next)return null;
+  const diff=(next-tot)*60-s;return`${Math.floor(diff/60)}m ${diff%60}s`;
 }
-function is0DTE(est) {
-  const dow = est.getDay();
-  // Mon/Wed/Fri have SPX 0DTE; futures expire 3rd Fri
-  return dow === 1 || dow === 3 || dow === 5;
-}
+function is0DTE(est){const d=est.getDay();return d===1||d===3||d===5;}
+
 function updateClock() {
-  const est = getESTNow();
-  const hh = String(est.getHours()).padStart(2,'0');
-  const mm = String(est.getMinutes()).padStart(2,'0');
-  const ss = String(est.getSeconds()).padStart(2,'0');
-  const el = document.getElementById('clock-time');
-  if (el) el.textContent = `${hh}:${mm}:${ss}`;
-
-  const period = getMarketPeriod(est);
-  const stEl = document.getElementById('clock-status');
-  if (stEl) { stEl.textContent = period.name + ' EST'; stEl.className = 'clock-status status-' + period.cls; }
-
-  const next = getNextTransition(est);
-  const cdEl = document.getElementById('clock-countdown');
-  if (cdEl) cdEl.textContent = next ? `Next: ${next}` : '';
-
-  // Update pre-signal period card
-  updatePeriodCard(period, est);
-
-  // 0DTE auto-flag
-  if (is0DTE(est)) {
-    const sel = document.getElementById('is-0dte');
-    if (sel && sel.value === 'no') sel.value = 'yes';
-  }
-
-  // Auto-morning toast at 9:00 AM
-  if (est.getHours() === 9 && est.getMinutes() === 0 && est.getSeconds() === 0) {
-    showToast('☀️ 9:00 AM — Run morning bias before open', 'info');
-  }
-
-  // Trigger econ release check every 30s
-  if (est.getSeconds() === 0 || est.getSeconds() === 30) checkEconRelease();
+  const est=getESTNow();
+  const hh=String(est.getHours()).padStart(2,'0'),mm=String(est.getMinutes()).padStart(2,'0'),ss=String(est.getSeconds()).padStart(2,'0');
+  const el=document.getElementById('clock-time');if(el)el.textContent=`${hh}:${mm}:${ss}`;
+  const period=getMarketPeriod(est);
+  const stEl=document.getElementById('clock-status');if(stEl){stEl.textContent=period.name+' EST';stEl.className='clock-status status-'+period.cls;}
+  const cdEl=document.getElementById('clock-countdown');if(cdEl)cdEl.textContent=getNextTransition(est)?`Next: ${getNextTransition(est)}`:'';
+  updatePeriodCard(period,est);
+  if(is0DTE(est)){const sel=document.getElementById('is-0dte');if(sel&&sel.value==='no')sel.value='yes';}
+  if(est.getHours()===9&&est.getMinutes()===0&&est.getSeconds()===0)showToast('☀️ 9:00 AM — Run morning bias','info');
+  if(est.getSeconds()===0||est.getSeconds()===30)checkEconRelease();
+}
+function updatePeriodCard(period,est){
+  const nameEl=document.getElementById('psd-period-name'),noteEl=document.getElementById('psd-period-note'),dotEl=document.getElementById('psd-period-dot'),cdEl=document.getElementById('psd-countdown');
+  if(nameEl)nameEl.textContent=period.name;if(noteEl)noteEl.textContent=period.note;if(dotEl)dotEl.style.background=period.dotColor;
+  const next=getNextTransition(est);if(cdEl)cdEl.textContent=next||'—';
 }
 
-function updatePeriodCard(period, est) {
-  const nameEl = document.getElementById('psd-period-name');
-  const noteEl = document.getElementById('psd-period-note');
-  const dotEl  = document.getElementById('psd-period-dot');
-  const cdEl   = document.getElementById('psd-countdown');
-  if (nameEl) nameEl.textContent = period.name;
-  if (noteEl) noteEl.textContent = period.note;
-  if (dotEl)  dotEl.style.background = period.dotColor;
-  const next = getNextTransition(est);
-  if (cdEl) cdEl.textContent = next || '—';
+// ── FETCH PRICE via Finnhub direct (proven to work) ──
+async function fetchFinnhubDirect(symbol) {
+  const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_KEY}`);
+  if (!res.ok) throw new Error(`Finnhub ${res.status}`);
+  const d = await res.json();
+  if (!d || !d.c || d.c === 0) throw new Error('No price');
+  return d;
 }
 
-// ── PRICE FETCHES ──
+// SPX via Finnhub SPY*10
 async function fetchSPYNow() {
   try {
-    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/SPY?interval=1m&range=1d`);
-    const d = await r.json();
-    const q = d?.chart?.result?.[0]?.meta;
-    if (!q) { showToast('SPY fetch: no data', 'err'); return; }
-    const spyPrice = q.regularMarketPrice || q.previousClose;
-    const spxApprox = spyPrice * 10;
-    priceData['SPX'] = spxApprox;
-    const el = document.getElementById('px-spx');
-    if (el) { el.textContent = spxApprox.toFixed(2); el.className = 'px-val'; }
-    const el2 = document.getElementById('spy-fetch-time');
-    if (el2) el2.textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
-
-    // Calc ES from SPX using SPX_BASIS input
-    const basis = parseFloat(document.getElementById('es-manual-price')?.value) || null;
-    if (!basis) {
-      const esApprox = spxApprox + 4; // rough typical basis
-      if (!window.liveESPrice) {
-        priceData['ES'] = esApprox;
-        const esEl = document.getElementById('px-es');
-        if (esEl) esEl.textContent = esApprox.toFixed(2);
-      }
-    }
-    showToast(`SPX ~${spxApprox.toFixed(2)} (SPY × 10)`, 'ok');
-    updateGapAnalysis(spxApprox);
-  } catch(e) { showToast('SPY fetch failed: ' + e.message, 'err'); }
+    const d = await fetchFinnhubDirect('SPY');
+    const spx = d.c * 10;
+    priceData['SPX'] = spx;
+    const el=document.getElementById('px-spx');if(el){el.textContent=spx.toFixed(2);el.className='px-val';}
+    const el2=document.getElementById('spy-fetch-time');if(el2)el2.textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+    if(d.pc&&!prevDayClose){prevDayClose=d.pc*10;window.prevDayClose=prevDayClose;setAutoLevel('lvl-prev-close',prevDayClose.toFixed(2));}
+    if(!window.liveESPrice){priceData['ES']=spx+4;const esEl=document.getElementById('px-es');if(esEl){esEl.textContent=(spx+4).toFixed(2);esEl.className='px-val';}const pEl=document.getElementById('psd-es');if(pEl)pEl.textContent=(spx+4).toFixed(2);}
+    updateGapAnalysis(window.liveESPrice||priceData['ES']);
+    showToast(`SPX ${spx.toFixed(2)}`,'ok');
+  } catch(e){showToast('SPX: '+e.message,'err');}
 }
 
+// VIX via Finnhub VIXY*multiplier + DXY via UUP
 async function fetchVIXandDXY() {
+  // VIX — use VIXY ETF, multiply to approximate VIX index
   try {
-    // VIX
-    const rv = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1m&range=1d');
-    const dv = await rv.json();
-    const vix = dv?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (vix) {
-      priceData['VIX'] = vix;
-      ['px-vix','vix-display','psd-vix'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.textContent = vix.toFixed(2); el.style.color = vix > 25 ? '#ff4444' : vix > 18 ? '#ffaa00' : '#00ff88'; }
-      });
-    }
-  } catch(e) {}
+    const d = await fetchFinnhubDirect('VIXY');
+    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
+    const vix = d.c;
+    priceData['VIX'] = vix;
+    const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
+    ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
+  } catch(e){console.warn('VIX:',e.message);}
+  // DXY via UUP
   try {
-    // DXY via UUP ETF as proxy
-    const rd = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/UUP?interval=1m&range=1d');
-    const dd = await rd.json();
-    const dxy = dd?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (dxy) {
-      priceData['DXY'] = dxy;
-      const el = document.getElementById('px-dxy');
-      if (el) el.textContent = dxy.toFixed(2);
-      const el2 = document.getElementById('dxy-display');
-      if (el2) el2.textContent = dxy.toFixed(2);
-    }
-  } catch(e) {}
+    const d = await fetchFinnhubDirect('UUP');
+    priceData['DXY'] = d.c;
+    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
+    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
+  } catch(e){console.warn('DXY:',e.message);}
 }
 
+// QQQ/NQ via Finnhub
+async function refreshPrices() {
+  try {
+    const d = await fetchFinnhubDirect('QQQ');
+    priceData['QQQ'] = d.c;
+    const prev=priceData['QQQ_prev']||d.c;priceData['QQQ_prev']=d.c;
+    const el=document.getElementById('px-nq');if(el){el.textContent=d.c.toFixed(2);el.className='px-val'+(d.c>prev?' up':d.c<prev?' dn':'');}
+  } catch(e){}
+  fetchVIXandDXY();
+}
+
+// Day levels via Finnhub candles
 async function fetchDayLevels() {
+  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching…';
   try {
-    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=1mo');
-    const d = await r.json(), res = d?.chart?.result?.[0];
-    if (!res) return;
-    const q = res.indicators?.quote?.[0], ts = res.timestamps || res.timestamp;
-    if (!q || !ts) return;
-    const n = ts.length;
-
-    // Previous day
-    const pdIdx = n - 2;
-    const pdh = q.high[pdIdx], pdl = q.low[pdIdx], pdc = q.close[pdIdx];
-    window.prevDayHigh = pdh; window.prevDayLow = pdl; window.prevDayClose = pdc;
-    prevDayClose = pdc;
-    setAutoLevel('lvl-prev-close', pdc?.toFixed(2));
-    setAutoLevel('lvl-pdh', pdh?.toFixed(2));
-    setAutoLevel('lvl-pdl', pdl?.toFixed(2));
-
-    // Today open
-    const todayOpen = q.open?.[n - 1];
-    setAutoLevel('lvl-today-open', todayOpen?.toFixed(2));
-
-    // Week high/low (last 5 bars)
-    const wBars = q.high.slice(-5), wLo = q.low.slice(-5);
-    setAutoLevel('lvl-wk-hi', Math.max(...wBars.filter(Boolean)).toFixed(2));
-    setAutoLevel('lvl-wk-lo', Math.min(...wLo.filter(Boolean)).toFixed(2));
-
-    // Month high/low
-    setAutoLevel('lvl-mo-hi', Math.max(...q.high.filter(Boolean)).toFixed(2));
-    setAutoLevel('lvl-mo-lo', Math.min(...q.low.filter(Boolean)).toFixed(2));
-
-    const note = document.getElementById('auto-levels-note');
-    if (note) note.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    if (pdc) updateGapAnalysis(window.liveESPrice || priceData['ES']);
-  } catch(e) { showToast('Levels fetch failed: ' + e.message, 'err'); }
+    const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-45*86400;
+    const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${nowTs}&token=${FINNHUB_KEY}`);
+    const d=await res.json();
+    if(d.s!=='ok'||!d.c||d.c.length<2)throw new Error('No candle data: '+d.s);
+    const n=d.c.length;
+    const pdh=d.h[n-2]*10,pdl=d.l[n-2]*10,pdc=d.c[n-2]*10,pdo=d.o[n-1]*10;
+    prevDayClose=pdc;window.prevDayClose=pdc;window.prevDayHigh=pdh;window.prevDayLow=pdl;
+    setAutoLevel('lvl-prev-close',pdc.toFixed(2));
+    setAutoLevel('lvl-pdh',pdh.toFixed(2));
+    setAutoLevel('lvl-pdl',pdl.toFixed(2));
+    setAutoLevel('lvl-today-open',pdo.toFixed(2));
+    const sl=Math.min(5,n-1);
+    setAutoLevel('lvl-wk-hi',(Math.max(...d.h.slice(-sl))*10).toFixed(2));
+    setAutoLevel('lvl-wk-lo',(Math.min(...d.l.slice(-sl))*10).toFixed(2));
+    setAutoLevel('lvl-mo-hi',(Math.max(...d.h)*10).toFixed(2));
+    setAutoLevel('lvl-mo-lo',(Math.min(...d.l)*10).toFixed(2));
+    if(note)note.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    updateGapAnalysis(window.liveESPrice||priceData['ES']);
+    showToast(`Levels: PDH ${pdh.toFixed(0)} / PDL ${pdl.toFixed(0)} / PC ${pdc.toFixed(0)}`,'ok');
+  } catch(e){if(note)note.textContent='Error: '+e.message;console.error('fetchDayLevels:',e);}
 }
 
-function setAutoLevel(id, val) {
-  const el = document.getElementById(id);
-  if (el && val) { el.textContent = val; el.className = 'auto-level-val'; }
-}
+function setAutoLevel(id,val){const el=document.getElementById(id);if(el&&val){el.textContent=val;el.className='auto-level-val';}}
 
-// ── GAP ANALYSIS ──
 function updateGapAnalysis(currentPrice) {
-  if (!prevDayClose || !currentPrice) return;
-  const gap = currentPrice - prevDayClose;
-  const gapPct = ((gap / prevDayClose) * 100).toFixed(2);
-  const isUp = gap > 0.5, isDn = gap < -0.5;
-  const dir = isUp ? 'GAP UP' : isDn ? 'GAP DOWN' : 'FLAT';
-  const dirCls = isUp ? 'up' : isDn ? 'dn' : 'flat';
-  const fillTarget = isUp ? prevDayClose : prevDayClose;
-  const distToFill = Math.abs(currentPrice - fillTarget);
-  const gapSize = Math.abs(gap);
-  const fillPct = gapSize > 0 ? Math.max(0, Math.min(100, ((gapSize - distToFill) / gapSize) * 100)) : 100;
-
-  const dirEl = document.getElementById('psd-gap-dir');
-  if (dirEl) { dirEl.textContent = dir; dirEl.className = 'gap-val-lg ' + dirCls; }
-  const sizeEl = document.getElementById('psd-gap-size');
-  if (sizeEl) sizeEl.textContent = `${gapPct}% (${Math.abs(gap).toFixed(2)} pts)`;
-  const fillEl = document.getElementById('psd-gap-fill');
-  if (fillEl) fillEl.textContent = prevDayClose.toFixed(2);
-  const barEl = document.getElementById('psd-gap-bar');
-  if (barEl) { barEl.style.width = fillPct + '%'; barEl.className = 'gap-fill-progress' + (fillPct >= 100 ? ' filled' : ''); }
-
-  // Viz badge
-  const gbEl = document.getElementById('viz-gap-badge');
-  if (gbEl) { gbEl.innerHTML = `<span class="gap-badge ${dirCls}">${dir} ${Math.abs(gap).toFixed(2)}</span>`; }
-
-  window.gapContext = `Gap: ${dir} ${Math.abs(gap).toFixed(2)} pts (${gapPct}%) from prev close ${prevDayClose.toFixed(2)}. Fill target: ${fillTarget.toFixed(2)}. ${fillPct > 50 ? 'Gap mostly filled.' : 'Gap NOT filled — magnet in play.'}`;
+  if(!prevDayClose||!currentPrice)return;
+  const gap=currentPrice-prevDayClose,gapPct=((gap/prevDayClose)*100).toFixed(2);
+  const isUp=gap>0.5,isDn=gap<-0.5,dir=isUp?'GAP UP':isDn?'GAP DOWN':'FLAT',dirCls=isUp?'up':isDn?'dn':'flat';
+  const gapSize=Math.abs(gap),fillPct=gapSize>0?Math.max(0,Math.min(100,((gapSize-Math.abs(currentPrice-prevDayClose))/gapSize)*100)):100;
+  const dirEl=document.getElementById('psd-gap-dir');if(dirEl){dirEl.textContent=dir;dirEl.className='gap-val-lg '+dirCls;}
+  const sEl=document.getElementById('psd-gap-size');if(sEl)sEl.textContent=`${gapPct}% (${Math.abs(gap).toFixed(2)} pts)`;
+  const fEl=document.getElementById('psd-gap-fill');if(fEl)fEl.textContent=prevDayClose.toFixed(2);
+  const bEl=document.getElementById('psd-gap-bar');if(bEl){bEl.style.width=fillPct+'%';bEl.className='gap-fill-progress'+(fillPct>=100?' filled':'');}
+  const gbEl=document.getElementById('viz-gap-badge');if(gbEl)gbEl.innerHTML=`<span class="gap-badge ${dirCls}">${dir} ${Math.abs(gap).toFixed(2)}</span>`;
+  window.gapContext=`Gap: ${dir} ${Math.abs(gap).toFixed(2)} pts (${gapPct}%) from prev close ${prevDayClose.toFixed(2)}. ${fillPct>50?'Mostly filled.':'NOT filled.'}`;
 }
 // ══════════════════════════════════════════════════
 // PART 5b: GEX UPLOAD SYSTEM
@@ -3247,7 +3191,7 @@ async function fetchEconCalendar() {
   if (calBar) calBar.innerHTML = '<span class="cal-bar-empty">Loading...</span>';
   try {
     const today = new Date().toISOString().split('T')[0];
-    const r = await fetch(`${CLOUDFLARE_WORKER}?source=finnhub&type=calendar&from=${today}&to=${today}`);
+    const r = await fetch(`https://finnhub.io/api/v1/calendar/economic?from=${today}&to=${today}&token=${FINNHUB_KEY}`);
     const d = await r.json();
     const events = d?.economicCalendar || [];
     const usEvents = events.filter(e => e.country === 'US' && (e.impact === 'high' || e.impact === 'medium')).slice(0, 10);
@@ -3464,13 +3408,12 @@ function initAll() {
   // Snap grid
   renderSnapGrid();
 
-  // Price fetches
+  // Prices — exact v3 pattern
   fetchSPYNow();
-  fetchVIXandDXY();
   fetchDayLevels();
-
-  // Repeat price fetches
-  setInterval(() => { fetchSPYNow(); fetchVIXandDXY(); }, 30000);
+  refreshPrices();
+  setInterval(refreshPrices, 15000);
+  setInterval(fetchSPYNow, 60000);
   setInterval(fetchDayLevels, 300000);
 
   // Tier 2
