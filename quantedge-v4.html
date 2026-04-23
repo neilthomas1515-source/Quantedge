@@ -3465,6 +3465,42 @@ function initAll() {
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', initAll);
+
+// ── RITHMIC LIVE FLOW BRIDGE POLL ──
+async function pollRithmicBridge() {
+  try {
+    const res = await fetch('http://localhost:8765/flow', { signal: AbortSignal.timeout(1500) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    const dot = document.getElementById('rithmic-dot');
+    const lbl = document.getElementById('rithmic-label');
+    if (d.status === 'live' || d.status === 'subscribed') {
+      if (d.last) {
+        const prev = window.liveESPrice || d.last;
+        window.liveESPrice = d.last;
+        const esEl = document.getElementById('px-es');
+        if (esEl) { esEl.textContent = d.last.toFixed(2); esEl.className = 'px-val' + (d.last > prev ? ' up' : d.last < prev ? ' dn' : ''); }
+        const psdEs = document.getElementById('psd-es');
+        if (psdEs) psdEs.textContent = d.last.toFixed(2);
+        const vizEl = document.getElementById('viz-price-main');
+        if (vizEl) { vizEl.textContent = d.last.toFixed(2); vizEl.className = 'viz-price-main' + (d.last > prev ? ' up' : d.last < prev ? ' dn' : ''); }
+      }
+      if (dot) { dot.style.background = 'var(--green)'; dot.style.boxShadow = '0 0 6px var(--green)'; }
+      if (lbl) lbl.textContent = 'Live | Bid ' + (d.bid||'—') + ' Ask ' + (d.ask||'—') + ' | Vol ' + (d.volume||0).toLocaleString() + ' | Delta ' + (d.cum_delta >= 0 ? '+' : '') + (d.cum_delta||0);
+    } else {
+      if (dot) { dot.style.background = 'var(--amber)'; dot.style.boxShadow = 'none'; }
+      if (lbl) lbl.textContent = 'Bridge: ' + (d.status||'connecting') + (d.error ? ' — ' + d.error : '');
+    }
+  } catch(e) {
+    const dot = document.getElementById('rithmic-dot');
+    const lbl = document.getElementById('rithmic-label');
+    if (dot) { dot.style.background = 'var(--t4)'; dot.style.boxShadow = 'none'; }
+    if (lbl) lbl.textContent = 'Bridge offline — run rithmic_bridge.py';
+  }
+}
+setInterval(pollRithmicBridge, 2000);
+pollRithmicBridge();
+
 </script>
 </body>
 </html>
