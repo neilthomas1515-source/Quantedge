@@ -2887,10 +2887,13 @@ async function generateSignal() {
     });
 
     if (!res.ok) throw new Error(`Worker error ${res.status}: ${await res.text()}`);
-    const data = await res.json();
+    const rawText = await res.text();
+    const data = JSON.parse(rawText);
     const text = (data?.content || []).filter(b=>b.type==='text').map(b=>b.text).join('\n');
     const clean = text.replace(/```json|```/g,'').trim();
-    const signal = JSON.parse(clean);
+    const j1 = clean.indexOf('{'); const j2 = clean.lastIndexOf('}');
+    if(j1===-1||j2===-1) throw new Error('No JSON in response');
+    const signal = JSON.parse(clean.substring(j1, j2+1));
 
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
