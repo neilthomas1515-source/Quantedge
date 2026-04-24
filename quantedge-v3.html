@@ -2225,7 +2225,7 @@ async function fetchSPYNow() {
   btn.textContent = '⟳ Fetching…';
   try {
     // Exact same method as qm-final
-    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=3mo&interval=1d');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -2288,7 +2288,7 @@ async function fetchDayLevels() {
 
   try {
     // Single fetch — 1mo of SPX data gives us everything we need
-    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=3mo&interval=1d');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
