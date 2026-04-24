@@ -2160,9 +2160,9 @@ async function fetchSPYNow() {
 async function fetchVIXandDXY() {
   // VIX — use VIXY ETF, multiply to approximate VIX index
   try {
-    const d = await fetchFinnhubDirect('VIXY');
-    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
-    const vix = d.c;
+    const vixResp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX');
+    const vixData = await vixResp.json();
+    const vix = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
     priceData['VIX'] = vix;
     const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
