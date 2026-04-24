@@ -2167,12 +2167,16 @@ async function fetchVIXandDXY() {
     const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
   } catch(e){console.warn('VIX:',e.message);}
-  // DXY via UUP
+  // DXY via Yahoo
   try {
-    const d = await fetchFinnhubDirect('UUP');
-    priceData['DXY'] = d.c;
-    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
-    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
+    const dxyResp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB');
+    const dxyData = await dxyResp.json();
+    const dxy = dxyData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if(dxy) {
+      priceData['DXY'] = dxy;
+      const el=document.getElementById('px-dxy');if(el)el.textContent=dxy.toFixed(2);
+      const el2=document.getElementById('dxy-display');if(el2)el2.textContent=dxy.toFixed(2);
+    }
   } catch(e){console.warn('DXY:',e.message);}
 }
 
