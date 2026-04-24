@@ -2239,21 +2239,27 @@ async function fetchSPYNow() {
 
 // VIX via Finnhub VIXY*multiplier + DXY via UUP
 async function fetchVIXandDXY() {
-  // VIX — use VIXY ETF, multiply to approximate VIX index
+  // VIX via Worker Yahoo route (confirmed working in v4)
   try {
-    const d = await fetchFinnhubDirect('VIXY');
-    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
-    const vix = d.c;
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EVIX`);
+    if (!res.ok) throw new Error(`Yahoo VIX ${res.status}`);
+    const d = await res.json();
+    const vix = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (!vix) throw new Error('No VIX price in response');
     priceData['VIX'] = vix;
     const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
   } catch(e){console.warn('VIX:',e.message);}
-  // DXY via UUP
+  // DXY via Worker Yahoo route
   try {
-    const d = await fetchFinnhubDirect('UUP');
-    priceData['DXY'] = d.c;
-    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
-    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=DX-Y.NYB`);
+    if (!res.ok) throw new Error(`Yahoo DXY ${res.status}`);
+    const d = await res.json();
+    const dxy = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (!dxy) throw new Error('No DXY price in response');
+    priceData['DXY'] = dxy;
+    const el=document.getElementById('px-dxy');if(el)el.textContent=dxy.toFixed(2);
+    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=dxy.toFixed(2);
   } catch(e){console.warn('DXY:',e.message);}
 }
 
@@ -2923,16 +2929,14 @@ function buildMessageContent(prompt) {
   // Order flow image
   if (ofImageData) {
     const b64 = ofImageData.split(',')[1];
-    const ofMt = ofImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-    content.push({ type:'image', source:{ type:'base64', media_type:ofMt, data:b64 } });
+    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
     content.push({ type:'text', text:'[Above: Order flow / Bookmap]' });
   }
 
   // Indicator snapshots
   snapSlots.filter(s => s.image).forEach(s => {
     const b64 = s.image.split(',')[1];
-    const snapMt = s.image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-    content.push({ type:'image', source:{ type:'base64', media_type:snapMt, data:b64 } });
+    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
     content.push({ type:'text', text:`[Above: ${s.label}${s.desc ? ' — ' + s.desc : ''}]` });
   });
 
