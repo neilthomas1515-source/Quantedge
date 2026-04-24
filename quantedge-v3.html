@@ -2225,7 +2225,7 @@ async function fetchSPYNow() {
   btn.textContent = '⟳ Fetching…';
   try {
     // Exact same method as qm-final
-    const resp = await fetch('https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&count=30&token=d75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90');
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -2288,7 +2288,7 @@ async function fetchDayLevels() {
 
   try {
     // Single fetch — 1mo of SPX data gives us everything we need
-    const resp = await fetch('https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&count=30&token=d75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90');
+    const resp = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EGSPC&range=1mo');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const result = data.chart?.result?.[0];
@@ -2775,7 +2775,7 @@ function updateGEXDisplay() {
 async function fetchVIXandDXY() {
   // VIX via Yahoo ^VIX
   try {
-    const vixRes = await fetch('https://finnhub.io/api/v1/quote?symbol=VIXY&token=d75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90');
+    const vixRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX');
     const vixData = await vixRes.json();
     const vixPrice = vixData?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if (vixPrice) {
@@ -2789,7 +2789,7 @@ async function fetchVIXandDXY() {
   } catch {}
   // DXY via Yahoo DX-Y.NYB
   try {
-    const dxyRes = await fetch('https://finnhub.io/api/v1/quote?symbol=UUP&token=d75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90');
+    const dxyRes = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB');
     const dxyData = await dxyRes.json();
     const dxyPrice = dxyData?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if (dxyPrice) {
