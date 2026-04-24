@@ -2462,33 +2462,45 @@ async function fetchGEX() {
 function renderFlashAlphaData(data) {
   const container = document.getElementById('gex-fa-data');
   container.style.display = 'block';
-  // Display real fields — zero placeholders, zero hardcoded defaults
-  // If a field is missing we show the key as missing, not a fake value
-  const fields = ['gexLevel','flipLevel','callWall','putWall','hVol','zeroDeltaStrike','regimeType'];
+
+  // Real field names from FlashAlpha v1/exposure/gex/SPY response
+  // Zero placeholders — missing fields show red NO DATA
+  const nd = `<span style="color:#ff4444;font-size:9px">NO DATA</span>`;
+
+  const gammaFlip    = data.gamma_flip;
+  const netGex       = data.net_gex;
+  const regime       = data.net_gex_label;
+  const callWall     = data.call_wall?.strike;
+  const putWall      = data.put_wall?.strike;
+  const underlyingPx = data.underlying_price;
+
+  const rows = [
+    ['Gamma Flip',  gammaFlip    != null ? gammaFlip.toFixed(2)             : null],
+    ['Net GEX',     netGex       != null ? '$'+(netGex/1e9).toFixed(2)+'B' : null],
+    ['Regime',      regime       || null],
+    ['Call Wall',   callWall     != null ? callWall.toFixed(2)              : null],
+    ['Put Wall',    putWall      != null ? putWall.toFixed(2)               : null],
+    ['Underlying',  underlyingPx != null ? underlyingPx.toFixed(2)         : null],
+  ];
+
   let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px">';
-  fields.forEach(f => {
-    const val = data[f];
-    const display = (val !== undefined && val !== null) ? String(val) : `<span style="color:#ff4444;font-size:9px">NO DATA</span>`;
+  rows.forEach(([label, val]) => {
     html += `<div style="background:var(--s3);border:1px solid var(--b2);border-radius:3px;padding:4px 6px">
-      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${f}</div>
-      <div style="font-size:15px;font-weight:700;color:var(--cyan);font-family:var(--mono)">${display}</div>
+      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${label}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--cyan);font-family:var(--mono)">${val !== null ? val : nd}</div>
     </div>`;
   });
   html += '</div>';
 
-  // Raw fields that came back but aren't in our list
-  const extra = Object.keys(data).filter(k => !fields.includes(k));
+  const known = ['gamma_flip','net_gex','net_gex_label','call_wall','put_wall','underlying_price','symbol','strikes'];
+  const extra = Object.keys(data).filter(k => !known.includes(k));
   if (extra.length) {
-    html += `<div style="font-size:9px;color:var(--t4);margin-top:4px">Additional: ${extra.map(k=>`${k}:${data[k]}`).join(' · ')}</div>`;
+    html += `<div style="font-size:9px;color:var(--t4);margin-top:4px">Extra: ${extra.map(k=>k+':'+JSON.stringify(data[k])).join(' · ')}</div>`;
   }
   container.innerHTML = html;
 
-  // Store for AI prompt
   window.flashAlphaData = data;
-  window.gexContext = `FlashAlpha GEX: ${JSON.stringify(data)}`;
-
-  // Auto-populate key level inputs if present
-  if (data.flipLevel) { const el=document.getElementById('on-hi'); /* use as gex flip ref */ }
+  window.gexContext = `FlashAlpha GEX: Flip=${gammaFlip} Regime=${regime} CallWall=${callWall} PutWall=${putWall} Price=${underlyingPx}`;
 }
 
 // ── ORDER FLOW IMAGE ──
