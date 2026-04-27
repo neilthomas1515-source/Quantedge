@@ -3515,6 +3515,94 @@ async function checkSchwabStatus() {
 }
 
 // ── MAIN INIT ──
+
+// ══════════════════════════════════════════════════
+// TV ALERT BRIDGE
+// Polls Cloudflare Worker for TradingView webhook alerts
+// When alert arrives, injects context and auto-fires AI signal
+// Blueprint for all TradingView indicators
+// ══════════════════════════════════════════════════
+let tvAlertLastId = null;
+let tvAlertPollInterval = null;
+
+async function pollTVAlert() {
+  try {
+    const res = await fetch(`${CLOUDFLARE_WORKER}?source=tv-alert`, {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.status === 'no_data') return;
+    if (data.stale) return; // older than 30s — already processed
+
+    // Deduplicate — only fire once per alert
+    const alertId = data.receivedAt;
+    if (alertId === tvAlertLastId) return;
+    tvAlertLastId = alertId;
+
+    // Store alert context for AI prompt
+    window.tvAlertContext = buildTVAlertContext(data);
+    window.autoConfluenceContext = window.tvAlertContext;
+    window.autoConfluenceDirection = data.signal === 'LONG' ? 'BULLISH' : data.signal === 'SHORT' ? 'BEARISH' : null;
+
+    // Show toast
+    const dir = data.signal || '?';
+    const price = data.price || '?';
+    const tf = data.tf || '?';
+    const indicator = data.indicator || 'TV Alert';
+    showToast(`📡 ${indicator}: ${dir} @ ${price} (${tf})`, dir === 'LONG' ? 'ok' : 'warn');
+
+    // Update signal checks
+    const chk = document.getElementById('chk-regime');
+    if (chk && dir !== '?') {
+      chk.classList.add(dir === 'LONG' ? 'active' : 'active-red');
+      chk.querySelector('.sig-text').textContent = `${indicator} ${dir}`;
+    }
+
+    // Auto-fire AI signal
+    setTimeout(() => {
+      const btn = document.getElementById('btn-generate');
+      if (btn && !btn.disabled) btn.click();
+    }, 500);
+
+  } catch(e) {
+    // Silently ignore — bridge not connected
+  }
+}
+
+function buildTVAlertContext(data) {
+  const lines = ['=== TRADINGVIEW ALERT ==='];
+  if (data.indicator) lines.push(`Indicator: ${data.indicator}`);
+  if (data.signal)    lines.push(`Signal: ${data.signal}`);
+  if (data.tf)        lines.push(`Timeframe: ${data.tf}`);
+  if (data.price)     lines.push(`Price at alert: ${data.price}`);
+  if (data.rf)        lines.push(`Range Filter: ${data.rf}`);
+  if (data.rqk)       lines.push(`RQK Trend: ${data.rqk}`);
+  if (data.leading)   lines.push(`Leading indicator: ${data.leading}`);
+  if (data.confirm)   lines.push(`Confirmations: ${data.confirm}`);
+  if (data.supply_high) lines.push(`Supply High: ${data.supply_high}`);
+  if (data.demand_low)  lines.push(`Demand Low: ${data.demand_low}`);
+  if (data.session)   lines.push(`Session: ${data.session}`);
+  if (data.notes)     lines.push(`Notes: ${data.notes}`);
+  // Include any extra fields dynamically
+  const known = ['indicator','signal','tf','price','rf','rqk','leading','confirm','supply_high','demand_low','session','notes','receivedAt','age_ms','stale'];
+  Object.entries(data).forEach(([k,v]) => {
+    if (!known.includes(k)) lines.push(`${k}: ${v}`);
+  });
+  return lines.join('\n');
+}
+
+function startTVAlertPolling() {
+  if (tvAlertPollInterval) clearInterval(tvAlertPollInterval);
+  pollTVAlert();
+  tvAlertPollInterval = setInterval(pollTVAlert, 2000);
+  console.log('[TV Bridge] Polling for alerts every 2s');
+}
+
+function stopTVAlertPolling() {
+  if (tvAlertPollInterval) { clearInterval(tvAlertPollInterval); tvAlertPollInterval = null; }
+}
+
 function initAll() {
   // Clock
   updateClock();
@@ -3553,6 +3641,8 @@ function initAll() {
   setInterval(checkSchwabStatus, 30000);
 
   // Rithmic bridge polling (requires rithmic_bridge.py running on desktop)
+  // TV Alert bridge polling
+  startTVAlertPolling();
   setTimeout(startBridgePolling, 1000);
 
   // Econ calendar auto-load
