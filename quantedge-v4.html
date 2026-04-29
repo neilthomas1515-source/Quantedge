@@ -3677,14 +3677,20 @@ function buildMorningContext(data) {
   if (!data) return '';
   const lines = [
     '=== MORNING ANALYSIS (Auto-generated 5 AM PST) ===',
+    '=== INSTRUMENT CLARITY ===',
+    'ES FUTURES and SPX CASH INDEX are currently both trading in the 7100-7200 range.',
+    'ALL overnight/Asia/London High-Low levels below = ES FUTURES contract prices (from TradingView)',
+    'PDH/PDL/Prev Close in v4 input fields = SPX CASH INDEX levels (from TOS)',
+    'DO NOT confuse ES futures levels with SPX index levels — they are different instruments.',
+    '=== END INSTRUMENT CLARITY ===',
     `Date: ${data.date} | Generated: ${data.generated_at}`,
-    `ES Price at analysis: ${data.es_price}`,
+    `ES Futures Price at analysis: ${data.es_price} (ES contract)`,
     `Bias: ${data.bias} (${data.bias_confidence}% confidence)`,
-    `Daily Trend: ${data.daily_trend}`,
-    `4H Trend: ${data.h4_trend}`,
-    `Overnight: High ${data.overnight_high} | Low ${data.overnight_low}`,
-    `Asia: High ${data.asia_high} | Low ${data.asia_low}`,
-    `London: High ${data.london_high} | Low ${data.london_low}`,
+    `Daily Trend (ES Futures): ${data.daily_trend}`,
+    `4H Trend (ES Futures): ${data.h4_trend}`,
+    `Overnight High/Low (ES Futures): High ${data.overnight_high} | Low ${data.overnight_low}`,
+    `Asia Session High/Low (ES Futures): High ${data.asia_high} | Low ${data.asia_low}`,
+    `London Session High/Low (ES Futures): High ${data.london_high} | Low ${data.london_low}`,
   ];
 
   if (data.key_levels && data.key_levels.length) {
