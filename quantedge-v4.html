@@ -3776,5 +3776,35 @@ function initAll() {
 // DOM ready
 document.addEventListener('DOMContentLoaded', initAll);
 </script>
+
+<script>
+async function loadMorningAnalysis() {
+  try {
+    const res  = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=morning-analysis');
+    const data = await res.json();
+    if (!data || data.status === 'no_data') return;
+    function fill(id, val) {
+      const el = document.getElementById(id);
+      if (el && val != null && val !== 0 && val !== '') el.value = val;
+    }
+    const h1   = data.h1 || {};
+    const asia = h1.asia_session   || {};
+    const lon  = h1.london_session || {};
+    fill('on-hi',   h1.overnight_high   || data.overnight_high_ES_futures);
+    fill('on-lo',   h1.overnight_low    || data.overnight_low_ES_futures);
+    fill('asia-hi', asia.high || data.asia_high_ES_futures);
+    fill('asia-lo', asia.low  || data.asia_low_ES_futures);
+    fill('lon-hi',  lon.high  || data.london_high_ES_futures);
+    fill('lon-lo',  lon.low   || data.london_low_ES_futures);
+    const p = document.getElementById('es-override');
+    if (p && !p.value && data.current_price) p.value = data.current_price;
+    const t = document.getElementById('morning-thesis');
+    if (t && !t.value && data.game_plan) t.value = data.game_plan;
+    console.log('[QuantEdge] Morning data loaded');
+  } catch(e) { console.warn('[QuantEdge] Morning load failed:', e.message); }
+}
+loadMorningAnalysis();
+setInterval(loadMorningAnalysis, 300000);
+</script>
 </body>
 </html>
