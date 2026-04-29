@@ -3789,6 +3789,27 @@ async function loadMorningAnalysis() {
 }
 loadMorningAnalysis();
 setInterval(loadMorningAnalysis, 300000);
+
+async function loadAfternoonAnalysis() {
+  try {
+    const aRes = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=afternoon-analysis');
+    const aData = await aRes.json();
+    if (!aData || !aData.bias || !aData.generated_at) return;
+    const prev = window.lastBias||''; const nb = aData.bias; const chg = prev && prev!==nb;
+    window.lastBias = nb;
+    const dc=nb==='BULLISH'?'#00ff88':nb==='BEARISH'?'#ff4444':'#ffaa00';
+    const de=document.getElementById('bias-direction'); if(de){de.textContent=nb+(chg?' BIAS FLIP':'');de.style.color=dc;}
+    const fe=document.getElementById('bias-conf-fill'); if(fe)fe.style.width=(aData.bias_confidence||50)+'%';
+    const pe=document.getElementById('bias-conf-pct'); if(pe)pe.textContent=(aData.bias_confidence||50)+'%';
+    const re=document.getElementById('bias-reasoning'); if(re)re.textContent='[PM '+aData.generated_at+'] '+(aData.game_plan||'');
+    const te=document.getElementById('morning-thesis'); if(te&&aData.game_plan)te.value='[PM '+aData.generated_at+'] '+aData.game_plan;
+    window.morningBiasContext='PM Bias: '+nb+' ('+(aData.bias_confidence||50)+'%) '+(aData.game_plan||'');
+    if(chg)showToast('BIAS FLIP: Now '+nb,'warn');
+    console.log('[QuantEdge] Afternoon loaded: '+nb);
+  } catch(e){console.log('No afternoon data yet');}
+}
+loadAfternoonAnalysis();
+setInterval(loadAfternoonAnalysis, 300000);
 </script>
 </body>
 </html>
