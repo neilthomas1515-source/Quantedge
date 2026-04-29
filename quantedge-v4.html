@@ -2274,46 +2274,30 @@ async function refreshPrices() {
   fetchVIXandDXY();
 }
 
-// Day levels via Finnhub candles
+// Day levels via Yahoo GSPC
 async function fetchDayLevels() {
-  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching…';
+  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching...';
   try {
-    // Use Finnhub quote for SPY to get prev close, high, low
-    const q = await fetchFinnhubDirect('SPY');
-    // q.c=current, q.h=today high, q.l=today low, q.o=today open, q.pc=prev close
-    const pc=q.pc*10, todayH=q.h*10, todayL=q.l*10, todayO=q.o*10, cur=q.c*10;
-    prevDayClose=pc; window.prevDayClose=pc;
-    setAutoLevel('lvl-prev-close',pc.toFixed(2));
-    setAutoLevel('lvl-today-open',todayO.toFixed(2));
-    // Today's high/low as proxy for intraday range
-    setAutoLevel('lvl-pdh',todayH.toFixed(2));
-    setAutoLevel('lvl-pdl',todayL.toFixed(2));
-    window.prevDayHigh=todayH; window.prevDayLow=todayL;
-    // For PDH/PDL we need yesterday - use Finnhub candles with longer window
-    try {
-      const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-60*86400;
-      const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${nowTs}&token=${FINNHUB_KEY}`);
-      const d=await res.json();
-      if(d.s==='ok'&&d.c&&d.c.length>=2){
-        const n=d.c.length;
-        const pdh=d.h[n-2]*10,pdl=d.l[n-2]*10,pdc2=d.c[n-2]*10;
-        window.prevDayHigh=pdh;window.prevDayLow=pdl;
-        setAutoLevel('lvl-pdh',pdh.toFixed(2));
-        setAutoLevel('lvl-pdl',pdl.toFixed(2));
-        // Week hi/lo from last 5 bars
-        const sl=Math.min(5,n-1);
-        setAutoLevel('lvl-wk-hi',(Math.max(...d.h.slice(-sl))*10).toFixed(2));
-        setAutoLevel('lvl-wk-lo',(Math.min(...d.l.slice(-sl))*10).toFixed(2));
-        setAutoLevel('lvl-mo-hi',(Math.max(...d.h)*10).toFixed(2));
-        setAutoLevel('lvl-mo-lo',(Math.min(...d.l)*10).toFixed(2));
-      }
-    } catch(e2){console.warn('Candle fetch:',e2.message);}
+    const res = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=yahoo&symbol=%5EGSPC&range=5d&interval=1d');
+    const yd = await res.json();
+    const result = yd && yd.chart && yd.chart.result && yd.chart.result[0];
+    if(!result) throw new Error('No Yahoo GSPC data');
+    const q = result.indicators && result.indicators.quote && result.indicators.quote[0];
+    const ts = result.timestamp;
+    if(!q||!ts||ts.length<2) throw new Error('No data');
+    const n=ts.length,pdc=q.close[n-2],pdh=q.high[n-2],pdl=q.low[n-2],todayO=q.open[n-1],sl=Math.min(5,n-1);
+    const wkHi=Math.max.apply(null,q.high.slice(-sl)),wkLo=Math.min.apply(null,q.low.slice(-sl));
+    const moHi=Math.max.apply(null,q.high),moLo=Math.min.apply(null,q.low);
+    prevDayClose=pdc;window.prevDayClose=pdc;window.prevDayHigh=pdh;window.prevDayLow=pdl;
+    setAutoLevel('lvl-prev-close',pdc.toFixed(2));setAutoLevel('lvl-today-open',todayO?todayO.toFixed(2):'-');
+    setAutoLevel('lvl-pdh',pdh.toFixed(2));setAutoLevel('lvl-pdl',pdl.toFixed(2));
+    setAutoLevel('lvl-wk-hi',wkHi.toFixed(2));setAutoLevel('lvl-wk-lo',wkLo.toFixed(2));
+    setAutoLevel('lvl-mo-hi',moHi.toFixed(2));setAutoLevel('lvl-mo-lo',moLo.toFixed(2));
     if(note)note.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     updateGapAnalysis(window.liveESPrice||priceData['ES']);
-    showToast(`Prev Close: ${pc.toFixed(0)} | Today O: ${todayO.toFixed(0)}`,'ok');
-  } catch(e){if(note)note.textContent='Error: '+e.message;console.error('fetchDayLevels:',e);}
+    showToast('PDC:'+pdc.toFixed(0)+' PDH:'+pdh.toFixed(0)+' PDL:'+pdl.toFixed(0),'ok');
+  } catch(e){if(note)note.textContent='Error:'+e.message;console.error(e);}
 }
-
 function setAutoLevel(id,val){const el=document.getElementById(id);if(el&&val){el.textContent=val;el.className='auto-level-val';}}
 
 function updateGapAnalysis(currentPrice) {
