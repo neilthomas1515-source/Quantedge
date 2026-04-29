@@ -2610,7 +2610,7 @@ async function generateMorningBias() {
 
 Key Data:
 - ES Price: ${es}
-- Prev Day Close: ${pdc} | PDH: ${pdh} | PDL: ${pdl}
+- SPX Cash Prev Day Close: ${pdc} | SPX PDH: ${pdh} | SPX PDL: ${pdl} (NOTE: these are SPX cash index levels, NOT ES futures prices. ES trades at a small premium, typically 1-5pts above SPX cash)
 - Overnight High: ${onHi} | Low: ${onLo}
 - VIX: ${vix}
 - Events today: ${events || 'none noted'}
@@ -2829,7 +2829,7 @@ NQ/ES Corr: ${document.getElementById('nq-es-correlation')?.textContent||'?'} | 
 
 === KEY LEVELS ===
 VWAP: ${vwap} | POC: ${poc} | VAH: ${vah} | VAL: ${val}
-PDH: ${pdh} | PDL: ${pdl} | Prev Close: ${pdc}
+SPX PDH (cash): ${pdh} | SPX PDL (cash): ${pdl} | SPX Prev Close (cash): ${pdc} -- ES futures trade at slight premium to these SPX cash levels
 O/N High: ${onHi} | O/N Low: ${onLo}
 Week Hi: ${wkHi} | Week Lo: ${wkLo}
 ORB: ${orbCtx}
