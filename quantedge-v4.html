@@ -1265,7 +1265,7 @@ function toggleRithmicPopup(){
 // Polls rithmic_bridge.py running on localhost:8182
 // Falls back gracefully if bridge not running
 // ══════════════════════════════════════════════════
-const BRIDGE_URL = 'http://localhost:8182/rithmic';
+const BRIDGE_URL = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev?source=rithmic';
 let bridgePollInterval = null;
 let bridgeLastUpdate = 0;
 
@@ -1275,17 +1275,17 @@ async function pollRithmicBridge() {
     if (!res.ok) return;
     const data = await res.json();
     
-    if (data.status === 'live' && data.last_price) {
+    if (data.status === 'live' && data.last) {
       // Update all price displays
-      if (data.last_price !== RS.lastPrice) {
-        RS.lastPrice = data.last_price;
-        updateESPriceFromRithmic(data.last_price);
+      if (data.last !== RS.lastPrice) {
+        RS.lastPrice = data.last;
+        updateESPriceFromRithmic(data.last);
       }
       if (data.bid)  { RS.bidPrice = data.bid;  }
       if (data.ask)  { RS.askPrice = data.ask;  }
-      RS.cumulativeDelta = data.cumulative_delta || 0;
-      RS.buyVolume       = data.buy_volume       || 0;
-      RS.sellVolume      = data.sell_volume      || 0;
+      RS.cumulativeDelta = data.cum_delta || 0;
+      RS.buyVolume       = data.volume           || 0;
+      RS.sellVolume      = 0;
       RS.connected       = true;
       RS.authenticated   = true;
       bridgeLastUpdate   = Date.now();
@@ -1296,7 +1296,7 @@ async function pollRithmicBridge() {
       
       // Update viz
       const vmEl = document.getElementById('viz-price-main');
-      if (vmEl) { vmEl.textContent = data.last_price.toFixed(2); vmEl.className = 'viz-price-main'; }
+      if (vmEl) { vmEl.textContent = data.last.toFixed(2); vmEl.className = 'viz-price-main'; }
       const vwsDot = document.getElementById('viz-ws-dot');
       if (vwsDot) vwsDot.classList.add('live');
       
@@ -2239,27 +2239,21 @@ async function fetchSPYNow() {
 
 // VIX via Finnhub VIXY*multiplier + DXY via UUP
 async function fetchVIXandDXY() {
-  // VIX via Worker Yahoo route (confirmed working in v4)
+  // VIX — use VIXY ETF, multiply to approximate VIX index
   try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=%5EVIX`);
-    if (!res.ok) throw new Error(`Yahoo VIX ${res.status}`);
-    const d = await res.json();
-    const vix = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (!vix) throw new Error('No VIX price in response');
+    const d = await fetchFinnhubDirect('VIXY');
+    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
+    const vix = d.c;
     priceData['VIX'] = vix;
     const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
   } catch(e){console.warn('VIX:',e.message);}
-  // DXY via Worker Yahoo route
+  // DXY via UUP
   try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}?source=yahoo&symbol=DX-Y.NYB`);
-    if (!res.ok) throw new Error(`Yahoo DXY ${res.status}`);
-    const d = await res.json();
-    const dxy = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (!dxy) throw new Error('No DXY price in response');
-    priceData['DXY'] = dxy;
-    const el=document.getElementById('px-dxy');if(el)el.textContent=dxy.toFixed(2);
-    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=dxy.toFixed(2);
+    const d = await fetchFinnhubDirect('UUP');
+    priceData['DXY'] = d.c;
+    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
+    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
   } catch(e){console.warn('DXY:',e.message);}
 }
 
@@ -2274,30 +2268,46 @@ async function refreshPrices() {
   fetchVIXandDXY();
 }
 
-// Day levels via Yahoo GSPC
+// Day levels via Finnhub candles
 async function fetchDayLevels() {
-  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching...';
+  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching…';
   try {
-    const res = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=yahoo&symbol=%5EGSPC&range=5d&interval=1d');
-    const yd = await res.json();
-    const result = yd && yd.chart && yd.chart.result && yd.chart.result[0];
-    if(!result) throw new Error('No Yahoo GSPC data');
-    const q = result.indicators && result.indicators.quote && result.indicators.quote[0];
-    const ts = result.timestamp;
-    if(!q||!ts||ts.length<2) throw new Error('No data');
-    const n=ts.length,pdc=q.close[n-2],pdh=q.high[n-2],pdl=q.low[n-2],todayO=q.open[n-1],sl=Math.min(5,n-1);
-    const wkHi=Math.max.apply(null,q.high.slice(-sl)),wkLo=Math.min.apply(null,q.low.slice(-sl));
-    const moHi=Math.max.apply(null,q.high),moLo=Math.min.apply(null,q.low);
-    prevDayClose=pdc;window.prevDayClose=pdc;window.prevDayHigh=pdh;window.prevDayLow=pdl;
-    setAutoLevel('lvl-prev-close',pdc.toFixed(2));setAutoLevel('lvl-today-open',todayO?todayO.toFixed(2):'-');
-    setAutoLevel('lvl-pdh',pdh.toFixed(2));setAutoLevel('lvl-pdl',pdl.toFixed(2));
-    setAutoLevel('lvl-wk-hi',wkHi.toFixed(2));setAutoLevel('lvl-wk-lo',wkLo.toFixed(2));
-    setAutoLevel('lvl-mo-hi',moHi.toFixed(2));setAutoLevel('lvl-mo-lo',moLo.toFixed(2));
+    // Use Finnhub quote for SPY to get prev close, high, low
+    const q = await fetchFinnhubDirect('SPY');
+    // q.c=current, q.h=today high, q.l=today low, q.o=today open, q.pc=prev close
+    const pc=q.pc*10, todayH=q.h*10, todayL=q.l*10, todayO=q.o*10, cur=q.c*10;
+    prevDayClose=pc; window.prevDayClose=pc;
+    setAutoLevel('lvl-prev-close',pc.toFixed(2));
+    setAutoLevel('lvl-today-open',todayO.toFixed(2));
+    // Today's high/low as proxy for intraday range
+    setAutoLevel('lvl-pdh',todayH.toFixed(2));
+    setAutoLevel('lvl-pdl',todayL.toFixed(2));
+    window.prevDayHigh=todayH; window.prevDayLow=todayL;
+    // For PDH/PDL we need yesterday - use Finnhub candles with longer window
+    try {
+      const nowTs=Math.floor(Date.now()/1000),fromTs=nowTs-60*86400;
+      const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${fromTs}&to=${nowTs}&token=${FINNHUB_KEY}`);
+      const d=await res.json();
+      if(d.s==='ok'&&d.c&&d.c.length>=2){
+        const n=d.c.length;
+        const pdh=d.h[n-2]*10,pdl=d.l[n-2]*10,pdc2=d.c[n-2]*10;
+        window.prevDayHigh=pdh;window.prevDayLow=pdl;
+        setAutoLevel('lvl-pdh',pdh.toFixed(2));
+        setAutoLevel('lvl-pdl',pdl.toFixed(2));
+        // Week hi/lo from last 5 bars
+        const sl=Math.min(5,n-1);
+        setAutoLevel('lvl-wk-hi',(Math.max(...d.h.slice(-sl))*10).toFixed(2));
+        setAutoLevel('lvl-wk-lo',(Math.min(...d.l.slice(-sl))*10).toFixed(2));
+        setAutoLevel('lvl-mo-hi',(Math.max(...d.h)*10).toFixed(2));
+        setAutoLevel('lvl-mo-lo',(Math.min(...d.l)*10).toFixed(2));
+      }
+    } catch(e2){console.warn('Candle fetch:',e2.message);}
     if(note)note.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     updateGapAnalysis(window.liveESPrice||priceData['ES']);
-    showToast('PDC:'+pdc.toFixed(0)+' PDH:'+pdh.toFixed(0)+' PDL:'+pdl.toFixed(0),'ok');
-  } catch(e){if(note)note.textContent='Error:'+e.message;console.error(e);}
+    showToast(`Prev Close: ${pc.toFixed(0)} | Today O: ${todayO.toFixed(0)}`,'ok');
+  } catch(e){if(note)note.textContent='Error: '+e.message;console.error('fetchDayLevels:',e);}
 }
+
 function setAutoLevel(id,val){const el=document.getElementById(id);if(el&&val){el.textContent=val;el.className='auto-level-val';}}
 
 function updateGapAnalysis(currentPrice) {
@@ -2446,45 +2456,33 @@ async function fetchGEX() {
 function renderFlashAlphaData(data) {
   const container = document.getElementById('gex-fa-data');
   container.style.display = 'block';
-
-  // Real field names from FlashAlpha v1/exposure/gex/SPY response
-  // Zero placeholders — missing fields show red NO DATA
-  const nd = `<span style="color:#ff4444;font-size:9px">NO DATA</span>`;
-
-  const gammaFlip    = data.gamma_flip;
-  const netGex       = data.net_gex;
-  const regime       = data.net_gex_label;
-  const callWall     = data.call_wall?.strike;
-  const putWall      = data.put_wall?.strike;
-  const underlyingPx = data.underlying_price;
-
-  const rows = [
-    ['Gamma Flip',  gammaFlip    != null ? gammaFlip.toFixed(2)             : null],
-    ['Net GEX',     netGex       != null ? '$'+(netGex/1e9).toFixed(2)+'B' : null],
-    ['Regime',      regime       || null],
-    ['Call Wall',   callWall     != null ? callWall.toFixed(2)              : null],
-    ['Put Wall',    putWall      != null ? putWall.toFixed(2)               : null],
-    ['Underlying',  underlyingPx != null ? underlyingPx.toFixed(2)         : null],
-  ];
-
+  // Display real fields — zero placeholders, zero hardcoded defaults
+  // If a field is missing we show the key as missing, not a fake value
+  const fields = ['gexLevel','flipLevel','callWall','putWall','hVol','zeroDeltaStrike','regimeType'];
   let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px">';
-  rows.forEach(([label, val]) => {
+  fields.forEach(f => {
+    const val = data[f];
+    const display = (val !== undefined && val !== null) ? String(val) : `<span style="color:#ff4444;font-size:9px">NO DATA</span>`;
     html += `<div style="background:var(--s3);border:1px solid var(--b2);border-radius:3px;padding:4px 6px">
-      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${label}</div>
-      <div style="font-size:15px;font-weight:700;color:var(--cyan);font-family:var(--mono)">${val !== null ? val : nd}</div>
+      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">${f}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--cyan);font-family:var(--mono)">${display}</div>
     </div>`;
   });
   html += '</div>';
 
-  const known = ['gamma_flip','net_gex','net_gex_label','call_wall','put_wall','underlying_price','symbol','strikes'];
-  const extra = Object.keys(data).filter(k => !known.includes(k));
+  // Raw fields that came back but aren't in our list
+  const extra = Object.keys(data).filter(k => !fields.includes(k));
   if (extra.length) {
-    html += `<div style="font-size:9px;color:var(--t4);margin-top:4px">Extra: ${extra.map(k=>k+':'+JSON.stringify(data[k])).join(' · ')}</div>`;
+    html += `<div style="font-size:9px;color:var(--t4);margin-top:4px">Additional: ${extra.map(k=>`${k}:${data[k]}`).join(' · ')}</div>`;
   }
   container.innerHTML = html;
 
+  // Store for AI prompt
   window.flashAlphaData = data;
-  window.gexContext = `FlashAlpha GEX: Flip=${gammaFlip} Regime=${regime} CallWall=${callWall} PutWall=${putWall} Price=${underlyingPx}`;
+  window.gexContext = `FlashAlpha GEX: ${JSON.stringify(data)}`;
+
+  // Auto-populate key level inputs if present
+  if (data.flipLevel) { const el=document.getElementById('on-hi'); /* use as gex flip ref */ }
 }
 
 // ── ORDER FLOW IMAGE ──
@@ -2610,7 +2608,7 @@ async function generateMorningBias() {
 
 Key Data:
 - ES Price: ${es}
-- SPX Cash Prev Day Close: ${pdc} | SPX PDH: ${pdh} | SPX PDL: ${pdl} (NOTE: these are SPX cash index levels, NOT ES futures prices. ES trades at a small premium, typically 1-5pts above SPX cash)
+- Prev Day Close: ${pdc} | PDH: ${pdh} | PDL: ${pdl}
 - Overnight High: ${onHi} | Low: ${onLo}
 - VIX: ${vix}
 - Events today: ${events || 'none noted'}
@@ -2829,7 +2827,7 @@ NQ/ES Corr: ${document.getElementById('nq-es-correlation')?.textContent||'?'} | 
 
 === KEY LEVELS ===
 VWAP: ${vwap} | POC: ${poc} | VAH: ${vah} | VAL: ${val}
-SPX PDH (cash): ${pdh} | SPX PDL (cash): ${pdl} | SPX Prev Close (cash): ${pdc} -- ES futures trade at slight premium to these SPX cash levels
+PDH: ${pdh} | PDL: ${pdl} | Prev Close: ${pdc}
 O/N High: ${onHi} | O/N Low: ${onLo}
 Week Hi: ${wkHi} | Week Lo: ${wkLo}
 ORB: ${orbCtx}
@@ -2925,16 +2923,14 @@ function buildMessageContent(prompt) {
   // Order flow image
   if (ofImageData) {
     const b64 = ofImageData.split(',')[1];
-    const ofMt = ofImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-    content.push({ type:'image', source:{ type:'base64', media_type:ofMt, data:b64 } });
+    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
     content.push({ type:'text', text:'[Above: Order flow / Bookmap]' });
   }
 
   // Indicator snapshots
   snapSlots.filter(s => s.image).forEach(s => {
     const b64 = s.image.split(',')[1];
-    const snapMt = s.image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-    content.push({ type:'image', source:{ type:'base64', media_type:snapMt, data:b64 } });
+    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
     content.push({ type:'text', text:`[Above: ${s.label}${s.desc ? ' — ' + s.desc : ''}]` });
   });
 
@@ -3499,213 +3495,6 @@ async function checkSchwabStatus() {
 }
 
 // ── MAIN INIT ──
-
-// ══════════════════════════════════════════════════
-// TV ALERT BRIDGE
-// Polls Cloudflare Worker for TradingView webhook alerts
-// When alert arrives, injects context and auto-fires AI signal
-// Blueprint for all TradingView indicators
-// ══════════════════════════════════════════════════
-let tvAlertLastId = null;
-let tvAlertPollInterval = null;
-
-async function pollTVAlert() {
-  try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}?source=tv-alert`, {
-      signal: AbortSignal.timeout(3000)
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.status === 'no_data') return;
-    if (data.stale) return; // older than 30s — already processed
-
-    // Deduplicate — only fire once per alert
-    const alertId = data.receivedAt;
-    if (alertId === tvAlertLastId) return;
-    tvAlertLastId = alertId;
-
-    // Store alert context for AI prompt
-    window.tvAlertContext = buildTVAlertContext(data);
-    window.autoConfluenceContext = window.tvAlertContext;
-    window.autoConfluenceDirection = data.signal === 'LONG' ? 'BULLISH' : data.signal === 'SHORT' ? 'BEARISH' : null;
-
-    // Show toast
-    const dir = data.signal || '?';
-    const price = data.price || '?';
-    const tf = data.tf || '?';
-    const indicator = data.indicator || 'TV Alert';
-    showToast(`📡 ${indicator}: ${dir} @ ${price} (${tf})`, dir === 'LONG' ? 'ok' : 'warn');
-
-    // Update signal checks
-    const chk = document.getElementById('chk-regime');
-    if (chk && dir !== '?') {
-      chk.classList.add(dir === 'LONG' ? 'active' : 'active-red');
-      chk.querySelector('.sig-text').textContent = `${indicator} ${dir}`;
-    }
-
-    // Auto-fire AI signal
-    setTimeout(() => {
-      const btn = document.getElementById('btn-generate');
-      if (btn && !btn.disabled) btn.click();
-    }, 500);
-
-  } catch(e) {
-    // Silently ignore — bridge not connected
-  }
-}
-
-function buildTVAlertContext(data) {
-  const lines = ['=== TRADINGVIEW ALERT ==='];
-  if (data.indicator) lines.push(`Indicator: ${data.indicator}`);
-  if (data.signal)    lines.push(`Signal: ${data.signal}`);
-  if (data.tf)        lines.push(`Timeframe: ${data.tf}`);
-  if (data.price)     lines.push(`Price at alert: ${data.price}`);
-  if (data.rf)        lines.push(`Range Filter: ${data.rf}`);
-  if (data.rqk)       lines.push(`RQK Trend: ${data.rqk}`);
-  if (data.leading)   lines.push(`Leading indicator: ${data.leading}`);
-  if (data.confirm)   lines.push(`Confirmations: ${data.confirm}`);
-  if (data.supply_high) lines.push(`Supply High: ${data.supply_high}`);
-  if (data.demand_low)  lines.push(`Demand Low: ${data.demand_low}`);
-  if (data.session)   lines.push(`Session: ${data.session}`);
-  if (data.notes)     lines.push(`Notes: ${data.notes}`);
-  // Include any extra fields dynamically
-  const known = ['indicator','signal','tf','price','rf','rqk','leading','confirm','supply_high','demand_low','session','notes','receivedAt','age_ms','stale'];
-  Object.entries(data).forEach(([k,v]) => {
-    if (!known.includes(k)) lines.push(`${k}: ${v}`);
-  });
-  return lines.join('\n');
-}
-
-function startTVAlertPolling() {
-  if (tvAlertPollInterval) clearInterval(tvAlertPollInterval);
-  pollTVAlert();
-  tvAlertPollInterval = setInterval(pollTVAlert, 2000);
-  console.log('[TV Bridge] Polling for alerts every 2s');
-}
-
-function stopTVAlertPolling() {
-  if (tvAlertPollInterval) { clearInterval(tvAlertPollInterval); tvAlertPollInterval = null; }
-}
-
-
-// ══════════════════════════════════════════════════
-// MORNING ANALYSIS BRIDGE
-// Polls Cloudflare Worker /morning-analysis for daily pre-market analysis
-// Generated by Claude Code + TradingView MCP at 5 AM PST
-// Auto-populates overnight data and injects into every AI signal
-// ══════════════════════════════════════════════════
-let morningAnalysis = null;
-
-async function fetchMorningAnalysis() {
-  try {
-    const res = await fetch(`${CLOUDFLARE_WORKER}/morning-analysis`, {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.status === 'no_data') return;
-    if (data.stale) return; // older than 24 hours
-
-    morningAnalysis = data;
-    applyMorningAnalysis(data);
-    console.log('[Morning] Analysis loaded:', data.bias, data.bias_confidence + '%');
-  } catch(e) {
-    // Silently ignore
-  }
-}
-
-function applyMorningAnalysis(data) {
-  if (!data) return;
-
-  // Auto-populate overnight levels
-  const fields = {
-    'on-hi':    data.overnight_high,
-    'on-lo':    data.overnight_low,
-    'asia-hi':  data.asia_high,
-    'asia-lo':  data.asia_low,
-    'lon-hi':   data.london_high,
-    'lon-lo':   data.london_low,
-  };
-  Object.entries(fields).forEach(([id, val]) => {
-    if (val && val > 0) {
-      const el = document.getElementById(id);
-      if (el && !el.dataset.manualOverride) {
-        el.value = val.toFixed(2);
-      }
-    }
-  });
-
-  // Store context for AI prompt
-  window.morningAnalysisContext = buildMorningContext(data);
-
-  // Update morning bias display
-  const dirEl = document.getElementById('bias-direction');
-  const fillEl = document.getElementById('bias-conf-fill');
-  const pctEl  = document.getElementById('bias-conf-pct');
-  const reasonEl = document.getElementById('bias-reasoning');
-
-  if (dirEl) {
-    dirEl.textContent = data.bias || '—';
-    dirEl.style.color = data.bias === 'BULLISH' ? '#00ff88' : data.bias === 'BEARISH' ? '#ff4444' : '#ffaa00';
-  }
-  if (fillEl) fillEl.style.width = (data.bias_confidence || 0) + '%';
-  if (pctEl)  pctEl.textContent  = (data.bias_confidence || 0) + '%';
-  if (reasonEl) reasonEl.textContent = data.game_plan || '';
-
-  // Show toast
-  const time = data.generated_at || '5:00 AM';
-  showToast(`☀️ Morning Analysis loaded (${time} PST) — ${data.bias} ${data.bias_confidence}%`, 'ok');
-}
-
-function buildMorningContext(data) {
-  if (!data) return '';
-  const lines = [
-    '=== MORNING ANALYSIS (Auto-generated 5 AM PST) ===',
-    '=== INSTRUMENT CLARITY ===',
-    'ES FUTURES and SPX CASH INDEX are currently both trading in the 7100-7200 range.',
-    'ALL overnight/Asia/London High-Low levels below = ES FUTURES contract prices (from TradingView)',
-    'PDH/PDL/Prev Close in v4 input fields = SPX CASH INDEX levels (from TOS)',
-    'DO NOT confuse ES futures levels with SPX index levels — they are different instruments.',
-    '=== END INSTRUMENT CLARITY ===',
-    `Date: ${data.date} | Generated: ${data.generated_at}`,
-    `ES Futures Price at analysis: ${data.es_price} (ES contract)`,
-    `Bias: ${data.bias} (${data.bias_confidence}% confidence)`,
-    `Daily Trend (ES Futures): ${data.daily_trend}`,
-    `4H Trend (ES Futures): ${data.h4_trend}`,
-    `Overnight High/Low (ES Futures): High ${data.overnight_high} | Low ${data.overnight_low}`,
-    `Asia Session High/Low (ES Futures): High ${data.asia_high} | Low ${data.asia_low}`,
-    `London Session High/Low (ES Futures): High ${data.london_high} | Low ${data.london_low}`,
-  ];
-
-  if (data.key_levels && data.key_levels.length) {
-    lines.push('Key Levels:');
-    data.key_levels.forEach(l => lines.push(`  ${l.type.toUpperCase()} @ ${l.price}: ${l.description}`));
-  }
-
-  if (data.highest_probability_entries && data.highest_probability_entries.length) {
-    lines.push('Highest Probability Entries:');
-    data.highest_probability_entries.forEach(e => {
-      lines.push(`  ${e.direction} @ ${e.entry_price} | Stop: ${e.stop} | T1: ${e.target1} | T2: ${e.target2} | ${e.probability}% | ${e.reason}`);
-    });
-  }
-
-  if (data.econ_events && data.econ_events.length) {
-    lines.push(`Econ Events: ${data.econ_events.join(', ')}`);
-  }
-
-  lines.push(`Game Plan: ${data.game_plan}`);
-  lines.push(`Watch For: ${data.what_to_watch}`);
-  lines.push(`Invalidation: ${data.invalidation}`);
-
-  return lines.join('\n');
-}
-
-// Inject morning analysis into AI prompt
-function getMorningAnalysisForPrompt() {
-  if (!morningAnalysis) return '';
-  return window.morningAnalysisContext || '';
-}
-
 function initAll() {
   // Clock
   updateClock();
@@ -3744,12 +3533,7 @@ function initAll() {
   setInterval(checkSchwabStatus, 30000);
 
   // Rithmic bridge polling (requires rithmic_bridge.py running on desktop)
-  // TV Alert bridge polling
-  startTVAlertPolling();
   setTimeout(startBridgePolling, 1000);
-
-  // Morning analysis — fetch on load
-  fetchMorningAnalysis();
 
   // Econ calendar auto-load
   setTimeout(fetchEconCalendar, 2000);
@@ -3759,57 +3543,6 @@ function initAll() {
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', initAll);
-</script>
-
-<script>
-async function loadMorningAnalysis() {
-  try {
-    const res  = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=morning-analysis');
-    const data = await res.json();
-    if (!data || data.status === 'no_data') return;
-    function fill(id, val) {
-      const el = document.getElementById(id);
-      if (el && val != null && val !== 0 && val !== '') el.value = val;
-    }
-    const h1   = data.h1 || {};
-    const asia = h1.asia_session   || {};
-    const lon  = h1.london_session || {};
-    fill('on-hi',   h1.overnight_high   || data.overnight_high_ES_futures);
-    fill('on-lo',   h1.overnight_low    || data.overnight_low_ES_futures);
-    fill('asia-hi', asia.high || data.asia_high_ES_futures);
-    fill('asia-lo', asia.low  || data.asia_low_ES_futures);
-    fill('lon-hi',  lon.high  || data.london_high_ES_futures);
-    fill('lon-lo',  lon.low   || data.london_low_ES_futures);
-    const p = document.getElementById('es-override');
-    if (p && !p.value && data.current_price) p.value = data.current_price;
-    const t = document.getElementById('morning-thesis');
-    if (t && !t.value && data.game_plan) t.value = data.game_plan;
-    console.log('[QuantEdge] Morning data loaded');
-  } catch(e) { console.warn('[QuantEdge] Morning load failed:', e.message); }
-}
-loadMorningAnalysis();
-setInterval(loadMorningAnalysis, 300000);
-
-async function loadAfternoonAnalysis() {
-  try {
-    const aRes = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/?source=afternoon-analysis');
-    const aData = await aRes.json();
-    if (!aData || !aData.bias || !aData.generated_at) return;
-    const prev = window.lastBias||''; const nb = aData.bias; const chg = prev && prev!==nb;
-    window.lastBias = nb;
-    const dc=nb==='BULLISH'?'#00ff88':nb==='BEARISH'?'#ff4444':'#ffaa00';
-    const de=document.getElementById('bias-direction'); if(de){de.textContent=nb+(chg?' BIAS FLIP':'');de.style.color=dc;}
-    const fe=document.getElementById('bias-conf-fill'); if(fe)fe.style.width=(aData.bias_confidence||50)+'%';
-    const pe=document.getElementById('bias-conf-pct'); if(pe)pe.textContent=(aData.bias_confidence||50)+'%';
-    const re=document.getElementById('bias-reasoning'); if(re)re.textContent='[PM '+aData.generated_at+'] '+(aData.game_plan||'');
-    const te=document.getElementById('morning-thesis'); if(te&&aData.game_plan)te.value='[PM '+aData.generated_at+'] '+aData.game_plan;
-    window.morningBiasContext='PM Bias: '+nb+' ('+(aData.bias_confidence||50)+'%) '+(aData.game_plan||'');
-    if(chg)showToast('BIAS FLIP: Now '+nb,'warn');
-    console.log('[QuantEdge] Afternoon loaded: '+nb);
-  } catch(e){console.log('No afternoon data yet');}
-}
-loadAfternoonAnalysis();
-setInterval(loadAfternoonAnalysis, 300000);
 </script>
 </body>
 </html>
