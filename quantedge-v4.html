@@ -2585,7 +2585,7 @@ function addSnapSlot() {
 
 function getSnapImagesForAI() {
   return snapSlots.filter(s => s.image).map(s => ({
-    type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: s.image.split(',')[1] },
+    type: 'image', source: { type: 'base64', media_type: (s.image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg'), data: s.image.split(',')[1] },
     label: s.label, desc: s.desc
   }));
 }
@@ -2923,14 +2923,16 @@ function buildMessageContent(prompt) {
   // Order flow image
   if (ofImageData) {
     const b64 = ofImageData.split(',')[1];
-    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
+    const ofMt = ofImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({ type:'image', source:{ type:'base64', media_type:ofMt, data:b64 } });
     content.push({ type:'text', text:'[Above: Order flow / Bookmap]' });
   }
 
   // Indicator snapshots
   snapSlots.filter(s => s.image).forEach(s => {
     const b64 = s.image.split(',')[1];
-    content.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } });
+    const snapMt = s.image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({ type:'image', source:{ type:'base64', media_type:snapMt, data:b64 } });
     content.push({ type:'text', text:`[Above: ${s.label}${s.desc ? ' — ' + s.desc : ''}]` });
   });
 
