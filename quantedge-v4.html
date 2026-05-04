@@ -2222,27 +2222,26 @@ async function fetchFinnhubDirect(symbol) {
   return d;
 }
 
-// SPX via Yahoo ^GSPC (direct -- no SPY*10)
+// SPX via Worker -> Yahoo ^GSPC (CORS-safe, no SPY*10)
 async function fetchSPYNow() {
   try {
-    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=5d');
+    const r = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev?source=yahoo&symbol=%5EGSPC&range=5d&interval=1d');
+    if (!r.ok) throw new Error('Worker ' + r.status);
     const d = await r.json();
-    const res = d?.chart?.result?.[0];
-    if (!res) throw new Error('No GSPC data');
-    const q = res.indicators?.quote?.[0];
-    const n = res.timestamp?.length || 0;
-    if (!q || n < 1) throw new Error('Empty GSPC quote');
-    // Use most recent close as SPX price
+    const result = d?.chart?.result?.[0];
+    const q = result?.indicators?.quote?.[0];
+    const n = result?.timestamp?.length || 0;
+    if (!q || n < 1) throw new Error('No GSPC data');
     const spx = q.close[n-1];
     const prevClose = n >= 2 ? q.close[n-2] : q.close[n-1];
     priceData['SPX'] = spx;
-    const el = document.getElementById('px-spx'); if (el) { el.textContent = spx.toFixed(2); el.className = 'px-val'; }
-    const el2 = document.getElementById('spy-fetch-time'); if (el2) el2.textContent = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: false});
-    if (prevClose && !prevDayClose) { prevDayClose = prevClose; window.prevDayClose = prevClose; setAutoLevel('lvl-prev-close', prevClose.toFixed(2)); }
-    if (!window.liveESPrice) { priceData['ES'] = spx + 4; const esEl = document.getElementById('px-es'); if (esEl) { esEl.textContent = (spx+4).toFixed(2); esEl.className = 'px-val'; } const pEl = document.getElementById('psd-es'); if (pEl) pEl.textContent = (spx+4).toFixed(2); }
-    updateGapAnalysis(window.liveESPrice || priceData['ES']);
-    showToast(`SPX ${spx.toFixed(2)}`, 'ok');
-  } catch(e) { showToast('SPX: ' + e.message, 'err'); }
+    const el=document.getElementById('px-spx');if(el){el.textContent=spx.toFixed(2);el.className='px-val';}
+    const el2=document.getElementById('spy-fetch-time');if(el2)el2.textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+    if(prevClose&&!prevDayClose){prevDayClose=prevClose;window.prevDayClose=prevDayClose;setAutoLevel('lvl-prev-close',prevDayClose.toFixed(2));}
+    if(!window.liveESPrice){priceData['ES']=spx+4;const esEl=document.getElementById('px-es');if(esEl){esEl.textContent=(spx+4).toFixed(2);esEl.className='px-val';}const pEl=document.getElementById('psd-es');if(pEl)pEl.textContent=(spx+4).toFixed(2);}
+    updateGapAnalysis(window.liveESPrice||priceData['ES']);
+    showToast('SPX '+spx.toFixed(2),'ok');
+  } catch(e){showToast('SPX: '+e.message,'err');}
 }
 
 
@@ -2277,38 +2276,34 @@ async function refreshPrices() {
   fetchVIXandDXY();
 }
 
-// Day levels via Yahoo ^GSPC (direct -- no SPY*10)
+// Day levels via Worker -> Yahoo ^GSPC (CORS-safe, no SPY*10)
 async function fetchDayLevels() {
-  const note = document.getElementById('auto-levels-note'); if (note) note.textContent = 'Fetching…';
+  const note=document.getElementById('auto-levels-note');if(note)note.textContent='Fetching…';
   try {
-    // Fetch 60 days of ^GSPC daily OHLC from Yahoo
-    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=60d');
+    const r = await fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev?source=yahoo&symbol=%5EGSPC&range=60d&interval=1d');
+    if (!r.ok) throw new Error('Worker ' + r.status);
     const d = await r.json();
-    const res = d?.chart?.result?.[0];
-    if (!res) throw new Error('No GSPC data');
-    const q = res.indicators?.quote?.[0];
-    const n = res.timestamp?.length || 0;
+    const result = d?.chart?.result?.[0];
+    const q = result?.indicators?.quote?.[0];
+    const n = result?.timestamp?.length || 0;
     if (!q || n < 2) throw new Error('Insufficient GSPC history');
-    // Today (index n-1) and previous day (index n-2)
-    const todayO = q.open[n-1], todayH = q.high[n-1], todayL = q.low[n-1], cur = q.close[n-1];
-    const pc = q.close[n-2], pdh = q.high[n-2], pdl = q.low[n-2];
-    prevDayClose = pc; window.prevDayClose = pc;
-    window.prevDayHigh = pdh; window.prevDayLow = pdl;
-    setAutoLevel('lvl-prev-close', pc.toFixed(2));
-    setAutoLevel('lvl-today-open', todayO.toFixed(2));
-    setAutoLevel('lvl-pdh', pdh.toFixed(2));
-    setAutoLevel('lvl-pdl', pdl.toFixed(2));
-    // Week hi/lo from last 5 bars, Month hi/lo from all 60 days
-    const sl = Math.min(5, n-1);
-    const wkHighs = q.high.slice(-sl), wkLows = q.low.slice(-sl);
-    setAutoLevel('lvl-wk-hi', Math.max(...wkHighs).toFixed(2));
-    setAutoLevel('lvl-wk-lo', Math.min(...wkLows).toFixed(2));
-    setAutoLevel('lvl-mo-hi', Math.max(...q.high).toFixed(2));
-    setAutoLevel('lvl-mo-lo', Math.min(...q.low).toFixed(2));
-    if (note) note.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
-    updateGapAnalysis(window.liveESPrice || priceData['ES']);
-    showToast(`Prev Close: ${pc.toFixed(0)} | Today O: ${todayO.toFixed(0)}`, 'ok');
-  } catch(e) { if (note) note.textContent = 'Error: ' + e.message; console.error('fetchDayLevels:', e); }
+    const pc=q.close[n-2], pdh=q.high[n-2], pdl=q.low[n-2];
+    const todayO=q.open[n-1], todayH=q.high[n-1], todayL=q.low[n-1], cur=q.close[n-1];
+    prevDayClose=pc; window.prevDayClose=pc;
+    window.prevDayHigh=pdh; window.prevDayLow=pdl;
+    setAutoLevel('lvl-prev-close',pc.toFixed(2));
+    setAutoLevel('lvl-today-open',todayO.toFixed(2));
+    setAutoLevel('lvl-pdh',pdh.toFixed(2));
+    setAutoLevel('lvl-pdl',pdl.toFixed(2));
+    const sl=Math.min(5,n-1);
+    setAutoLevel('lvl-wk-hi',(Math.max(...q.high.slice(-sl))).toFixed(2));
+    setAutoLevel('lvl-wk-lo',(Math.min(...q.low.slice(-sl))).toFixed(2));
+    setAutoLevel('lvl-mo-hi',(Math.max(...q.high)).toFixed(2));
+    setAutoLevel('lvl-mo-lo',(Math.min(...q.low)).toFixed(2));
+    if(note)note.textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    updateGapAnalysis(window.liveESPrice||priceData['ES']);
+    showToast('Prev Close: '+pc.toFixed(0)+' | Today O: '+todayO.toFixed(0),'ok');
+  } catch(e){if(note)note.textContent='Error: '+e.message;console.error('fetchDayLevels:',e);}
 }
 
 
