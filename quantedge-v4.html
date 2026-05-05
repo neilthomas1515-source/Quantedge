@@ -423,6 +423,22 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .wp-gex-stack-slot.has-image{border-style:solid;border-color:#a78bfa;}
 .wp-gex-stack-slot img{max-width:100%;max-height:70px;border-radius:3px;object-fit:contain;}
 
+
+/* ── DYNAMIC AI / SIGNAL DECAY ── */
+.sig-stale-banner{display:none;background:rgba(255,170,0,0.1);border:1px solid var(--amber2);border-radius:4px;padding:6px 12px;margin-bottom:6px;font-size:11px;color:var(--amber);text-align:center;}
+.sig-invalidated-banner{display:none;background:rgba(255,51,85,0.15);border:1px solid var(--red2);border-radius:4px;padding:8px 12px;margin-bottom:6px;font-size:12px;color:var(--red);font-weight:700;text-align:center;animation:pulse 1s infinite;}
+.sig2-age{font-size:9px;color:var(--t4);text-align:right;padding:4px 14px;border-top:1px solid var(--b1);}
+.regime-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.regime-badge.bull{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid var(--green2);}
+.regime-badge.bear{background:rgba(255,51,85,0.1);color:var(--red);border:1px solid var(--red2);}
+.regime-badge.neut{background:rgba(255,170,0,0.08);color:var(--amber);border:1px solid var(--amber2);}
+#vwap-regime-badge{margin-left:8px;}
+.dynamic-alert{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--cyan2);border-radius:6px;padding:12px 16px;z-index:9999;max-width:320px;font-size:12px;color:var(--t1);box-shadow:0 4px 20px rgba(0,0,0,0.5);animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.wp-gen-btn{width:100%;padding:7px;background:linear-gradient(135deg,#0ea5e9,#0369a1);border:none;border-radius:4px;color:var(--white);font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:opacity 0.15s;}
+.wp-gen-btn:hover{opacity:0.85;}
+.nq-live-badge{font-size:9px;color:var(--cyan2);margin-left:4px;}
+
 </style>
 </head>
 <body>
@@ -673,6 +689,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         <div><div style="color:var(--t4);margin-bottom:1px">Logged</div><div id="wp-stat-logged" style="font-weight:700;color:var(--t1)">0</div></div>
         <div><div style="color:var(--t4);margin-bottom:1px">Saved</div><div id="wp-save-time" style="font-weight:700;color:var(--t4)">Never</div></div>
       </div>
+      <button class="wp-gen-btn" onclick="generateWeeklyBias()" id="wp-gen-btn">⚡ Generate Weekly Bias (AI)</button>
       <button class="wp-save-btn" onclick="saveWeeklyPlaybook()">💾 Save Weekly Playbook to Cloud</button>
     </div>
   </div>
@@ -1033,6 +1050,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="sig-dot" id="rithmic-live-dot"></div><span class="sig-text" id="rithmic-live-text">Rithmic Live</span>
     </div>
   </div>
+  <div id="sig-invalidated-banner" class="sig-invalidated-banner">⛔ SIGNAL INVALIDATED — Price crossed <span id="sig-inv-level"></span> — Regenerate now</div>
+  <div id="sig-stale-banner" class="sig-stale-banner">⏰ Signal is <span id="sig-age-text"></span> old — Consider regenerating</div>
   <div id="wp-econ-warning">⚠ HIGH-IMPACT EVENT SOON — <span id="wp-econ-event-name"></span> in <span id="wp-econ-countdown"></span> — REDUCE SIZE OR STAND ASIDE</div>
   <div id="gen-bar">
     <button id="btn-generate" onclick="generateSignal()">⚡ Generate Signal</button>
@@ -1463,8 +1482,14 @@ async function pollRithmicBridge() {
       if (data.bid)  { RS.bidPrice = data.bid;  }
       if (data.ask)  { RS.askPrice = data.ask;  }
       RS.cumulativeDelta = data.cum_delta || 0;
-      RS.buyVolume       = data.volume           || 0;
-      RS.sellVolume      = 0;
+      RS.buyVolume  = data.volume || 0;
+      // Derive sell volume: buy vol minus net positive delta (approximation)
+      // When delta is negative, sells exceeded buys by that amount
+      const absDelta = Math.abs(data.cum_delta || 0);
+      const netDelta = data.cum_delta || 0;
+      RS.sellVolume = netDelta < 0
+        ? RS.buyVolume + absDelta
+        : Math.max(0, RS.buyVolume - absDelta);
       RS.connected       = true;
       RS.authenticated   = true;
       bridgeLastUpdate   = Date.now();
@@ -1472,6 +1497,10 @@ async function pollRithmicBridge() {
       updateBidAskDisplay();
       updateDeltaDisplay();
       updateRithmicStatus('connected');
+      // Dynamic intelligence
+      if (data.last) { checkORBCapture(data.last); updateSessionHL(data.last); }
+      checkDeltaDivergence();
+      updateVWAPRegimeBadge();
       
       // Update viz
       const vmEl = document.getElementById('viz-price-main');
@@ -2425,33 +2454,66 @@ async function fetchSPYNow() {
 
 
 // VIX via Finnhub VIXY*multiplier + DXY via UUP
-async function fetchVIXandDXY() {
-  // VIX — use VIXY ETF, multiply to approximate VIX index
+async async function fetchVIXandDXY() {
+  // VIX via Yahoo ^VIX through Worker (no CORS issues, accurate index value)
   try {
-    const d = await fetchFinnhubDirect('VIXY');
-    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
-    const vix = d.c;
+    const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX&range=1d&interval=1m');
+    if (!r.ok) throw new Error('Worker ' + r.status);
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    const q = res?.indicators?.quote?.[0];
+    const n = res?.timestamp?.length || 0;
+    if (!q || n < 1) throw new Error('No VIX data');
+    const vix = q.close[n-1] || q.open[n-1];
+    if (!vix || isNaN(vix)) throw new Error('VIX value invalid');
     priceData['VIX'] = vix;
-    const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
+    const col = vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
-  } catch(e){console.warn('VIX:',e.message);}
-  // DXY via UUP
+    console.log('[VIX] Updated via Yahoo: ' + vix.toFixed(2));
+  } catch(e){ console.warn('[VIX] Yahoo failed:', e.message); }
+  // DXY via Yahoo DX-Y.NYB through Worker
   try {
-    const d = await fetchFinnhubDirect('UUP');
-    priceData['DXY'] = d.c;
-    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
-    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
-  } catch(e){console.warn('DXY:',e.message);}
+    const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB&range=1d&interval=1m');
+    if (!r.ok) throw new Error('Worker ' + r.status);
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    const q = res?.indicators?.quote?.[0];
+    const n = res?.timestamp?.length || 0;
+    if (!q || n < 1) throw new Error('No DXY data');
+    const dxy = q.close[n-1] || q.open[n-1];
+    if (!dxy || isNaN(dxy)) throw new Error('DXY value invalid');
+    priceData['DXY'] = dxy;
+    const el=document.getElementById('px-dxy');if(el)el.textContent=dxy.toFixed(2);
+    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=dxy.toFixed(2);
+    console.log('[DXY] Updated via Yahoo: ' + dxy.toFixed(2));
+  } catch(e){ console.warn('[DXY] Yahoo failed:', e.message); }
 }
 
 // QQQ/NQ via Finnhub
 async function refreshPrices() {
-  try {
-    const d = await fetchFinnhubDirect('QQQ');
-    priceData['QQQ'] = d.c;
-    const prev=priceData['QQQ_prev']||d.c;priceData['QQQ_prev']=d.c;
-    const el=document.getElementById('px-nq');if(el){el.textContent=d.c.toFixed(2);el.className='px-val'+(d.c>prev?' up':d.c<prev?' dn':'');}
-  } catch(e){}
+  // NQ from Rithmic if connected, else Yahoo NQ=F
+  if (!RS?.connected || !window.liveNQPrice) {
+    try {
+      const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=NQ%3DF&range=1d&interval=1m');
+      if (!r.ok) throw new Error('Worker ' + r.status);
+      const d = await r.json();
+      const res = d?.chart?.result?.[0];
+      const q = res?.indicators?.quote?.[0];
+      const n = res?.timestamp?.length || 0;
+      if (q && n > 0) {
+        const nq = q.close[n-1] || q.open[n-1];
+        if (nq && !isNaN(nq)) {
+          const prev = priceData['NQ_prev'] || nq;
+          priceData['NQ'] = nq; priceData['NQ_prev'] = nq;
+          window.liveNQPrice = nq;
+          const el = document.getElementById('px-nq');
+          if (el) { el.textContent = nq.toFixed(2); el.className = 'px-val' + (nq>prev?' up':nq<prev?' dn':''); }
+          updateNQESCorrelation(nq);
+          console.log('[NQ] Updated via Yahoo NQ=F: ' + nq.toFixed(2));
+        }
+      }
+    } catch(e) { console.warn('[NQ] Yahoo failed:', e.message); }
+  }
   fetchVIXandDXY();
 }
 
@@ -3001,7 +3063,9 @@ function getCompleteAIContext() {
 Session: ${period.name} | ${new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York'})} EST | 0DTE: ${dte}
 
 === LIVE PRICES ===
-ES~: ${es} | Bid: ${bid} | Ask: ${ask} | VIX: ${vix} | DXY: ${priceData['DXY']||'?'}
+ES~: ${es} | Bid: ${bid} | Ask: ${ask} | VIX: ${vix} | DXY: ${priceData['DXY']||'?'} | NQ: ${window.liveNQPrice?.toFixed(2)||priceData['NQ']?.toFixed(2)||'?'}
+VWAP Regime: ${(()=>{const p=window.liveESPrice,v=window.liveVWAP,d=RS?.cumulativeDelta||0;if(!p||!v)return'unknown';const above=p>v;const bullDelta=d>0;if(above&&bullDelta)return'BULL CONFIRMED (price above VWAP + positive delta)';if(!above&&!bullDelta)return'BEAR CONFIRMED (price below VWAP + negative delta)';if(above&&!bullDelta)return'CAUTION: price above VWAP but delta turning negative - possible reversal';return'CAUTION: price below VWAP but delta positive - possible bounce';})()}
+NQ/ES Divergence: ${(()=>{const nq=window.liveNQPrice,es=window.liveESPrice;if(!nq||!es)return'unknown';const ratio=nq/es;const norm=19000/7200;const div=((ratio/norm)-1)*100;return div>0.5?'NQ LEADING BULLISH (+'+div.toFixed(2)+'%)':div<-0.5?'NQ LEADING BEARISH ('+div.toFixed(2)+'%)':'IN SYNC ('+div.toFixed(2)+'%)';})()}
 
 === LIVE FLOW (RITHMIC) ===
 Cumulative Delta: ${delta} | Buy Vol: ${buyVol} | Sell Vol: ${sellVol}
@@ -3221,6 +3285,9 @@ async function generateSignal() {
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
     currentSignal = signal;
+    // Reset signal age tracking
+    window.lastSignalTime = Date.now();
+    window.signalInvalidated = false;
     signalHistory.unshift(signal);
     if (signalHistory.length > 10) signalHistory.pop();
 
@@ -3306,6 +3373,7 @@ function renderSignal(sig) {
     <div class="sig2-invalidation">\u26A0 Invalidation: <strong>${sig.invalidation||sig.keyLevelToWatch||'\u2014'}</strong></div>
     ${alignHtml}
     ${sig.regimeWarning?`<div style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--amber)">\u26A1 ${sig.regimeWarning}</div>`:''}
+    <div class="sig2-age" id="sig2-age-display">—</div>
     <div class="sig2-actions">
       <button class="sig2-btn log-btn" id="sig2-log-btn" onclick="logSignalToKV(currentSignal,this)">\uD83D\uDCCB Log Trade</button>
       <button class="sig2-btn" onclick="document.getElementById('sig2-detail').style.display=document.getElementById('sig2-detail').style.display==='none'?'block':'none';this.textContent=this.textContent==='\u25BC Explain More'?'\u25B2 Less':'\u25BC Explain More'">\u25BC Explain More</button>
@@ -4058,6 +4126,288 @@ function initGexStackPaste() {
   }, true);
 }
 
+
+// ══════════════════════════════════════════════════
+// DYNAMIC AI + SIGNAL INTELLIGENCE FUNCTIONS
+// ══════════════════════════════════════════════════
+
+// ── NQ update from Rithmic (called when NQ tick arrives) ──
+function updateNQFromRithmic(price) {
+  if (!price || isNaN(price)) return;
+  const prev = window.liveNQPrice || price;
+  window.liveNQPrice = price;
+  priceData['NQ'] = price;
+  const el = document.getElementById('px-nq');
+  if (el) { el.textContent = price.toFixed(2); el.className = 'px-val' + (price>prev?' up':price<prev?' dn':''); }
+  updateNQESCorrelation(price);
+}
+
+// ── NQ/ES correlation update ──
+function updateNQESCorrelation(nqPrice) {
+  const esPrice = window.liveESPrice;
+  if (!nqPrice || !esPrice) return;
+  const ratio = (nqPrice / esPrice).toFixed(3);
+  const el = document.getElementById('nq-es-ratio');
+  if (el) el.textContent = ratio;
+  const nqEl = document.getElementById('nq-price');
+  if (nqEl) nqEl.textContent = nqPrice.toFixed(2);
+  // Divergence check
+  const normRatio = 19000 / 7200;
+  const div = ((nqPrice/esPrice/normRatio) - 1) * 100;
+  const divEl = document.getElementById('nq-es-correlation');
+  if (divEl) {
+    divEl.textContent = (div > 0 ? '+' : '') + div.toFixed(1) + '%';
+    divEl.style.color = Math.abs(div) > 0.5 ? 'var(--amber)' : 'var(--green)';
+  }
+}
+
+// ── Signal age + invalidation checker (runs every 30s) ──
+function checkSignalHealth() {
+  if (!currentSignal || !window.lastSignalTime) return;
+  const price = window.liveESPrice;
+  const ageMins = Math.round((Date.now() - window.lastSignalTime) / 60000);
+  const ageEl = document.getElementById('sig-age-text');
+  const staleBanner = document.getElementById('sig-stale-banner');
+  const invBanner   = document.getElementById('sig-invalidated-banner');
+  const invLevel    = document.getElementById('sig-inv-level');
+  const sigAgeEl    = document.getElementById('sig2-age-display');
+
+  if (sigAgeEl) sigAgeEl.textContent = ageMins + 'm ago';
+
+  // Staleness
+  if (staleBanner && ageEl) {
+    if (ageMins >= 60) {
+      ageEl.textContent = ageMins + ' minutes';
+      staleBanner.style.display = 'block';
+      staleBanner.style.background = 'rgba(255,51,85,0.1)';
+      staleBanner.style.color = 'var(--red)';
+    } else if (ageMins >= 30) {
+      ageEl.textContent = ageMins + ' minutes';
+      staleBanner.style.display = 'block';
+    } else {
+      staleBanner.style.display = 'none';
+    }
+  }
+
+  // Invalidation check
+  if (!window.signalInvalidated && price && currentSignal.invalidation) {
+    const invPrice = parseFloat(currentSignal.invalidation);
+    if (!isNaN(invPrice)) {
+      const dist = Math.abs(price - invPrice);
+      const crossed = currentSignal.bias === 'LONG' ? price < invPrice : price > invPrice;
+      if (crossed) {
+        window.signalInvalidated = true;
+        if (invBanner) { invBanner.style.display = 'block'; }
+        if (invLevel)  { invLevel.textContent = invPrice; }
+        showToast('\u26D4 SIGNAL INVALIDATED \u2014 Price crossed ' + invPrice, 'err');
+      } else if (dist < 3 && invBanner && !window.signalInvalidated) {
+        if (invLevel) invLevel.textContent = invPrice;
+        showToast('\u26A0 Approaching invalidation level: ' + invPrice, 'warn');
+      }
+    }
+  }
+}
+
+// ── Session transition auto-prompt ──
+let lastSessionPrompt = '';
+function checkSessionTransition() {
+  const now = getESTNow();
+  const h = now.getHours(), m = now.getMinutes();
+  const hm = h * 100 + m;
+  // Key session transitions: 10:00, 11:00, 12:00, 14:00, 15:00, 15:30
+  const transitions = [1000, 1100, 1200, 1400, 1500, 1530];
+  const key = transitions.find(t => hm >= t && hm <= t + 1);
+  if (!key) return;
+  const keyStr = String(key);
+  if (lastSessionPrompt === keyStr) return;
+  lastSessionPrompt = keyStr;
+  const names = {1000:'10AM Pivot',1100:'11AM Reversal Window',1200:'Noon Chop',1400:'2PM PM Session',1500:'3PM Power Hour',1530:'3:30PM MOC'};
+  showDynamicAlert('\u23F0 ' + (names[key]||'Session Transition') + ' \u2014 Consider updating your signal', 'info');
+}
+
+// ── Delta divergence detector (enhanced) ──
+let deltaDivHistory = [];
+function checkDeltaDivergence() {
+  const price = window.liveESPrice;
+  const delta = RS?.cumulativeDelta;
+  if (!price || delta == null) return;
+  const now = Date.now();
+  deltaDivHistory.push({ price, delta, time: now });
+  if (deltaDivHistory.length > 12) deltaDivHistory.shift();
+  if (deltaDivHistory.length < 6) return;
+  const old = deltaDivHistory[0];
+  const priceDiff = price - old.price;
+  const deltaDiff = delta - old.delta;
+  // Bearish divergence: price rising but delta falling
+  if (priceDiff > 3 && deltaDiff < -2000) {
+    window.lastDeltaDivergence = { type: 'BEARISH DIV: price up, delta down', price, time: now };
+    if (!window.lastDivAlert || now - window.lastDivAlert > 300000) {
+      window.lastDivAlert = now;
+      showDynamicAlert('\uD83D\uDD34 BEARISH DIVERGENCE: Price rising but delta falling \u2014 Potential reversal', 'warn');
+    }
+  }
+  // Bullish divergence: price falling but delta rising
+  if (priceDiff < -3 && deltaDiff > 2000) {
+    window.lastDeltaDivergence = { type: 'BULLISH DIV: price down, delta up', price, time: now };
+    if (!window.lastDivAlert || now - window.lastDivAlert > 300000) {
+      window.lastDivAlert = now;
+      showDynamicAlert('\uD83D\uDFE2 BULLISH DIVERGENCE: Price falling but delta rising \u2014 Potential bounce', 'info');
+    }
+  }
+}
+
+// ── GEX proximity vs live price ──
+function checkGEXProximity() {
+  const price = window.liveESPrice;
+  if (!price) return;
+  const flip = window.gexFlipLevel || parseFloat(document.getElementById('gex-flip-display')?.textContent);
+  if (flip && !isNaN(flip) && Math.abs(price - flip) < 5) {
+    if (!window.lastGEXAlert || Date.now() - window.lastGEXAlert > 600000) {
+      window.lastGEXAlert = Date.now();
+      showDynamicAlert('\uD83C\uDFAF GEX FLIP ZONE: Price within 5pts of flip level ' + flip + ' \u2014 Key inflection', 'warn');
+    }
+  }
+}
+
+// ── VWAP regime badge updater ──
+function updateVWAPRegimeBadge() {
+  const price = window.liveESPrice;
+  const vwap  = window.liveVWAP;
+  const delta = RS?.cumulativeDelta || 0;
+  if (!price || !vwap) return;
+  const above = price > vwap;
+  const bullDelta = delta > 0;
+  let regime, cls;
+  if (above && bullDelta)       { regime = 'BULL'; cls = 'bull'; }
+  else if (!above && !bullDelta){ regime = 'BEAR'; cls = 'bear'; }
+  else                          { regime = above ? 'CAUTION \u2191' : 'CAUTION \u2193'; cls = 'neut'; }
+  let badge = document.getElementById('vwap-regime-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.id = 'vwap-regime-badge';
+    badge.className = 'regime-badge';
+    const vwapEl = document.getElementById('vwap-value');
+    if (vwapEl) vwapEl.parentNode.insertBefore(badge, vwapEl.nextSibling);
+  }
+  badge.className = 'regime-badge ' + cls;
+  badge.textContent = regime;
+}
+
+// ── Dynamic alert toast (bottom-right, auto-dismiss) ──
+let dynamicAlertTimeout = null;
+function showDynamicAlert(msg, type) {
+  let el = document.getElementById('dynamic-alert-box');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'dynamic-alert-box';
+    el.className = 'dynamic-alert';
+    document.body.appendChild(el);
+  }
+  el.style.borderColor = type === 'warn' ? 'var(--amber)' : type === 'err' ? 'var(--red)' : 'var(--cyan2)';
+  el.style.color = type === 'warn' ? 'var(--amber)' : type === 'err' ? 'var(--red)' : 'var(--t1)';
+  el.textContent = msg;
+  el.style.display = 'block';
+  if (dynamicAlertTimeout) clearTimeout(dynamicAlertTimeout);
+  dynamicAlertTimeout = setTimeout(() => { if(el) el.style.display = 'none'; }, 8000);
+}
+
+// ── ORB auto-capture from Rithmic ──
+function checkORBCapture(price, timestamp) {
+  if (!orbSt || orbSt.orb5.done && orbSt.orb15.done && orbSt.orb30.done) return;
+  const now = getESTNow();
+  const h = now.getHours(), m = now.getMinutes();
+  if (h < 9 || (h === 9 && m < 30)) return; // before open
+  const minsAfterOpen = (h - 9) * 60 + (m - 30);
+  if (!orbSt.open) { orbSt.open = price; orbSt.high = price; orbSt.low = price; }
+  if (price > orbSt.high) orbSt.high = price;
+  if (price < orbSt.low)  orbSt.low  = price;
+  if (minsAfterOpen >= 5  && !orbSt.orb5.done)  { orbSt.orb5  = {h:orbSt.high,l:orbSt.low,done:true};  updateORBDisplay(); showToast('ORB 5M captured: H '+orbSt.orb5.h.toFixed(2)+' L '+orbSt.orb5.l.toFixed(2), 'ok'); }
+  if (minsAfterOpen >= 15 && !orbSt.orb15.done) { orbSt.orb15 = {h:orbSt.high,l:orbSt.low,done:true}; updateORBDisplay(); showToast('ORB 15M captured: H '+orbSt.orb15.h.toFixed(2)+' L '+orbSt.orb15.l.toFixed(2), 'ok'); }
+  if (minsAfterOpen >= 30 && !orbSt.orb30.done) { orbSt.orb30 = {h:orbSt.high,l:orbSt.low,done:true}; updateORBDisplay(); showToast('ORB 30M captured: H '+orbSt.orb30.h.toFixed(2)+' L '+orbSt.orb30.l.toFixed(2), 'ok'); }
+}
+
+// ── Session high/low tracker ──
+let sessionHL = { high: null, low: null, date: null };
+function updateSessionHL(price) {
+  const today = new Date().toDateString();
+  if (sessionHL.date !== today) { sessionHL = { high: price, low: price, date: today }; return; }
+  if (price > sessionHL.high) sessionHL.high = price;
+  if (price < sessionHL.low)  sessionHL.low  = price;
+  window.sessionHigh = sessionHL.high;
+  window.sessionLow  = sessionHL.low;
+}
+
+// ── Generate weekly bias via AI ──
+async function generateWeeklyBias() {
+  const btn = document.getElementById('wp-gen-btn');
+  if (btn) { btn.textContent = '\u23F3 Analyzing...'; btn.disabled = true; }
+  try {
+    const es = window.liveESPrice || '?';
+    const vix = priceData['VIX'] || '?';
+    const dxy = priceData['DXY'] || '?';
+    const nq = window.liveNQPrice || priceData['NQ'] || '?';
+    const wkHi = document.getElementById('lvl-wk-hi')?.textContent || '?';
+    const wkLo = document.getElementById('lvl-wk-lo')?.textContent || '?';
+    const pdh = document.getElementById('lvl-pdh')?.textContent || '?';
+    const pdl = document.getElementById('lvl-pdl')?.textContent || '?';
+    const mtf = window.mtfContext || 'not loaded';
+    const biasCtx = window.morningBiasContext || 'not run';
+    const wpNotes = document.getElementById('wp-notes')?.value || '';
+
+    const prompt = `You are an elite ES futures analyst. Generate a weekly trading playbook for the coming week.
+
+CURRENT DATA:
+ES: ${es} | VIX: ${vix} | DXY: ${dxy} | NQ: ${nq}
+Week High: ${wkHi} | Week Low: ${wkLo}
+PDH: ${pdh} | PDL: ${pdl}
+MTF Alignment: ${mtf}
+Morning Bias Context: ${biasCtx}
+Trader Notes: ${wpNotes}
+
+OUTPUT JSON ONLY (no markdown, no backticks):
+{
+  "bias": "BULLISH or BEARISH or NEUTRAL",
+  "flipZone": "key price level where bias flips",
+  "zone0": {"dir":"SHORT or LONG","entry":"price","stop":"price","t1":"price","t2":"price"},
+  "zone1": {"dir":"SHORT or LONG","entry":"price","stop":"price","t1":"price","t2":"price"},
+  "zone2": {"dir":"SHORT or LONG","entry":"price","stop":"price","t1":"price","t2":"price"},
+  "notes": "2-3 sentence weekly thesis"
+}`;
+
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:600, messages:[{role:'user',content:prompt}] })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const data = await res.json();
+    const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const start = text.indexOf('{'), end = text.lastIndexOf('}');
+    if (start === -1) throw new Error('No JSON in response');
+    const parsed = JSON.parse(text.slice(start, end+1));
+    // Populate fields
+    const set = (id, val) => { const el=document.getElementById(id); if(el&&val!=null) el.value=val; };
+    set('wp-bias',  parsed.bias);
+    set('wp-flip',  parsed.flipZone);
+    set('wp-notes', parsed.notes);
+    ['0','1','2'].forEach(i => {
+      const z = parsed['zone'+i]; if(!z) return;
+      set('wp-z'+i+'-dir',   z.dir);
+      set('wp-z'+i+'-entry', z.entry);
+      set('wp-z'+i+'-stop',  z.stop);
+      set('wp-z'+i+'-t1',    z.t1);
+      set('wp-z'+i+'-t2',    z.t2);
+    });
+    updateWPBiasBadge(parsed.bias);
+    weeklyPlaybook = parsed;
+    showToast('\u2705 Weekly bias generated \u2014 review and save', 'ok');
+  } catch(e) {
+    showToast('Weekly bias failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.textContent = '\u26A1 Generate Weekly Bias (AI)'; btn.disabled = false; }
+  }
+}
+
 // ── MAIN INIT ──
 function initAll() {
   // Clock
@@ -4114,7 +4464,15 @@ function initAll() {
   if (wpBiasEl) wpBiasEl.addEventListener('change', e => updateWPBiasBadge(e.target.value));
   initGexStackZones();
   initGexStackPaste();
-  console.log('[QuantEdge v4] All systems initialized — Weekly Playbook + Signal v2 + GEX Stacks active');
+  // Dynamic AI intervals
+  setInterval(checkSignalHealth, 30000);
+  setInterval(checkSessionTransition, 60000);
+  setInterval(checkGEXProximity, 15000);
+  setInterval(updateVWAPRegimeBadge, 10000);
+  // VIX/DXY refresh every 2 minutes
+  setInterval(fetchVIXandDXY, 120000);
+  setTimeout(fetchVIXandDXY, 3000);
+  console.log('[QuantEdge v4] All systems initialized — Full Dynamic AI active');
 }
 
 // DOM ready
