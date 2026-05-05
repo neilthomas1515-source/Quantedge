@@ -349,6 +349,63 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 #gex-drop .drop-hint strong{color:var(--t2);}
 #gex-drop .drop-kbd{font-size:9px;color:var(--t4);}
 #gex-file{display:none;}
+
+/* ── WEEKLY PLAYBOOK ── */
+#wp-sect-body{display:block;}
+.wp-bias-badge{display:inline-block;padding:4px 14px;border-radius:4px;font-family:var(--sans);font-size:14px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.wp-bias-badge.BULLISH{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid var(--green2);}
+.wp-bias-badge.BEARISH{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid var(--red2);}
+.wp-bias-badge.NEUTRAL{background:rgba(255,170,0,0.10);color:var(--amber);border:1px solid var(--amber2);}
+.wp-zone{background:var(--s2);border:1px solid var(--b2);border-radius:4px;padding:8px 10px;margin-bottom:6px;transition:border-color 0.3s;}
+.wp-zone.zone-active{border-color:var(--amber);box-shadow:0 0 10px rgba(255,170,0,0.25);animation:pulse 1s infinite;}
+.wp-zone-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;}
+.wp-zone-dist{margin-left:auto;font-size:11px;font-weight:700;color:var(--cyan);}
+.wp-gex-drop{border:1px dashed var(--b3);border-radius:4px;padding:10px;text-align:center;cursor:pointer;background:rgba(167,139,250,0.02);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.2s;}
+.wp-gex-drop:hover,.wp-gex-drop.drag-over{border-color:#a78bfa;background:rgba(167,139,250,0.05);}
+.wp-gex-drop.has-image{border-style:solid;border-color:#a78bfa;}
+.wp-gex-drop img{max-width:100%;max-height:100px;border-radius:3px;object-fit:contain;}
+.wp-save-btn{width:100%;padding:7px;background:linear-gradient(135deg,#7c3aed,#4c1d95);border:none;border-radius:4px;color:var(--white);font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:6px;transition:opacity 0.15s;}
+.wp-save-btn:hover{opacity:0.85;}
+.wp-auto-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:8px;}
+.wp-auto-item{background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:5px 6px;text-align:center;}
+.wp-auto-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.wp-auto-val{font-size:13px;font-weight:700;color:var(--cyan);font-family:var(--mono);}
+#wp-econ-warning{display:none;background:rgba(255,51,85,0.1);border:1px solid var(--red2);border-radius:4px;padding:7px 12px;margin:6px 14px;font-size:12px;color:var(--red);font-weight:700;letter-spacing:0.5px;text-align:center;animation:pulse 1.5s infinite;}
+.sig2-box{background:var(--s2);border:1px solid var(--b2);border-radius:6px;overflow:hidden;width:100%;}
+.sig2-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);}
+.sig2-direction{font-family:var(--sans);font-size:22px;font-weight:900;letter-spacing:2px;}
+.sig2-direction.LONG{color:var(--green);}
+.sig2-direction.SHORT{color:var(--red);}
+.sig2-direction.NEUTRAL{color:var(--amber);}
+.sig2-conf{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.sig2-conf-num{font-size:22px;font-weight:900;font-family:var(--sans);}
+.sig2-conf-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);}
+.sig2-levels{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1px;background:var(--b1);border-top:1px solid var(--b1);}
+.sig2-lv{background:var(--s2);padding:10px 8px;text-align:center;}
+.sig2-lv-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.sig2-lv-val{font-size:18px;font-weight:900;font-family:var(--sans);}
+.sig2-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--b1);border-top:1px solid var(--b1);}
+.sig2-meta-item{background:var(--s2);padding:8px 10px;}
+.sig2-meta-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.sig2-meta-val{font-size:12px;font-weight:700;color:var(--t1);}
+.sig2-why{padding:10px 14px;border-top:1px solid var(--b1);font-size:13px;color:var(--t1);line-height:1.5;}
+.sig2-why-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.sig2-invalidation{padding:7px 14px;border-top:1px solid var(--b1);font-size:12px;color:var(--amber);background:rgba(255,170,0,0.04);}
+.sig2-weekly-align{padding:7px 14px;border-top:1px solid var(--b1);font-size:12px;font-weight:700;}
+.sig2-weekly-align.aligned{color:var(--green);}
+.sig2-weekly-align.conflict{color:var(--red);}
+.sig2-weekly-align.none{color:var(--t3);}
+.sig2-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--b1);}
+.sig2-btn{flex:1;padding:6px 10px;border-radius:4px;border:1px solid var(--b2);background:var(--s3);color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.15s;text-align:center;}
+.sig2-btn:hover{color:var(--cyan);border-color:var(--cyan2);}
+.sig2-btn.log-btn{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);color:var(--green);}
+.sig2-btn.log-btn:hover{background:rgba(0,255,136,0.12);}
+.sig2-btn.log-btn.logged{background:rgba(0,255,136,0.15);color:var(--green2);cursor:default;}
+.sig2-detail{display:none;padding:10px 14px;border-top:1px solid var(--b1);font-size:12px;color:var(--t2);line-height:1.6;}
+.sig2-htf{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--b1);}
+.sig2-htf-item{background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:4px 8px;font-size:11px;font-weight:700;}
+.sig2-contracts{font-family:var(--sans);font-size:16px;font-weight:900;color:var(--cyan);}
+
 </style>
 </head>
 <body>
@@ -497,6 +554,89 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <button class="btn-gex-clear" onclick="clearGEXHistory()" style="font-size:9px;padding:2px 6px">Clear All</button>
     </div>
     <div id="gex-history-strip" class="gex-history-strip"><div class="gex-hist-empty">No history yet</div></div>
+  </div>
+
+
+  <!-- WEEKLY PLAYBOOK -->
+  <div class="sect" id="wp-sect">
+    <div class="sect-hd purple" style="cursor:pointer" onclick="toggleWPPanel()">
+      📅 Weekly Playbook <div class="hd-line"></div>
+      <span id="wp-bias-topbadge" style="font-size:10px;font-weight:700;margin-left:4px;color:var(--t4)">—</span>
+      <span id="wp-collapse-arrow" style="font-size:10px;color:var(--t3);margin-left:4px;">▲</span>
+    </div>
+    <div id="wp-sect-body">
+      <div class="wp-auto-grid">
+        <div class="wp-auto-item"><div class="wp-auto-label">Wk Hi</div><div class="wp-auto-val" id="wp-wk-hi">—</div></div>
+        <div class="wp-auto-item"><div class="wp-auto-label">Wk Lo</div><div class="wp-auto-val" id="wp-wk-lo">—</div></div>
+        <div class="wp-auto-item"><div class="wp-auto-label">Pivot</div><div class="wp-auto-val" id="wp-pivot">—</div></div>
+        <div class="wp-auto-item"><div class="wp-auto-label">Days Left</div><div class="wp-auto-val" id="wp-days-left">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px;font-size:10px;color:var(--t3)">
+        <div style="text-align:center"><div style="color:var(--t4);margin-bottom:1px">R1</div><div id="wp-r1" style="color:var(--red2);font-weight:700">—</div></div>
+        <div style="text-align:center"><div style="color:var(--t4);margin-bottom:1px">R2</div><div id="wp-r2" style="color:var(--red2);font-weight:700">—</div></div>
+        <div style="text-align:center"><div style="color:var(--t4);margin-bottom:1px">S1</div><div id="wp-s1" style="color:var(--green2);font-weight:700">—</div></div>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Weekly Bias</label>
+        <select id="wp-bias">
+          <option value="">— Select —</option>
+          <option value="BULLISH">BULLISH</option>
+          <option value="BEARISH">BEARISH</option>
+          <option value="NEUTRAL">NEUTRAL</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Flip Zone (price)</label>
+        <input type="number" id="wp-flip" placeholder="e.g. 7265" step="0.25">
+      </div>
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Entry Zones</div>
+      <div class="wp-zone" id="wp-zone-0">
+        <div class="wp-zone-hd">Zone 1 <span id="wp-z0-dist" class="wp-zone-dist"></span></div>
+        <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr 1fr;gap:5px;align-items:end">
+          <div class="field"><label>Dir</label><select id="wp-z0-dir"><option value="SHORT">SHORT</option><option value="LONG">LONG</option></select></div>
+          <div class="field"><label>Entry</label><input type="number" id="wp-z0-entry" placeholder="—" step="0.25"></div>
+          <div class="field"><label>Stop</label><input type="number" id="wp-z0-stop" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T1</label><input type="number" id="wp-z0-t1" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T2</label><input type="number" id="wp-z0-t2" placeholder="—" step="0.25"></div>
+        </div>
+      </div>
+      <div class="wp-zone" id="wp-zone-1">
+        <div class="wp-zone-hd">Zone 2 <span id="wp-z1-dist" class="wp-zone-dist"></span></div>
+        <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr 1fr;gap:5px;align-items:end">
+          <div class="field"><label>Dir</label><select id="wp-z1-dir"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+          <div class="field"><label>Entry</label><input type="number" id="wp-z1-entry" placeholder="—" step="0.25"></div>
+          <div class="field"><label>Stop</label><input type="number" id="wp-z1-stop" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T1</label><input type="number" id="wp-z1-t1" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T2</label><input type="number" id="wp-z1-t2" placeholder="—" step="0.25"></div>
+        </div>
+      </div>
+      <div class="wp-zone" id="wp-zone-2">
+        <div class="wp-zone-hd">Zone 3 <span id="wp-z2-dist" class="wp-zone-dist"></span></div>
+        <div style="display:grid;grid-template-columns:60px 1fr 1fr 1fr 1fr;gap:5px;align-items:end">
+          <div class="field"><label>Dir</label><select id="wp-z2-dir"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+          <div class="field"><label>Entry</label><input type="number" id="wp-z2-entry" placeholder="—" step="0.25"></div>
+          <div class="field"><label>Stop</label><input type="number" id="wp-z2-stop" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T1</label><input type="number" id="wp-z2-t1" placeholder="—" step="0.25"></div>
+          <div class="field"><label>T2</label><input type="number" id="wp-z2-t2" placeholder="—" step="0.25"></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px;margin-bottom:8px">
+        <label>Weekly Thesis / Notes</label>
+        <textarea id="wp-notes" rows="2" placeholder="e.g. Fade all rallies into 7265 flip zone. Bears in control below 7252."></textarea>
+      </div>
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Weekly GEX Snapshot</div>
+      <div id="wp-gex-drop" class="wp-gex-drop" onclick="wpSetActiveZone()">
+        <div id="wp-gex-placeholder"><div style="font-size:11px;color:var(--t3)"><strong>Click</strong>, drag &amp; drop, or <strong>Ctrl+V</strong></div><div style="font-size:9px;color:var(--t4)">Weekly GEX from QTA (separate from daily)</div></div>
+        <img id="wp-gex-preview" style="display:none" alt="Weekly GEX">
+      </div>
+      <input type="file" id="wp-gex-file" accept="image/*" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px;font-size:10px;color:var(--t3);text-align:center">
+        <div><div style="color:var(--t4);margin-bottom:1px">Signals</div><div id="wp-stat-signals" style="font-weight:700;color:var(--t1)">0</div></div>
+        <div><div style="color:var(--t4);margin-bottom:1px">Logged</div><div id="wp-stat-logged" style="font-weight:700;color:var(--t1)">0</div></div>
+        <div><div style="color:var(--t4);margin-bottom:1px">Saved</div><div id="wp-save-time" style="font-weight:700;color:var(--t4)">Never</div></div>
+      </div>
+      <button class="wp-save-btn" onclick="saveWeeklyPlaybook()">💾 Save Weekly Playbook to Cloud</button>
+    </div>
   </div>
 
   <!-- LIVE FLOW -->
@@ -855,6 +995,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="sig-dot" id="rithmic-live-dot"></div><span class="sig-text" id="rithmic-live-text">Rithmic Live</span>
     </div>
   </div>
+  <div id="wp-econ-warning">⚠ HIGH-IMPACT EVENT SOON — <span id="wp-econ-event-name"></span> in <span id="wp-econ-countdown"></span> — REDUCE SIZE OR STAND ASIDE</div>
   <div id="gen-bar">
     <button id="btn-generate" onclick="generateSignal()">⚡ Generate Signal</button>
     <div class="gen-meta">Last: <strong><span id="last-gen-time">never</span></strong> &nbsp;·&nbsp; <span style="color:var(--t4)">Ctrl+Enter</span></div>
@@ -1326,8 +1467,8 @@ async function resetBridgeDelta() {
 function startBridgePolling() {
   if (bridgePollInterval) clearInterval(bridgePollInterval);
   pollRithmicBridge(); // immediate first poll
-  bridgePollInterval = setInterval(pollRithmicBridge, 1000);
-  console.log('[Bridge] Polling localhost:8182 every 1s');
+  bridgePollInterval = setInterval(pollRithmicBridge, 5000);
+  console.log('[Bridge] Polling localhost:8182 every 5s (KV-safe)');
 }
 
 // Override connectRithmic to use bridge
@@ -2751,6 +2892,14 @@ function toggleSigCheck(el, type) {
 
 let signalHistory = [];
 let currentSignal = null;
+// ── WEEKLY PLAYBOOK STATE ──
+let weeklyPlaybook = {};
+let weeklyGexImageData = null;
+let wpActiveZone = false;
+let zoneAlertCooldowns = {};
+let wpSignalCount = 0;
+let wpLoggedCount = 0;
+let wpAudioCtx = null;
 
 // ── BUILD COMPLETE AI CONTEXT ──
 function getCompleteAIContext() {
@@ -2871,7 +3020,17 @@ Position: ${pos} | Contracts: ${contracts}
 ${bookmap}
 
 === KEY EVENTS TODAY ===
-${events}`;
+${events}
+
+=== WEEKLY PLAYBOOK ===
+${(()=>{
+  const wp = weeklyPlaybook;
+  if (!wp || !wp.bias) return 'Not set';
+  const zones = [wp.zone0, wp.zone1, wp.zone2].filter(z => z && z.entry);
+  const zoneStr = zones.map((z,i) => `Zone${i+1}: ${z.dir} Entry:${z.entry} Stop:${z.stop} T1:${z.t1} T2:${z.t2}`).join(' | ');
+  return `Bias: ${wp.bias} | Flip: ${wp.flipZone||'?'} | ${zoneStr} | Notes: ${wp.notes||'none'}`;
+})()}
+${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer positioning, separate from daily GEX]' : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -2881,29 +3040,48 @@ function buildPrompt() {
   const hasGEX   = !!gexImageData;
   const hasOF    = !!ofImageData;
 
-  return `You are an elite ES futures prop trader managing 2-5 contract positions. Analyze all provided data and output ONE high-probability trade signal.
+  return `You are an elite ES futures prop trader. Analyze all provided data and output ONE high-probability trade signal.
+
+RESPONSE RULES — FOLLOW EXACTLY:
+1. Lead directly with JSON. Zero preamble.
+2. whyOneLine: one sentence max. No paragraphs.
+3. narrative: max 3 sentences, shown only on expand.
+4. If confidence below 60, set bias NEUTRAL and entry/stop/targets to NO SIGNAL.
+5. contracts: recommend 2-5 based on confidence (60-69=2, 70-79=3, 80-89=4, 90+=5).
+6. sessionContext: one of Power Hour Open|AM Session|Lunch Chop|PM Session|Power Hour Close|MOC Close|After Hours|Pre-Market|Globex.
+7. weeklyBiasAligned: true if signal matches weekly playbook bias, false if conflict, null if no playbook.
+8. invalidation: exact price that kills this trade. Always required.
+9. htfStack: keys D, 4H, 1H, 15M — values BULL BEAR or NEUT.
+10. gexConfirm: one line on what GEX says about this level.
 
 ${context}
 
-${hasGEX   ? '[GEX chart image attached — analyze dealer positioning, flip levels, call/put walls]' : ''}
+${hasGEX   ? '[Daily GEX chart image attached — analyze dealer positioning, flip levels, call/put walls]' : ''}
 ${hasOF    ? '[Order flow / Bookmap image attached — analyze tape, absorption, iceberg, volume]' : ''}
 ${hasSnaps ? '[Indicator snapshot images attached — analyze for additional confluence]' : ''}
 
-REQUIRED OUTPUT FORMAT (JSON only, no markdown):
+REQUIRED OUTPUT FORMAT (JSON only, no markdown, no backticks):
 {
-  "bias": "LONG" or "SHORT" or "NEUTRAL",
+  "bias": "LONG or SHORT or NEUTRAL",
   "confidence": 0-100,
-  "entry": "price level",
-  "target1": "first target price",
-  "target2": "second target price",
-  "stop": "stop loss price",
-  "gexFlip": "flip level from GEX if identifiable",
-  "riskReward": "R:R ratio",
-  "timeframe": "trade duration",
-  "narrative": "3-5 sentence analysis covering: (1) what the GEX/dealer positioning says, (2) what live flow/delta/absorption say, (3) what SMC structure says, (4) the exact trade thesis, (5) what would invalidate this trade",
-  "keyLevelToWatch": "single most important level",
-  "regimeWarning": "any regime change risk or flip risk",
-  "mlNote": "ML confidence note if applicable"
+  "contracts": 2-5,
+  "entry": "price or NO SIGNAL",
+  "target1": "price",
+  "target2": "price",
+  "target3": "price",
+  "stop": "price",
+  "invalidation": "exact price that kills the trade",
+  "riskReward": "e.g. 1:2.5",
+  "timeframe": "scalp or intraday or swing",
+  "sessionContext": "current session name",
+  "gexFlip": "flip level or null",
+  "gexConfirm": "one line on what GEX says",
+  "weeklyBiasAligned": "true or false or null",
+  "htfStack": {"D":"BULL/BEAR/NEUT","4H":"BULL/BEAR/NEUT","1H":"BULL/BEAR/NEUT","15M":"BULL/BEAR/NEUT"},
+  "whyOneLine": "single sentence core thesis",
+  "narrative": "max 3 sentences for expand view",
+  "regimeWarning": "one line or null",
+  "mlNote": "ML note or null"
 }`;
 }
 
@@ -2935,6 +3113,13 @@ function buildMessageContent(prompt) {
     content.push({ type:'text', text:`[Above: ${s.label}${s.desc ? ' — ' + s.desc : ''}]` });
   });
 
+  // Weekly GEX image
+  if (weeklyGexImageData) {
+    const b64w = weeklyGexImageData.split(',')[1];
+    const mtw  = weeklyGexImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({ type:'image', source:{ type:'base64', media_type:mtw, data:b64w } });
+    content.push({ type:'text', text:'[Above image: WEEKLY GEX chart — weekly dealer positioning context, separate from daily GEX]' });
+  }
   // Main prompt text
   content.push({ type:'text', text:prompt });
   return content;
@@ -3004,62 +3189,75 @@ async function generateSignal() {
   }
 }
 
-// ── RENDER SIGNAL ──
+// ── RENDER SIGNAL v2 ──
 function renderSignal(sig) {
   const area = document.getElementById('signal-area');
   if (!area) return;
+  wpSignalCount++;
+  const wse = document.getElementById('wp-stat-signals');
+  if (wse) wse.textContent = wpSignalCount;
+
   const isBull = sig.bias === 'LONG', isBear = sig.bias === 'SHORT';
-  const biasClass = isBull ? 'bull' : isBear ? 'bear' : 'neutral';
-  const biasColor = isBull ? '#00ff88' : isBear ? '#ff4444' : '#ffaa00';
-  const confClass = sig.confidence >= 70 ? 'high' : sig.confidence >= 50 ? 'mid' : 'low';
+  const biasColor = isBull ? 'var(--green)' : isBear ? 'var(--red)' : 'var(--amber)';
+  const cn = sig.confidence || 0;
+  const confColor = cn >= 80 ? 'var(--green)' : cn >= 70 ? 'var(--amber)' : cn >= 60 ? '#ff8844' : 'var(--t3)';
+  const confLabel = cn >= 80 ? '\uD83D\uDFE2 VERY HIGH' : cn >= 70 ? '\uD83D\uDFE0 HIGH' : cn >= 60 ? '\uD83D\uDFE1 MODERATE' : '\u26AA LOW';
+
+  let alignHtml = '';
+  if (sig.weeklyBiasAligned === true || sig.weeklyBiasAligned === 'true')
+    alignHtml = '<div class="sig2-weekly-align aligned">\u2705 WEEKLY BIAS ALIGNED</div>';
+  else if (sig.weeklyBiasAligned === false || sig.weeklyBiasAligned === 'false')
+    alignHtml = '<div class="sig2-weekly-align conflict">\u26A0\uFE0F CONFLICTS WITH WEEKLY BIAS \u2014 REDUCE SIZE</div>';
+  else
+    alignHtml = '<div class="sig2-weekly-align none">\u2014 Weekly playbook not set</div>';
+
+  const htf = sig.htfStack || {};
+  const hc = v => v==='BULL'?'var(--green)':v==='BEAR'?'var(--red)':'var(--t3)';
+  const htfHtml = `<div class="sig2-htf">${['D','4H','1H','15M'].map(tf=>`<div class="sig2-htf-item" style="color:${hc(htf[tf])}">${tf}: ${htf[tf]||'?'}</div>`).join('')}</div>`;
 
   area.innerHTML = `
-    <div class="signal-grid">
-      <div class="sig-card ${biasClass}">
-        <div class="sig-card-label">Bias</div>
-        <div class="sig-card-value ${biasClass}">${sig.bias}</div>
-        <div class="sig-card-sub">At ${sig.esAtSignal?.toFixed(2)||'?'}</div>
+  <div class="sig2-box">
+    <div class="sig2-header">
+      <div>
+        <div style="font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">ES SIGNAL \u00b7 ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})} EST</div>
+        <div class="sig2-direction ${sig.bias}">${sig.bias==='NEUTRAL'?'\u2B1B NO SIGNAL':isBull?'\u2B06 LONG':'\u2B07 SHORT'}</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:4px">${sig.sessionContext||''}</div>
       </div>
-      <div class="sig-card ${biasClass}">
-        <div class="sig-card-label">Confidence</div>
-        <div class="sig-card-value ${biasClass}">${sig.confidence}%</div>
-        <div class="conf-bar-bg"><div class="conf-bar-fill ${confClass}" style="width:${sig.confidence}%"></div></div>
-      </div>
-      <div class="sig-card info">
-        <div class="sig-card-label">R:R</div>
-        <div class="sig-card-value info">${sig.riskReward || '?'}</div>
-        <div class="sig-card-sub">${sig.timeframe || ''}</div>
+      <div class="sig2-conf">
+        <div class="sig2-conf-num" style="color:${confColor}">${cn}%</div>
+        <div class="sig2-conf-label">${confLabel}</div>
+        <div class="sig2-contracts" style="margin-top:4px">${sig.contracts||'?'}\u00d7</div>
+        <div style="font-size:9px;color:var(--t3)">contracts</div>
       </div>
     </div>
-    <div class="signal-grid4">
-      <div class="sig-card ${biasClass}">
-        <div class="sig-card-label">Entry</div>
-        <div style="font-size:22px;font-weight:900;font-family:var(--sans);color:${biasColor}">${sig.entry || '?'}</div>
-      </div>
-      <div class="sig-card bull">
-        <div class="sig-card-label">Target 1</div>
-        <div style="font-size:22px;font-weight:900;font-family:var(--sans);color:#00ff88">${sig.target1 || '?'}</div>
-      </div>
-      <div class="sig-card bull">
-        <div class="sig-card-label">Target 2</div>
-        <div style="font-size:22px;font-weight:900;font-family:var(--sans);color:#88ff88">${sig.target2 || '?'}</div>
-      </div>
-      <div class="sig-card bear">
-        <div class="sig-card-label">Stop</div>
-        <div style="font-size:22px;font-weight:900;font-family:var(--sans);color:#ff4444">${sig.stop || '?'}</div>
-      </div>
+    <div class="sig2-levels">
+      <div class="sig2-lv"><div class="sig2-lv-label">Entry</div><div class="sig2-lv-val" style="color:${biasColor}">${sig.entry||'?'}</div></div>
+      <div class="sig2-lv"><div class="sig2-lv-label">Stop</div><div class="sig2-lv-val" style="color:var(--red)">${sig.stop||'?'}</div></div>
+      <div class="sig2-lv"><div class="sig2-lv-label">T1</div><div class="sig2-lv-val" style="color:var(--green)">${sig.target1||'?'}</div></div>
+      <div class="sig2-lv"><div class="sig2-lv-label">T2</div><div class="sig2-lv-val" style="color:var(--green2)">${sig.target2||'?'}</div></div>
+      <div class="sig2-lv"><div class="sig2-lv-label">R:R</div><div class="sig2-lv-val" style="color:var(--cyan);font-size:14px">${sig.riskReward||'?'}</div></div>
     </div>
-    ${sig.gexFlip ? `<div class="sig-card-wide"><div class="sig-card-label">GEX Flip Level</div><div class="content" style="color:var(--amber);font-size:20px;font-weight:700">${sig.gexFlip}</div></div>` : ''}
-    <div class="sig-narrative">
-      <div class="sig-narrative-label">Analysis</div>
-      <div class="sig-narrative-text">${sig.narrative?.split('\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('') || ''}</div>
+    <div class="sig2-meta">
+      <div class="sig2-meta-item"><div class="sig2-meta-label">GEX</div><div class="sig2-meta-val" style="color:var(--amber);font-size:11px">${sig.gexConfirm||sig.gexFlip||'\u2014'}</div></div>
+      <div class="sig2-meta-item"><div class="sig2-meta-label">Timeframe</div><div class="sig2-meta-val">${sig.timeframe||'\u2014'}</div></div>
+      <div class="sig2-meta-item"><div class="sig2-meta-label">At Price</div><div class="sig2-meta-val" style="color:var(--cyan)">${sig.esAtSignal?.toFixed(2)||'?'}</div></div>
     </div>
-    ${sig.regimeWarning ? `<div style="background:rgba(255,170,0,0.06);border:1px solid var(--amber2);border-radius:5px;padding:10px 14px"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">⚠ Regime Warning</div><div style="font-size:14px;color:var(--amber)">${sig.regimeWarning}</div></div>` : ''}
-    ${sig.keyLevelToWatch ? `<div style="font-size:12px;color:var(--t2);padding:6px 0">📌 Key level to watch: <strong style="color:var(--cyan)">${sig.keyLevelToWatch}</strong></div>` : ''}
-    <div style="text-align:center;padding:6px 0">
-      <button onclick="generateSignal()" style="padding:5px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer">⟳ Regenerate</button>
-      <button onclick="showPresignalDash()" style="padding:5px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer;margin-left:8px">← Dashboard</button>
-    </div>`;
+    ${htfHtml}
+    <div class="sig2-why"><div class="sig2-why-label">Why</div>${sig.whyOneLine||sig.narrative?.split('.')[0]||'\u2014'}</div>
+    <div class="sig2-invalidation">\u26A0 Invalidation: <strong>${sig.invalidation||sig.keyLevelToWatch||'\u2014'}</strong></div>
+    ${alignHtml}
+    ${sig.regimeWarning?`<div style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--amber)">\u26A1 ${sig.regimeWarning}</div>`:''}
+    <div class="sig2-actions">
+      <button class="sig2-btn log-btn" id="sig2-log-btn" onclick="logSignalToKV(currentSignal,this)">\uD83D\uDCCB Log Trade</button>
+      <button class="sig2-btn" onclick="document.getElementById('sig2-detail').style.display=document.getElementById('sig2-detail').style.display==='none'?'block':'none';this.textContent=this.textContent==='\u25BC Explain More'?'\u25B2 Less':'\u25BC Explain More'">\u25BC Explain More</button>
+      <button class="sig2-btn" onclick="generateSignal()">\u27F3 Regenerate</button>
+      <button class="sig2-btn" onclick="showPresignalDash()">\u2190 Back</button>
+    </div>
+    <div class="sig2-detail" id="sig2-detail">
+      <strong>Full Analysis:</strong><br>${sig.narrative||'\u2014'}
+      ${sig.mlNote?`<br><br><strong>ML Note:</strong> ${sig.mlNote}`:''}
+    </div>
+  </div>`;
 }
 
 function showPresignalDash() {
@@ -3495,6 +3693,222 @@ async function checkSchwabStatus() {
   }
 }
 
+
+// ══════════════════════════════════════════════════
+// WEEKLY PLAYBOOK FUNCTIONS
+// ══════════════════════════════════════════════════
+function toggleWPPanel() {
+  const b = document.getElementById('wp-sect-body');
+  const a = document.getElementById('wp-collapse-arrow');
+  if (!b) return;
+  const collapsed = b.style.display === 'none';
+  b.style.display = collapsed ? 'block' : 'none';
+  if (a) a.textContent = collapsed ? '\u25b2' : '\u25bc';
+}
+
+async function loadWeeklyPlaybook() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/weekly-playbook');
+    if (!res.ok) return;
+    const txt = await res.text();
+    const d = JSON.parse(txt);
+    if (d.status === 'no_data') return;
+    weeklyPlaybook = d;
+    populateWPFields(d);
+    console.log('[WP] Loaded weekly playbook');
+  } catch(e) { console.log('[WP] No playbook yet:', e.message); }
+}
+
+function populateWPFields(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+  set('wp-bias', d.bias); set('wp-flip', d.flipZone); set('wp-notes', d.notes);
+  ['0','1','2'].forEach(i => {
+    const z = d['zone'+i]; if (!z) return;
+    set('wp-z'+i+'-dir', z.dir); set('wp-z'+i+'-entry', z.entry);
+    set('wp-z'+i+'-stop', z.stop); set('wp-z'+i+'-t1', z.t1); set('wp-z'+i+'-t2', z.t2);
+  });
+  if (d.weeklyGex) {
+    weeklyGexImageData = d.weeklyGex;
+    const prev = document.getElementById('wp-gex-preview');
+    const ph   = document.getElementById('wp-gex-placeholder');
+    const drop = document.getElementById('wp-gex-drop');
+    if (prev) { prev.src = d.weeklyGex; prev.style.display = 'block'; }
+    if (ph)   ph.style.display = 'none';
+    if (drop) drop.classList.add('has-image');
+  }
+  if (d.savedAt) {
+    const el = document.getElementById('wp-save-time');
+    if (el) el.textContent = new Date(d.savedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+  updateWPBiasBadge(d.bias);
+  updateWPAutoCalc();
+}
+
+function updateWPBiasBadge(bias) {
+  const b = document.getElementById('wp-bias-topbadge');
+  if (!b) return;
+  b.textContent = bias || '\u2014';
+  b.style.color = bias === 'BULLISH' ? 'var(--green)' : bias === 'BEARISH' ? 'var(--red)' : 'var(--amber)';
+}
+
+function updateWPAutoCalc() {
+  const day = new Date().getDay();
+  const daysLeft = day === 0 ? 5 : Math.max(0, 5 - day);
+  const dl = document.getElementById('wp-days-left'); if (dl) dl.textContent = daysLeft;
+  const wkHi = document.getElementById('lvl-wk-hi')?.textContent;
+  const wkLo = document.getElementById('lvl-wk-lo')?.textContent;
+  if (wkHi && wkHi !== '\u2014') { const e = document.getElementById('wp-wk-hi'); if (e) e.textContent = wkHi; }
+  if (wkLo && wkLo !== '\u2014') { const e = document.getElementById('wp-wk-lo'); if (e) e.textContent = wkLo; }
+  const h = parseFloat(wkHi), l = parseFloat(wkLo);
+  const pdc = parseFloat(document.getElementById('lvl-prev-close')?.textContent);
+  if (!isNaN(h) && !isNaN(l) && !isNaN(pdc)) {
+    const p = ((h+l+pdc)/3).toFixed(2);
+    const set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+    set('wp-pivot',p); set('wp-r1',(2*parseFloat(p)-l).toFixed(2));
+    set('wp-r2',(parseFloat(p)+(h-l)).toFixed(2)); set('wp-s1',(2*parseFloat(p)-h).toFixed(2));
+  }
+}
+
+async function saveWeeklyPlaybook() {
+  const get = id => document.getElementById(id)?.value || null;
+  const bias = get('wp-bias');
+  if (!bias) { showToast('Select a weekly bias first', 'err'); return; }
+  const payload = {
+    bias, flipZone: get('wp-flip'), notes: get('wp-notes'),
+    zone0: { dir:get('wp-z0-dir'), entry:get('wp-z0-entry'), stop:get('wp-z0-stop'), t1:get('wp-z0-t1'), t2:get('wp-z0-t2') },
+    zone1: { dir:get('wp-z1-dir'), entry:get('wp-z1-entry'), stop:get('wp-z1-stop'), t1:get('wp-z1-t1'), t2:get('wp-z1-t2') },
+    zone2: { dir:get('wp-z2-dir'), entry:get('wp-z2-entry'), stop:get('wp-z2-stop'), t1:get('wp-z2-t1'), t2:get('wp-z2-t2') },
+    weeklyGex: weeklyGexImageData || null
+  };
+  weeklyPlaybook = payload;
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/weekly-playbook', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const el = document.getElementById('wp-save-time');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    updateWPBiasBadge(bias);
+    showToast('\u2705 Weekly playbook saved', 'ok');
+  } catch(e) { showToast('Save failed: ' + e.message, 'err'); }
+}
+
+function wpSetActiveZone() { wpActiveZone = true; showToast('Weekly GEX active \u2014 paste or drop image', 'info'); }
+
+function initWPGexZone() {
+  const drop = document.getElementById('wp-gex-drop');
+  const fi   = document.getElementById('wp-gex-file');
+  if (!drop || !fi) return;
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); const f=e.dataTransfer?.files?.[0]; if(f&&f.type.startsWith('image/')) wpLoadGexFile(f); });
+  fi.addEventListener('change', () => { if(fi.files?.[0]) wpLoadGexFile(fi.files[0]); });
+  document.addEventListener('paste', e => {
+    if (!wpActiveZone) return;
+    const items = e.clipboardData?.items; if (!items) return;
+    for (const item of items) { if (item.type.startsWith('image/')) { wpLoadGexFile(item.getAsFile()); break; } }
+    wpActiveZone = false;
+  });
+}
+
+function wpLoadGexFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    weeklyGexImageData = ev.target.result;
+    const prev = document.getElementById('wp-gex-preview');
+    const ph   = document.getElementById('wp-gex-placeholder');
+    const drop = document.getElementById('wp-gex-drop');
+    if (prev) { prev.src = weeklyGexImageData; prev.style.display = 'block'; }
+    if (ph)   ph.style.display = 'none';
+    if (drop) drop.classList.add('has-image');
+    showToast('Weekly GEX loaded', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function checkZoneProximity() {
+  const price = window.liveESPrice; if (!price || !weeklyPlaybook.zone0) return;
+  const zones = [weeklyPlaybook.zone0, weeklyPlaybook.zone1, weeklyPlaybook.zone2];
+  const BUFFER = 5, now = Date.now();
+  zones.forEach((z, i) => {
+    if (!z || !z.entry) return;
+    const entry = parseFloat(z.entry); if (isNaN(entry)) return;
+    const dist = Math.abs(price - entry);
+    const de = document.getElementById('wp-z'+i+'-dist');
+    if (de) de.textContent = dist < 50 ? (price > entry ? '+' : '-') + dist.toFixed(2) + ' pts' : '';
+    if (dist <= BUFFER) {
+      const ck = 'zone'+i, last = zoneAlertCooldowns[ck]||0;
+      if (now - last < 600000) return;
+      zoneAlertCooldowns[ck] = now;
+      const ze = document.getElementById('wp-zone-'+i);
+      if (ze) { ze.classList.add('zone-active'); setTimeout(()=>ze.classList.remove('zone-active'),30000); }
+      try {
+        if (!wpAudioCtx) wpAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        const osc=wpAudioCtx.createOscillator(), gain=wpAudioCtx.createGain();
+        osc.connect(gain); gain.connect(wpAudioCtx.destination);
+        osc.frequency.value = z.dir==='LONG' ? 880 : 660; osc.type='sine';
+        gain.gain.setValueAtTime(0.3, wpAudioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, wpAudioCtx.currentTime+0.8);
+        osc.start(); osc.stop(wpAudioCtx.currentTime+0.8);
+      } catch(e){}
+      showToast('\uD83C\uDFAF Zone '+(i+1)+' ACTIVE \u2014 '+z.dir+' @ '+entry+' ('+dist.toFixed(2)+' pts away)', 'warn');
+    }
+  });
+}
+
+function checkEconWarning() {
+  const bar = document.getElementById('wp-econ-warning');
+  const nameEl = document.getElementById('wp-econ-event-name');
+  const cdEl   = document.getElementById('wp-econ-countdown');
+  if (!bar) return;
+  const ctx = window.econCalendarContext || '';
+  if (!ctx) { bar.style.display='none'; return; }
+  const now = getESTNow();
+  const nowMins = now.getHours()*60 + now.getMinutes();
+  const events = ctx.split('|').map(s=>s.trim());
+  let closest = null, closestMins = Infinity;
+  events.forEach(ev => {
+    const m = ev.match(/^(\d{1,2}):(\d{2})/); if (!m) return;
+    const evMins = parseInt(m[1])*60+parseInt(m[2]);
+    const diff = evMins - nowMins;
+    if (diff > 0 && diff <= 30 && diff < closestMins && ev.toLowerCase().includes('high')) {
+      closestMins = diff;
+      closest = { name: ev.replace(/^\d{1,2}:\d{2}\s*/,'').split('(')[0].trim(), minsAway: diff };
+    }
+  });
+  if (closest) {
+    bar.style.display='block';
+    if (nameEl) nameEl.textContent = closest.name;
+    if (cdEl)   cdEl.textContent   = closest.minsAway + ' min';
+  } else { bar.style.display='none'; }
+}
+
+async function logSignalToKV(sig, btnEl) {
+  if (!sig) { showToast('No signal to log', 'err'); return; }
+  if (btnEl) { btnEl.textContent='\u23F3 Logging...'; btnEl.disabled=true; }
+  const entry = {
+    bias:sig.bias, confidence:sig.confidence, contracts:sig.contracts,
+    entry:sig.entry, stop:sig.stop, target1:sig.target1, target2:sig.target2,
+    invalidation:sig.invalidation, riskReward:sig.riskReward,
+    sessionContext:sig.sessionContext, whyOneLine:sig.whyOneLine,
+    weeklyBiasAligned:sig.weeklyBiasAligned, esAtSignal:sig.esAtSignal,
+    timestamp:sig.timestamp||Date.now()
+  };
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER+'/trade-log', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(entry)
+    });
+    if (!res.ok) throw new Error('Worker '+res.status);
+    wpLoggedCount++;
+    const se = document.getElementById('wp-stat-logged'); if(se) se.textContent=wpLoggedCount;
+    if (btnEl) { btnEl.textContent='\u2705 Logged'; btnEl.classList.add('logged'); }
+    showToast('Trade logged to cloud', 'ok');
+  } catch(e) {
+    if (btnEl) { btnEl.textContent='\uD83D\uDCCB Log Trade'; btnEl.disabled=false; }
+    showToast('Log failed: '+e.message, 'err');
+  }
+}
+
 // ── MAIN INIT ──
 function initAll() {
   // Clock
@@ -3539,7 +3953,17 @@ function initAll() {
   // Econ calendar auto-load
   setTimeout(fetchEconCalendar, 2000);
 
-  console.log('[QuantEdge v4] All systems initialized');
+  // ── Weekly Playbook init ──
+  setTimeout(loadWeeklyPlaybook, 1500);
+  setTimeout(updateWPAutoCalc, 3000);
+  setInterval(updateWPAutoCalc, 300000);
+  setInterval(checkZoneProximity, 10000);
+  setInterval(checkEconWarning, 60000);
+  setTimeout(checkEconWarning, 5000);
+  initWPGexZone();
+  const wpBiasEl = document.getElementById('wp-bias');
+  if (wpBiasEl) wpBiasEl.addEventListener('change', e => updateWPBiasBadge(e.target.value));
+  console.log('[QuantEdge v4] All systems initialized — Weekly Playbook + Signal v2 active');
 }
 
 // DOM ready
