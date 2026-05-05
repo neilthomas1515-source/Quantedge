@@ -2428,19 +2428,27 @@ async function fetchSPYNow() {
 async function fetchVIXandDXY() {
   // VIX — use VIXY ETF, multiply to approximate VIX index
   try {
-    const d = await fetchFinnhubDirect('VIXY');
-    // VIXY typically ~55-60% of VIX. Use raw value as proxy.
-    const vix = d.c;
+    const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX&range=1d&interval=1m');
+    if (!r.ok) throw new Error('VIX Worker ' + r.status);
+    const txt = await r.text();
+    const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    const vix = j?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (!vix || isNaN(vix)) throw new Error('No VIX value');
     priceData['VIX'] = vix;
     const col=vix>25?'var(--red)':vix>18?'var(--amber)':'var(--green)';
     ['px-vix','vix-display','psd-vix'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=vix.toFixed(2);el.style.color=col;}});
   } catch(e){console.warn('VIX:',e.message);}
-  // DXY via UUP
+  // DXY via Yahoo ^DXY
   try {
-    const d = await fetchFinnhubDirect('UUP');
-    priceData['DXY'] = d.c;
-    const el=document.getElementById('px-dxy');if(el)el.textContent=d.c.toFixed(2);
-    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=d.c.toFixed(2);
+    const r2 = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB&range=1d&interval=1m');
+    if (!r2.ok) throw new Error('DXY Worker ' + r2.status);
+    const txt2 = await r2.text();
+    const j2 = JSON.parse(txt2.slice(txt2.indexOf('{'), txt2.lastIndexOf('}') + 1));
+    const dxy = j2?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (!dxy || isNaN(dxy)) throw new Error('No DXY value');
+    priceData['DXY'] = dxy;
+    const el=document.getElementById('px-dxy');if(el)el.textContent=dxy.toFixed(2);
+    const el2=document.getElementById('dxy-display');if(el2)el2.textContent=dxy.toFixed(2);
   } catch(e){console.warn('DXY:',e.message);}
 }
 
