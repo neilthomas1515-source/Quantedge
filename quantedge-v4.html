@@ -406,6 +406,23 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .sig2-htf-item{background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:4px 8px;font-size:11px;font-weight:700;}
 .sig2-contracts{font-family:var(--sans);font-size:16px;font-weight:900;color:var(--cyan);}
 
+
+/* ── GEX STACK ZONES ── */
+.gex-stack-wrap{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.gex-stack-slot{position:relative;border:1px dashed var(--b3);border-radius:4px;padding:6px 8px;text-align:center;cursor:pointer;background:rgba(0,212,255,0.02);min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.2s;}
+.gex-stack-slot:hover,.gex-stack-slot.drag-over{border-color:var(--cyan);background:rgba(0,212,255,0.05);}
+.gex-stack-slot.has-image{border-style:solid;border-color:var(--cyan2);}
+.gex-stack-slot img{max-width:100%;max-height:80px;border-radius:3px;object-fit:contain;}
+.gex-stack-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;font-weight:700;}
+.gex-stack-ts{font-size:9px;color:var(--cyan2);margin-top:2px;}
+.gex-stack-clear{position:absolute;top:4px;right:6px;font-size:10px;color:var(--t4);cursor:pointer;background:none;border:none;padding:0;line-height:1;}
+.gex-stack-clear:hover{color:var(--red);}
+.gex-stack-hd{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.wp-gex-stack-slot{position:relative;border:1px dashed var(--b3);border-radius:4px;padding:6px 8px;text-align:center;cursor:pointer;background:rgba(167,139,250,0.02);min-height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.2s;}
+.wp-gex-stack-slot:hover,.wp-gex-stack-slot.drag-over{border-color:#a78bfa;background:rgba(167,139,250,0.05);}
+.wp-gex-stack-slot.has-image{border-style:solid;border-color:#a78bfa;}
+.wp-gex-stack-slot img{max-width:100%;max-height:70px;border-radius:3px;object-fit:contain;}
+
 </style>
 </head>
 <body>
@@ -534,14 +551,23 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
   <!-- GEX CHART -->
   <div class="sect">
     <div class="sect-hd">GEX Chart <div class="hd-line"></div></div>
-    <div id="gex-drop" onclick="setActiveZone('gex')" ondblclick="document.getElementById('gex-file').click()">
-      <div id="gex-placeholder">
-        <div class="drop-hint"><strong>Click</strong>, drag &amp; drop, or <strong>Ctrl+V</strong></div>
-        <div class="drop-kbd">Paste QTA / FlashAlpha screenshot</div>
-      </div>
+    <div class="gex-stack-hd"><span>SPX / ES (Daily)</span><span style="color:var(--t4)">3 slots · newest last</span></div>
+    <div class="gex-stack-wrap" id="daily-spx-wrap">
+      <div class="gex-stack-slot" id="dspx-0" onclick="gexStackClick('dspx',0)"><div class="gex-stack-label">SPX Slot 1 — Oldest</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspx-0-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspx',0)">✕</button></div>
+      <div class="gex-stack-slot" id="dspx-1" onclick="gexStackClick('dspx',1)"><div class="gex-stack-label">SPX Slot 2</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspx-1-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspx',1)">✕</button></div>
+      <div class="gex-stack-slot" id="dspx-2" onclick="gexStackClick('dspx',2)"><div class="gex-stack-label">SPX Slot 3 — Newest</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspx-2-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspx',2)">✕</button></div>
+    </div>
+    <div class="gex-stack-hd" style="margin-top:8px"><span>SPY (Daily)</span><span style="color:var(--t4)">3 slots · newest last</span></div>
+    <div class="gex-stack-wrap" id="daily-spy-wrap">
+      <div class="gex-stack-slot" id="dspy-0" onclick="gexStackClick('dspy',0)"><div class="gex-stack-label">SPY Slot 1 — Oldest</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspy-0-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspy',0)">✕</button></div>
+      <div class="gex-stack-slot" id="dspy-1" onclick="gexStackClick('dspy',1)"><div class="gex-stack-label">SPY Slot 2</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspy-1-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspy',1)">✕</button></div>
+      <div class="gex-stack-slot" id="dspy-2" onclick="gexStackClick('dspy',2)"><div class="gex-stack-label">SPY Slot 3 — Newest</div><div style="font-size:10px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="dspy-2-ts"></span><button class="gex-stack-clear" onclick="gexStackClear(event,'dspy',2)">✕</button></div>
+    </div>
+    <div id="gex-drop" style="display:none" onclick="setActiveZone('gex')">
+      <div id="gex-placeholder"></div>
       <img id="gex-preview" style="display:none" alt="GEX chart">
     </div>
-    <input type="file" id="gex-file" accept="image/*">
+    <input type="file" id="gex-file" accept="image/*" style="display:none">
     <div class="gex-row">
       <button class="btn-gex-fetch" onclick="fetchGEX()">⬇ Fetch GEX</button>
       <button class="btn-spy-fetch" onclick="fetchSPYNow()">⬇ SPX Price</button>
@@ -624,9 +650,21 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         <label>Weekly Thesis / Notes</label>
         <textarea id="wp-notes" rows="2" placeholder="e.g. Fade all rallies into 7265 flip zone. Bears in control below 7252."></textarea>
       </div>
-      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Weekly GEX Snapshot</div>
-      <div id="wp-gex-drop" class="wp-gex-drop" onclick="wpSetActiveZone()">
-        <div id="wp-gex-placeholder"><div style="font-size:11px;color:var(--t3)"><strong>Click</strong>, drag &amp; drop, or <strong>Ctrl+V</strong></div><div style="font-size:9px;color:var(--t4)">Weekly GEX from QTA (separate from daily)</div></div>
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Weekly GEX Snapshots</div>
+      <div class="gex-stack-hd"><span>SPX / ES Weekly</span></div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+        <div class="wp-gex-stack-slot" id="wspx-0" onclick="wpGexStackClick('wspx',0)"><div class="gex-stack-label">SPX Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspx-0-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspx',0)">✕</button></div>
+        <div class="wp-gex-stack-slot" id="wspx-1" onclick="wpGexStackClick('wspx',1)"><div class="gex-stack-label">SPX Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspx-1-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspx',1)">✕</button></div>
+        <div class="wp-gex-stack-slot" id="wspx-2" onclick="wpGexStackClick('wspx',2)"><div class="gex-stack-label">SPX Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspx-2-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspx',2)">✕</button></div>
+      </div>
+      <div class="gex-stack-hd"><span>SPY Weekly</span></div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+        <div class="wp-gex-stack-slot" id="wspy-0" onclick="wpGexStackClick('wspy',0)"><div class="gex-stack-label">SPY Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspy-0-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspy',0)">✕</button></div>
+        <div class="wp-gex-stack-slot" id="wspy-1" onclick="wpGexStackClick('wspy',1)"><div class="gex-stack-label">SPY Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspy-1-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspy',1)">✕</button></div>
+        <div class="wp-gex-stack-slot" id="wspy-2" onclick="wpGexStackClick('wspy',2)"><div class="gex-stack-label">SPY Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div><img style="display:none"><span class="gex-stack-ts" id="wspy-2-ts"></span><button class="gex-stack-clear" onclick="wpGexStackClear(event,'wspy',2)">✕</button></div>
+      </div>
+      <div id="wp-gex-drop" style="display:none" class="wp-gex-drop" onclick="wpSetActiveZone()">
+        <div id="wp-gex-placeholder"></div>
         <img id="wp-gex-preview" style="display:none" alt="Weekly GEX">
       </div>
       <input type="file" id="wp-gex-file" accept="image/*" style="display:none">
@@ -2896,6 +2934,8 @@ let currentSignal = null;
 let weeklyPlaybook = {};
 let weeklyGexImageData = null;
 let wpActiveZone = false;
+const gexStacks = { dspx:[null,null,null], dspy:[null,null,null], wspx:[null,null,null], wspy:[null,null,null] };
+let activeGexSlot = null;
 let zoneAlertCooldowns = {};
 let wpSignalCount = 0;
 let wpLoggedCount = 0;
@@ -3037,7 +3077,7 @@ ${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer posit
 function buildPrompt() {
   const context = getCompleteAIContext();
   const hasSnaps = snapSlots.some(s => s.image);
-  const hasGEX   = !!gexImageData;
+  const hasGEX   = !!gexImageData || gexStacks.dspx.some(Boolean) || gexStacks.dspy.some(Boolean);
   const hasOF    = !!ofImageData;
 
   return `You are an elite ES futures prop trader. Analyze all provided data and output ONE high-probability trade signal.
@@ -3089,12 +3129,22 @@ REQUIRED OUTPUT FORMAT (JSON only, no markdown, no backticks):
 function buildMessageContent(prompt) {
   const content = [];
 
-  // GEX image first
-  if (gexImageData) {
+  const stackLabels = { dspx:'DAILY SPX/ES GEX', dspy:'DAILY SPY GEX', wspx:'WEEKLY SPX/ES GEX', wspy:'WEEKLY SPY GEX' };
+  ['dspx','dspy'].forEach(key => {
+    const slots = gexStacks[key].filter(Boolean);
+    if (!slots.length) return;
+    slots.forEach((slot, i) => {
+      const b64 = slot.dataUrl.split(',')[1];
+      const mt  = slot.dataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      content.push({ type:'image', source:{ type:'base64', media_type:mt, data:b64 } });
+      content.push({ type:'text', text:`[${stackLabels[key]} — Slot ${i+1} of ${slots.length} — ${i===slots.length-1?'NEWEST/CURRENT':'older snapshot'} — ${slot.timestamp}]` });
+    });
+  });
+  if (gexImageData && !gexStacks.dspx.some(Boolean) && !gexStacks.dspy.some(Boolean)) {
     const b64 = gexImageData.split(',')[1];
     const mt  = gexImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
     content.push({ type:'image', source:{ type:'base64', media_type:mt, data:b64 } });
-    content.push({ type:'text', text:'[Above: GEX chart]' });
+    content.push({ type:'text', text:'[Above: GEX chart (legacy single)]' });
   }
 
   // Order flow image
@@ -3113,12 +3163,21 @@ function buildMessageContent(prompt) {
     content.push({ type:'text', text:`[Above: ${s.label}${s.desc ? ' — ' + s.desc : ''}]` });
   });
 
-  // Weekly GEX image
-  if (weeklyGexImageData) {
+  ['wspx','wspy'].forEach(key => {
+    const slots = gexStacks[key].filter(Boolean);
+    if (!slots.length) return;
+    slots.forEach((slot, i) => {
+      const b64 = slot.dataUrl.split(',')[1];
+      const mt  = slot.dataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      content.push({ type:'image', source:{ type:'base64', media_type:mt, data:b64 } });
+      content.push({ type:'text', text:`[${stackLabels[key]} — Slot ${i+1} of ${slots.length} — ${i===slots.length-1?'NEWEST/CURRENT':'older context'} — ${slot.timestamp}]` });
+    });
+  });
+  if (weeklyGexImageData && !gexStacks.wspx.some(Boolean) && !gexStacks.wspy.some(Boolean)) {
     const b64w = weeklyGexImageData.split(',')[1];
     const mtw  = weeklyGexImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
     content.push({ type:'image', source:{ type:'base64', media_type:mtw, data:b64w } });
-    content.push({ type:'text', text:'[Above image: WEEKLY GEX chart — weekly dealer positioning context, separate from daily GEX]' });
+    content.push({ type:'text', text:'[Above image: WEEKLY GEX chart — weekly dealer positioning context]' });
   }
   // Main prompt text
   content.push({ type:'text', text:prompt });
@@ -3909,6 +3968,96 @@ async function logSignalToKV(sig, btnEl) {
   }
 }
 
+
+// ══════════════════════════════════════════════════
+// GEX STACK FUNCTIONS
+// ══════════════════════════════════════════════════
+function gexStackClick(stack, idx) {
+  activeGexSlot = { stack, idx };
+  showToast(stack.toUpperCase() + ' Slot ' + (idx+1) + ' active \u2014 drop or paste image', 'info');
+}
+function wpGexStackClick(stack, idx) { gexStackClick(stack, idx); }
+
+function gexStackClear(e, stack, idx) {
+  e.stopPropagation();
+  gexStacks[stack][idx] = null;
+  renderGexSlot(stack, idx);
+  showToast('Slot cleared', 'ok');
+}
+function wpGexStackClear(e, stack, idx) { gexStackClear(e, stack, idx); }
+
+function renderGexSlot(stack, idx) {
+  const el = document.getElementById(stack + '-' + idx);
+  if (!el) return;
+  const slot = gexStacks[stack][idx];
+  const img  = el.querySelector('img');
+  const ts   = document.getElementById(stack + '-' + idx + '-ts');
+  if (slot) {
+    img.src = slot.dataUrl; img.style.display = 'block';
+    el.classList.add('has-image');
+    if (ts) ts.textContent = slot.timestamp;
+    el.querySelectorAll('.gex-stack-label, div[style*="font-size:10px"], div[style*="font-size:9px"]').forEach(l => { l.style.display = 'none'; });
+  } else {
+    img.src = ''; img.style.display = 'none';
+    el.classList.remove('has-image');
+    if (ts) ts.textContent = '';
+    el.querySelectorAll('.gex-stack-label, div[style*="font-size:10px"], div[style*="font-size:9px"]').forEach(l => { l.style.display = ''; });
+  }
+}
+
+function loadGexStackFile(file) {
+  if (!activeGexSlot) {
+    let assigned = false;
+    for (const stack of ['dspx','dspy','wspx','wspy']) {
+      for (let i = 0; i < 3; i++) {
+        if (!gexStacks[stack][i]) { activeGexSlot = {stack, idx:i}; assigned = true; break; }
+      }
+      if (assigned) break;
+    }
+    if (!activeGexSlot) activeGexSlot = {stack:'dspx', idx:2};
+  }
+  const {stack, idx} = activeGexSlot;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const ts = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+    gexStacks[stack][idx] = { dataUrl: ev.target.result, timestamp: ts };
+    renderGexSlot(stack, idx);
+    showToast(stack.toUpperCase() + ' Slot ' + (idx+1) + ' loaded at ' + ts, 'ok');
+    activeGexSlot = null;
+  };
+  reader.readAsDataURL(file);
+}
+
+function initGexStackZones() {
+  ['dspx','dspy','wspx','wspy'].forEach(stack => {
+    for (let i = 0; i < 3; i++) {
+      const el = document.getElementById(stack + '-' + i);
+      if (!el) continue;
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+      el.addEventListener('drop', e => {
+        e.preventDefault(); el.classList.remove('drag-over');
+        const f = e.dataTransfer?.files?.[0];
+        if (f && f.type.startsWith('image/')) { activeGexSlot = {stack, idx:i}; loadGexStackFile(f); }
+      });
+    }
+  });
+}
+
+function initGexStackPaste() {
+  document.addEventListener('paste', e => {
+    if (!activeGexSlot) return;
+    const items = e.clipboardData?.items; if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.stopImmediatePropagation();
+        loadGexStackFile(item.getAsFile());
+        break;
+      }
+    }
+  }, true);
+}
+
 // ── MAIN INIT ──
 function initAll() {
   // Clock
@@ -3963,7 +4112,9 @@ function initAll() {
   initWPGexZone();
   const wpBiasEl = document.getElementById('wp-bias');
   if (wpBiasEl) wpBiasEl.addEventListener('change', e => updateWPBiasBadge(e.target.value));
-  console.log('[QuantEdge v4] All systems initialized — Weekly Playbook + Signal v2 active');
+  initGexStackZones();
+  initGexStackPaste();
+  console.log('[QuantEdge v4] All systems initialized — Weekly Playbook + Signal v2 + GEX Stacks active');
 }
 
 // DOM ready
