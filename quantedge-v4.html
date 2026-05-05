@@ -439,6 +439,29 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .wp-gen-btn:hover{opacity:0.85;}
 .nq-live-badge{font-size:9px;color:var(--cyan2);margin-left:4px;}
 
+/* ── UNUSUAL WHALES ── */
+.uw-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.uw-zone{border:1px dashed var(--b3);border-radius:5px;padding:10px 10px 8px;background:rgba(251,191,36,0.02);display:flex;flex-direction:column;gap:6px;transition:all 0.2s;}
+.uw-zone:hover,.uw-zone.drag-over{border-color:#f59e0b;background:rgba(251,191,36,0.05);}
+.uw-zone.has-image{border-style:solid;border-color:#f59e0b;}
+.uw-zone-lbl{font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:1px;}
+.uw-zone-sub{font-size:8px;color:var(--t4);line-height:1.4;}
+.uw-drop-area{min-height:70px;border:1px dashed rgba(245,158,11,0.3);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:3px;padding:6px;position:relative;background:rgba(0,0,0,0.15);transition:all 0.2s;}
+.uw-drop-area:hover{border-color:#f59e0b;background:rgba(245,158,11,0.04);}
+.uw-drop-area.drag-over{border-color:#f59e0b;background:rgba(245,158,11,0.08);}
+.uw-drop-area.has-image{border-style:solid;border-color:rgba(245,158,11,0.5);min-height:auto;}
+.uw-drop-area img{max-width:100%;max-height:110px;border-radius:3px;object-fit:contain;display:none;}
+.uw-drop-hint{font-size:9px;color:var(--t4);text-align:center;}
+.uw-drop-hint span{color:#f59e0b;font-weight:700;}
+.uw-clear-btn{position:absolute;top:3px;right:3px;background:rgba(255,68,68,0.15);border:none;color:#ff6b6b;font-size:9px;padding:1px 5px;border-radius:2px;cursor:pointer;display:none;}
+.uw-zone.has-image .uw-clear-btn{display:block;}
+.uw-analyze-btn{width:100%;padding:5px;background:linear-gradient(135deg,#d97706,#b45309);border:none;border-radius:3px;color:#fff;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;}
+.uw-analyze-btn:hover{opacity:0.85;}
+.uw-analyze-btn:disabled{opacity:0.45;cursor:not-allowed;}
+.uw-output{margin-top:6px;font-size:10px;color:var(--t2);line-height:1.5;white-space:pre-wrap;display:none;border-top:1px solid var(--b2);padding-top:6px;}
+.uw-output.visible{display:block;}
+.uw-output-lbl{font-size:8px;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:700;}
+
 </style>
 </head>
 <body>
@@ -596,6 +619,49 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <button class="btn-gex-clear" onclick="clearGEXHistory()" style="font-size:9px;padding:2px 6px">Clear All</button>
     </div>
     <div id="gex-history-strip" class="gex-history-strip"><div class="gex-hist-empty">No history yet</div></div>
+  </div>
+
+
+  <!-- UNUSUAL WHALES -->
+  <div class="sect" id="uw-sect">
+    <div class="sect-hd" style="color:#f59e0b">🐋 Unusual Whales <div class="hd-line" style="background:linear-gradient(90deg,rgba(245,158,11,0.5),transparent)"></div></div>
+    <input type="file" id="uw-file-flows" accept="image/*" style="display:none" onchange="uwLoadFile('flows',this.files[0])">
+    <input type="file" id="uw-file-expo"  accept="image/*" style="display:none" onchange="uwLoadFile('expo',this.files[0])">
+    <div class="uw-grid">
+
+      <!-- Zone 1: Net Flows -->
+      <div class="uw-zone" id="uw-zone-flows" ondragover="uwDragOver(event,'flows')" ondragleave="uwDragLeave(event,'flows')" ondrop="uwDrop(event,'flows')">
+        <div class="uw-zone-lbl">📊 Net Flows</div>
+        <div class="uw-zone-sub">Market Tide · 0DTE Flow · Net Impact</div>
+        <div class="uw-drop-area" id="uw-drop-flows" onclick="document.getElementById('uw-file-flows').click()">
+          <img id="uw-img-flows" alt="Net Flows">
+          <div class="uw-drop-hint" id="uw-hint-flows"><span>Click</span>, drop or paste<br>Net Flows screenshot</div>
+          <button class="uw-clear-btn" onclick="uwClear(event,'flows')">✕</button>
+        </div>
+        <button class="uw-analyze-btn" id="uw-btn-flows" onclick="uwAnalyze('flows')">⚡ Analyze Net Flows</button>
+        <div class="uw-output" id="uw-out-flows">
+          <div class="uw-output-lbl">🐋 Net Flows Analysis</div>
+          <div id="uw-out-flows-text"></div>
+        </div>
+      </div>
+
+      <!-- Zone 2: Exposures -->
+      <div class="uw-zone" id="uw-zone-expo" ondragover="uwDragOver(event,'expo')" ondragleave="uwDragLeave(event,'expo')" ondrop="uwDrop(event,'expo')">
+        <div class="uw-zone-lbl">📡 Exposures</div>
+        <div class="uw-zone-sub">Periscope SPX · Spot Gamma SPY · Delta by Strike SPY</div>
+        <div class="uw-drop-area" id="uw-drop-expo" onclick="document.getElementById('uw-file-expo').click()">
+          <img id="uw-img-expo" alt="Exposures">
+          <div class="uw-drop-hint" id="uw-hint-expo"><span>Click</span>, drop or paste<br>Exposures screenshot</div>
+          <button class="uw-clear-btn" onclick="uwClear(event,'expo')">✕</button>
+        </div>
+        <button class="uw-analyze-btn" id="uw-btn-expo" onclick="uwAnalyze('expo')">⚡ Analyze Exposures</button>
+        <div class="uw-output" id="uw-out-expo">
+          <div class="uw-output-lbl">🐋 Exposures Analysis</div>
+          <div id="uw-out-expo-text"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 
@@ -4124,6 +4190,171 @@ function initGexStackPaste() {
 
 
 // ══════════════════════════════════════════════════
+// UNUSUAL WHALES ZONE
+// ══════════════════════════════════════════════════
+
+const uwImages = { flows: null, expo: null };
+
+function uwSetImage(zone, dataUrl) {
+  uwImages[zone] = dataUrl;
+  const dropEl  = document.getElementById('uw-drop-' + zone);
+  const imgEl   = document.getElementById('uw-img-' + zone);
+  const hintEl  = document.getElementById('uw-hint-' + zone);
+  const zoneEl  = document.getElementById('uw-zone-' + zone);
+  if (!dropEl || !imgEl) return;
+  imgEl.src = dataUrl;
+  imgEl.style.display = 'block';
+  if (hintEl) hintEl.style.display = 'none';
+  dropEl.classList.add('has-image');
+  if (zoneEl) zoneEl.classList.add('has-image');
+}
+
+function uwClear(e, zone) {
+  e.stopPropagation();
+  uwImages[zone] = null;
+  const dropEl  = document.getElementById('uw-drop-' + zone);
+  const imgEl   = document.getElementById('uw-img-' + zone);
+  const hintEl  = document.getElementById('uw-hint-' + zone);
+  const zoneEl  = document.getElementById('uw-zone-' + zone);
+  const outEl   = document.getElementById('uw-out-' + zone);
+  if (imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
+  if (hintEl) hintEl.style.display = '';
+  if (dropEl) dropEl.classList.remove('has-image');
+  if (zoneEl) zoneEl.classList.remove('has-image');
+  if (outEl)  outEl.classList.remove('visible');
+  showToast('UW zone cleared', 'ok');
+}
+
+function uwLoadFile(zone, file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => { uwSetImage(zone, ev.target.result); showToast('UW ' + zone + ' loaded — click Analyze', 'ok'); };
+  reader.readAsDataURL(file);
+}
+
+function uwDragOver(e, zone) {
+  e.preventDefault();
+  document.getElementById('uw-drop-' + zone)?.classList.add('drag-over');
+}
+function uwDragLeave(e, zone) {
+  document.getElementById('uw-drop-' + zone)?.classList.remove('drag-over');
+}
+function uwDrop(e, zone) {
+  e.preventDefault();
+  document.getElementById('uw-drop-' + zone)?.classList.remove('drag-over');
+  const f = e.dataTransfer?.files?.[0];
+  if (f && f.type.startsWith('image/')) uwLoadFile(zone, f);
+}
+
+function uwInitPaste() {
+  document.addEventListener('paste', e => {
+    // Only intercept if a UW drop area is the active/focused target
+    const active = document.activeElement;
+    const flowsDrop = document.getElementById('uw-drop-flows');
+    const expoDrop  = document.getElementById('uw-drop-expo');
+    let zone = null;
+    if (active === flowsDrop || flowsDrop?.contains(active)) zone = 'flows';
+    else if (active === expoDrop || expoDrop?.contains(active)) zone = 'expo';
+    if (!zone) return;
+    const items = e.clipboardData?.items; if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.stopImmediatePropagation();
+        uwLoadFile(zone, item.getAsFile());
+        break;
+      }
+    }
+  }, true);
+}
+
+async function uwAnalyze(zone) {
+  const imgData = uwImages[zone];
+  if (!imgData) { showToast('Drop an image into the ' + zone + ' zone first', 'err'); return; }
+
+  const btn    = document.getElementById('uw-btn-' + zone);
+  const outEl  = document.getElementById('uw-out-' + zone);
+  const textEl = document.getElementById('uw-out-' + zone + '-text');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyzing…'; }
+
+  const mt  = imgData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+  const b64 = imgData.split(',')[1];
+
+  const prompts = {
+    flows: `You are a professional ES/SPX options flow analyst reading Unusual Whales screenshots.
+
+This screenshot shows NET FLOWS data: Market Tide, 0DTE flow, and Net Impact charts.
+
+Analyze and extract:
+1. WEEKLY BIAS — Bullish / Bearish / Neutral based on net flow direction and intensity
+2. KEY LEVELS — Price levels where flow is concentrated or reversing (be specific with SPX/ES prices)
+3. SUPPORT ZONES — Where net positive flow / buying pressure exists
+4. RESISTANCE ZONES — Where net negative flow / selling pressure exists
+5. REVERSAL SIGNALS — Any divergences, exhaustion, or regime-change signals in the flow data
+6. TRADE SETUP — Specific ES entry zone, target, and stop based on flow context
+7. CONFIDENCE — How clean and clear the signal is (High / Medium / Low)
+
+Format as clean bullet points. Be specific with price levels. If levels aren't visible, say so — do not fabricate numbers.`,
+
+    expo: `You are a professional ES/SPX options dealer positioning analyst reading Unusual Whales screenshots.
+
+This screenshot shows EXPOSURES data: Periscope SPX, Spot Gamma SPY, and Delta by Strike SPY charts.
+
+Analyze and extract:
+1. WEEKLY BIAS — Bullish / Bearish / Neutral based on dealer gamma exposure and positioning
+2. KEY LEVELS — Gamma flip level, max pain, high-conviction strike clusters (specific SPX/ES prices)
+3. SUPPORT ZONES — Where dealers are long gamma and will hedge to support price
+4. RESISTANCE ZONES — Where dealers are short gamma or heavy call walls create resistance
+5. REVERSAL SIGNALS — Gamma flip proximity, delta hedging pressure, periscope breakout/breakdown signals
+6. TRADE SETUP — Specific ES entry zone, target, and stop based on dealer positioning
+7. CONFIDENCE — How clean and clear the signal is (High / Medium / Low)
+
+Format as clean bullet points. Be specific with price levels. If levels aren't visible, say so — do not fabricate numbers.`
+  };
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'anthropic',
+        model: 'claude-opus-4-5',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
+            { type: 'text', text: prompts[zone] }
+          ]
+        }]
+      })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw  = await res.text();
+    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    const text = (json?.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!text) throw new Error('No text in response');
+
+    if (textEl) textEl.textContent = text;
+    if (outEl)  outEl.classList.add('visible');
+
+    // Store in window context for master AI
+    if (zone === 'flows') window.uwFlowsContext  = 'UW Net Flows: ' + text.slice(0, 400);
+    if (zone === 'expo')  window.uwExpoContext   = 'UW Exposures: ' + text.slice(0, 400);
+
+    showToast('✅ UW ' + zone + ' analyzed', 'ok');
+  } catch(e) {
+    if (textEl) textEl.textContent = 'Analysis failed: ' + e.message;
+    if (outEl)  outEl.classList.add('visible');
+    showToast('UW analyze failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Analyze ' + (zone === 'flows' ? 'Net Flows' : 'Exposures'); }
+  }
+}
+
+// ── END UNUSUAL WHALES ──
+
+
+// ══════════════════════════════════════════════════
 // DYNAMIC AI + SIGNAL INTELLIGENCE FUNCTIONS
 // ══════════════════════════════════════════════════
 
@@ -4460,6 +4691,7 @@ function initAll() {
   if (wpBiasEl) wpBiasEl.addEventListener('change', e => updateWPBiasBadge(e.target.value));
   initGexStackZones();
   initGexStackPaste();
+  uwInitPaste();
   // Dynamic AI intervals
   setInterval(checkSignalHealth, 30000);
   setInterval(checkSessionTransition, 60000);
