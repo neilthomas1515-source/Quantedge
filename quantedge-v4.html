@@ -2454,7 +2454,7 @@ async function fetchSPYNow() {
 
 
 // VIX via Finnhub VIXY*multiplier + DXY via UUP
-async async function fetchVIXandDXY() {
+async function fetchVIXandDXY() {
   // VIX via Yahoo ^VIX through Worker (no CORS issues, accurate index value)
   try {
     const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EVIX&range=1d&interval=1m');
