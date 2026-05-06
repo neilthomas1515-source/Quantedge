@@ -4848,20 +4848,46 @@ function uwUpdateAnchorUI(a) {
 
 // Load anchor + intraday from KV on startup
 async function uwLoadFromKV() {
+  // Anchor
   try {
     const res = await fetch(CLOUDFLARE_WORKER + '/uw-weekly-anchor');
     if (!res.ok) return;
     const raw = await res.text();
     const d = JSON.parse(raw);
     if (d.status === 'no_data') return;
+    // Validate: must have a real savedAt timestamp (after Jan 1 2025)
+    const MIN_TS = 1735689600000; // 2025-01-01
+    if (!d.savedAt || d.savedAt < MIN_TS) {
+      console.log('[UW] Anchor has invalid/corrupt timestamp — ignoring');
+      return;
+    }
+    // Must have actual bias data
+    if (!d.bias || !['BULLISH','BEARISH','NEUTRAL'].includes(d.bias)) {
+      console.log('[UW] Anchor has no valid bias — ignoring');
+      return;
+    }
     uwUpdateAnchorUI(d);
   } catch(e) { console.log('[UW] No anchor yet'); }
+
+  // Intraday
   try {
     const res2 = await fetch(CLOUDFLARE_WORKER + '/uw-intraday');
     if (!res2.ok) return;
     const raw2 = await res2.text();
     const d2 = JSON.parse(raw2);
-    if (d2.status==='no_data' || d2.stale) return;
+    if (d2.status === 'no_data' || d2.stale) return;
+    // Validate timestamp
+    const MIN_TS = 1735689600000;
+    if (!d2.savedAt || d2.savedAt < MIN_TS) {
+      console.log('[UW] Intraday has invalid timestamp — ignoring');
+      return;
+    }
+    // Only show if saved today
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    if (d2.savedAt < todayStart.getTime()) {
+      console.log('[UW] Intraday is from a previous day — ignoring');
+      return;
+    }
     uwIntraday = d2;
     const bar   = document.getElementById('uw-intraday-bar');
     const delta = document.getElementById('uw-intraday-delta');
