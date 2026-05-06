@@ -1259,8 +1259,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 </div><!-- end #left -->
 
 <!-- ══ RIGHT PANEL ══ -->
-<!-- TV ALERT PANEL -->
-<div id="tv-alert-panel" style="display:none;background:var(--s2);border:1px solid var(--cyan2);border-radius:5px;padding:10px 14px;margin:8px 10px 0;box-shadow:0 0 12px rgba(0,212,255,0.15)"></div>
+<!-- TV ALERT PANEL — fixed overlay, top-right of viewport -->
+<div id="tv-alert-panel" style="display:none;position:fixed;top:108px;right:10px;width:380px;max-height:calc(100vh - 120px);overflow-y:auto;background:var(--s2);border:1px solid var(--cyan2);border-radius:6px;z-index:996;box-shadow:0 4px 24px rgba(0,212,255,0.2);padding:12px 14px"></div>
 
 <div id="right">
   <div id="signal-checks">
@@ -3229,13 +3229,18 @@ function processTVAlert(d) {
   tvAlertHistory.unshift({ ...d, receivedAt: now });
   if (tvAlertHistory.length > 20) tvAlertHistory.pop();
 
-  // Build context for AI
-  const checklistStr = checklist ? Object.entries(checklist).map(([k,v])=>`${v?'✓':'✗'} ${k}`).join(' | ') : '';
+  // Build full context for AI — includes all panel data
+  const rr2 = (() => { const e=parseFloat(d.entry)||0,s=parseFloat(d.stop)||0,t=parseFloat(d.tp1)||0; const r=Math.abs(e-s); return r>0?(Math.abs(t-e)/r).toFixed(1):'?'; })();
+  const clStr = d.checklist ? Object.entries(d.checklist).map(([k,v])=>`${(v===true||v==='true')?'✓':'✗'} ${k}`).join(' | ') : '';
   window.tvAlertContext = [
-    `${indicator||'TV Alert'} ${rating||''} | ${direction||'?'} | TF: ${tf||'?'} | Price: ${price||'?'}`,
-    entry  ? `Entry: ${entry} | Stop: ${stop||'?'} | BE: ${be||'?'} | TP1: ${tp1||'?'} | TP2: ${tp2||'?'}` : '',
-    checklistStr ? `Checklist: ${checklistStr}` : '',
-    pattern ? `Pattern: ${pattern}` : ''
+    `${d.indicator||'TV Alert'} | Rating: ${d.rating||'?'} | ${d.direction||'?'} | Score: ${d.score||'?'}/6 | TF: ${d.tf||'?'} | Price: ${d.price||'?'}`,
+    `Entry: ${d.entry||'?'} | Stop: ${d.stop||'?'} | BE: ${d.be||'?'} | TP1: ${d.tp1||'?'} | TP2: ${d.tp2||'?'} | R:R 1:${rr2}`,
+    clStr ? `Checklist: ${clStr}` : '',
+    d.pattern ? `Pattern: ${d.pattern}` : '',
+    window.liveVWAP ? `VWAP: ${parseFloat(window.liveVWAP).toFixed(2)} (entry is ${parseFloat(d.entry||0)>window.liveVWAP?'ABOVE':'BELOW'} VWAP)` : '',
+    RS?.cumulativeDelta ? `Cum Delta at alert: ${RS.cumulativeDelta>0?'+':''}${RS.cumulativeDelta.toLocaleString()}` : '',
+    window.smcContext  ? `SMC: ${window.smcContext}` : '',
+    window.mtfContext  ? `MTF: ${window.mtfContext}` : '',
   ].filter(Boolean).join('\n');
 
   // Update Master Score based on rating
@@ -3263,25 +3268,110 @@ function renderTVAlertPanel(d) {
   const panel = document.getElementById('tv-alert-panel');
   if (!panel) return;
   panel.style.display = 'block';
-  const ratingColor = d.rating==='A++'?'var(--green)':d.rating==='A+'?'var(--amber)':'var(--cyan)';
-  const dirColor = (d.direction||'').toLowerCase().includes('bull')||(d.direction||'').toLowerCase().includes('long') ? 'var(--green)' : 'var(--red)';
-  const checkHtml = d.checklist ? Object.entries(d.checklist).map(([k,v])=>`<span style="color:${v?'var(--green)':'var(--t4)'};font-size:9px">${v?'✓':'✗'} ${k}</span>`).join('') : '';
-  const ts = d.timestamp ? new Date(d.timestamp).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}) : new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+  // Colors
+  const rc  = d.rating==='A++'?'var(--green)':d.rating==='A+'?'var(--amber)':'var(--cyan)';
+  const dc  = (d.direction||'').toUpperCase()==='LONG'?'var(--green)':'var(--red)';
+  const ts  = new Date(d.timestamp||Date.now()).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+  // Score bar
+  const score    = parseInt(d.score)||0;
+  const scorePct = Math.round((score/6)*100);
+  const scoreCol = score>=5?'var(--green)':score>=4?'var(--amber)':'var(--cyan)';
+
+  // R:R calculation
+  const entry = parseFloat(d.entry)||0, stop = parseFloat(d.stop)||0, tp1 = parseFloat(d.tp1)||0;
+  const risk  = Math.abs(entry - stop);
+  const rwd   = Math.abs(tp1  - entry);
+  const rr    = risk>0 ? (rwd/risk).toFixed(1) : '?';
+
+  // Checklist grid
+  const clItems = d.checklist ? Object.entries(d.checklist) : [];
+  const clHtml  = clItems.map(([k,v]) => {
+    const met = v===true||v==='true';
+    return `<div style="display:flex;align-items:center;gap:4px;padding:3px 6px;background:${met?'rgba(0,255,136,0.06)':'var(--s3)'};border:1px solid ${met?'rgba(0,255,136,0.2)':'var(--b1)'};border-radius:3px">
+      <span style="font-size:11px">${met?'✓':'✗'}</span>
+      <span style="font-size:10px;color:${met?'var(--green)':'var(--t4)'};font-weight:${met?'700':'400'}">${k}</span>
+    </div>`;
+  }).join('');
+
+  // Live context at time of alert
+  const vwap    = window.liveVWAP ? parseFloat(window.liveVWAP).toFixed(2) : '?';
+  const vwapPos = window.liveVWAP && entry ? (entry > window.liveVWAP ? 'ABOVE VWAP' : 'BELOW VWAP') : '?';
+  const mtf     = window.mtfContext || '?';
+  const gex     = window.gexContext ? window.gexContext.slice(0,60)+'…' : '?';
+  const delta   = RS?.cumulativeDelta ? (RS.cumulativeDelta>0?'+':'')+RS.cumulativeDelta.toLocaleString() : '?';
+  const smc     = window.smcContext ? window.smcContext.slice(0,50) : '?';
+  const uwBias  = window.uwWeeklyContext ? window.uwWeeklyContext.split('\n')[0] : '?';
+
+  // Alert history strip
+  const histHtml = tvAlertHistory.slice(0,5).map((h,i) => {
+    const hc  = h.rating==='A++'?'var(--green)':h.rating==='A+'?'var(--amber)':'var(--cyan)';
+    const hdc = h.direction==='LONG'?'var(--green)':'var(--red)';
+    const ht  = new Date(h.receivedAt||Date.now()).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+    return `<div style="display:flex;gap:5px;align-items:center;padding:3px 0;border-bottom:1px solid var(--b1);font-size:10px">
+      <span style="color:${hc};font-weight:700;min-width:28px">${h.rating||'A'}</span>
+      <span style="color:${hdc};min-width:40px">${h.direction||'?'}</span>
+      <span style="color:var(--t2);font-family:var(--mono);flex:1">${h.price||'?'}</span>
+      <span style="color:var(--t4)">${ht}</span>
+    </div>`;
+  }).join('');
+
   panel.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <span style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--white)">📺 ${d.indicator||'TV Alert'}</span>
-      <span style="font-size:10px;color:var(--t4)">${ts} · ${d.tf||'?'}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--b1)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:28px;font-weight:900;font-family:var(--sans);color:${rc};line-height:1">${d.rating||'A'}</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:${dc};font-family:var(--sans)">${d.direction||'?'} ${d.pattern||d.indicator||''}</div>
+          <div style="font-size:10px;color:var(--t3)">${d.indicator||'TV'} · ${d.tf||'?'} · ${ts}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:700;color:var(--white);font-family:var(--mono)">${d.price||'?'}</div>
+        <div style="font-size:10px;color:var(--t3)">R:R 1:${rr}</div>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <span style="font-size:22px;font-weight:900;font-family:var(--sans);color:${ratingColor}">${d.rating||'A'}</span>
-      <span style="font-size:18px;font-weight:700;color:${dirColor}">${d.direction||'?'}</span>
-      <span style="font-size:15px;font-weight:700;color:var(--white);font-family:var(--mono)">${d.price||'?'}</span>
-    </div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px">
-      ${[['Entry',d.entry,'var(--white)'],['Stop',d.stop,'var(--red)'],['BE',d.be,'var(--amber)'],['TP1',d.tp1,'var(--green)'],['TP2',d.tp2,'var(--green2)']].map(([l,v,c])=>`<div style="background:var(--s3);border:1px solid var(--b2);border-radius:3px;padding:4px 5px;text-align:center"><div style="font-size:8px;color:var(--t3);margin-bottom:1px">${l}</div><div style="font-size:12px;font-weight:700;color:${c};font-family:var(--mono)">${v||'—'}</div></div>`).join('')}
+      ${[['ENTRY',d.entry,'var(--white)'],['STOP',d.stop,'var(--red)'],['BE',d.be,'var(--amber)'],['TP1',d.tp1,'var(--green)'],['TP2',d.tp2,'#00cc66']].map(([l,v,c])=>`
+        <div style="background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:6px 4px;text-align:center">
+          <div style="font-size:8px;letter-spacing:1px;color:var(--t3);text-transform:uppercase;margin-bottom:3px">${l}</div>
+          <div style="font-size:13px;font-weight:700;color:${c};font-family:var(--mono)">${v||'—'}</div>
+        </div>`).join('')}
     </div>
-    ${checkHtml ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">${checkHtml}</div>` : ''}
-    ${d.pattern ? `<div style="font-size:10px;color:var(--t3)">Pattern: ${d.pattern}</div>` : ''}`;
+
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:9px;letter-spacing:1px;color:var(--t3);text-transform:uppercase">Checklist Score</span>
+        <span style="font-size:11px;font-weight:700;color:${scoreCol}">${score}/6 — ${d.rating||'?'}</span>
+      </div>
+      <div style="height:5px;background:var(--b2);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="height:100%;width:${scorePct}%;background:${scoreCol};border-radius:3px;transition:width 0.4s"></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${clHtml}</div>
+    </div>
+
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:4px;padding:7px 9px;margin-bottom:8px">
+      <div style="font-size:9px;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin-bottom:5px">Live Context at Alert</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">
+        <div><span style="color:var(--t3)">VWAP </span><span style="color:var(--cyan);font-weight:700">${vwap}</span><span style="color:var(--t4);margin-left:4px">${vwapPos}</span></div>
+        <div><span style="color:var(--t3)">Cum Δ </span><span style="color:${RS?.cumulativeDelta>0?'var(--green)':'var(--red)'};font-weight:700">${delta}</span></div>
+        <div style="grid-column:1/-1"><span style="color:var(--t3)">SMC </span><span style="color:var(--t1)">${smc}</span></div>
+        <div style="grid-column:1/-1"><span style="color:var(--t3)">MTF </span><span style="color:var(--t1)">${mtf.slice(0,60)}</span></div>
+        <div style="grid-column:1/-1"><span style="color:var(--t3)">UW  </span><span style="color:var(--amber)">${uwBias.slice(0,60)}</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button onclick="generateSignal()" style="flex:1;padding:8px;background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(0,153,204,0.1));border:1px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.8px">⚡ Send to AI → Generate Signal</button>
+      <button onclick="document.getElementById('tv-alert-panel').style.display='none'" style="padding:8px 10px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;color:var(--t3);font-family:var(--mono);font-size:10px;cursor:pointer">✕</button>
+    </div>
+
+    ${tvAlertHistory.length>1?`
+    <div style="border-top:1px solid var(--b1);padding-top:6px">
+      <div style="font-size:9px;letter-spacing:1px;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Alert History</div>
+      ${histHtml}
+    </div>`:''}`;
 }
 
 // ── MORNING BIAS ──
