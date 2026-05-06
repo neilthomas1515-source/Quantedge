@@ -503,8 +503,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .uw-save-anchor-btn{flex:1;padding:6px;background:linear-gradient(135deg,#f59e0b,#b45309);border:none;border-radius:3px;color:#000;font-family:var(--sans);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.8px;}
 .uw-save-anchor-btn:hover{opacity:0.85;}
 /* UW save intraday update btn */
-.uw-save-intraday-btn{width:100%;padding:5px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;color:var(--cyan);font-family:var(--sans);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;display:none;margin-top:4px;}
+.uw-save-intraday-btn{width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.18),rgba(0,153,204,0.12));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;display:none;margin-top:8px;box-shadow:0 0 12px rgba(0,212,255,0.2);transition:all 0.2s;}
 .uw-save-intraday-btn.visible{display:block;}
+.uw-save-intraday-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.28),rgba(0,153,204,0.22));box-shadow:0 0 18px rgba(0,212,255,0.35);color:var(--white);}
 /* WP intel badge — shown in Weekly Playbook header */
 .wp-uw-badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;margin-left:6px;}
 .wp-uw-badge.active{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
@@ -1671,50 +1672,75 @@ async function pollRithmicBridge() {
   try {
     const res = await fetch(BRIDGE_URL, { signal: AbortSignal.timeout(2000) });
     if (!res.ok) return;
-    const data = await res.json();
-    
+    const raw = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+
     if (data.status === 'live' && data.last) {
-      // Update all price displays
-      if (data.last !== RS.lastPrice) {
-        RS.lastPrice = data.last;
-        updateESPriceFromRithmic(data.last);
-      }
-      if (data.bid)  { RS.bidPrice = data.bid;  }
-      if (data.ask)  { RS.askPrice = data.ask;  }
-      RS.cumulativeDelta = data.cum_delta || 0;
-      RS.buyVolume  = data.volume || 0;
-      // Derive sell volume: buy vol minus net positive delta (approximation)
-      // When delta is negative, sells exceeded buys by that amount
-      const absDelta = Math.abs(data.cum_delta || 0);
+      const price    = data.last;
+      const vol      = data.volume || 0;
       const netDelta = data.cum_delta || 0;
-      RS.sellVolume = netDelta < 0
-        ? RS.buyVolume + absDelta
-        : Math.max(0, RS.buyVolume - absDelta);
-      RS.connected       = true;
-      RS.authenticated   = true;
-      bridgeLastUpdate   = Date.now();
-      
+      const absDelta = Math.abs(netDelta);
+      const now      = Date.now();
+
+      // ── Core RS state ──
+      RS.lastPrice       = price;
+      RS.cumulativeDelta = netDelta;
+      RS.buyVolume       = vol;
+      RS.sellVolume      = netDelta < 0 ? vol + absDelta : Math.max(0, vol - absDelta);
+      if (data.bid) RS.bidPrice = data.bid;
+      if (data.ask) RS.askPrice = data.ask;
+      RS.connected     = true;
+      RS.authenticated = true;
+      bridgeLastUpdate = now;
+
+      // ── Price / bid-ask / delta displays ──
+      updateESPriceFromRithmic(price);
       updateBidAskDisplay();
       updateDeltaDisplay();
       updateRithmicStatus('connected');
-      // Dynamic intelligence
-      if (data.last) { checkORBCapture(data.last); updateSessionHL(data.last); }
-      checkDeltaDivergence();
-      updateVWAPRegimeBadge();
-      
-      // Update viz
+
+      // ── Tier-1: VWAP (uses total vol; aggressor split not available per-tick from bridge) ──
+      if (typeof processVWAP === 'function') processVWAP(price, vol || 1);
+
+      // ── Tier-1: Volume Profile ──
+      // Infer aggressor from delta sign: positive delta = more buys (aggr=1), negative = sells (aggr=2)
+      const aggr = netDelta >= 0 ? 1 : 2;
+      if (typeof processVolumeProfile === 'function') processVolumeProfile(price, vol || 1, aggr);
+
+      // ── Tier-3: SMC Market Structure (BOS / CHoCH / Swing H/L) ──
+      if (typeof processSMCTick === 'function') processSMCTick(price, now);
+
+      // ── Tier-4: ORB capture ──
+      if (typeof processORBTick === 'function') processORBTick(price, now);
+      if (typeof checkORBCapture === 'function') checkORBCapture(price);
+
+      // ── Tier-4: Liquidity Sweep Detector ──
+      if (typeof processSweepTick === 'function') processSweepTick(price, vol || 1);
+
+      // ── Tier-1: NQ/ES Correlation (ES side) ──
+      if (typeof processESTick === 'function') processESTick(price);
+
+      // ── Session H/L + Dynamic intelligence ──
+      if (typeof updateSessionHL === 'function') updateSessionHL(price);
+      if (typeof checkDeltaDivergence === 'function') checkDeltaDivergence();
+      if (typeof updateVWAPRegimeBadge === 'function') updateVWAPRegimeBadge();
+
+      // ── MTF alignment refresh (throttled inside fetchMTFData) ──
+      if (typeof fetchMTFData === 'function') fetchMTFData();
+
+      // ── Viz panel ──
       const vmEl = document.getElementById('viz-price-main');
-      if (vmEl) { vmEl.textContent = data.last.toFixed(2); vmEl.className = 'viz-price-main'; }
+      if (vmEl) { vmEl.textContent = price.toFixed(2); vmEl.className = 'viz-price-main'; }
       const vwsDot = document.getElementById('viz-ws-dot');
       if (vwsDot) vwsDot.classList.add('live');
-      
+
     } else if (data.status === 'connecting' || data.status === 'authenticating') {
       updateRithmicStatus('connecting');
     } else if (data.status === 'auth_failed') {
       updateRithmicStatus('auth_failed');
     }
   } catch(e) {
-    // Bridge not running - show offline
+    // Bridge not running — show offline after grace period
     if (Date.now() - bridgeLastUpdate > 5000) {
       RS.connected = false;
       updateRithmicStatus('disconnected');
@@ -3067,10 +3093,12 @@ Respond in JSON only:
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:400, messages:[{role:'user',content:prompt}] })
     });
-    const data = await res.json();
-    const text = data?.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
+    const raw = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const tStart = text.indexOf('{'), tEnd = text.lastIndexOf('}');
+    if (tStart === -1) throw new Error('No JSON in bias response');
+    const parsed = JSON.parse(text.slice(tStart, tEnd+1));
 
     const dirEl = document.getElementById('bias-direction');
     const fillEl = document.getElementById('bias-conf-fill');
@@ -3477,10 +3505,12 @@ async function generateSignal() {
     });
 
     if (!res.ok) throw new Error(`Worker error ${res.status}: ${await res.text()}`);
-    const data = await res.json();
+    const raw = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
     const text = (data?.content || []).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-    const clean = text.replace(/```json|```/g,'').trim();
-    const signal = JSON.parse(clean);
+    const tStart = text.indexOf('{'), tEnd = text.lastIndexOf('}');
+    if (tStart === -1) throw new Error('No JSON in signal response');
+    const signal = JSON.parse(text.slice(tStart, tEnd+1));
 
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
@@ -5156,7 +5186,8 @@ OUTPUT JSON ONLY (no markdown, no backticks):
       body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:600, messages:[{role:'user',content:prompt}] })
     });
     if (!res.ok) throw new Error('Worker ' + res.status);
-    const data = await res.json();
+    const raw = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
     const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
     const start = text.indexOf('{'), end = text.lastIndexOf('}');
     if (start === -1) throw new Error('No JSON in response');
