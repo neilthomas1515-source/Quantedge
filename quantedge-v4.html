@@ -503,9 +503,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .uw-save-anchor-btn{flex:1;padding:6px;background:linear-gradient(135deg,#f59e0b,#b45309);border:none;border-radius:3px;color:#000;font-family:var(--sans);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.8px;}
 .uw-save-anchor-btn:hover{opacity:0.85;}
 /* UW save intraday update btn */
-.uw-save-intraday-btn{width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.18),rgba(0,153,204,0.12));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;display:none;margin-top:8px;box-shadow:0 0 12px rgba(0,212,255,0.2);transition:all 0.2s;}
+.uw-save-intraday-btn{width:100%;padding:5px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;color:var(--cyan);font-family:var(--sans);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;display:none;margin-top:4px;}
 .uw-save-intraday-btn.visible{display:block;}
-.uw-save-intraday-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.28),rgba(0,153,204,0.22));box-shadow:0 0 18px rgba(0,212,255,0.35);color:var(--white);}
 /* WP intel badge — shown in Weekly Playbook header */
 .wp-uw-badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;margin-left:6px;}
 .wp-uw-badge.active{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
@@ -1029,7 +1028,34 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="auto-level-item"><div class="auto-level-label">Month Lo</div><div class="auto-level-val" id="lvl-mo-lo">—</div></div>
     </div>
     <div class="auto-levels-note" id="auto-levels-note">Click Refresh to load</div>
-    <div class="input-grid" style="margin-top:7px">
+
+    <!-- CHART SCREENSHOT → AI AUTO-FILL -->
+    <div id="chart-snap-zone"
+      style="border:2px dashed var(--b2);border-radius:5px;padding:10px 12px;margin-top:8px;margin-bottom:6px;cursor:pointer;background:var(--s2);transition:all 0.2s;position:relative"
+      onclick="chartSnapClick()"
+      ondragover="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--cyan2)'"
+      ondragleave="document.getElementById('chart-snap-zone').style.borderColor='var(--b2)'"
+      ondrop="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--b2)';handleChartSnapDrop(event)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">📸</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Chart Screenshot → AI Auto-Fill</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:1px">Paste (Ctrl+V) · Drag & drop · Click to browse</div>
+        </div>
+        <div id="chart-snap-status" style="margin-left:auto;font-size:10px;color:var(--t4)">No image</div>
+      </div>
+      <img id="chart-snap-preview" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:3px;margin-top:7px;border:1px solid var(--b2)" alt="">
+      <button id="chart-snap-clear" onclick="event.stopPropagation();clearChartSnap()" style="display:none;position:absolute;top:6px;right:6px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--t3);font-size:10px;padding:1px 6px;cursor:pointer">✕</button>
+    </div>
+    <input type="file" id="chart-snap-file" accept="image/*" style="display:none" onchange="loadChartSnapFile(this.files[0])">
+    <button id="btn-chart-autofill" onclick="runChartAutoFill()"
+      style="width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,153,204,0.08));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;box-shadow:0 0 10px rgba(0,212,255,0.15);transition:all 0.2s;display:none"
+      disabled>
+      📸 Read Chart → Auto-Fill Levels
+    </button>
+    <div id="chart-autofill-result" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:4px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:var(--t2)"></div>
+
+    <div class="input-grid" style="margin-top:4px">
       <div class="field"><label>O/N High</label><input type="number" id="on-hi" placeholder="—" step="0.25"></div>
       <div class="field"><label>O/N Low</label><input type="number" id="on-lo" placeholder="—" step="0.25"></div>
       <div class="field"><label>Asia High</label><input type="number" id="asia-hi" placeholder="—" step="0.25"></div>
@@ -1682,7 +1708,6 @@ async function pollRithmicBridge() {
       const absDelta = Math.abs(netDelta);
       const now      = Date.now();
 
-      // ── Core RS state ──
       RS.lastPrice       = price;
       RS.cumulativeDelta = netDelta;
       RS.buyVolume       = vol;
@@ -1693,42 +1718,24 @@ async function pollRithmicBridge() {
       RS.authenticated = true;
       bridgeLastUpdate = now;
 
-      // ── Price / bid-ask / delta displays ──
       updateESPriceFromRithmic(price);
       updateBidAskDisplay();
       updateDeltaDisplay();
       updateRithmicStatus('connected');
 
-      // ── Tier-1: VWAP (uses total vol; aggressor split not available per-tick from bridge) ──
       if (typeof processVWAP === 'function') processVWAP(price, vol || 1);
-
-      // ── Tier-1: Volume Profile ──
-      // Infer aggressor from delta sign: positive delta = more buys (aggr=1), negative = sells (aggr=2)
       const aggr = netDelta >= 0 ? 1 : 2;
       if (typeof processVolumeProfile === 'function') processVolumeProfile(price, vol || 1, aggr);
-
-      // ── Tier-3: SMC Market Structure (BOS / CHoCH / Swing H/L) ──
       if (typeof processSMCTick === 'function') processSMCTick(price, now);
-
-      // ── Tier-4: ORB capture ──
       if (typeof processORBTick === 'function') processORBTick(price, now);
       if (typeof checkORBCapture === 'function') checkORBCapture(price);
-
-      // ── Tier-4: Liquidity Sweep Detector ──
       if (typeof processSweepTick === 'function') processSweepTick(price, vol || 1);
-
-      // ── Tier-1: NQ/ES Correlation (ES side) ──
       if (typeof processESTick === 'function') processESTick(price);
-
-      // ── Session H/L + Dynamic intelligence ──
       if (typeof updateSessionHL === 'function') updateSessionHL(price);
       if (typeof checkDeltaDivergence === 'function') checkDeltaDivergence();
       if (typeof updateVWAPRegimeBadge === 'function') updateVWAPRegimeBadge();
-
-      // ── MTF alignment refresh (throttled inside fetchMTFData) ──
       if (typeof fetchMTFData === 'function') fetchMTFData();
 
-      // ── Viz panel ──
       const vmEl = document.getElementById('viz-price-main');
       if (vmEl) { vmEl.textContent = price.toFixed(2); vmEl.className = 'viz-price-main'; }
       const vwsDot = document.getElementById('viz-ws-dot');
@@ -1740,7 +1747,6 @@ async function pollRithmicBridge() {
       updateRithmicStatus('auth_failed');
     }
   } catch(e) {
-    // Bridge not running — show offline after grace period
     if (Date.now() - bridgeLastUpdate > 5000) {
       RS.connected = false;
       updateRithmicStatus('disconnected');
@@ -3052,6 +3058,231 @@ function getSnapImagesForAI() {
   }));
 }
 
+// ══════════════════════════════════════════════════
+// CHART SCREENSHOT → AI AUTO-FILL LEVELS
+// Replaces Python 5am / 2pm scheduled tasks entirely
+// ══════════════════════════════════════════════════
+let chartSnapImage = null;
+let chartSnapActive = false;
+
+function chartSnapClick() {
+  if (chartSnapImage) return; // already has image, do nothing on click
+  chartSnapActive = true;
+  document.getElementById('chart-snap-file').click();
+  setTimeout(() => { chartSnapActive = false; }, 30000);
+}
+
+function handleChartSnapDrop(e) {
+  const file = e.dataTransfer?.files?.[0];
+  if (file && file.type.startsWith('image/')) loadChartSnapFile(file);
+}
+
+function loadChartSnapFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    chartSnapImage = ev.target.result;
+    const preview = document.getElementById('chart-snap-preview');
+    const status  = document.getElementById('chart-snap-status');
+    const clearBtn= document.getElementById('chart-snap-clear');
+    const fillBtn = document.getElementById('btn-chart-autofill');
+    if (preview) { preview.src = chartSnapImage; preview.style.display = 'block'; }
+    if (status)  { status.textContent = '✓ Ready'; status.style.color = 'var(--green)'; }
+    if (clearBtn) clearBtn.style.display = 'block';
+    if (fillBtn)  { fillBtn.style.display = 'block'; fillBtn.disabled = false; }
+    document.getElementById('chart-snap-zone').style.borderColor = 'var(--cyan2)';
+    showToast('📸 Chart loaded — click Auto-Fill to extract levels', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearChartSnap() {
+  chartSnapImage = null;
+  const preview = document.getElementById('chart-snap-preview');
+  const status  = document.getElementById('chart-snap-status');
+  const clearBtn= document.getElementById('chart-snap-clear');
+  const fillBtn = document.getElementById('btn-chart-autofill');
+  const result  = document.getElementById('chart-autofill-result');
+  if (preview)  { preview.src = ''; preview.style.display = 'none'; }
+  if (status)   { status.textContent = 'No image'; status.style.color = 'var(--t4)'; }
+  if (clearBtn)  clearBtn.style.display = 'none';
+  if (fillBtn)  { fillBtn.style.display = 'none'; fillBtn.disabled = true; }
+  if (result)    result.style.display = 'none';
+  document.getElementById('chart-snap-zone').style.borderColor = 'var(--b2)';
+}
+
+// Handle Ctrl+V paste into chart snap zone
+document.addEventListener('paste', e => {
+  if (!chartSnapActive) return;
+  const items = e.clipboardData?.items; if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.stopImmediatePropagation(); e.preventDefault();
+      loadChartSnapFile(item.getAsFile());
+      chartSnapActive = false;
+      break;
+    }
+  }
+}, true);
+
+async function runChartAutoFill() {
+  if (!chartSnapImage) { showToast('Load a chart screenshot first', 'err'); return; }
+  const btn = document.getElementById('btn-chart-autofill');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ AI Reading Chart…'; }
+  const result = document.getElementById('chart-autofill-result');
+
+  const mt  = chartSnapImage.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+  const b64 = chartSnapImage.split(',')[1];
+  const es  = window.liveESPrice || '?';
+  const pdh = document.getElementById('lvl-pdh')?.textContent || '?';
+  const pdl = document.getElementById('lvl-pdl')?.textContent || '?';
+  const pdc = document.getElementById('lvl-prev-close')?.textContent || '?';
+
+  const prompt = `You are an elite ES futures analyst reading a TradingView chart screenshot for pre-market level extraction.
+
+Current known data: ES~${es} | PDH=${pdh} | PDL=${pdl} | PrevClose=${pdc}
+
+Extract the following price levels visible in the chart. If a level is not clearly visible, return null for that field.
+
+OUTPUT JSON ONLY (no markdown, no backticks, no explanation):
+{
+  "onHigh": number or null,
+  "onLow": number or null,
+  "asiaHigh": number or null,
+  "asiaLow": number or null,
+  "londonHigh": number or null,
+  "londonLow": number or null,
+  "keyLevels": [number, ...] or [],
+  "bias": "BULLISH" or "BEARISH" or "NEUTRAL",
+  "biasConfidence": 0-100,
+  "biasSummary": "1-2 sentence pre-market read from the chart",
+  "watchFor": "key thing to monitor this session"
+}
+
+Rules:
+- All prices must be realistic ES futures prices (currently ~${es})
+- O/N = Overnight session high/low (typically marked on chart as globex or overnight range)
+- Asia = Asian session high/low
+- London = London/European session high/low
+- keyLevels = any clearly marked support/resistance levels (max 4)
+- Never fabricate levels not visible in the chart — return null if uncertain`;
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:600,
+        messages:[{role:'user', content:[
+          {type:'image', source:{type:'base64', media_type:mt, data:b64}},
+          {type:'text', text:prompt}
+        ]}]
+      })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw  = await res.text();
+    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const tS = text.indexOf('{'), tE = text.lastIndexOf('}');
+    if (tS === -1) throw new Error('No JSON in response');
+    const p = JSON.parse(text.slice(tS, tE+1));
+
+    // ── Populate all level inputs ──
+    const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
+    setInput('on-hi',   p.onHigh);
+    setInput('on-lo',   p.onLow);
+    setInput('asia-hi', p.asiaHigh);
+    setInput('asia-lo', p.asiaLow);
+    setInput('lon-hi',  p.londonHigh);
+    setInput('lon-lo',  p.londonLow);
+
+    // ── Populate morning bias card ──
+    if (p.bias) {
+      const dirEl    = document.getElementById('bias-direction');
+      const fillEl   = document.getElementById('bias-conf-fill');
+      const pctEl    = document.getElementById('bias-conf-pct');
+      const reasonEl = document.getElementById('bias-reasoning');
+      if (dirEl)    { dirEl.textContent = p.bias; dirEl.style.color = p.bias==='BULLISH'?'var(--green)':p.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
+      if (fillEl)   fillEl.style.width = (p.biasConfidence||0) + '%';
+      if (pctEl)    pctEl.textContent  = (p.biasConfidence||0) + '%';
+      if (reasonEl) reasonEl.textContent = p.biasSummary || '';
+      window.morningBiasContext = `Morning Bias: ${p.bias} (${p.biasConfidence}%) — ${p.biasSummary||''}. Watch: ${p.watchFor||''}`;
+      const thEl = document.getElementById('morning-thesis');
+      if (thEl) thEl.value = window.morningBiasContext;
+    }
+
+    // ── Result summary ──
+    const filled = [
+      p.onHigh    != null ? `O/N ${p.onHigh}/${p.onLow}` : null,
+      p.asiaHigh  != null ? `Asia ${p.asiaHigh}/${p.asiaLow}` : null,
+      p.londonHigh!= null ? `London ${p.londonHigh}/${p.londonLow}` : null,
+    ].filter(Boolean);
+    const summaryText = `✅ Auto-filled: ${filled.join(' · ') || 'no session levels found'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+    if (result) { result.style.display = 'block'; result.textContent = summaryText; }
+    showToast(summaryText, 'ok');
+
+    // ── Save to KV so it persists on reload ──
+    const payload = {
+      onHigh: p.onHigh, onLow: p.onLow,
+      asiaHigh: p.asiaHigh, asiaLow: p.asiaLow,
+      londonHigh: p.londonHigh, londonLow: p.londonLow,
+      keyLevels: p.keyLevels || [],
+      bias: p.bias, biasConfidence: p.biasConfidence,
+      biasSummary: p.biasSummary, watchFor: p.watchFor,
+      savedAt: Date.now()
+    };
+    try {
+      await fetch(CLOUDFLARE_WORKER + '/morning-analysis', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+    } catch(kvErr) { console.warn('[ChartFill] KV save failed:', kvErr.message); }
+
+    window.chartAutoFillContext = `Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+
+  } catch(e) {
+    if (result) { result.style.display = 'block'; result.textContent = '⚠ Failed: ' + e.message; result.style.color = 'var(--red)'; }
+    showToast('Chart auto-fill failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📸 Read Chart → Auto-Fill Levels'; }
+  }
+}
+
+// ── Load today's chart levels from KV on startup ──
+async function loadChartLevelsFromKV() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/morning-analysis');
+    if (!res.ok) return;
+    const raw = await res.text();
+    const d = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    if (!d || d.status === 'no_data') return;
+    // Only use if saved today
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    if (!d.savedAt || d.savedAt < todayStart.getTime()) { console.log('[ChartFill] KV data is from previous day — skipping'); return; }
+
+    const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
+    setInput('on-hi',   d.onHigh);
+    setInput('on-lo',   d.onLow);
+    setInput('asia-hi', d.asiaHigh);
+    setInput('asia-lo', d.asiaLow);
+    setInput('lon-hi',  d.londonHigh);
+    setInput('lon-lo',  d.londonLow);
+
+    if (d.bias) {
+      const dirEl    = document.getElementById('bias-direction');
+      const fillEl   = document.getElementById('bias-conf-fill');
+      const pctEl    = document.getElementById('bias-conf-pct');
+      const reasonEl = document.getElementById('bias-reasoning');
+      if (dirEl)    { dirEl.textContent = d.bias; dirEl.style.color = d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
+      if (fillEl)   fillEl.style.width = (d.biasConfidence||0) + '%';
+      if (pctEl)    pctEl.textContent  = (d.biasConfidence||0) + '%';
+      if (reasonEl) reasonEl.textContent = d.biasSummary || '';
+      window.morningBiasContext = `Morning Bias: ${d.bias} (${d.biasConfidence}%) — ${d.biasSummary||''}. Watch: ${d.watchFor||''}`;
+    }
+    window.chartAutoFillContext = `Chart Levels (loaded): O/N ${d.onHigh||'?'}/${d.onLow||'?'} | Asia ${d.asiaHigh||'?'}/${d.asiaLow||'?'} | London ${d.londonHigh||'?'}/${d.londonLow||'?'}`;
+    const savedTime = new Date(d.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    showToast(`📸 Chart levels loaded from cloud (saved ${savedTime})`, 'ok');
+  } catch(e) { console.log('[ChartFill] No KV data yet'); }
+}
+
 // ── MORNING BIAS ──
 async function generateMorningBias() {
   const btn = document.getElementById('btn-bias');
@@ -3362,7 +3593,8 @@ ${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer posit
 
 === UW WEEKLY INTELLIGENCE ===
 ${window.uwWeeklyContext || 'No UW anchor set — drop UW screenshots and run Weekly Intelligence'}
-${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}`;
+${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}
+${window.chartAutoFillContext ? '\n=== CHART LEVELS (from screenshot) ===\n' + window.chartAutoFillContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -3806,6 +4038,7 @@ function updateReadinessGrid() {
     { label:'MTF Alignment',   filled: !!mtfSt?.alignment && mtfSt.alignment !== null },
     { label:'Options Flow',    filled: !!optFlow?.putCallRatio },
     { label:'Morning Bias',    filled: !!window.morningBiasContext },
+    { label:'Chart Levels',    filled: !!window.chartAutoFillContext },
   ];
   const filledCount = items.filter(i => i.filled).length;
   const scoreEl = document.getElementById('psd-ready-score');
@@ -5273,6 +5506,7 @@ function initAll() {
   initGexStackPaste();
   uwInitPaste();
   setTimeout(uwLoadFromKV, 2000);
+  setTimeout(loadChartLevelsFromKV, 2500);
   // Dynamic AI intervals
   setInterval(checkSignalHealth, 30000);
   setInterval(checkSessionTransition, 60000);
