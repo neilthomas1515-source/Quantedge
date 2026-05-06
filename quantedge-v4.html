@@ -802,18 +802,18 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
         <span style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:1.5px;color:#f59e0b;text-transform:uppercase">📚 Historical Log</span>
         <span id="uw-hist-count" style="font-size:10px;color:var(--t4);padding:1px 7px;background:var(--s3);border:1px solid var(--b2);border-radius:10px">0 entries</span>
-        <button onclick="uwHistClearAll()" style="margin-left:auto;padding:2px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;color:var(--t4);font-family:var(--mono);font-size:9px;cursor:pointer" title="Clear all historical entries">Clear</button>
+        <button onclick="uwHistClearAll()" style="margin-left:auto;padding:2px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;color:var(--t4);font-family:var(--mono);font-size:9px;cursor:pointer">Clear</button>
       </div>
-      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;line-height:1.5">Paste historical UW data (Market Tide readings + outcomes). AI matches current conditions against history on every signal.</div>
-      <textarea id="uw-hist-input" rows="4"
-        style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--white);font-family:var(--mono);font-size:11px;padding:7px 9px;resize:vertical;line-height:1.5;outline:none"
-        placeholder="Paste UW historical data here — any format. Example:&#10;2025-01-15: Market Tide BULLISH, Net Impact +2.1B, 0DTE Call-heavy, result: ES +28pts&#10;2025-01-16: Market Tide BEARISH, Gamma Flip failed, result: ES -18pts choppy&#10;&#10;AI will parse and extract patterns automatically."></textarea>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;line-height:1.5">Paste historical UW data (Market Tide readings + outcomes). AI matches current conditions on every signal.</div>
+      <textarea id="uw-hist-input" rows="4" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--white);font-family:var(--mono);font-size:11px;padding:7px 9px;resize:vertical;line-height:1.5;outline:none" placeholder="Paste UW historical data here — any format.&#10;Example: 2025-01-15: Market Tide BULLISH, Net Impact +2.1B, 0DTE Call-heavy, result: ES +28pts"></textarea>
       <button onclick="uwHistAddEntries()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(180,83,9,0.1));border:1px solid rgba(245,158,11,0.4);border-radius:4px;color:#f59e0b;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase">📚 Parse &amp; Add to Historical Log</button>
       <div id="uw-hist-status" style="display:none;margin-top:6px;padding:6px 9px;background:var(--s2);border:1px solid var(--b1);border-radius:4px;font-size:11px;color:var(--t2)"></div>
       <div id="uw-hist-entries" style="margin-top:8px;max-height:160px;overflow-y:auto;display:none"></div>
     </div>
+  </div><!-- end uw-sect -->
 
-  </div><!-- end #uw-sect -->
+
+  <!-- WEEKLY PLAYBOOK -->
   <div class="sect" id="wp-sect">
     <div class="sect-hd purple" style="cursor:pointer" onclick="toggleWPPanel()">
       📅 Weekly Playbook <div class="hd-line"></div>
@@ -1043,31 +1043,14 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="auto-level-item"><div class="auto-level-label">Month Lo</div><div class="auto-level-val" id="lvl-mo-lo">—</div></div>
     </div>
     <div class="auto-levels-note" id="auto-levels-note">Click Refresh to load</div>
-
-    <!-- CHART SCREENSHOT → AI AUTO-FILL -->
-    <div id="chart-snap-zone"
-      style="border:2px dashed var(--b2);border-radius:5px;padding:10px 12px;margin-top:8px;margin-bottom:6px;cursor:pointer;background:var(--s2);transition:all 0.2s;position:relative"
-      onclick="chartSnapClick()"
-      ondragover="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--cyan2)'"
-      ondragleave="document.getElementById('chart-snap-zone').style.borderColor='var(--b2)'"
-      ondrop="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--b2)';handleChartSnapDrop(event)">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px">📸</span>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--t1)">Chart Screenshot → AI Auto-Fill</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:1px">Paste (Ctrl+V) · Drag &amp; drop · Click to browse</div>
-        </div>
-        <div id="chart-snap-status" style="margin-left:auto;font-size:10px;color:var(--t4)">No image</div>
-      </div>
+    <div id="chart-snap-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:10px 12px;margin-top:8px;margin-bottom:6px;cursor:pointer;background:var(--s2);transition:all 0.2s;position:relative" onclick="chartSnapClick()" ondragover="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--cyan2)'" ondragleave="document.getElementById('chart-snap-zone').style.borderColor='var(--b2)'" ondrop="event.preventDefault();document.getElementById('chart-snap-zone').style.borderColor='var(--b2)';handleChartSnapDrop(event)">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">📸</span><div><div style="font-size:12px;font-weight:700;color:var(--t1)">Chart Screenshot → AI Auto-Fill</div><div style="font-size:10px;color:var(--t3);margin-top:1px">Paste (Ctrl+V) · Drag &amp; drop · Click to browse</div></div><div id="chart-snap-status" style="margin-left:auto;font-size:10px;color:var(--t4)">No image</div></div>
       <img id="chart-snap-preview" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:3px;margin-top:7px;border:1px solid var(--b2)" alt="">
       <button id="chart-snap-clear" onclick="event.stopPropagation();clearChartSnap()" style="display:none;position:absolute;top:6px;right:6px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--t3);font-size:10px;padding:1px 6px;cursor:pointer">✕</button>
     </div>
     <input type="file" id="chart-snap-file" accept="image/*" style="display:none" onchange="loadChartSnapFile(this.files[0])">
-    <button id="btn-chart-autofill" onclick="runChartAutoFill()"
-      style="width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,153,204,0.08));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;box-shadow:0 0 10px rgba(0,212,255,0.15);transition:all 0.2s;display:none"
-      disabled>📸 Read Chart → Auto-Fill Levels</button>
+    <button id="btn-chart-autofill" onclick="runChartAutoFill()" style="width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,153,204,0.08));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;box-shadow:0 0 10px rgba(0,212,255,0.15);transition:all 0.2s;display:none" disabled>📸 Read Chart → Auto-Fill Levels</button>
     <div id="chart-autofill-result" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:4px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:var(--t2)"></div>
-
     <div class="input-grid" style="margin-top:4px">
       <div class="field"><label>O/N High</label><input type="number" id="on-hi" placeholder="—" step="0.25"></div>
       <div class="field"><label>O/N Low</label><input type="number" id="on-lo" placeholder="—" step="0.25"></div>
@@ -1276,6 +1259,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 </div><!-- end #left -->
 
 <!-- ══ RIGHT PANEL ══ -->
+<!-- TV ALERT PANEL -->
+<div id="tv-alert-panel" style="display:none;background:var(--s2);border:1px solid var(--cyan2);border-radius:5px;padding:10px 14px;margin:8px 10px 0;box-shadow:0 0 12px rgba(0,212,255,0.15)"></div>
+
 <div id="right">
   <div id="signal-checks">
     <div class="sig-check" id="chk-regime" onclick="toggleSigCheck(this,'bull')"><div class="sig-dot"></div><span class="sig-text">GEX Confirmed</span></div>
@@ -1713,52 +1699,32 @@ async function pollRithmicBridge() {
     if (!res.ok) return;
     const raw = await res.text();
     const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-
     if (data.status === 'live' && data.last) {
-      const price    = data.last;
-      const vol      = data.volume || 0;
-      const netDelta = data.cum_delta || 0;
-      const absDelta = Math.abs(netDelta);
-      const now      = Date.now();
-      RS.lastPrice       = price;
-      RS.cumulativeDelta = netDelta;
-      RS.buyVolume       = vol;
-      RS.sellVolume      = netDelta < 0 ? vol + absDelta : Math.max(0, vol - absDelta);
-      if (data.bid) RS.bidPrice = data.bid;
-      if (data.ask) RS.askPrice = data.ask;
-      RS.connected     = true;
-      RS.authenticated = true;
-      bridgeLastUpdate = now;
-      updateESPriceFromRithmic(price);
-      updateBidAskDisplay();
-      updateDeltaDisplay();
-      updateRithmicStatus('connected');
-      if (typeof processVWAP === 'function') processVWAP(price, vol || 1);
-      const aggr = netDelta >= 0 ? 1 : 2;
-      if (typeof processVolumeProfile === 'function') processVolumeProfile(price, vol || 1, aggr);
-      if (typeof processSMCTick === 'function') processSMCTick(price, now);
-      if (typeof processORBTick === 'function') processORBTick(price, now);
-      if (typeof checkORBCapture === 'function') checkORBCapture(price);
-      if (typeof processSweepTick === 'function') processSweepTick(price, vol || 1);
-      if (typeof processESTick === 'function') processESTick(price);
-      if (typeof updateSessionHL === 'function') updateSessionHL(price);
-      if (typeof checkDeltaDivergence === 'function') checkDeltaDivergence();
-      if (typeof updateVWAPRegimeBadge === 'function') updateVWAPRegimeBadge();
-      if (typeof fetchMTFData === 'function') fetchMTFData();
-      const vmEl = document.getElementById('viz-price-main');
-      if (vmEl) { vmEl.textContent = price.toFixed(2); vmEl.className = 'viz-price-main'; }
-      const vwsDot = document.getElementById('viz-ws-dot');
-      if (vwsDot) vwsDot.classList.add('live');
-    } else if (data.status === 'connecting' || data.status === 'authenticating') {
-      updateRithmicStatus('connecting');
-    } else if (data.status === 'auth_failed') {
-      updateRithmicStatus('auth_failed');
-    }
+      const price=data.last,vol=data.volume||0,netDelta=data.cum_delta||0,absDelta=Math.abs(netDelta),now=Date.now();
+      RS.lastPrice=price;RS.cumulativeDelta=netDelta;RS.buyVolume=vol;
+      RS.sellVolume=netDelta<0?vol+absDelta:Math.max(0,vol-absDelta);
+      if(data.bid)RS.bidPrice=data.bid;if(data.ask)RS.askPrice=data.ask;
+      RS.connected=true;RS.authenticated=true;bridgeLastUpdate=now;
+      updateESPriceFromRithmic(price);updateBidAskDisplay();updateDeltaDisplay();updateRithmicStatus('connected');
+      if(typeof processVWAP==='function')processVWAP(price,vol||1);
+      const aggr=netDelta>=0?1:2;
+      if(typeof processVolumeProfile==='function')processVolumeProfile(price,vol||1,aggr);
+      if(typeof processSMCTick==='function')processSMCTick(price,now);
+      if(typeof processORBTick==='function')processORBTick(price,now);
+      if(typeof checkORBCapture==='function')checkORBCapture(price);
+      if(typeof processSweepTick==='function')processSweepTick(price,vol||1);
+      if(typeof processESTick==='function')processESTick(price);
+      if(typeof updateSessionHL==='function')updateSessionHL(price);
+      if(typeof checkDeltaDivergence==='function')checkDeltaDivergence();
+      if(typeof updateVWAPRegimeBadge==='function')updateVWAPRegimeBadge();
+      if(typeof fetchMTFData==='function')fetchMTFData();
+      const vmEl=document.getElementById('viz-price-main');
+      if(vmEl){vmEl.textContent=price.toFixed(2);vmEl.className='viz-price-main';}
+      const vwsDot=document.getElementById('viz-ws-dot');if(vwsDot)vwsDot.classList.add('live');
+    } else if(data.status==='connecting'||data.status==='authenticating'){updateRithmicStatus('connecting');}
+    else if(data.status==='auth_failed'){updateRithmicStatus('auth_failed');}
   } catch(e) {
-    if (Date.now() - bridgeLastUpdate > 5000) {
-      RS.connected = false;
-      updateRithmicStatus('disconnected');
-    }
+    if(Date.now()-bridgeLastUpdate>5000){RS.connected=false;updateRithmicStatus('disconnected');}
   }
 }
 
@@ -3067,335 +3033,255 @@ function getSnapImagesForAI() {
 }
 
 // ══════════════════════════════════════════════════
-// CHART SCREENSHOT → AI AUTO-FILL LEVELS (item #5)
+// CHART SCREENSHOT → AI AUTO-FILL LEVELS (#5)
 // ══════════════════════════════════════════════════
-let chartSnapImage = null;
-let chartSnapActive = false;
-
-function chartSnapClick() {
-  if (chartSnapImage) return;
-  chartSnapActive = true;
-  document.getElementById('chart-snap-file').click();
-  setTimeout(() => { chartSnapActive = false; }, 30000);
-}
-function handleChartSnapDrop(e) {
-  const file = e.dataTransfer?.files?.[0];
-  if (file && file.type.startsWith('image/')) loadChartSnapFile(file);
-}
+let chartSnapImage = null, chartSnapActive = false;
+function chartSnapClick() { if (chartSnapImage) return; chartSnapActive = true; document.getElementById('chart-snap-file').click(); setTimeout(() => { chartSnapActive = false; }, 30000); }
+function handleChartSnapDrop(e) { const f = e.dataTransfer?.files?.[0]; if (f && f.type.startsWith('image/')) loadChartSnapFile(f); }
 function loadChartSnapFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
   reader.onload = ev => {
     chartSnapImage = ev.target.result;
-    const preview = document.getElementById('chart-snap-preview');
-    const status  = document.getElementById('chart-snap-status');
-    const clearBtn= document.getElementById('chart-snap-clear');
-    const fillBtn = document.getElementById('btn-chart-autofill');
-    if (preview)  { preview.src = chartSnapImage; preview.style.display = 'block'; }
-    if (status)   { status.textContent = '✓ Ready'; status.style.color = 'var(--green)'; }
-    if (clearBtn)  clearBtn.style.display = 'block';
-    if (fillBtn)  { fillBtn.style.display = 'block'; fillBtn.disabled = false; }
-    document.getElementById('chart-snap-zone').style.borderColor = 'var(--cyan2)';
+    const preview=document.getElementById('chart-snap-preview'), status=document.getElementById('chart-snap-status'), clearBtn=document.getElementById('chart-snap-clear'), fillBtn=document.getElementById('btn-chart-autofill');
+    if (preview) { preview.src=chartSnapImage; preview.style.display='block'; }
+    if (status)  { status.textContent='✓ Ready'; status.style.color='var(--green)'; }
+    if (clearBtn) clearBtn.style.display='block';
+    if (fillBtn)  { fillBtn.style.display='block'; fillBtn.disabled=false; }
+    document.getElementById('chart-snap-zone').style.borderColor='var(--cyan2)';
     showToast('📸 Chart loaded — click Auto-Fill to extract levels', 'ok');
   };
   reader.readAsDataURL(file);
 }
 function clearChartSnap() {
   chartSnapImage = null;
-  const ids = { 'chart-snap-preview':'', 'chart-snap-status':'No image', 'chart-snap-clear':'', 'btn-chart-autofill':'', 'chart-autofill-result':'' };
-  const preview = document.getElementById('chart-snap-preview');
-  const status  = document.getElementById('chart-snap-status');
-  const clearBtn= document.getElementById('chart-snap-clear');
-  const fillBtn = document.getElementById('btn-chart-autofill');
-  const result  = document.getElementById('chart-autofill-result');
-  if (preview)  { preview.src = ''; preview.style.display = 'none'; }
-  if (status)   { status.textContent = 'No image'; status.style.color = 'var(--t4)'; }
-  if (clearBtn)  clearBtn.style.display = 'none';
-  if (fillBtn)  { fillBtn.style.display = 'none'; fillBtn.disabled = true; }
-  if (result)    result.style.display = 'none';
-  document.getElementById('chart-snap-zone').style.borderColor = 'var(--b2)';
+  const preview=document.getElementById('chart-snap-preview'), status=document.getElementById('chart-snap-status'), clearBtn=document.getElementById('chart-snap-clear'), fillBtn=document.getElementById('btn-chart-autofill'), result=document.getElementById('chart-autofill-result');
+  if (preview)  { preview.src=''; preview.style.display='none'; }
+  if (status)   { status.textContent='No image'; status.style.color='var(--t4)'; }
+  if (clearBtn)  clearBtn.style.display='none';
+  if (fillBtn)  { fillBtn.style.display='none'; fillBtn.disabled=true; }
+  if (result)    result.style.display='none';
+  document.getElementById('chart-snap-zone').style.borderColor='var(--b2)';
 }
-// Ctrl+V into chart snap zone
 document.addEventListener('paste', e => {
   if (!chartSnapActive) return;
   const items = e.clipboardData?.items; if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      e.stopImmediatePropagation(); e.preventDefault();
-      loadChartSnapFile(item.getAsFile());
-      chartSnapActive = false; break;
-    }
-  }
+  for (const item of items) { if (item.type.startsWith('image/')) { e.stopImmediatePropagation(); e.preventDefault(); loadChartSnapFile(item.getAsFile()); chartSnapActive=false; break; } }
 }, true);
-
 async function runChartAutoFill() {
   if (!chartSnapImage) { showToast('Load a chart screenshot first', 'err'); return; }
-  const btn = document.getElementById('btn-chart-autofill');
-  const result = document.getElementById('chart-autofill-result');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ AI Reading Chart…'; }
-
-  const mt  = chartSnapImage.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-  const b64 = chartSnapImage.split(',')[1];
-  const es  = window.liveESPrice || '?';
-  const pdh = document.getElementById('lvl-pdh')?.textContent || '?';
-  const pdl = document.getElementById('lvl-pdl')?.textContent || '?';
-  const pdc = document.getElementById('lvl-prev-close')?.textContent || '?';
-
+  const btn=document.getElementById('btn-chart-autofill'), result=document.getElementById('chart-autofill-result');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ AI Reading Chart…'; }
+  const mt=chartSnapImage.startsWith('data:image/png')?'image/png':'image/jpeg', b64=chartSnapImage.split(',')[1];
+  const es=window.liveESPrice||'?', pdh=document.getElementById('lvl-pdh')?.textContent||'?', pdl=document.getElementById('lvl-pdl')?.textContent||'?', pdc=document.getElementById('lvl-prev-close')?.textContent||'?';
   const prompt = `You are an elite ES futures analyst reading a TradingView chart screenshot for pre-market level extraction.
-Current known data: ES~${es} | PDH=${pdh} | PDL=${pdl} | PrevClose=${pdc}
-Extract price levels visible in the chart. Return null for any level not clearly visible.
-OUTPUT JSON ONLY (no markdown, no backticks):
-{"onHigh":number|null,"onLow":number|null,"asiaHigh":number|null,"asiaLow":number|null,"londonHigh":number|null,"londonLow":number|null,"keyLevels":[numbers],"bias":"BULLISH|BEARISH|NEUTRAL","biasConfidence":0-100,"biasSummary":"1-2 sentence read","watchFor":"key thing to monitor"}
-Rules: All ES prices realistic (~${es}). O/N=overnight range. Never fabricate — return null if uncertain.`;
-
+Current: ES~${es} | PDH=${pdh} | PDL=${pdl} | PrevClose=${pdc}
+Extract price levels visible. Return null for any not clearly visible.
+OUTPUT JSON ONLY: {"onHigh":number|null,"onLow":number|null,"asiaHigh":number|null,"asiaLow":number|null,"londonHigh":number|null,"londonLow":number|null,"keyLevels":[numbers],"bias":"BULLISH|BEARISH|NEUTRAL","biasConfidence":0-100,"biasSummary":"1-2 sentence read","watchFor":"key thing to monitor"}
+Rules: Realistic ES prices (~${es}). O/N=overnight range. Never fabricate.`;
   try {
-    const res = await fetch(CLOUDFLARE_WORKER, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:600,
-        messages:[{role:'user', content:[
-          {type:'image', source:{type:'base64', media_type:mt, data:b64}},
-          {type:'text', text:prompt}
-        ]}]
-      })
-    });
+    const res = await fetch(CLOUDFLARE_WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:600, messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:prompt}]}] }) });
     if (!res.ok) throw new Error('Worker ' + res.status);
-    const raw  = await res.text();
-    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const tS = text.indexOf('{'), tE = text.lastIndexOf('}');
-    if (tS === -1) throw new Error('No JSON in response');
-    const p = JSON.parse(text.slice(tS, tE+1));
-
-    const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
-    setInput('on-hi',   p.onHigh);  setInput('on-lo',   p.onLow);
-    setInput('asia-hi', p.asiaHigh); setInput('asia-lo', p.asiaLow);
-    setInput('lon-hi',  p.londonHigh); setInput('lon-lo', p.londonLow);
-
+    const raw=await res.text(), json=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
+    const text=(json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const tS=text.indexOf('{'),tE=text.lastIndexOf('}'); if(tS===-1)throw new Error('No JSON');
+    const p=JSON.parse(text.slice(tS,tE+1));
+    const si=(id,val)=>{if(val!=null&&!isNaN(val)){const el=document.getElementById(id);if(el)el.value=parseFloat(val).toFixed(2);}};
+    si('on-hi',p.onHigh);si('on-lo',p.onLow);si('asia-hi',p.asiaHigh);si('asia-lo',p.asiaLow);si('lon-hi',p.londonHigh);si('lon-lo',p.londonLow);
     if (p.bias) {
-      const dirEl    = document.getElementById('bias-direction');
-      const fillEl   = document.getElementById('bias-conf-fill');
-      const pctEl    = document.getElementById('bias-conf-pct');
-      const reasonEl = document.getElementById('bias-reasoning');
-      if (dirEl)    { dirEl.textContent = p.bias; dirEl.style.color = p.bias==='BULLISH'?'var(--green)':p.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
-      if (fillEl)   fillEl.style.width = (p.biasConfidence||0) + '%';
-      if (pctEl)    pctEl.textContent  = (p.biasConfidence||0) + '%';
-      if (reasonEl) reasonEl.textContent = p.biasSummary || '';
-      window.morningBiasContext = `Morning Bias: ${p.bias} (${p.biasConfidence}%) — ${p.biasSummary||''}. Watch: ${p.watchFor||''}`;
-      const thEl = document.getElementById('morning-thesis');
-      if (thEl) thEl.value = window.morningBiasContext;
+      const dirEl=document.getElementById('bias-direction'),fillEl=document.getElementById('bias-conf-fill'),pctEl=document.getElementById('bias-conf-pct'),reasonEl=document.getElementById('bias-reasoning');
+      if(dirEl){dirEl.textContent=p.bias;dirEl.style.color=p.bias==='BULLISH'?'var(--green)':p.bias==='BEARISH'?'var(--red)':'var(--amber)';}
+      if(fillEl)fillEl.style.width=(p.biasConfidence||0)+'%'; if(pctEl)pctEl.textContent=(p.biasConfidence||0)+'%'; if(reasonEl)reasonEl.textContent=p.biasSummary||'';
+      window.morningBiasContext=`Morning Bias: ${p.bias} (${p.biasConfidence}%) — ${p.biasSummary||''}. Watch: ${p.watchFor||''}`;
+      const thEl=document.getElementById('morning-thesis');if(thEl)thEl.value=window.morningBiasContext;
     }
-    const filled = [p.onHigh!=null?`O/N ${p.onHigh}/${p.onLow}`:null, p.asiaHigh!=null?`Asia ${p.asiaHigh}/${p.asiaLow}`:null, p.londonHigh!=null?`London ${p.londonHigh}/${p.londonLow}`:null].filter(Boolean);
-    const summaryText = `✅ Auto-filled: ${filled.join(' · ')||'no session levels found'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
-    if (result) { result.style.display = 'block'; result.textContent = summaryText; }
-    showToast(summaryText, 'ok');
-    window.chartAutoFillContext = `Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
-    // Save to KV
-    try {
-      await fetch(CLOUDFLARE_WORKER + '/morning-analysis', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({onHigh:p.onHigh,onLow:p.onLow,asiaHigh:p.asiaHigh,asiaLow:p.asiaLow,londonHigh:p.londonHigh,londonLow:p.londonLow,keyLevels:p.keyLevels||[],bias:p.bias,biasConfidence:p.biasConfidence,biasSummary:p.biasSummary,watchFor:p.watchFor,savedAt:Date.now()})
-      });
-    } catch(kvErr) { console.warn('[ChartFill] KV save failed:', kvErr.message); }
-  } catch(e) {
-    if (result) { result.style.display='block'; result.textContent='⚠ Failed: '+e.message; result.style.color='var(--red)'; }
-    showToast('Chart auto-fill failed: ' + e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📸 Read Chart → Auto-Fill Levels'; }
-  }
+    const filled=[p.onHigh!=null?`O/N ${p.onHigh}/${p.onLow}`:null,p.asiaHigh!=null?`Asia ${p.asiaHigh}/${p.asiaLow}`:null,p.londonHigh!=null?`London ${p.londonHigh}/${p.londonLow}`:null].filter(Boolean);
+    const sumTxt=`✅ Auto-filled: ${filled.join(' · ')||'no session levels'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+    if(result){result.style.display='block';result.textContent=sumTxt;result.style.color='var(--t2)';}
+    showToast(sumTxt,'ok');
+    window.chartAutoFillContext=`Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+    try { await fetch(CLOUDFLARE_WORKER+'/morning-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({onHigh:p.onHigh,onLow:p.onLow,asiaHigh:p.asiaHigh,asiaLow:p.asiaLow,londonHigh:p.londonHigh,londonLow:p.londonLow,keyLevels:p.keyLevels||[],bias:p.bias,biasConfidence:p.biasConfidence,biasSummary:p.biasSummary,watchFor:p.watchFor,savedAt:Date.now()})});} catch(kvErr){}
+  } catch(e) { if(result){result.style.display='block';result.textContent='⚠ Failed: '+e.message;result.style.color='var(--red)';} showToast('Chart auto-fill failed: '+e.message,'err'); }
+  finally { if(btn){btn.disabled=false;btn.textContent='📸 Read Chart → Auto-Fill Levels';} }
 }
-
 async function loadChartLevelsFromKV() {
   try {
-    const res = await fetch(CLOUDFLARE_WORKER + '/morning-analysis');
-    if (!res.ok) return;
-    const raw = await res.text();
-    const d = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-    if (!d || d.status === 'no_data') return;
-    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-    if (!d.savedAt || d.savedAt < todayStart.getTime()) { console.log('[ChartFill] KV data is from previous day — skipping'); return; }
-    const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
-    setInput('on-hi',d.onHigh); setInput('on-lo',d.onLow); setInput('asia-hi',d.asiaHigh);
-    setInput('asia-lo',d.asiaLow); setInput('lon-hi',d.londonHigh); setInput('lon-lo',d.londonLow);
-    if (d.bias) {
-      const dirEl=document.getElementById('bias-direction'), fillEl=document.getElementById('bias-conf-fill'), pctEl=document.getElementById('bias-conf-pct'), reasonEl=document.getElementById('bias-reasoning');
-      if (dirEl)    { dirEl.textContent=d.bias; dirEl.style.color=d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
-      if (fillEl)   fillEl.style.width=(d.biasConfidence||0)+'%';
-      if (pctEl)    pctEl.textContent=(d.biasConfidence||0)+'%';
-      if (reasonEl) reasonEl.textContent=d.biasSummary||'';
+    const res=await fetch(CLOUDFLARE_WORKER+'/morning-analysis'); if(!res.ok)return;
+    const raw=await res.text(), d=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
+    if(!d||d.status==='no_data')return;
+    const todayStart=new Date();todayStart.setHours(0,0,0,0);
+    if(!d.savedAt||d.savedAt<todayStart.getTime()){console.log('[ChartFill] Previous day — skipping');return;}
+    const si=(id,val)=>{if(val!=null&&!isNaN(val)){const el=document.getElementById(id);if(el)el.value=parseFloat(val).toFixed(2);}};
+    si('on-hi',d.onHigh);si('on-lo',d.onLow);si('asia-hi',d.asiaHigh);si('asia-lo',d.asiaLow);si('lon-hi',d.londonHigh);si('lon-lo',d.londonLow);
+    if(d.bias){
+      const dirEl=document.getElementById('bias-direction'),fillEl=document.getElementById('bias-conf-fill'),pctEl=document.getElementById('bias-conf-pct'),reasonEl=document.getElementById('bias-reasoning');
+      if(dirEl){dirEl.textContent=d.bias;dirEl.style.color=d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--amber)';}
+      if(fillEl)fillEl.style.width=(d.biasConfidence||0)+'%';if(pctEl)pctEl.textContent=(d.biasConfidence||0)+'%';if(reasonEl)reasonEl.textContent=d.biasSummary||'';
       window.morningBiasContext=`Morning Bias: ${d.bias} (${d.biasConfidence}%) — ${d.biasSummary||''}. Watch: ${d.watchFor||''}`;
     }
     window.chartAutoFillContext=`Chart Levels (loaded): O/N ${d.onHigh||'?'}/${d.onLow||'?'} | Asia ${d.asiaHigh||'?'}/${d.asiaLow||'?'} | London ${d.londonHigh||'?'}/${d.londonLow||'?'}`;
-    const savedTime = new Date(d.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    showToast(`📸 Chart levels loaded from cloud (saved ${savedTime})`, 'ok');
-  } catch(e) { console.log('[ChartFill] No KV data yet'); }
+    showToast(`📸 Chart levels loaded from cloud (${new Date(d.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})})`,'ok');
+  } catch(e){console.log('[ChartFill] No KV data yet');}
 }
 
 // ══════════════════════════════════════════════════
-// UW HISTORICAL LOG — item #6
-// Stores parsed UW entries in localStorage.
-// AI searches on every Weekly Intelligence + Signal call.
+// UW HISTORICAL LOG (#6)
 // ══════════════════════════════════════════════════
 const UW_HIST_KEY = 'qe_uw_hist_v4';
 let uwHistEntries = [];
-
-function uwHistLoad() {
-  try {
-    const s = localStorage.getItem(UW_HIST_KEY);
-    if (s) uwHistEntries = JSON.parse(s);
-  } catch(e) { uwHistEntries = []; }
-  uwHistRenderCount();
-}
-
-function uwHistSave() {
-  try { localStorage.setItem(UW_HIST_KEY, JSON.stringify(uwHistEntries)); } catch(e) {}
-}
-
+function uwHistLoad() { try { const s=localStorage.getItem(UW_HIST_KEY); if(s)uwHistEntries=JSON.parse(s); } catch(e){uwHistEntries=[];} uwHistRenderCount(); }
+function uwHistSave() { try{localStorage.setItem(UW_HIST_KEY,JSON.stringify(uwHistEntries));}catch(e){} }
 function uwHistRenderCount() {
-  const el = document.getElementById('uw-hist-count');
-  if (el) el.textContent = uwHistEntries.length + ' entr' + (uwHistEntries.length === 1 ? 'y' : 'ies');
-  const entriesEl = document.getElementById('uw-hist-entries');
-  if (!entriesEl) return;
-  if (uwHistEntries.length === 0) { entriesEl.style.display = 'none'; return; }
-  entriesEl.style.display = 'block';
-  entriesEl.innerHTML = uwHistEntries.slice(-20).reverse().map((e, i) => {
-    const oc = e.outcome?.toLowerCase().includes('bull') || e.outcome?.toLowerCase().includes('+') ? 'var(--green)' : e.outcome?.toLowerCase().includes('bear') || e.outcome?.toLowerCase().includes('-') ? 'var(--red)' : 'var(--t3)';
-    return `<div style="display:flex;gap:6px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1);font-size:10px">
-      <span style="color:var(--t4);flex-shrink:0;min-width:60px">${e.date||'?'}</span>
-      <span style="color:var(--t2);flex:1">${e.conditions||e.raw||''}</span>
-      <span style="color:${oc};flex-shrink:0;font-weight:700">${e.outcome||'?'}</span>
-    </div>`;
+  const el=document.getElementById('uw-hist-count'); if(el)el.textContent=uwHistEntries.length+' entr'+(uwHistEntries.length===1?'y':'ies');
+  const entriesEl=document.getElementById('uw-hist-entries'); if(!entriesEl)return;
+  if(!uwHistEntries.length){entriesEl.style.display='none';return;}
+  entriesEl.style.display='block';
+  entriesEl.innerHTML=uwHistEntries.slice(-20).reverse().map(e=>{
+    const oc=(e.outcomeDir==='BULLISH'||(e.outcome||'').includes('+'))?'var(--green)':(e.outcomeDir==='BEARISH'||(e.outcome||'').includes('-'))?'var(--red)':'var(--t3)';
+    return `<div style="display:flex;gap:6px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1);font-size:10px"><span style="color:var(--t4);flex-shrink:0;min-width:60px">${e.date||'?'}</span><span style="color:var(--t2);flex:1">${e.conditions||''}</span><span style="color:${oc};flex-shrink:0;font-weight:700">${e.outcome||'?'}</span></div>`;
   }).join('');
 }
-
 function uwHistClearAll() {
-  if (!confirm('Clear all ' + uwHistEntries.length + ' historical entries?')) return;
-  uwHistEntries = [];
-  uwHistSave();
-  uwHistRenderCount();
-  window.uwHistContext = null;
-  showToast('Historical log cleared', 'ok');
+  if(!confirm('Clear all '+uwHistEntries.length+' historical entries?'))return;
+  uwHistEntries=[];uwHistSave();uwHistRenderCount();window.uwHistContext=null;showToast('Historical log cleared','ok');
 }
-
 async function uwHistAddEntries() {
-  const input = document.getElementById('uw-hist-input');
-  const statusEl = document.getElementById('uw-hist-status');
-  const raw = input?.value?.trim();
-  if (!raw) { showToast('Paste historical data first', 'err'); return; }
-
-  const btn = document.querySelector('[onclick="uwHistAddEntries()"]');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Parsing…'; }
-  if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'AI parsing historical entries…'; statusEl.style.color = 'var(--t2)'; }
-
-  const prompt = `You are parsing historical Unusual Whales / market data entries for pattern storage.
-
-Raw input:
-${raw.slice(0, 3000)}
-
-Extract each entry and return a JSON array. Each entry object:
-{
-  "date": "YYYY-MM-DD or date string",
-  "marketTide": "BULLISH|BEARISH|NEUTRAL|null",
-  "netImpact": "string like +2.1B or null",
-  "zerodte": "CALL-HEAVY|PUT-HEAVY|BALANCED|null",
-  "gammaFlip": "price or null",
-  "conditions": "1 sentence summary of the setup",
-  "outcome": "result — e.g. ES +28pts, choppy -12pts, stopped out, etc.",
-  "outcomeDir": "BULLISH|BEARISH|NEUTRAL"
+  const input=document.getElementById('uw-hist-input'), statusEl=document.getElementById('uw-hist-status');
+  const raw=input?.value?.trim(); if(!raw){showToast('Paste historical data first','err');return;}
+  const btn=document.querySelector('[onclick="uwHistAddEntries()"]');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Parsing…';}
+  if(statusEl){statusEl.style.display='block';statusEl.textContent='AI parsing historical entries…';statusEl.style.color='var(--t2)';}
+  const prompt=`Parse these historical UW/market data entries into a JSON array. Each entry: {"date":"YYYY-MM-DD","marketTide":"BULLISH|BEARISH|NEUTRAL|null","netImpact":"string|null","zerodte":"CALL-HEAVY|PUT-HEAVY|BALANCED|null","gammaFlip":"price|null","conditions":"1 sentence setup summary","outcome":"result string","outcomeDir":"BULLISH|BEARISH|NEUTRAL"}\nReturn ONLY a JSON array. No markdown.\n\nRaw input:\n${raw.slice(0,3000)}`;
+  try {
+    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-opus-4-5',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)throw new Error('Worker '+res.status);
+    const r=await res.text(), j=JSON.parse(r.slice(r.indexOf('{'),r.lastIndexOf('}')+1));
+    const t=(j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const aS=t.indexOf('['),aE=t.lastIndexOf(']'); if(aS===-1)throw new Error('No array');
+    const parsed=JSON.parse(t.slice(aS,aE+1)); if(!Array.isArray(parsed)||!parsed.length)throw new Error('No entries parsed');
+    let added=0;
+    parsed.forEach(e=>{e.addedAt=Date.now();const isDupe=uwHistEntries.some(x=>x.date===e.date&&x.conditions===e.conditions);if(!isDupe){uwHistEntries.push(e);added++;}});
+    uwHistSave();uwHistRenderCount();
+    if(statusEl){statusEl.textContent=`✅ Added ${added} new entries (${parsed.length-added} dupes skipped). Total: ${uwHistEntries.length}`;statusEl.style.color='var(--green)';}
+    if(input)input.value='';
+    showToast(`📚 ${added} entries added — total ${uwHistEntries.length}`,'ok');
+    uwHistBuildContext();
+  } catch(e){if(statusEl){statusEl.textContent='⚠ Parse failed: '+e.message;statusEl.style.color='var(--red)';}showToast('Historical parse failed: '+e.message,'err');}
+  finally{if(btn){btn.disabled=false;btn.textContent='📚 Parse & Add to Historical Log';}}
+}
+function uwHistBuildContext() {
+  if(!uwHistEntries.length){window.uwHistContext=null;return;}
+  const total=uwHistEntries.length, wins=uwHistEntries.filter(e=>e.outcomeDir==='BULLISH'||(e.outcome||'').includes('+')).length;
+  window.uwHistContext=`UW Historical Log: ${total} entries, ${Math.round((wins/total)*100)}% bullish outcomes.`;
+}
+async function uwHistMatchCurrent(currentConditions) {
+  if(!uwHistEntries.length)return null;
+  const recent=uwHistEntries.slice(-50);
+  const summary=recent.map(e=>`${e.date}: ${e.conditions} → ${e.outcome}`).join('\n');
+  const prompt=`Search historical trade database for pattern matches.\nCURRENT: ${currentConditions}\nHISTORY (${recent.length} records):\n${summary}\nOUTPUT JSON ONLY: {"matchFound":bool,"matchCount":number,"winRate":0-100,"avgOutcome":"string","bestMatch":"string","patternNote":"1 sentence","noPrecedent":bool}`;
+  try {
+    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-opus-4-5',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)return null;
+    const r=await res.text(),j=JSON.parse(r.slice(r.indexOf('{'),r.lastIndexOf('}')+1));
+    const t=(j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const tS=t.indexOf('{'),tE=t.lastIndexOf('}');if(tS===-1)return null;
+    return JSON.parse(t.slice(tS,tE+1));
+  }catch(e){return null;}
 }
 
-Return ONLY a JSON array. No markdown, no backticks, no explanation.
-If fewer than 1 valid entry found, return [].`;
+// ══════════════════════════════════════════════════
+// TV ALERT POLLER + HANDLER (#7 / #8 / #9 blueprint)
+// Polls Worker /tv-alert every 2s
+// Processes IFVG, TICK, Wedge, MTF, QM alerts
+// ══════════════════════════════════════════════════
+let tvAlertPollInterval = null;
+let tvAlertLastId = null;
+let tvAlertHistory = [];
 
+function startTVAlertPolling() {
+  if (tvAlertPollInterval) clearInterval(tvAlertPollInterval);
+  pollTVAlert();
+  tvAlertPollInterval = setInterval(pollTVAlert, 2000);
+  console.log('[TV] Alert polling started — 2s interval');
+}
+
+async function pollTVAlert() {
   try {
-    const res = await fetch(CLOUDFLARE_WORKER, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:2000,
-        messages:[{role:'user', content:prompt}]
-      })
-    });
-    if (!res.ok) throw new Error('Worker ' + res.status);
-    const raw2 = await res.text();
-    const json = JSON.parse(raw2.slice(raw2.indexOf('{'), raw2.lastIndexOf('}')+1));
-    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const aS = text.indexOf('['), aE = text.lastIndexOf(']');
-    if (aS === -1) throw new Error('No array in response');
-    const parsed = JSON.parse(text.slice(aS, aE+1));
-    if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('No valid entries parsed');
+    const res = await fetch(CLOUDFLARE_WORKER + '/tv-alert', { signal: AbortSignal.timeout(1800) });
+    if (!res.ok) return;
+    const raw = await res.text();
+    if (!raw || raw.trim() === '' || raw.includes('no_data')) return;
+    const d = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    if (!d || !d.id) return;
+    // Skip if already processed
+    if (d.id === tvAlertLastId) return;
+    tvAlertLastId = d.id;
+    processTVAlert(d);
+  } catch(e) { /* silent — bridge may be off */ }
+}
 
-    // Dedupe by date+conditions
-    let added = 0;
-    parsed.forEach(entry => {
-      entry.addedAt = Date.now();
-      const isDupe = uwHistEntries.some(e => e.date === entry.date && e.conditions === entry.conditions);
-      if (!isDupe) { uwHistEntries.push(entry); added++; }
-    });
-    uwHistSave();
-    uwHistRenderCount();
-    if (statusEl) { statusEl.textContent = `✅ Added ${added} new entries (${parsed.length - added} duplicates skipped). Total: ${uwHistEntries.length}`; statusEl.style.color = 'var(--green)'; }
-    if (input) input.value = '';
-    showToast(`📚 ${added} historical entries added — total ${uwHistEntries.length}`, 'ok');
-    uwHistBuildContext(); // rebuild context string
-  } catch(e) {
-    if (statusEl) { statusEl.textContent = '⚠ Parse failed: ' + e.message; statusEl.style.color = 'var(--red)'; }
-    showToast('Historical parse failed: ' + e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📚 Parse & Add to Historical Log'; }
+function processTVAlert(d) {
+  // d = standard webhook blueprint payload (see Pine Script below)
+  const { indicator, direction, rating, price, tf, entry, stop, be, tp1, tp2, checklist, pattern, timestamp } = d;
+  const now = Date.now();
+
+  // Store in history
+  tvAlertHistory.unshift({ ...d, receivedAt: now });
+  if (tvAlertHistory.length > 20) tvAlertHistory.pop();
+
+  // Build context for AI
+  const checklistStr = checklist ? Object.entries(checklist).map(([k,v])=>`${v?'✓':'✗'} ${k}`).join(' | ') : '';
+  window.tvAlertContext = [
+    `${indicator||'TV Alert'} ${rating||''} | ${direction||'?'} | TF: ${tf||'?'} | Price: ${price||'?'}`,
+    entry  ? `Entry: ${entry} | Stop: ${stop||'?'} | BE: ${be||'?'} | TP1: ${tp1||'?'} | TP2: ${tp2||'?'}` : '',
+    checklistStr ? `Checklist: ${checklistStr}` : '',
+    pattern ? `Pattern: ${pattern}` : ''
+  ].filter(Boolean).join('\n');
+
+  // Update Master Score based on rating
+  const ratingScore = rating==='A++'?2.0:rating==='A+'?1.5:1.0;
+  const dir = (direction||'').toUpperCase().includes('BULL')||(direction||'').toUpperCase().includes('LONG') ? 'BULLISH' : 'BEARISH';
+  updateMasterScore('bosDetected', dir, ratingScore);
+
+  // Show toast with rating color
+  const ratingColor = rating==='A++'?'urgent':rating==='A+'?'warn':'info';
+  showToast(`📺 ${indicator||'TV'} ${rating||''} ${direction||''} @ ${price||'?'} | ${tf||'?'}\nEntry: ${entry||'?'} TP1: ${tp1||'?'} Stop: ${stop||'?'}`, ratingColor);
+  playAlert(rating==='A++'?[523,659,784,1047]:[440,554,659]);
+
+  // Update TV alert display panel
+  renderTVAlertPanel(d);
+
+  // Auto-fire signal for A+ and A++ alerts
+  if (rating === 'A++' || rating === 'A+') {
+    window.autoConfluenceContext = window.tvAlertContext;
+    window.autoConfluenceDirection = dir;
+    setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
   }
 }
 
-// Build compressed context string from history — called after add and on pattern match
-function uwHistBuildContext() {
-  if (!uwHistEntries.length) { window.uwHistContext = null; return; }
-  const total = uwHistEntries.length;
-  const wins  = uwHistEntries.filter(e => e.outcomeDir === 'BULLISH' || (e.outcome||'').includes('+')).length;
-  const winRate = total > 0 ? Math.round((wins/total)*100) : 0;
-  window.uwHistContext = `UW Historical Log: ${total} entries, overall ${winRate}% bullish outcomes.`;
-}
-
-// Match current conditions against history — called from signal + weekly intelligence
-async function uwHistMatchCurrent(currentConditions) {
-  if (!uwHistEntries.length) return null;
-  const recentEntries = uwHistEntries.slice(-50); // last 50 entries
-  const summary = recentEntries.map(e => `${e.date}: ${e.conditions} → ${e.outcome}`).join('\n');
-
-  const prompt = `You are searching a historical trade database for pattern matches.
-
-CURRENT CONDITIONS:
-${currentConditions}
-
-HISTORICAL ENTRIES (${recentEntries.length} records):
-${summary}
-
-Find entries where historical conditions closely match current conditions (same UW bias direction, similar gamma regime, similar flow characteristics).
-
-OUTPUT JSON ONLY:
-{
-  "matchFound": true|false,
-  "matchCount": number,
-  "winRate": 0-100,
-  "avgOutcome": "e.g. ES +18pts avg",
-  "bestMatch": "date and brief description of closest match",
-  "patternNote": "1 sentence on what the history says about this setup",
-  "noPrecedent": true|false
-}
-
-If fewer than 2 matches found, set matchFound=false and noPrecedent=true.`;
-
-  try {
-    const res = await fetch(CLOUDFLARE_WORKER, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:400,
-        messages:[{role:'user', content:prompt}]
-      })
-    });
-    if (!res.ok) return null;
-    const raw = await res.text();
-    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const tS = text.indexOf('{'), tE = text.lastIndexOf('}');
-    if (tS === -1) return null;
-    return JSON.parse(text.slice(tS, tE+1));
-  } catch(e) { return null; }
+function renderTVAlertPanel(d) {
+  const panel = document.getElementById('tv-alert-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+  const ratingColor = d.rating==='A++'?'var(--green)':d.rating==='A+'?'var(--amber)':'var(--cyan)';
+  const dirColor = (d.direction||'').toLowerCase().includes('bull')||(d.direction||'').toLowerCase().includes('long') ? 'var(--green)' : 'var(--red)';
+  const checkHtml = d.checklist ? Object.entries(d.checklist).map(([k,v])=>`<span style="color:${v?'var(--green)':'var(--t4)'};font-size:9px">${v?'✓':'✗'} ${k}</span>`).join('') : '';
+  const ts = d.timestamp ? new Date(d.timestamp).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}) : new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--white)">📺 ${d.indicator||'TV Alert'}</span>
+      <span style="font-size:10px;color:var(--t4)">${ts} · ${d.tf||'?'}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:22px;font-weight:900;font-family:var(--sans);color:${ratingColor}">${d.rating||'A'}</span>
+      <span style="font-size:18px;font-weight:700;color:${dirColor}">${d.direction||'?'}</span>
+      <span style="font-size:15px;font-weight:700;color:var(--white);font-family:var(--mono)">${d.price||'?'}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+      ${[['Entry',d.entry,'var(--white)'],['Stop',d.stop,'var(--red)'],['BE',d.be,'var(--amber)'],['TP1',d.tp1,'var(--green)'],['TP2',d.tp2,'var(--green2)']].map(([l,v,c])=>`<div style="background:var(--s3);border:1px solid var(--b2);border-radius:3px;padding:4px 5px;text-align:center"><div style="font-size:8px;color:var(--t3);margin-bottom:1px">${l}</div><div style="font-size:12px;font-weight:700;color:${c};font-family:var(--mono)">${v||'—'}</div></div>`).join('')}
+    </div>
+    ${checkHtml ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">${checkHtml}</div>` : ''}
+    ${d.pattern ? `<div style="font-size:10px;color:var(--t3)">Pattern: ${d.pattern}</div>` : ''}`;
 }
 
 // ── MORNING BIAS ──
@@ -3442,9 +3328,9 @@ Respond in JSON only:
     const raw2 = await res.text();
     const data = JSON.parse(raw2.slice(raw2.indexOf('{'), raw2.lastIndexOf('}')+1));
     const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const tStart = text.indexOf('{'), tEnd = text.lastIndexOf('}');
-    if (tStart === -1) throw new Error('No JSON in bias response');
-    const parsed = JSON.parse(text.slice(tStart, tEnd+1));
+    const tStart=text.indexOf('{'),tEnd=text.lastIndexOf('}');
+    if(tStart===-1)throw new Error('No JSON in bias response');
+    const parsed=JSON.parse(text.slice(tStart,tEnd+1));
 
     const dirEl = document.getElementById('bias-direction');
     const fillEl = document.getElementById('bias-conf-fill');
@@ -3709,8 +3595,9 @@ ${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer posit
 === UW WEEKLY INTELLIGENCE ===
 ${window.uwWeeklyContext || 'No UW anchor set — drop UW screenshots and run Weekly Intelligence'}
 ${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}
-${window.chartAutoFillContext ? '\n=== CHART LEVELS (from screenshot) ===\n' + window.chartAutoFillContext : ''}
-${window.uwHistContext ? '\n=== UW HISTORICAL PATTERN MATCH ===\n' + window.uwHistContext : ''}`;
+${window.chartAutoFillContext ? '\n=== CHART LEVELS ===\n' + window.chartAutoFillContext : ''}
+${window.uwHistContext ? '\n=== UW HISTORICAL PATTERN MATCH ===\n' + window.uwHistContext : ''}
+${window.tvAlertContext ? '\n=== TRADINGVIEW ALERT ===\n' + window.tvAlertContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -3855,10 +3742,10 @@ async function generateSignal() {
     if (!res.ok) throw new Error(`Worker error ${res.status}: ${await res.text()}`);
     const raw = await res.text();
     const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-    const text = (data?.content || []).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-    const tStart = text.indexOf('{'), tEnd = text.lastIndexOf('}');
-    if (tStart === -1) throw new Error('No JSON in signal response');
-    const signal = JSON.parse(text.slice(tStart, tEnd+1));
+    const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const tStart=text.indexOf('{'),tEnd=text.lastIndexOf('}');
+    if(tStart===-1)throw new Error('No JSON in signal response');
+    const signal=JSON.parse(text.slice(tStart,tEnd+1));
 
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
@@ -4155,7 +4042,8 @@ function updateReadinessGrid() {
     { label:'Options Flow',    filled: !!optFlow?.putCallRatio },
     { label:'Morning Bias',    filled: !!window.morningBiasContext },
     { label:'Chart Levels',    filled: !!window.chartAutoFillContext },
-    { label:'UW History',      filled: uwHistEntries.length >= 5 },
+    { label:'UW History',      filled: typeof uwHistEntries !== 'undefined' && uwHistEntries.length >= 5 },
+    { label:'TV Alerts',       filled: !!window.tvAlertContext },
   ];
   const filledCount = items.filter(i => i.filled).length;
   const scoreEl = document.getElementById('psd-ready-score');
@@ -4932,12 +4820,6 @@ async function uwGenerateWeeklyIntelligence() {
   const currentBias = document.getElementById('wp-bias')?.value || 'not set';
   const currentFlip = document.getElementById('wp-flip')?.value || 'not set';
 
-  const currentConditionsForHistory = `Bias=${currentBias} | Flip=${currentFlip} | ES=${es} | VIX=${vix} | DXY=${dxy} | hasFlows=${hasFlows} | hasExpo=${hasExpo}`;
-  let histMatchResult = null;
-  if (uwHistEntries.length >= 2) {
-    histMatchResult = await uwHistMatchCurrent(currentConditionsForHistory);
-  }
-
   const masterPrompt = `You are an elite ES futures analyst with deep expertise in options dealer positioning, institutional flow, and GEX dynamics.
 
 You have been given ${content.filter(c=>c.type==='image').length} images:
@@ -4990,10 +4872,6 @@ OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
   "intradayNote": "what to watch intraday that could invalidate this thesis"
 }`;
 
-  if (histMatchResult) {
-    content.push({type:'text', text:`\n=== UW HISTORICAL PATTERN MATCH ===\nMatch Found: ${histMatchResult.matchFound} | Count: ${histMatchResult.matchCount} | Win Rate: ${histMatchResult.winRate}% | Avg: ${histMatchResult.avgOutcome||'?'}\nBest Match: ${histMatchResult.bestMatch||'?'}\nPattern Note: ${histMatchResult.patternNote||'?'}\nNo Precedent: ${histMatchResult.noPrecedent||false}\nFactor this into your confluence scoring and bias confidence.`});
-  }
-
   content.push({type:'text', text:masterPrompt});
 
   try {
@@ -5014,20 +4892,6 @@ OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
 
     uwProposed = p;
     uwShowPropose(p);
-    // Show historical match result if available
-    if (histMatchResult) {
-      const histEl = document.getElementById('uw-hist-match-result');
-      if (histEl) {
-        if (histMatchResult.noPrecedent) {
-          histEl.style.display = 'block'; histEl.style.borderColor = 'rgba(255,170,0,0.4)';
-          histEl.innerHTML = `<span style="color:var(--amber);font-weight:700">⚠ NO HISTORICAL PRECEDENT</span> — This setup has no close matches in your log. Algorithm upgrade trigger.`;
-        } else if (histMatchResult.matchFound) {
-          histEl.style.display = 'block'; histEl.style.borderColor = 'rgba(0,255,136,0.3)';
-          histEl.innerHTML = `<span style="color:var(--green);font-weight:700">📚 ${histMatchResult.matchCount} HISTORICAL MATCHES</span> — ${histMatchResult.winRate}% win rate | Avg: ${histMatchResult.avgOutcome||'?'} | ${histMatchResult.patternNote||''}`;
-        }
-        window.uwHistContext = (histMatchResult.matchFound ? `Historical Match: ${histMatchResult.matchCount} setups, ${histMatchResult.winRate}% win rate, avg ${histMatchResult.avgOutcome||'?'}. ${histMatchResult.patternNote||''}` : histMatchResult.noPrecedent ? 'No historical precedent for this setup — treat with caution.' : null);
-      }
-    }
     // Also update single-zone outputs for immediate visibility
     if (hasFlows) {
       const el = document.getElementById('uw-out-flows-text');
@@ -5649,6 +5513,7 @@ function initAll() {
   setTimeout(uwLoadFromKV, 2000);
   setTimeout(loadChartLevelsFromKV, 2500);
   uwHistLoad();
+  setTimeout(startTVAlertPolling, 3000);
   // Dynamic AI intervals
   setInterval(checkSignalHealth, 30000);
   setInterval(checkSessionTransition, 60000);
