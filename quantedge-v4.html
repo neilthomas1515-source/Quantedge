@@ -444,7 +444,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .uw-zone{border:1px dashed var(--b3);border-radius:5px;padding:10px 10px 8px;background:rgba(251,191,36,0.02);display:flex;flex-direction:column;gap:6px;transition:all 0.2s;}
 .uw-zone:hover,.uw-zone.drag-over{border-color:#f59e0b;background:rgba(251,191,36,0.05);}
 .uw-zone.has-image{border-style:solid;border-color:#f59e0b;}
-.uw-zone-lbl{font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:1px;}
+.uw-zone-lbl{font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:1px;cursor:pointer;}
 .uw-zone-sub{font-size:8px;color:var(--t4);line-height:1.4;}
 .uw-drop-area{min-height:70px;border:1px dashed rgba(245,158,11,0.3);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:3px;padding:6px;position:relative;background:rgba(0,0,0,0.15);transition:all 0.2s;}
 .uw-drop-area:hover{border-color:#f59e0b;background:rgba(245,158,11,0.04);}
@@ -461,6 +461,55 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .uw-output{margin-top:6px;font-size:10px;color:var(--t2);line-height:1.5;white-space:pre-wrap;display:none;border-top:1px solid var(--b2);padding-top:6px;}
 .uw-output.visible{display:block;}
 .uw-output-lbl{font-size:8px;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:700;}
+/* UW anchor badge + status bar */
+.uw-anchor-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:4px;padding:6px 9px;margin-top:6px;gap:6px;flex-wrap:wrap;}
+.uw-anchor-bias{font-size:13px;font-weight:900;letter-spacing:1.5px;}
+.uw-anchor-bias.BULLISH{color:var(--green);}
+.uw-anchor-bias.BEARISH{color:var(--red);}
+.uw-anchor-bias.NEUTRAL{color:var(--amber);}
+.uw-anchor-meta{font-size:9px;color:var(--t3);flex:1;}
+.uw-anchor-age{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:700;}
+.uw-anchor-age.fresh{background:rgba(0,255,136,0.1);color:var(--green);}
+.uw-anchor-age.stale{background:rgba(255,170,0,0.1);color:var(--amber);}
+.uw-anchor-age.old{background:rgba(255,51,85,0.1);color:var(--red);}
+/* UW intraday delta badge */
+.uw-intraday-bar{display:none;align-items:center;gap:6px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:4px;padding:5px 8px;margin-top:4px;font-size:9px;color:var(--t2);}
+.uw-intraday-bar.visible{display:flex;}
+.uw-intraday-lbl{color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
+/* UW unified intelligence button */
+.uw-intel-btn{width:100%;padding:8px;background:linear-gradient(135deg,#f59e0b,#b45309);border:none;border-radius:4px;color:#000;font-family:var(--sans);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:opacity 0.15s;box-shadow:0 0 12px rgba(245,158,11,0.25);}
+.uw-intel-btn:hover{opacity:0.88;}
+.uw-intel-btn:disabled{opacity:0.4;cursor:not-allowed;}
+/* UW propose panel */
+.uw-propose-panel{display:none;margin-top:8px;border:1px solid rgba(245,158,11,0.35);border-radius:5px;overflow:hidden;}
+.uw-propose-panel.visible{display:block;}
+.uw-propose-hd{background:rgba(245,158,11,0.12);padding:6px 10px;font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.uw-propose-body{padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
+.uw-propose-row{display:grid;grid-template-columns:90px 1fr 1fr;gap:6px;align-items:center;font-size:10px;}
+.uw-propose-row-lbl{color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:0.8px;}
+.uw-propose-ai{color:var(--amber);font-weight:700;}
+.uw-propose-current{color:var(--t3);font-size:9px;}
+.uw-propose-accept{font-size:9px;padding:2px 7px;background:rgba(0,255,136,0.1);border:1px solid var(--green2);color:var(--green);border-radius:3px;cursor:pointer;}
+.uw-propose-accept:hover{background:rgba(0,255,136,0.2);}
+.uw-propose-thesis{font-size:10px;color:var(--t2);line-height:1.5;padding:6px 0;border-top:1px solid var(--b2);white-space:pre-wrap;}
+.uw-propose-confluence{display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid var(--b2);font-size:9px;}
+.uw-confluence-score{font-size:14px;font-weight:900;padding:2px 8px;border-radius:4px;}
+.uw-confluence-score.high{background:rgba(0,255,136,0.12);color:var(--green);}
+.uw-confluence-score.med{background:rgba(255,170,0,0.12);color:var(--amber);}
+.uw-confluence-score.low{background:rgba(255,51,85,0.12);color:var(--red);}
+.uw-propose-actions{display:flex;gap:6px;margin-top:4px;}
+.uw-accept-all-btn{flex:1;padding:6px;background:linear-gradient(135deg,var(--green2),#006633);border:none;border-radius:3px;color:#fff;font-family:var(--sans);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.8px;}
+.uw-accept-all-btn:hover{opacity:0.85;}
+.uw-save-anchor-btn{flex:1;padding:6px;background:linear-gradient(135deg,#f59e0b,#b45309);border:none;border-radius:3px;color:#000;font-family:var(--sans);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.8px;}
+.uw-save-anchor-btn:hover{opacity:0.85;}
+/* UW save intraday update btn */
+.uw-save-intraday-btn{width:100%;padding:5px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;color:var(--cyan);font-family:var(--sans);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;display:none;margin-top:4px;}
+.uw-save-intraday-btn.visible{display:block;}
+/* WP intel badge — shown in Weekly Playbook header */
+.wp-uw-badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;margin-left:6px;}
+.wp-uw-badge.active{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
+.wp-uw-badge.stale{background:rgba(255,170,0,0.1);color:var(--amber);border:1px solid rgba(255,170,0,0.2);}
+.wp-uw-badge.none{background:rgba(255,255,255,0.04);color:var(--t4);border:1px solid var(--b2);}
 
 </style>
 </head>
@@ -624,44 +673,128 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 
   <!-- UNUSUAL WHALES -->
   <div class="sect" id="uw-sect">
-    <div class="sect-hd" style="color:#f59e0b">🐋 Unusual Whales <div class="hd-line" style="background:linear-gradient(90deg,rgba(245,158,11,0.5),transparent)"></div></div>
+    <div class="sect-hd" style="color:#f59e0b">🐋 Unusual Whales <div class="hd-line" style="background:linear-gradient(90deg,rgba(245,158,11,0.5),transparent)"></div>
+      <span id="uw-anchor-badge" class="wp-uw-badge none">No Anchor</span>
+    </div>
+
+    <!-- Anchor status bar — shown when anchor is saved -->
+    <div class="uw-anchor-bar" id="uw-anchor-bar" style="display:none">
+      <div>
+        <div style="font-size:8px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Weekly Anchor</div>
+        <span class="uw-anchor-bias" id="uw-anchor-bias-lbl">—</span>
+        <span style="font-size:9px;color:var(--t3);margin-left:6px">Flip: <b id="uw-anchor-flip-lbl" style="color:var(--amber)">—</b></span>
+      </div>
+      <div class="uw-anchor-meta" id="uw-anchor-thesis-lbl"></div>
+      <span class="uw-anchor-age" id="uw-anchor-age">—</span>
+    </div>
+
+    <!-- Intraday update delta bar -->
+    <div class="uw-intraday-bar" id="uw-intraday-bar">
+      <span class="uw-intraday-lbl">⟳ Intraday</span>
+      <span id="uw-intraday-delta">—</span>
+      <span id="uw-intraday-time" style="color:var(--t4);margin-left:auto"></span>
+    </div>
+
     <input type="file" id="uw-file-flows" accept="image/*" style="display:none" onchange="uwLoadFile('flows',this.files[0])">
     <input type="file" id="uw-file-expo"  accept="image/*" style="display:none" onchange="uwLoadFile('expo',this.files[0])">
     <div class="uw-grid">
 
       <!-- Zone 1: Net Flows -->
-      <div class="uw-zone" id="uw-zone-flows" ondragover="uwDragOver(event,'flows')" ondragleave="uwDragLeave(event,'flows')" ondrop="uwDrop(event,'flows')">
-        <div class="uw-zone-lbl">📊 Net Flows</div>
+      <div class="uw-zone" id="uw-zone-flows">
+        <div class="uw-zone-lbl" onclick="uwSetActiveZone('flows')" title="Click then paste screenshot">📊 Net Flows <span style="font-size:7px;opacity:0.55">(click→paste)</span></div>
         <div class="uw-zone-sub">Market Tide · 0DTE Flow · Net Impact</div>
-        <div class="uw-drop-area" id="uw-drop-flows" onclick="document.getElementById('uw-file-flows').click()">
+        <div class="uw-drop-area" id="uw-drop-flows" onclick="uwDropAreaClick(event,'flows')" ondragover="uwDragOver(event,'flows')" ondragleave="uwDragLeave(event,'flows')" ondrop="uwDrop(event,'flows')">
           <img id="uw-img-flows" alt="Net Flows">
           <div class="uw-drop-hint" id="uw-hint-flows"><span>Click</span>, drop or paste<br>Net Flows screenshot</div>
           <button class="uw-clear-btn" onclick="uwClear(event,'flows')">✕</button>
         </div>
-        <button class="uw-analyze-btn" id="uw-btn-flows" onclick="uwAnalyze('flows')">⚡ Analyze Net Flows</button>
+        <button class="uw-analyze-btn" id="uw-btn-flows" onclick="uwAnalyzeSingle('flows')">⚡ Analyze Net Flows</button>
         <div class="uw-output" id="uw-out-flows">
-          <div class="uw-output-lbl">🐋 Net Flows Analysis</div>
+          <div class="uw-output-lbl">🐋 Net Flows Reading</div>
           <div id="uw-out-flows-text"></div>
         </div>
       </div>
 
       <!-- Zone 2: Exposures -->
-      <div class="uw-zone" id="uw-zone-expo" ondragover="uwDragOver(event,'expo')" ondragleave="uwDragLeave(event,'expo')" ondrop="uwDrop(event,'expo')">
-        <div class="uw-zone-lbl">📡 Exposures</div>
+      <div class="uw-zone" id="uw-zone-expo">
+        <div class="uw-zone-lbl" onclick="uwSetActiveZone('expo')" title="Click then paste screenshot">📡 Exposures <span style="font-size:7px;opacity:0.55">(click→paste)</span></div>
         <div class="uw-zone-sub">Periscope SPX · Spot Gamma SPY · Delta by Strike SPY</div>
-        <div class="uw-drop-area" id="uw-drop-expo" onclick="document.getElementById('uw-file-expo').click()">
+        <div class="uw-drop-area" id="uw-drop-expo" onclick="uwDropAreaClick(event,'expo')" ondragover="uwDragOver(event,'expo')" ondragleave="uwDragLeave(event,'expo')" ondrop="uwDrop(event,'expo')">
           <img id="uw-img-expo" alt="Exposures">
           <div class="uw-drop-hint" id="uw-hint-expo"><span>Click</span>, drop or paste<br>Exposures screenshot</div>
           <button class="uw-clear-btn" onclick="uwClear(event,'expo')">✕</button>
         </div>
-        <button class="uw-analyze-btn" id="uw-btn-expo" onclick="uwAnalyze('expo')">⚡ Analyze Exposures</button>
+        <button class="uw-analyze-btn" id="uw-btn-expo" onclick="uwAnalyzeSingle('expo')">⚡ Analyze Exposures</button>
         <div class="uw-output" id="uw-out-expo">
-          <div class="uw-output-lbl">🐋 Exposures Analysis</div>
+          <div class="uw-output-lbl">🐋 Exposures Reading</div>
           <div id="uw-out-expo-text"></div>
         </div>
       </div>
 
     </div>
+
+    <!-- Unified Weekly Intelligence button — reads ALL images simultaneously -->
+    <button class="uw-intel-btn" id="uw-intel-btn" onclick="uwGenerateWeeklyIntelligence()">
+      🐋 ⚡ Generate Weekly Intelligence (QTA GEX + UW)
+    </button>
+
+    <!-- Save intraday update button — appears after single-zone analyze -->
+    <button class="uw-save-intraday-btn" id="uw-save-intraday-btn" onclick="uwSaveIntradayUpdate()">
+      💾 Save as Intraday Update
+    </button>
+
+    <!-- Propose panel — shown after unified intelligence runs -->
+    <div class="uw-propose-panel" id="uw-propose-panel">
+      <div class="uw-propose-hd">
+        <span>🐋 AI Proposed Weekly Intelligence</span>
+        <span id="uw-propose-time" style="font-weight:400;opacity:0.7"></span>
+      </div>
+      <div class="uw-propose-body">
+
+        <div class="uw-propose-confluence">
+          <span class="uw-confluence-score" id="uw-confluence-score">—</span>
+          <div>
+            <div style="font-size:10px;color:var(--t2);font-weight:700" id="uw-confluence-label">Confluence</div>
+            <div style="font-size:9px;color:var(--t3)" id="uw-confluence-detail"></div>
+          </div>
+        </div>
+
+        <!-- Proposed values vs current -->
+        <div class="uw-propose-row">
+          <div class="uw-propose-row-lbl">Bias</div>
+          <div class="uw-propose-ai" id="prop-bias">—</div>
+          <div class="uw-propose-current" id="curr-bias">current: —</div>
+        </div>
+        <div class="uw-propose-row">
+          <div class="uw-propose-row-lbl">Flip Zone</div>
+          <div class="uw-propose-ai" id="prop-flip">—</div>
+          <div class="uw-propose-current" id="curr-flip">current: —</div>
+        </div>
+        <div class="uw-propose-row">
+          <div class="uw-propose-row-lbl">Zone 1</div>
+          <div class="uw-propose-ai" id="prop-z0">—</div>
+          <button class="uw-propose-accept" onclick="uwAcceptZone(0)">Accept</button>
+        </div>
+        <div class="uw-propose-row">
+          <div class="uw-propose-row-lbl">Zone 2</div>
+          <div class="uw-propose-ai" id="prop-z1">—</div>
+          <button class="uw-propose-accept" onclick="uwAcceptZone(1)">Accept</button>
+        </div>
+        <div class="uw-propose-row">
+          <div class="uw-propose-row-lbl">Zone 3</div>
+          <div class="uw-propose-ai" id="prop-z2">—</div>
+          <button class="uw-propose-accept" onclick="uwAcceptZone(2)">Accept</button>
+        </div>
+
+        <div class="uw-propose-thesis" id="prop-thesis"></div>
+
+        <div class="uw-propose-actions">
+          <button class="uw-accept-all-btn" onclick="uwAcceptAll()">✅ Accept All → Populate Weekly Playbook</button>
+          <button class="uw-save-anchor-btn" onclick="uwSaveAnchor()">🔒 Save as Weekly Anchor</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 
@@ -670,6 +803,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
     <div class="sect-hd purple" style="cursor:pointer" onclick="toggleWPPanel()">
       📅 Weekly Playbook <div class="hd-line"></div>
       <span id="wp-bias-topbadge" style="font-size:10px;font-weight:700;margin-left:4px;color:var(--t4)">—</span>
+      <span id="wp-uw-intel-badge" class="wp-uw-badge none" style="margin-left:auto" title="UW Weekly Anchor status">🐋 No UW</span>
       <span id="wp-collapse-arrow" style="font-size:10px;color:var(--t3);margin-left:4px;">▲</span>
     </div>
     <div id="wp-sect-body">
@@ -755,7 +889,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         <div><div style="color:var(--t4);margin-bottom:1px">Logged</div><div id="wp-stat-logged" style="font-weight:700;color:var(--t1)">0</div></div>
         <div><div style="color:var(--t4);margin-bottom:1px">Saved</div><div id="wp-save-time" style="font-weight:700;color:var(--t4)">Never</div></div>
       </div>
-      <button class="wp-gen-btn" onclick="generateWeeklyBias()" id="wp-gen-btn">⚡ Generate Weekly Bias (AI)</button>
+      <button class="wp-gen-btn" onclick="generateWeeklyBias()" id="wp-gen-btn" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">⚡ Generate Weekly Bias (Market Data Only)</button>
       <button class="wp-save-btn" onclick="saveWeeklyPlaybook()">💾 Save Weekly Playbook to Cloud</button>
     </div>
   </div>
@@ -3196,7 +3330,11 @@ ${(()=>{
   const zoneStr = zones.map((z,i) => `Zone${i+1}: ${z.dir} Entry:${z.entry} Stop:${z.stop} T1:${z.t1} T2:${z.t2}`).join(' | ');
   return `Bias: ${wp.bias} | Flip: ${wp.flipZone||'?'} | ${zoneStr} | Notes: ${wp.notes||'none'}`;
 })()}
-${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer positioning, separate from daily GEX]' : ''}`;
+${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer positioning, separate from daily GEX]' : ''}
+
+=== UW WEEKLY INTELLIGENCE ===
+${window.uwWeeklyContext || 'No UW anchor set — drop UW screenshots and run Weekly Intelligence'}
+${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -4190,55 +4328,54 @@ function initGexStackPaste() {
 
 
 // ══════════════════════════════════════════════════
-// UNUSUAL WHALES ZONE
+// UNUSUAL WHALES — FULL WEEKLY INTELLIGENCE SYSTEM
 // ══════════════════════════════════════════════════
 
 const uwImages = { flows: null, expo: null };
+let uwProposed  = null;   // AI proposed values waiting for user accept
+let uwAnchor    = null;   // Confirmed weekly anchor (from KV)
+let uwIntraday  = null;   // Latest intraday update
 
+// ── Image load helpers ──
 function uwSetImage(zone, dataUrl) {
   uwImages[zone] = dataUrl;
-  const dropEl  = document.getElementById('uw-drop-' + zone);
-  const imgEl   = document.getElementById('uw-img-' + zone);
-  const hintEl  = document.getElementById('uw-hint-' + zone);
-  const zoneEl  = document.getElementById('uw-zone-' + zone);
-  if (!dropEl || !imgEl) return;
-  imgEl.src = dataUrl;
-  imgEl.style.display = 'block';
+  const dropEl = document.getElementById('uw-drop-' + zone);
+  const imgEl  = document.getElementById('uw-img-' + zone);
+  const hintEl = document.getElementById('uw-hint-' + zone);
+  const zoneEl = document.getElementById('uw-zone-' + zone);
+  if (!imgEl) return;
+  imgEl.src = dataUrl; imgEl.style.display = 'block';
   if (hintEl) hintEl.style.display = 'none';
-  dropEl.classList.add('has-image');
+  if (dropEl) dropEl.classList.add('has-image');
   if (zoneEl) zoneEl.classList.add('has-image');
 }
 
 function uwClear(e, zone) {
   e.stopPropagation();
   uwImages[zone] = null;
-  const dropEl  = document.getElementById('uw-drop-' + zone);
-  const imgEl   = document.getElementById('uw-img-' + zone);
-  const hintEl  = document.getElementById('uw-hint-' + zone);
-  const zoneEl  = document.getElementById('uw-zone-' + zone);
-  const outEl   = document.getElementById('uw-out-' + zone);
-  if (imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
+  const dropEl = document.getElementById('uw-drop-' + zone);
+  const imgEl  = document.getElementById('uw-img-' + zone);
+  const hintEl = document.getElementById('uw-hint-' + zone);
+  const zoneEl = document.getElementById('uw-zone-' + zone);
+  const outEl  = document.getElementById('uw-out-' + zone);
+  if (imgEl)  { imgEl.src = ''; imgEl.style.display = 'none'; }
   if (hintEl) hintEl.style.display = '';
   if (dropEl) dropEl.classList.remove('has-image');
   if (zoneEl) zoneEl.classList.remove('has-image');
   if (outEl)  outEl.classList.remove('visible');
+  document.getElementById('uw-save-intraday-btn')?.classList.remove('visible');
   showToast('UW zone cleared', 'ok');
 }
 
 function uwLoadFile(zone, file) {
   if (!file || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
-  reader.onload = ev => { uwSetImage(zone, ev.target.result); showToast('UW ' + zone + ' loaded — click Analyze', 'ok'); };
+  reader.onload = ev => { uwSetImage(zone, ev.target.result); showToast('🐋 ' + (zone==='flows'?'Net Flows':'Exposures') + ' loaded', 'ok'); };
   reader.readAsDataURL(file);
 }
 
-function uwDragOver(e, zone) {
-  e.preventDefault();
-  document.getElementById('uw-drop-' + zone)?.classList.add('drag-over');
-}
-function uwDragLeave(e, zone) {
-  document.getElementById('uw-drop-' + zone)?.classList.remove('drag-over');
-}
+function uwDragOver(e, zone) { e.preventDefault(); document.getElementById('uw-drop-' + zone)?.classList.add('drag-over'); }
+function uwDragLeave(e, zone) { document.getElementById('uw-drop-' + zone)?.classList.remove('drag-over'); }
 function uwDrop(e, zone) {
   e.preventDefault();
   document.getElementById('uw-drop-' + zone)?.classList.remove('drag-over');
@@ -4246,112 +4383,498 @@ function uwDrop(e, zone) {
   if (f && f.type.startsWith('image/')) uwLoadFile(zone, f);
 }
 
+// ── Paste zone tracking ──
+let uwActiveZone = null, uwActiveZoneTimer = null;
+
+function uwSetActiveZone(zone) {
+  uwActiveZone = zone;
+  clearTimeout(uwActiveZoneTimer);
+  uwActiveZoneTimer = setTimeout(() => { uwActiveZone = null; }, 30000);
+  showToast('🐋 ' + (zone==='flows'?'Net Flows':'Exposures') + ' active — paste now', 'info');
+}
+
+function uwDropAreaClick(e, zone) {
+  if (uwImages[zone]) { document.getElementById('uw-file-' + zone)?.click(); return; }
+  if (uwActiveZone === zone) { document.getElementById('uw-file-' + zone)?.click(); }
+  else { uwSetActiveZone(zone); }
+}
+
 function uwInitPaste() {
   document.addEventListener('paste', e => {
-    // Only intercept if a UW drop area is the active/focused target
-    const active = document.activeElement;
-    const flowsDrop = document.getElementById('uw-drop-flows');
-    const expoDrop  = document.getElementById('uw-drop-expo');
-    let zone = null;
-    if (active === flowsDrop || flowsDrop?.contains(active)) zone = 'flows';
-    else if (active === expoDrop || expoDrop?.contains(active)) zone = 'expo';
-    if (!zone) return;
     const items = e.clipboardData?.items; if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        e.stopImmediatePropagation();
-        uwLoadFile(zone, item.getAsFile());
-        break;
-      }
+    let imgFile = null;
+    for (const item of items) { if (item.type.startsWith('image/')) { imgFile = item.getAsFile(); break; } }
+    if (!imgFile) return;
+    if (uwActiveZone) {
+      e.stopImmediatePropagation(); e.preventDefault();
+      uwLoadFile(uwActiveZone, imgFile); uwActiveZone = null; return;
     }
+    // Default: first empty zone
+    const zone = !uwImages.flows ? 'flows' : !uwImages.expo ? 'expo' : null;
+    if (zone) { e.stopImmediatePropagation(); e.preventDefault(); uwLoadFile(zone, imgFile); }
   }, true);
 }
 
-async function uwAnalyze(zone) {
+// ── Single-zone analyze (quick read, not stored as anchor) ──
+async function uwAnalyzeSingle(zone) {
   const imgData = uwImages[zone];
-  if (!imgData) { showToast('Drop an image into the ' + zone + ' zone first', 'err'); return; }
-
-  const btn    = document.getElementById('uw-btn-' + zone);
+  if (!imgData) { showToast('Load a ' + zone + ' screenshot first', 'err'); return; }
+  const btn = document.getElementById('uw-btn-' + zone);
   const outEl  = document.getElementById('uw-out-' + zone);
   const textEl = document.getElementById('uw-out-' + zone + '-text');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyzing…'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Reading…'; }
 
   const mt  = imgData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
   const b64 = imgData.split(',')[1];
 
   const prompts = {
-    flows: `You are a professional ES/SPX options flow analyst reading Unusual Whales screenshots.
+    flows: `You are an elite ES/SPX options flow analyst. Read this Unusual Whales NET FLOWS screenshot (Market Tide, 0DTE flow, Net Impact).
 
-This screenshot shows NET FLOWS data: Market Tide, 0DTE flow, and Net Impact charts.
+Extract as bullet points — be specific with price levels. Never fabricate numbers not visible in the chart:
+• Directional bias (Bullish/Bearish/Neutral) and conviction level
+• Net flow direction and intensity — is money flowing in or out?
+• Key SPX/ES price levels where flow concentrates or reverses
+• 0DTE activity — confirming or diverging from overall flow?
+• Any flow exhaustion, divergence, or regime change signals
+• Intraday implication for ES bulls/bears`,
 
-Analyze and extract:
-1. WEEKLY BIAS — Bullish / Bearish / Neutral based on net flow direction and intensity
-2. KEY LEVELS — Price levels where flow is concentrated or reversing (be specific with SPX/ES prices)
-3. SUPPORT ZONES — Where net positive flow / buying pressure exists
-4. RESISTANCE ZONES — Where net negative flow / selling pressure exists
-5. REVERSAL SIGNALS — Any divergences, exhaustion, or regime-change signals in the flow data
-6. TRADE SETUP — Specific ES entry zone, target, and stop based on flow context
-7. CONFIDENCE — How clean and clear the signal is (High / Medium / Low)
+    expo: `You are an elite ES/SPX dealer positioning analyst. Read this Unusual Whales EXPOSURES screenshot (Periscope SPX, Spot Gamma SPY, Delta by Strike SPY).
 
-Format as clean bullet points. Be specific with price levels. If levels aren't visible, say so — do not fabricate numbers.`,
-
-    expo: `You are a professional ES/SPX options dealer positioning analyst reading Unusual Whales screenshots.
-
-This screenshot shows EXPOSURES data: Periscope SPX, Spot Gamma SPY, and Delta by Strike SPY charts.
-
-Analyze and extract:
-1. WEEKLY BIAS — Bullish / Bearish / Neutral based on dealer gamma exposure and positioning
-2. KEY LEVELS — Gamma flip level, max pain, high-conviction strike clusters (specific SPX/ES prices)
-3. SUPPORT ZONES — Where dealers are long gamma and will hedge to support price
-4. RESISTANCE ZONES — Where dealers are short gamma or heavy call walls create resistance
-5. REVERSAL SIGNALS — Gamma flip proximity, delta hedging pressure, periscope breakout/breakdown signals
-6. TRADE SETUP — Specific ES entry zone, target, and stop based on dealer positioning
-7. CONFIDENCE — How clean and clear the signal is (High / Medium / Low)
-
-Format as clean bullet points. Be specific with price levels. If levels aren't visible, say so — do not fabricate numbers.`
+Extract as bullet points — be specific with price levels. Never fabricate numbers not visible in the chart:
+• Directional bias from dealer gamma positioning (Bullish/Bearish/Neutral)
+• Gamma flip level (specific SPX price) — above=dealers short gamma, below=long gamma
+• Max pain / highest open interest strike
+• Call wall / put wall levels creating resistance or support
+• Delta by strike — where is the heaviest positioning?
+• Periscope reading — expanding or contracting range?`
   };
 
   try {
     const res = await fetch(CLOUDFLARE_WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'anthropic',
-        model: 'claude-opus-4-5',
-        max_tokens: 600,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
-            { type: 'text', text: prompts[zone] }
-          ]
-        }]
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:500,
+        messages:[{role:'user', content:[
+          {type:'image', source:{type:'base64', media_type:mt, data:b64}},
+          {type:'text', text:prompts[zone]}
+        ]}]
       })
     });
     if (!res.ok) throw new Error('Worker ' + res.status);
-    const raw  = await res.text();
-    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
-    const text = (json?.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const raw = await res.text();
+    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
     if (!text) throw new Error('No text in response');
-
     if (textEl) textEl.textContent = text;
     if (outEl)  outEl.classList.add('visible');
-
-    // Store in window context for master AI
-    if (zone === 'flows') window.uwFlowsContext  = 'UW Net Flows: ' + text.slice(0, 400);
-    if (zone === 'expo')  window.uwExpoContext   = 'UW Exposures: ' + text.slice(0, 400);
-
-    showToast('✅ UW ' + zone + ' analyzed', 'ok');
-  } catch(e) {
-    if (textEl) textEl.textContent = 'Analysis failed: ' + e.message;
+    // Store quick context for signal AI
+    if (zone==='flows') window.uwFlowsContext = 'UW Net Flows (intraday read): ' + text.slice(0,350);
+    if (zone==='expo')  window.uwExpoContext  = 'UW Exposures (intraday read): ' + text.slice(0,350);
+    // Show save-as-intraday button
+    document.getElementById('uw-save-intraday-btn')?.classList.add('visible');
+    showToast('✅ UW ' + zone + ' read complete', 'ok');
+  } catch(err) {
+    if (textEl) textEl.textContent = 'Failed: ' + err.message;
     if (outEl)  outEl.classList.add('visible');
-    showToast('UW analyze failed: ' + e.message, 'err');
+    showToast('UW analyze failed: ' + err.message, 'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⚡ Analyze ' + (zone === 'flows' ? 'Net Flows' : 'Exposures'); }
+    if (btn) { btn.disabled=false; btn.textContent='⚡ Analyze ' + (zone==='flows'?'Net Flows':'Exposures'); }
   }
 }
 
+// ── UNIFIED WEEKLY INTELLIGENCE — reads ALL images simultaneously ──
+async function uwGenerateWeeklyIntelligence() {
+  const hasFlows = !!uwImages.flows;
+  const hasExpo  = !!uwImages.expo;
+  const hasWGEX  = gexStacks.wspx.some(Boolean) || gexStacks.wspy.some(Boolean) || !!weeklyGexImageData;
+  const hasDGEX  = gexStacks.dspx.some(Boolean) || gexStacks.dspy.some(Boolean) || !!gexImageData;
+
+  if (!hasFlows && !hasExpo) {
+    showToast('Load at least one UW screenshot first', 'err'); return;
+  }
+
+  const btn = document.getElementById('uw-intel-btn');
+  if (btn) { btn.disabled=true; btn.textContent='🐋 ⏳ Generating Weekly Intelligence…'; }
+  document.getElementById('uw-propose-panel')?.classList.remove('visible');
+
+  // Build multi-image content array
+  const content = [];
+
+  // Weekly GEX images (QTA) — added first as the "structural" context
+  const stackLabels = { wspx:'WEEKLY SPX/ES GEX (QTA)', wspy:'WEEKLY SPY GEX (QTA)', dspx:'DAILY SPX/ES GEX (QTA)', dspy:'DAILY SPY GEX (QTA)' };
+  ['wspx','wspy'].forEach(key => {
+    const slots = gexStacks[key].filter(Boolean);
+    if (!slots.length) return;
+    slots.forEach((slot,i) => {
+      const b64 = slot.dataUrl.split(',')[1];
+      const mt  = slot.dataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      content.push({type:'image', source:{type:'base64', media_type:mt, data:b64}});
+      content.push({type:'text', text:`[${stackLabels[key]} — Slot ${i+1} — ${i===slots.length-1?'NEWEST':'older'} — ${slot.timestamp}]`});
+    });
+  });
+  if (weeklyGexImageData && !gexStacks.wspx.some(Boolean) && !gexStacks.wspy.some(Boolean)) {
+    const b64w = weeklyGexImageData.split(',')[1];
+    const mtw  = weeklyGexImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({type:'image', source:{type:'base64', media_type:mtw, data:b64w}});
+    content.push({type:'text', text:'[WEEKLY GEX chart — QTA weekly dealer positioning]'});
+  }
+  // Daily GEX for additional context
+  ['dspx','dspy'].forEach(key => {
+    const slots = gexStacks[key].filter(Boolean);
+    if (!slots.length) return;
+    const newest = slots[slots.length-1];
+    const b64 = newest.dataUrl.split(',')[1];
+    const mt  = newest.dataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({type:'image', source:{type:'base64', media_type:mt, data:b64}});
+    content.push({type:'text', text:`[${stackLabels[key]} — most recent daily snapshot — ${newest.timestamp}]`});
+  });
+
+  // UW Net Flows
+  if (hasFlows) {
+    const mt  = uwImages.flows.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    const b64 = uwImages.flows.split(',')[1];
+    content.push({type:'image', source:{type:'base64', media_type:mt, data:b64}});
+    content.push({type:'text', text:'[UNUSUAL WHALES — NET FLOWS: Market Tide + 0DTE Flow + Net Impact]'});
+  }
+  // UW Exposures
+  if (hasExpo) {
+    const mt  = uwImages.expo.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    const b64 = uwImages.expo.split(',')[1];
+    content.push({type:'image', source:{type:'base64', media_type:mt, data:b64}});
+    content.push({type:'text', text:'[UNUSUAL WHALES — EXPOSURES: Periscope SPX + Spot Gamma SPY + Delta by Strike SPY]'});
+  }
+
+  // Market context
+  const es  = window.liveESPrice || '?';
+  const vix = priceData['VIX'] || '?';
+  const dxy = priceData['DXY'] || '?';
+  const wkHi = document.getElementById('lvl-wk-hi')?.textContent || '?';
+  const wkLo = document.getElementById('lvl-wk-lo')?.textContent || '?';
+  const currentBias = document.getElementById('wp-bias')?.value || 'not set';
+  const currentFlip = document.getElementById('wp-flip')?.value || 'not set';
+
+  const masterPrompt = `You are an elite ES futures analyst with deep expertise in options dealer positioning, institutional flow, and GEX dynamics.
+
+You have been given ${content.filter(c=>c.type==='image').length} images:
+${hasWGEX ? '- QTA Weekly GEX charts (dealer gamma positioning from QuantTradingApp)' : ''}
+${hasDGEX ? '- QTA Daily GEX charts (current daily dealer positioning)' : ''}
+${hasFlows ? '- Unusual Whales NET FLOWS (Market Tide, 0DTE flow, Net Impact)' : ''}
+${hasExpo  ? '- Unusual Whales EXPOSURES (Periscope SPX, Spot Gamma SPY, Delta by Strike SPY)' : ''}
+
+CURRENT MARKET: ES=${es} | VIX=${vix} | DXY=${dxy} | Wk Hi=${wkHi} | Wk Lo=${wkLo}
+CURRENT PLAYBOOK: Bias=${currentBias} | Flip=${currentFlip}
+
+YOUR TASK:
+1. Synthesize ALL images together — QTA GEX shows dealer STRUCTURE, UW shows actual FLOW and POSITIONING. They must agree for high conviction.
+2. Identify the weekly directional bias with confidence
+3. Find the gamma flip level (where dealer hedging flips from supportive to resistant)
+4. Extract 3 high-probability ES entry zones for the week with specific entry/stop/targets
+5. Score the CONFLUENCE between QTA GEX and UW data (how well do they agree?)
+6. Write a compressed weekly thesis (2-3 sentences max) that the system will use all week
+
+CONFLUENCE SCORING:
+- GEX bias direction matches UW flow direction: +2
+- Gamma flip level agrees within 10 pts: +2  
+- 0DTE flow confirms weekly direction: +1
+- UW exposures confirm GEX structure: +1
+- Disagreements reduce score and must be flagged
+Score: 0-6 → Low(0-2) Medium(3-4) High(5-6)
+
+CRITICAL RULES:
+- Never fabricate price levels not visible in the images
+- If images are unclear or insufficient, say so in confluenceDetail
+- All ES prices must be realistic (current market ~${es})
+- zones must have specific entry/stop/t1/t2 — not ranges
+
+OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
+{
+  "bias": "BULLISH or BEARISH or NEUTRAL",
+  "biasConfidence": 0-100,
+  "flipZone": "specific ES price",
+  "confluenceScore": 0-6,
+  "confluenceLevel": "High or Medium or Low",
+  "confluenceDetail": "one sentence on what agrees and what conflicts",
+  "zone0": {"dir":"LONG or SHORT","entry":"price","stop":"price","t1":"price","t2":"price","rationale":"one line"},
+  "zone1": {"dir":"LONG or SHORT","entry":"price","stop":"price","t1":"price","t2":"price","rationale":"one line"},
+  "zone2": {"dir":"LONG or SHORT","entry":"price","stop":"price","t1":"price","t2":"price","rationale":"one line"},
+  "weeklyThesis": "2-3 sentence compressed thesis used all week by the signal AI",
+  "keySupport": "strongest support price",
+  "keyResistance": "strongest resistance price",
+  "uwFlowsBias": "BULLISH or BEARISH or NEUTRAL — from UW flows only",
+  "qtaGexBias": "BULLISH or BEARISH or NEUTRAL — from QTA GEX only",
+  "intradayNote": "what to watch intraday that could invalidate this thesis"
+}`;
+
+  content.push({type:'text', text:masterPrompt});
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:1000,
+        messages:[{role:'user', content}]
+      })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw = await res.text();
+    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    if (!text) throw new Error('No response text');
+    const start = text.indexOf('{'), end = text.lastIndexOf('}');
+    if (start===-1) throw new Error('No JSON in response');
+    const p = JSON.parse(text.slice(start, end+1));
+
+    uwProposed = p;
+    uwShowPropose(p);
+    // Also update single-zone outputs for immediate visibility
+    if (hasFlows) {
+      const el = document.getElementById('uw-out-flows-text');
+      const outEl = document.getElementById('uw-out-flows');
+      if (el) el.textContent = 'UW Flows Bias: ' + (p.uwFlowsBias||'?') + '\n' + (p.weeklyThesis||'');
+      if (outEl) outEl.classList.add('visible');
+    }
+    if (hasExpo) {
+      const el = document.getElementById('uw-out-expo-text');
+      const outEl = document.getElementById('uw-out-expo');
+      if (el) el.textContent = 'QTA GEX Bias: ' + (p.qtaGexBias||'?') + ' | Flip: ' + (p.flipZone||'?') + '\n' + (p.confluenceDetail||'');
+      if (outEl) outEl.classList.add('visible');
+    }
+    showToast('🐋 Weekly intelligence ready — review and accept', 'ok');
+  } catch(err) {
+    showToast('Weekly intelligence failed: ' + err.message, 'err');
+    console.error('[UW Intel]', err);
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='🐋 ⚡ Generate Weekly Intelligence (QTA GEX + UW)'; }
+  }
+}
+
+function uwShowPropose(p) {
+  const panel = document.getElementById('uw-propose-panel');
+  if (!panel) return;
+
+  // Confluence badge
+  const scoreEl = document.getElementById('uw-confluence-score');
+  const labelEl = document.getElementById('uw-confluence-label');
+  const detailEl = document.getElementById('uw-confluence-detail');
+  if (scoreEl) {
+    scoreEl.textContent = (p.confluenceScore||0) + '/6';
+    scoreEl.className = 'uw-confluence-score ' + (p.confluenceLevel==='High'?'high':p.confluenceLevel==='Medium'?'med':'low');
+  }
+  if (labelEl) labelEl.textContent = (p.confluenceLevel||'?') + ' Confluence';
+  if (detailEl) detailEl.textContent = p.confluenceDetail || '';
+
+  // Proposed values
+  const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.textContent=v; };
+  set('prop-bias',  (p.bias||'?') + ' (' + (p.biasConfidence||'?') + '% conf)');
+  set('prop-flip',  p.flipZone||'?');
+  set('curr-bias',  'current: ' + (document.getElementById('wp-bias')?.value||'—'));
+  set('curr-flip',  'current: ' + (document.getElementById('wp-flip')?.value||'—'));
+  ['0','1','2'].forEach(i => {
+    const z = p['zone'+i];
+    if (z) set('prop-z'+i, (z.dir||'?') + ' E:' + (z.entry||'?') + ' S:' + (z.stop||'?') + ' T1:' + (z.t1||'?'));
+  });
+  set('prop-thesis', (p.weeklyThesis||'') + (p.intradayNote ? '\n\n⚠️ Watch: ' + p.intradayNote : ''));
+
+  const timeEl = document.getElementById('uw-propose-time');
+  if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  panel.classList.add('visible');
+}
+
+// Accept individual zone into weekly playbook
+function uwAcceptZone(idx) {
+  if (!uwProposed) return;
+  const z = uwProposed['zone'+idx];
+  if (!z) return;
+  const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
+  set('wp-z'+idx+'-dir',   z.dir);
+  set('wp-z'+idx+'-entry', z.entry);
+  set('wp-z'+idx+'-stop',  z.stop);
+  set('wp-z'+idx+'-t1',    z.t1);
+  set('wp-z'+idx+'-t2',    z.t2);
+  showToast('Zone ' + (idx+1) + ' accepted → Weekly Playbook', 'ok');
+}
+
+// Accept ALL proposed values into weekly playbook
+function uwAcceptAll() {
+  if (!uwProposed) { showToast('No proposal to accept', 'err'); return; }
+  const p = uwProposed;
+  const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
+  set('wp-bias',  p.bias);
+  set('wp-flip',  p.flipZone);
+  set('wp-notes', p.weeklyThesis + (p.intradayNote ? ' | Watch: ' + p.intradayNote : ''));
+  ['0','1','2'].forEach(i => {
+    const z = p['zone'+i]; if(!z) return;
+    set('wp-z'+i+'-dir',   z.dir);
+    set('wp-z'+i+'-entry', z.entry);
+    set('wp-z'+i+'-stop',  z.stop);
+    set('wp-z'+i+'-t1',    z.t1);
+    set('wp-z'+i+'-t2',    z.t2);
+  });
+  updateWPBiasBadge(p.bias);
+  weeklyPlaybook = { bias:p.bias, flipZone:p.flipZone, notes:p.weeklyThesis,
+    zone0:p.zone0, zone1:p.zone1, zone2:p.zone2 };
+  // Build compressed context for signal AI
+  window.uwWeeklyContext = buildUWWeeklyContext(p);
+  showToast('✅ All values accepted → Weekly Playbook — remember to Save to Cloud', 'ok');
+}
+
+// Save as weekly anchor to KV — persists all week
+async function uwSaveAnchor() {
+  if (!uwProposed) { showToast('Generate intelligence first', 'err'); return; }
+  const p = uwProposed;
+  const anchorPayload = {
+    bias: p.bias,
+    biasConfidence: p.biasConfidence,
+    flipZone: p.flipZone,
+    keySupport: p.keySupport,
+    keyResistance: p.keyResistance,
+    weeklyThesis: p.weeklyThesis,
+    intradayNote: p.intradayNote,
+    confluenceScore: p.confluenceScore,
+    confluenceLevel: p.confluenceLevel,
+    confluenceDetail: p.confluenceDetail,
+    uwFlowsBias: p.uwFlowsBias,
+    qtaGexBias: p.qtaGexBias,
+    zone0: p.zone0, zone1: p.zone1, zone2: p.zone2,
+    savedAt: Date.now()
+  };
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/uw-weekly-anchor', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(anchorPayload)
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    uwAnchor = anchorPayload;
+    window.uwWeeklyContext = buildUWWeeklyContext(p);
+    uwUpdateAnchorUI(anchorPayload);
+    showToast('🔒 Weekly anchor saved to cloud — active all week', 'ok');
+  } catch(e) { showToast('Anchor save failed: ' + e.message, 'err'); }
+}
+
+// Save intraday update to KV (does NOT overwrite anchor)
+async function uwSaveIntradayUpdate() {
+  const flowsText = document.getElementById('uw-out-flows-text')?.textContent || '';
+  const expoText  = document.getElementById('uw-out-expo-text')?.textContent  || '';
+  if (!flowsText && !expoText) { showToast('Analyze a zone first', 'err'); return; }
+
+  const intradayPayload = {
+    flowsRead: flowsText.slice(0,400),
+    expoRead:  expoText.slice(0,400),
+    flowsContext: window.uwFlowsContext || '',
+    expoContext:  window.uwExpoContext  || '',
+    savedAt: Date.now()
+  };
+  // Compute delta vs anchor
+  if (uwAnchor) {
+    intradayPayload.anchorBias = uwAnchor.bias;
+    // Simple delta detection
+    const flowsLower = flowsText.toLowerCase();
+    const flowDir = flowsLower.includes('bearish') || flowsLower.includes('negative') || flowsLower.includes('selling') ? 'BEARISH'
+                  : flowsLower.includes('bullish') || flowsLower.includes('positive') || flowsLower.includes('buying') ? 'BULLISH' : 'NEUTRAL';
+    const delta = flowDir !== uwAnchor.bias ? '⚠️ ' + flowDir + ' vs anchor ' + uwAnchor.bias : '✅ Confirming ' + uwAnchor.bias;
+    intradayPayload.delta = delta;
+  }
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/uw-intraday', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(intradayPayload)
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    uwIntraday = intradayPayload;
+    // Update intraday bar
+    const bar = document.getElementById('uw-intraday-bar');
+    const delta = document.getElementById('uw-intraday-delta');
+    const time  = document.getElementById('uw-intraday-time');
+    if (bar) bar.classList.add('visible');
+    if (delta) delta.textContent = intradayPayload.delta || 'Update saved';
+    if (time)  time.textContent  = new Date(intradayPayload.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    // Update signal AI context
+    window.uwIntradayContext = 'UW Intraday Update (' + new Date(intradayPayload.savedAt).toLocaleTimeString() + '): ' + (intradayPayload.delta||'') + ' | Flows: ' + (intradayPayload.flowsRead||'').slice(0,200);
+    document.getElementById('uw-save-intraday-btn')?.classList.remove('visible');
+    showToast('⟳ Intraday update saved', 'ok');
+  } catch(e) { showToast('Intraday save failed: ' + e.message, 'err'); }
+}
+
+// Build compressed context string injected into every signal
+function buildUWWeeklyContext(p) {
+  const zones = ['zone0','zone1','zone2'].map((k,i) => {
+    const z = p[k]; if(!z||!z.entry) return null;
+    return 'Z'+(i+1)+':'+z.dir+' E'+z.entry+' S'+z.stop+' T'+z.t1;
+  }).filter(Boolean).join(' | ');
+  return [
+    'UW WEEKLY ANCHOR:',
+    'Bias: ' + p.bias + ' (' + (p.biasConfidence||'?') + '% conf)',
+    'Confluence: ' + p.confluenceLevel + ' ' + (p.confluenceScore||0) + '/6 — ' + (p.confluenceDetail||''),
+    'Flip: ' + (p.flipZone||'?') + ' | Support: ' + (p.keySupport||'?') + ' | Resistance: ' + (p.keyResistance||'?'),
+    'QTA GEX: ' + (p.qtaGexBias||'?') + ' | UW Flows: ' + (p.uwFlowsBias||'?'),
+    zones ? 'Weekly Zones: ' + zones : '',
+    'Thesis: ' + (p.weeklyThesis||'not set'),
+    p.intradayNote ? 'Watch: ' + p.intradayNote : ''
+  ].filter(Boolean).join('\n');
+}
+
+// Update anchor status bar UI
+function uwUpdateAnchorUI(a) {
+  if (!a || a.status==='no_data') return;
+  const bar     = document.getElementById('uw-anchor-bar');
+  const biasEl  = document.getElementById('uw-anchor-bias-lbl');
+  const flipEl  = document.getElementById('uw-anchor-flip-lbl');
+  const thesisEl= document.getElementById('uw-anchor-thesis-lbl');
+  const ageEl   = document.getElementById('uw-anchor-age');
+  const badgeEl = document.getElementById('uw-anchor-badge');
+  const wpBadge = document.getElementById('wp-uw-intel-badge');
+
+  if (bar) bar.style.display = 'flex';
+  if (biasEl) { biasEl.textContent = a.bias||'?'; biasEl.className = 'uw-anchor-bias ' + (a.bias||''); }
+  if (flipEl) flipEl.textContent = a.flipZone || '?';
+  if (thesisEl) thesisEl.textContent = (a.weeklyThesis||'').slice(0,80) + ((a.weeklyThesis||'').length>80?'…':'');
+
+  // Age
+  const ageMs = Date.now() - (a.savedAt||0);
+  const ageDays = ageMs / 86400000;
+  const ageStr = ageDays < 1 ? Math.round(ageMs/3600000) + 'h ago'
+               : ageDays < 2 ? 'Yesterday' : Math.round(ageDays) + 'd ago';
+  const ageCls = ageDays < 2 ? 'fresh' : ageDays < 5 ? 'stale' : 'old';
+  if (ageEl) { ageEl.textContent = ageStr; ageEl.className = 'uw-anchor-age ' + ageCls; }
+  if (ageDays > 5 && ageEl) showToast('⚠️ UW anchor is ' + Math.round(ageDays) + ' days old — consider refreshing', 'err');
+
+  // Header badges
+  const shortBias = (a.bias||'?').slice(0,4);
+  if (badgeEl) { badgeEl.textContent = '🐋 ' + shortBias + ' ' + (a.confluenceLevel||'').slice(0,3); badgeEl.className = 'wp-uw-badge ' + (ageDays<5?'active':'stale'); }
+  if (wpBadge) { wpBadge.textContent = '🐋 UW: ' + shortBias; wpBadge.className = 'wp-uw-badge ' + (ageDays<5?'active':'stale'); }
+
+  // Set window context
+  if (a.weeklyThesis) window.uwWeeklyContext = buildUWWeeklyContext(a);
+  uwAnchor = a;
+}
+
+// Load anchor + intraday from KV on startup
+async function uwLoadFromKV() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/uw-weekly-anchor');
+    if (!res.ok) return;
+    const raw = await res.text();
+    const d = JSON.parse(raw);
+    if (d.status === 'no_data') return;
+    uwUpdateAnchorUI(d);
+  } catch(e) { console.log('[UW] No anchor yet'); }
+  try {
+    const res2 = await fetch(CLOUDFLARE_WORKER + '/uw-intraday');
+    if (!res2.ok) return;
+    const raw2 = await res2.text();
+    const d2 = JSON.parse(raw2);
+    if (d2.status==='no_data' || d2.stale) return;
+    uwIntraday = d2;
+    const bar   = document.getElementById('uw-intraday-bar');
+    const delta = document.getElementById('uw-intraday-delta');
+    const time  = document.getElementById('uw-intraday-time');
+    if (bar)   bar.classList.add('visible');
+    if (delta) delta.textContent = d2.delta || 'Intraday update loaded';
+    if (time)  time.textContent  = new Date(d2.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    window.uwIntradayContext = 'UW Intraday Update (' + new Date(d2.savedAt).toLocaleTimeString() + '): ' + (d2.delta||'') + ' | ' + (d2.flowsRead||'').slice(0,200);
+  } catch(e) { console.log('[UW] No intraday yet'); }
+}
+
 // ── END UNUSUAL WHALES ──
+
 
 
 // ══════════════════════════════════════════════════
@@ -4692,6 +5215,7 @@ function initAll() {
   initGexStackZones();
   initGexStackPaste();
   uwInitPaste();
+  setTimeout(uwLoadFromKV, 2000);
   // Dynamic AI intervals
   setInterval(checkSignalHealth, 30000);
   setInterval(checkSessionTransition, 60000);
