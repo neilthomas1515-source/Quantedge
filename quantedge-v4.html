@@ -503,8 +503,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .uw-save-anchor-btn{flex:1;padding:6px;background:linear-gradient(135deg,#f59e0b,#b45309);border:none;border-radius:3px;color:#000;font-family:var(--sans);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.8px;}
 .uw-save-anchor-btn:hover{opacity:0.85;}
 /* UW save intraday update btn */
-.uw-save-intraday-btn{width:100%;padding:5px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;color:var(--cyan);font-family:var(--sans);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;display:none;margin-top:4px;}
+.uw-save-intraday-btn{width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.18),rgba(0,153,204,0.12));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;display:none;margin-top:8px;box-shadow:0 0 12px rgba(0,212,255,0.2);transition:all 0.2s;}
 .uw-save-intraday-btn.visible{display:block;}
+.uw-save-intraday-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.28),rgba(0,153,204,0.22));box-shadow:0 0 18px rgba(0,212,255,0.35);color:var(--white);}
 /* WP intel badge — shown in Weekly Playbook header */
 .wp-uw-badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;margin-left:6px;}
 .wp-uw-badge.active{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
@@ -792,13 +793,27 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
           <button class="uw-accept-all-btn" onclick="uwAcceptAll()">✅ Accept All → Populate Weekly Playbook</button>
           <button class="uw-save-anchor-btn" onclick="uwSaveAnchor()">🔒 Save as Weekly Anchor</button>
         </div>
+        <div id="uw-hist-match-result" style="display:none;margin-top:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:4px;font-size:11px;color:var(--t2);line-height:1.5"></div>
       </div>
     </div>
 
-  </div>
+    <!-- UW HISTORICAL LOG -->
+    <div id="uw-hist-sect" style="margin-top:10px;border-top:1px solid var(--b1);padding-top:10px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+        <span style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:1.5px;color:#f59e0b;text-transform:uppercase">📚 Historical Log</span>
+        <span id="uw-hist-count" style="font-size:10px;color:var(--t4);padding:1px 7px;background:var(--s3);border:1px solid var(--b2);border-radius:10px">0 entries</span>
+        <button onclick="uwHistClearAll()" style="margin-left:auto;padding:2px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;color:var(--t4);font-family:var(--mono);font-size:9px;cursor:pointer" title="Clear all historical entries">Clear</button>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px;line-height:1.5">Paste historical UW data (Market Tide readings + outcomes). AI matches current conditions against history on every signal.</div>
+      <textarea id="uw-hist-input" rows="4"
+        style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--white);font-family:var(--mono);font-size:11px;padding:7px 9px;resize:vertical;line-height:1.5;outline:none"
+        placeholder="Paste UW historical data here — any format. Example:&#10;2025-01-15: Market Tide BULLISH, Net Impact +2.1B, 0DTE Call-heavy, result: ES +28pts&#10;2025-01-16: Market Tide BEARISH, Gamma Flip failed, result: ES -18pts choppy&#10;&#10;AI will parse and extract patterns automatically."></textarea>
+      <button onclick="uwHistAddEntries()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(180,83,9,0.1));border:1px solid rgba(245,158,11,0.4);border-radius:4px;color:#f59e0b;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase">📚 Parse &amp; Add to Historical Log</button>
+      <div id="uw-hist-status" style="display:none;margin-top:6px;padding:6px 9px;background:var(--s2);border:1px solid var(--b1);border-radius:4px;font-size:11px;color:var(--t2)"></div>
+      <div id="uw-hist-entries" style="margin-top:8px;max-height:160px;overflow-y:auto;display:none"></div>
+    </div>
 
-
-  <!-- WEEKLY PLAYBOOK -->
+  </div><!-- end #uw-sect -->
   <div class="sect" id="wp-sect">
     <div class="sect-hd purple" style="cursor:pointer" onclick="toggleWPPanel()">
       📅 Weekly Playbook <div class="hd-line"></div>
@@ -1040,7 +1055,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         <span style="font-size:16px">📸</span>
         <div>
           <div style="font-size:12px;font-weight:700;color:var(--t1)">Chart Screenshot → AI Auto-Fill</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:1px">Paste (Ctrl+V) · Drag & drop · Click to browse</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:1px">Paste (Ctrl+V) · Drag &amp; drop · Click to browse</div>
         </div>
         <div id="chart-snap-status" style="margin-left:auto;font-size:10px;color:var(--t4)">No image</div>
       </div>
@@ -1050,9 +1065,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
     <input type="file" id="chart-snap-file" accept="image/*" style="display:none" onchange="loadChartSnapFile(this.files[0])">
     <button id="btn-chart-autofill" onclick="runChartAutoFill()"
       style="width:100%;padding:10px 14px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,153,204,0.08));border:2px solid var(--cyan2);border-radius:4px;color:var(--cyan);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;box-shadow:0 0 10px rgba(0,212,255,0.15);transition:all 0.2s;display:none"
-      disabled>
-      📸 Read Chart → Auto-Fill Levels
-    </button>
+      disabled>📸 Read Chart → Auto-Fill Levels</button>
     <div id="chart-autofill-result" style="display:none;background:var(--s2);border:1px solid var(--b1);border-radius:4px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:var(--t2)"></div>
 
     <div class="input-grid" style="margin-top:4px">
@@ -1707,7 +1720,6 @@ async function pollRithmicBridge() {
       const netDelta = data.cum_delta || 0;
       const absDelta = Math.abs(netDelta);
       const now      = Date.now();
-
       RS.lastPrice       = price;
       RS.cumulativeDelta = netDelta;
       RS.buyVolume       = vol;
@@ -1717,12 +1729,10 @@ async function pollRithmicBridge() {
       RS.connected     = true;
       RS.authenticated = true;
       bridgeLastUpdate = now;
-
       updateESPriceFromRithmic(price);
       updateBidAskDisplay();
       updateDeltaDisplay();
       updateRithmicStatus('connected');
-
       if (typeof processVWAP === 'function') processVWAP(price, vol || 1);
       const aggr = netDelta >= 0 ? 1 : 2;
       if (typeof processVolumeProfile === 'function') processVolumeProfile(price, vol || 1, aggr);
@@ -1735,12 +1745,10 @@ async function pollRithmicBridge() {
       if (typeof checkDeltaDivergence === 'function') checkDeltaDivergence();
       if (typeof updateVWAPRegimeBadge === 'function') updateVWAPRegimeBadge();
       if (typeof fetchMTFData === 'function') fetchMTFData();
-
       const vmEl = document.getElementById('viz-price-main');
       if (vmEl) { vmEl.textContent = price.toFixed(2); vmEl.className = 'viz-price-main'; }
       const vwsDot = document.getElementById('viz-ws-dot');
       if (vwsDot) vwsDot.classList.add('live');
-
     } else if (data.status === 'connecting' || data.status === 'authenticating') {
       updateRithmicStatus('connecting');
     } else if (data.status === 'auth_failed') {
@@ -3059,24 +3067,21 @@ function getSnapImagesForAI() {
 }
 
 // ══════════════════════════════════════════════════
-// CHART SCREENSHOT → AI AUTO-FILL LEVELS
-// Replaces Python 5am / 2pm scheduled tasks entirely
+// CHART SCREENSHOT → AI AUTO-FILL LEVELS (item #5)
 // ══════════════════════════════════════════════════
 let chartSnapImage = null;
 let chartSnapActive = false;
 
 function chartSnapClick() {
-  if (chartSnapImage) return; // already has image, do nothing on click
+  if (chartSnapImage) return;
   chartSnapActive = true;
   document.getElementById('chart-snap-file').click();
   setTimeout(() => { chartSnapActive = false; }, 30000);
 }
-
 function handleChartSnapDrop(e) {
   const file = e.dataTransfer?.files?.[0];
   if (file && file.type.startsWith('image/')) loadChartSnapFile(file);
 }
-
 function loadChartSnapFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
@@ -3086,18 +3091,18 @@ function loadChartSnapFile(file) {
     const status  = document.getElementById('chart-snap-status');
     const clearBtn= document.getElementById('chart-snap-clear');
     const fillBtn = document.getElementById('btn-chart-autofill');
-    if (preview) { preview.src = chartSnapImage; preview.style.display = 'block'; }
-    if (status)  { status.textContent = '✓ Ready'; status.style.color = 'var(--green)'; }
-    if (clearBtn) clearBtn.style.display = 'block';
+    if (preview)  { preview.src = chartSnapImage; preview.style.display = 'block'; }
+    if (status)   { status.textContent = '✓ Ready'; status.style.color = 'var(--green)'; }
+    if (clearBtn)  clearBtn.style.display = 'block';
     if (fillBtn)  { fillBtn.style.display = 'block'; fillBtn.disabled = false; }
     document.getElementById('chart-snap-zone').style.borderColor = 'var(--cyan2)';
     showToast('📸 Chart loaded — click Auto-Fill to extract levels', 'ok');
   };
   reader.readAsDataURL(file);
 }
-
 function clearChartSnap() {
   chartSnapImage = null;
+  const ids = { 'chart-snap-preview':'', 'chart-snap-status':'No image', 'chart-snap-clear':'', 'btn-chart-autofill':'', 'chart-autofill-result':'' };
   const preview = document.getElementById('chart-snap-preview');
   const status  = document.getElementById('chart-snap-status');
   const clearBtn= document.getElementById('chart-snap-clear');
@@ -3110,8 +3115,7 @@ function clearChartSnap() {
   if (result)    result.style.display = 'none';
   document.getElementById('chart-snap-zone').style.borderColor = 'var(--b2)';
 }
-
-// Handle Ctrl+V paste into chart snap zone
+// Ctrl+V into chart snap zone
 document.addEventListener('paste', e => {
   if (!chartSnapActive) return;
   const items = e.clipboardData?.items; if (!items) return;
@@ -3119,8 +3123,7 @@ document.addEventListener('paste', e => {
     if (item.type.startsWith('image/')) {
       e.stopImmediatePropagation(); e.preventDefault();
       loadChartSnapFile(item.getAsFile());
-      chartSnapActive = false;
-      break;
+      chartSnapActive = false; break;
     }
   }
 }, true);
@@ -3128,8 +3131,8 @@ document.addEventListener('paste', e => {
 async function runChartAutoFill() {
   if (!chartSnapImage) { showToast('Load a chart screenshot first', 'err'); return; }
   const btn = document.getElementById('btn-chart-autofill');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ AI Reading Chart…'; }
   const result = document.getElementById('chart-autofill-result');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ AI Reading Chart…'; }
 
   const mt  = chartSnapImage.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
   const b64 = chartSnapImage.split(',')[1];
@@ -3139,33 +3142,11 @@ async function runChartAutoFill() {
   const pdc = document.getElementById('lvl-prev-close')?.textContent || '?';
 
   const prompt = `You are an elite ES futures analyst reading a TradingView chart screenshot for pre-market level extraction.
-
 Current known data: ES~${es} | PDH=${pdh} | PDL=${pdl} | PrevClose=${pdc}
-
-Extract the following price levels visible in the chart. If a level is not clearly visible, return null for that field.
-
-OUTPUT JSON ONLY (no markdown, no backticks, no explanation):
-{
-  "onHigh": number or null,
-  "onLow": number or null,
-  "asiaHigh": number or null,
-  "asiaLow": number or null,
-  "londonHigh": number or null,
-  "londonLow": number or null,
-  "keyLevels": [number, ...] or [],
-  "bias": "BULLISH" or "BEARISH" or "NEUTRAL",
-  "biasConfidence": 0-100,
-  "biasSummary": "1-2 sentence pre-market read from the chart",
-  "watchFor": "key thing to monitor this session"
-}
-
-Rules:
-- All prices must be realistic ES futures prices (currently ~${es})
-- O/N = Overnight session high/low (typically marked on chart as globex or overnight range)
-- Asia = Asian session high/low
-- London = London/European session high/low
-- keyLevels = any clearly marked support/resistance levels (max 4)
-- Never fabricate levels not visible in the chart — return null if uncertain`;
+Extract price levels visible in the chart. Return null for any level not clearly visible.
+OUTPUT JSON ONLY (no markdown, no backticks):
+{"onHigh":number|null,"onLow":number|null,"asiaHigh":number|null,"asiaLow":number|null,"londonHigh":number|null,"londonLow":number|null,"keyLevels":[numbers],"bias":"BULLISH|BEARISH|NEUTRAL","biasConfidence":0-100,"biasSummary":"1-2 sentence read","watchFor":"key thing to monitor"}
+Rules: All ES prices realistic (~${es}). O/N=overnight range. Never fabricate — return null if uncertain.`;
 
   try {
     const res = await fetch(CLOUDFLARE_WORKER, {
@@ -3185,16 +3166,11 @@ Rules:
     if (tS === -1) throw new Error('No JSON in response');
     const p = JSON.parse(text.slice(tS, tE+1));
 
-    // ── Populate all level inputs ──
     const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
-    setInput('on-hi',   p.onHigh);
-    setInput('on-lo',   p.onLow);
-    setInput('asia-hi', p.asiaHigh);
-    setInput('asia-lo', p.asiaLow);
-    setInput('lon-hi',  p.londonHigh);
-    setInput('lon-lo',  p.londonLow);
+    setInput('on-hi',   p.onHigh);  setInput('on-lo',   p.onLow);
+    setInput('asia-hi', p.asiaHigh); setInput('asia-lo', p.asiaLow);
+    setInput('lon-hi',  p.londonHigh); setInput('lon-lo', p.londonLow);
 
-    // ── Populate morning bias card ──
     if (p.bias) {
       const dirEl    = document.getElementById('bias-direction');
       const fillEl   = document.getElementById('bias-conf-fill');
@@ -3208,45 +3184,26 @@ Rules:
       const thEl = document.getElementById('morning-thesis');
       if (thEl) thEl.value = window.morningBiasContext;
     }
-
-    // ── Result summary ──
-    const filled = [
-      p.onHigh    != null ? `O/N ${p.onHigh}/${p.onLow}` : null,
-      p.asiaHigh  != null ? `Asia ${p.asiaHigh}/${p.asiaLow}` : null,
-      p.londonHigh!= null ? `London ${p.londonHigh}/${p.londonLow}` : null,
-    ].filter(Boolean);
-    const summaryText = `✅ Auto-filled: ${filled.join(' · ') || 'no session levels found'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+    const filled = [p.onHigh!=null?`O/N ${p.onHigh}/${p.onLow}`:null, p.asiaHigh!=null?`Asia ${p.asiaHigh}/${p.asiaLow}`:null, p.londonHigh!=null?`London ${p.londonHigh}/${p.londonLow}`:null].filter(Boolean);
+    const summaryText = `✅ Auto-filled: ${filled.join(' · ')||'no session levels found'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
     if (result) { result.style.display = 'block'; result.textContent = summaryText; }
     showToast(summaryText, 'ok');
-
-    // ── Save to KV so it persists on reload ──
-    const payload = {
-      onHigh: p.onHigh, onLow: p.onLow,
-      asiaHigh: p.asiaHigh, asiaLow: p.asiaLow,
-      londonHigh: p.londonHigh, londonLow: p.londonLow,
-      keyLevels: p.keyLevels || [],
-      bias: p.bias, biasConfidence: p.biasConfidence,
-      biasSummary: p.biasSummary, watchFor: p.watchFor,
-      savedAt: Date.now()
-    };
+    window.chartAutoFillContext = `Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
+    // Save to KV
     try {
       await fetch(CLOUDFLARE_WORKER + '/morning-analysis', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+        body: JSON.stringify({onHigh:p.onHigh,onLow:p.onLow,asiaHigh:p.asiaHigh,asiaLow:p.asiaLow,londonHigh:p.londonHigh,londonLow:p.londonLow,keyLevels:p.keyLevels||[],bias:p.bias,biasConfidence:p.biasConfidence,biasSummary:p.biasSummary,watchFor:p.watchFor,savedAt:Date.now()})
       });
     } catch(kvErr) { console.warn('[ChartFill] KV save failed:', kvErr.message); }
-
-    window.chartAutoFillContext = `Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
-
   } catch(e) {
-    if (result) { result.style.display = 'block'; result.textContent = '⚠ Failed: ' + e.message; result.style.color = 'var(--red)'; }
+    if (result) { result.style.display='block'; result.textContent='⚠ Failed: '+e.message; result.style.color='var(--red)'; }
     showToast('Chart auto-fill failed: ' + e.message, 'err');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '📸 Read Chart → Auto-Fill Levels'; }
   }
 }
 
-// ── Load today's chart levels from KV on startup ──
 async function loadChartLevelsFromKV() {
   try {
     const res = await fetch(CLOUDFLARE_WORKER + '/morning-analysis');
@@ -3254,33 +3211,191 @@ async function loadChartLevelsFromKV() {
     const raw = await res.text();
     const d = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
     if (!d || d.status === 'no_data') return;
-    // Only use if saved today
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
     if (!d.savedAt || d.savedAt < todayStart.getTime()) { console.log('[ChartFill] KV data is from previous day — skipping'); return; }
-
     const setInput = (id, val) => { if (val != null && !isNaN(val)) { const el=document.getElementById(id); if(el) el.value = parseFloat(val).toFixed(2); } };
-    setInput('on-hi',   d.onHigh);
-    setInput('on-lo',   d.onLow);
-    setInput('asia-hi', d.asiaHigh);
-    setInput('asia-lo', d.asiaLow);
-    setInput('lon-hi',  d.londonHigh);
-    setInput('lon-lo',  d.londonLow);
-
+    setInput('on-hi',d.onHigh); setInput('on-lo',d.onLow); setInput('asia-hi',d.asiaHigh);
+    setInput('asia-lo',d.asiaLow); setInput('lon-hi',d.londonHigh); setInput('lon-lo',d.londonLow);
     if (d.bias) {
-      const dirEl    = document.getElementById('bias-direction');
-      const fillEl   = document.getElementById('bias-conf-fill');
-      const pctEl    = document.getElementById('bias-conf-pct');
-      const reasonEl = document.getElementById('bias-reasoning');
-      if (dirEl)    { dirEl.textContent = d.bias; dirEl.style.color = d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
-      if (fillEl)   fillEl.style.width = (d.biasConfidence||0) + '%';
-      if (pctEl)    pctEl.textContent  = (d.biasConfidence||0) + '%';
-      if (reasonEl) reasonEl.textContent = d.biasSummary || '';
-      window.morningBiasContext = `Morning Bias: ${d.bias} (${d.biasConfidence}%) — ${d.biasSummary||''}. Watch: ${d.watchFor||''}`;
+      const dirEl=document.getElementById('bias-direction'), fillEl=document.getElementById('bias-conf-fill'), pctEl=document.getElementById('bias-conf-pct'), reasonEl=document.getElementById('bias-reasoning');
+      if (dirEl)    { dirEl.textContent=d.bias; dirEl.style.color=d.bias==='BULLISH'?'var(--green)':d.bias==='BEARISH'?'var(--red)':'var(--amber)'; }
+      if (fillEl)   fillEl.style.width=(d.biasConfidence||0)+'%';
+      if (pctEl)    pctEl.textContent=(d.biasConfidence||0)+'%';
+      if (reasonEl) reasonEl.textContent=d.biasSummary||'';
+      window.morningBiasContext=`Morning Bias: ${d.bias} (${d.biasConfidence}%) — ${d.biasSummary||''}. Watch: ${d.watchFor||''}`;
     }
-    window.chartAutoFillContext = `Chart Levels (loaded): O/N ${d.onHigh||'?'}/${d.onLow||'?'} | Asia ${d.asiaHigh||'?'}/${d.asiaLow||'?'} | London ${d.londonHigh||'?'}/${d.londonLow||'?'}`;
+    window.chartAutoFillContext=`Chart Levels (loaded): O/N ${d.onHigh||'?'}/${d.onLow||'?'} | Asia ${d.asiaHigh||'?'}/${d.asiaLow||'?'} | London ${d.londonHigh||'?'}/${d.londonLow||'?'}`;
     const savedTime = new Date(d.savedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     showToast(`📸 Chart levels loaded from cloud (saved ${savedTime})`, 'ok');
   } catch(e) { console.log('[ChartFill] No KV data yet'); }
+}
+
+// ══════════════════════════════════════════════════
+// UW HISTORICAL LOG — item #6
+// Stores parsed UW entries in localStorage.
+// AI searches on every Weekly Intelligence + Signal call.
+// ══════════════════════════════════════════════════
+const UW_HIST_KEY = 'qe_uw_hist_v4';
+let uwHistEntries = [];
+
+function uwHistLoad() {
+  try {
+    const s = localStorage.getItem(UW_HIST_KEY);
+    if (s) uwHistEntries = JSON.parse(s);
+  } catch(e) { uwHistEntries = []; }
+  uwHistRenderCount();
+}
+
+function uwHistSave() {
+  try { localStorage.setItem(UW_HIST_KEY, JSON.stringify(uwHistEntries)); } catch(e) {}
+}
+
+function uwHistRenderCount() {
+  const el = document.getElementById('uw-hist-count');
+  if (el) el.textContent = uwHistEntries.length + ' entr' + (uwHistEntries.length === 1 ? 'y' : 'ies');
+  const entriesEl = document.getElementById('uw-hist-entries');
+  if (!entriesEl) return;
+  if (uwHistEntries.length === 0) { entriesEl.style.display = 'none'; return; }
+  entriesEl.style.display = 'block';
+  entriesEl.innerHTML = uwHistEntries.slice(-20).reverse().map((e, i) => {
+    const oc = e.outcome?.toLowerCase().includes('bull') || e.outcome?.toLowerCase().includes('+') ? 'var(--green)' : e.outcome?.toLowerCase().includes('bear') || e.outcome?.toLowerCase().includes('-') ? 'var(--red)' : 'var(--t3)';
+    return `<div style="display:flex;gap:6px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--b1);font-size:10px">
+      <span style="color:var(--t4);flex-shrink:0;min-width:60px">${e.date||'?'}</span>
+      <span style="color:var(--t2);flex:1">${e.conditions||e.raw||''}</span>
+      <span style="color:${oc};flex-shrink:0;font-weight:700">${e.outcome||'?'}</span>
+    </div>`;
+  }).join('');
+}
+
+function uwHistClearAll() {
+  if (!confirm('Clear all ' + uwHistEntries.length + ' historical entries?')) return;
+  uwHistEntries = [];
+  uwHistSave();
+  uwHistRenderCount();
+  window.uwHistContext = null;
+  showToast('Historical log cleared', 'ok');
+}
+
+async function uwHistAddEntries() {
+  const input = document.getElementById('uw-hist-input');
+  const statusEl = document.getElementById('uw-hist-status');
+  const raw = input?.value?.trim();
+  if (!raw) { showToast('Paste historical data first', 'err'); return; }
+
+  const btn = document.querySelector('[onclick="uwHistAddEntries()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Parsing…'; }
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'AI parsing historical entries…'; statusEl.style.color = 'var(--t2)'; }
+
+  const prompt = `You are parsing historical Unusual Whales / market data entries for pattern storage.
+
+Raw input:
+${raw.slice(0, 3000)}
+
+Extract each entry and return a JSON array. Each entry object:
+{
+  "date": "YYYY-MM-DD or date string",
+  "marketTide": "BULLISH|BEARISH|NEUTRAL|null",
+  "netImpact": "string like +2.1B or null",
+  "zerodte": "CALL-HEAVY|PUT-HEAVY|BALANCED|null",
+  "gammaFlip": "price or null",
+  "conditions": "1 sentence summary of the setup",
+  "outcome": "result — e.g. ES +28pts, choppy -12pts, stopped out, etc.",
+  "outcomeDir": "BULLISH|BEARISH|NEUTRAL"
+}
+
+Return ONLY a JSON array. No markdown, no backticks, no explanation.
+If fewer than 1 valid entry found, return [].`;
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:2000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw2 = await res.text();
+    const json = JSON.parse(raw2.slice(raw2.indexOf('{'), raw2.lastIndexOf('}')+1));
+    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const aS = text.indexOf('['), aE = text.lastIndexOf(']');
+    if (aS === -1) throw new Error('No array in response');
+    const parsed = JSON.parse(text.slice(aS, aE+1));
+    if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('No valid entries parsed');
+
+    // Dedupe by date+conditions
+    let added = 0;
+    parsed.forEach(entry => {
+      entry.addedAt = Date.now();
+      const isDupe = uwHistEntries.some(e => e.date === entry.date && e.conditions === entry.conditions);
+      if (!isDupe) { uwHistEntries.push(entry); added++; }
+    });
+    uwHistSave();
+    uwHistRenderCount();
+    if (statusEl) { statusEl.textContent = `✅ Added ${added} new entries (${parsed.length - added} duplicates skipped). Total: ${uwHistEntries.length}`; statusEl.style.color = 'var(--green)'; }
+    if (input) input.value = '';
+    showToast(`📚 ${added} historical entries added — total ${uwHistEntries.length}`, 'ok');
+    uwHistBuildContext(); // rebuild context string
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = '⚠ Parse failed: ' + e.message; statusEl.style.color = 'var(--red)'; }
+    showToast('Historical parse failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📚 Parse & Add to Historical Log'; }
+  }
+}
+
+// Build compressed context string from history — called after add and on pattern match
+function uwHistBuildContext() {
+  if (!uwHistEntries.length) { window.uwHistContext = null; return; }
+  const total = uwHistEntries.length;
+  const wins  = uwHistEntries.filter(e => e.outcomeDir === 'BULLISH' || (e.outcome||'').includes('+')).length;
+  const winRate = total > 0 ? Math.round((wins/total)*100) : 0;
+  window.uwHistContext = `UW Historical Log: ${total} entries, overall ${winRate}% bullish outcomes.`;
+}
+
+// Match current conditions against history — called from signal + weekly intelligence
+async function uwHistMatchCurrent(currentConditions) {
+  if (!uwHistEntries.length) return null;
+  const recentEntries = uwHistEntries.slice(-50); // last 50 entries
+  const summary = recentEntries.map(e => `${e.date}: ${e.conditions} → ${e.outcome}`).join('\n');
+
+  const prompt = `You are searching a historical trade database for pattern matches.
+
+CURRENT CONDITIONS:
+${currentConditions}
+
+HISTORICAL ENTRIES (${recentEntries.length} records):
+${summary}
+
+Find entries where historical conditions closely match current conditions (same UW bias direction, similar gamma regime, similar flow characteristics).
+
+OUTPUT JSON ONLY:
+{
+  "matchFound": true|false,
+  "matchCount": number,
+  "winRate": 0-100,
+  "avgOutcome": "e.g. ES +18pts avg",
+  "bestMatch": "date and brief description of closest match",
+  "patternNote": "1 sentence on what the history says about this setup",
+  "noPrecedent": true|false
+}
+
+If fewer than 2 matches found, set matchFound=false and noPrecedent=true.`;
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:400,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    if (!res.ok) return null;
+    const raw = await res.text();
+    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const tS = text.indexOf('{'), tE = text.lastIndexOf('}');
+    if (tS === -1) return null;
+    return JSON.parse(text.slice(tS, tE+1));
+  } catch(e) { return null; }
 }
 
 // ── MORNING BIAS ──
@@ -3324,8 +3439,8 @@ Respond in JSON only:
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-5', max_tokens:400, messages:[{role:'user',content:prompt}] })
     });
-    const raw = await res.text();
-    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    const raw2 = await res.text();
+    const data = JSON.parse(raw2.slice(raw2.indexOf('{'), raw2.lastIndexOf('}')+1));
     const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
     const tStart = text.indexOf('{'), tEnd = text.lastIndexOf('}');
     if (tStart === -1) throw new Error('No JSON in bias response');
@@ -3594,7 +3709,8 @@ ${weeklyGexImageData ? '[Weekly GEX image attached below — WEEKLY dealer posit
 === UW WEEKLY INTELLIGENCE ===
 ${window.uwWeeklyContext || 'No UW anchor set — drop UW screenshots and run Weekly Intelligence'}
 ${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}
-${window.chartAutoFillContext ? '\n=== CHART LEVELS (from screenshot) ===\n' + window.chartAutoFillContext : ''}`;
+${window.chartAutoFillContext ? '\n=== CHART LEVELS (from screenshot) ===\n' + window.chartAutoFillContext : ''}
+${window.uwHistContext ? '\n=== UW HISTORICAL PATTERN MATCH ===\n' + window.uwHistContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -4039,6 +4155,7 @@ function updateReadinessGrid() {
     { label:'Options Flow',    filled: !!optFlow?.putCallRatio },
     { label:'Morning Bias',    filled: !!window.morningBiasContext },
     { label:'Chart Levels',    filled: !!window.chartAutoFillContext },
+    { label:'UW History',      filled: uwHistEntries.length >= 5 },
   ];
   const filledCount = items.filter(i => i.filled).length;
   const scoreEl = document.getElementById('psd-ready-score');
@@ -4815,6 +4932,12 @@ async function uwGenerateWeeklyIntelligence() {
   const currentBias = document.getElementById('wp-bias')?.value || 'not set';
   const currentFlip = document.getElementById('wp-flip')?.value || 'not set';
 
+  const currentConditionsForHistory = `Bias=${currentBias} | Flip=${currentFlip} | ES=${es} | VIX=${vix} | DXY=${dxy} | hasFlows=${hasFlows} | hasExpo=${hasExpo}`;
+  let histMatchResult = null;
+  if (uwHistEntries.length >= 2) {
+    histMatchResult = await uwHistMatchCurrent(currentConditionsForHistory);
+  }
+
   const masterPrompt = `You are an elite ES futures analyst with deep expertise in options dealer positioning, institutional flow, and GEX dynamics.
 
 You have been given ${content.filter(c=>c.type==='image').length} images:
@@ -4867,6 +4990,10 @@ OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
   "intradayNote": "what to watch intraday that could invalidate this thesis"
 }`;
 
+  if (histMatchResult) {
+    content.push({type:'text', text:`\n=== UW HISTORICAL PATTERN MATCH ===\nMatch Found: ${histMatchResult.matchFound} | Count: ${histMatchResult.matchCount} | Win Rate: ${histMatchResult.winRate}% | Avg: ${histMatchResult.avgOutcome||'?'}\nBest Match: ${histMatchResult.bestMatch||'?'}\nPattern Note: ${histMatchResult.patternNote||'?'}\nNo Precedent: ${histMatchResult.noPrecedent||false}\nFactor this into your confluence scoring and bias confidence.`});
+  }
+
   content.push({type:'text', text:masterPrompt});
 
   try {
@@ -4887,6 +5014,20 @@ OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
 
     uwProposed = p;
     uwShowPropose(p);
+    // Show historical match result if available
+    if (histMatchResult) {
+      const histEl = document.getElementById('uw-hist-match-result');
+      if (histEl) {
+        if (histMatchResult.noPrecedent) {
+          histEl.style.display = 'block'; histEl.style.borderColor = 'rgba(255,170,0,0.4)';
+          histEl.innerHTML = `<span style="color:var(--amber);font-weight:700">⚠ NO HISTORICAL PRECEDENT</span> — This setup has no close matches in your log. Algorithm upgrade trigger.`;
+        } else if (histMatchResult.matchFound) {
+          histEl.style.display = 'block'; histEl.style.borderColor = 'rgba(0,255,136,0.3)';
+          histEl.innerHTML = `<span style="color:var(--green);font-weight:700">📚 ${histMatchResult.matchCount} HISTORICAL MATCHES</span> — ${histMatchResult.winRate}% win rate | Avg: ${histMatchResult.avgOutcome||'?'} | ${histMatchResult.patternNote||''}`;
+        }
+        window.uwHistContext = (histMatchResult.matchFound ? `Historical Match: ${histMatchResult.matchCount} setups, ${histMatchResult.winRate}% win rate, avg ${histMatchResult.avgOutcome||'?'}. ${histMatchResult.patternNote||''}` : histMatchResult.noPrecedent ? 'No historical precedent for this setup — treat with caution.' : null);
+      }
+    }
     // Also update single-zone outputs for immediate visibility
     if (hasFlows) {
       const el = document.getElementById('uw-out-flows-text');
@@ -5507,6 +5648,7 @@ function initAll() {
   uwInitPaste();
   setTimeout(uwLoadFromKV, 2000);
   setTimeout(loadChartLevelsFromKV, 2500);
+  uwHistLoad();
   // Dynamic AI intervals
   setInterval(checkSignalHealth, 30000);
   setInterval(checkSessionTransition, 60000);
