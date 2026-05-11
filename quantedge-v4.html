@@ -512,6 +512,32 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .wp-uw-badge.stale{background:rgba(255,170,0,0.1);color:var(--amber);border:1px solid rgba(255,170,0,0.2);}
 .wp-uw-badge.none{background:rgba(255,255,255,0.04);color:var(--t4);border:1px solid var(--b2);}
 
+
+/* ── P4a: AI CHAT PANEL ── */
+#ai-chat-panel{display:none;position:fixed;bottom:44px;right:10px;width:420px;background:var(--s1);border:1px solid var(--cyan2);border-radius:8px;z-index:9995;flex-direction:column;box-shadow:0 4px 24px rgba(0,212,255,0.2);}
+#ai-chat-panel.open{display:flex;}
+#ai-chat-panel-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+#ai-chat-panel-title{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:1px;}
+#ai-chat-history{overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:140px;max-height:320px;}
+.chat-msg{display:flex;flex-direction:column;gap:3px;max-width:92%;}
+.chat-msg.user{align-self:flex-end;}
+.chat-msg.ai{align-self:flex-start;}
+.chat-bubble{padding:8px 12px;border-radius:6px;font-size:13px;line-height:1.6;}
+.chat-msg.user .chat-bubble{background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);color:var(--white);}
+.chat-msg.ai .chat-bubble{background:var(--s2);border:1px solid var(--b2);color:var(--t1);}
+.chat-msg.ai.thinking .chat-bubble{color:var(--t3);font-style:italic;}
+.chat-time{font-size:9px;color:var(--t4);padding:0 4px;}
+.chat-msg.user .chat-time{text-align:right;}
+#ai-chat-input-row{display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--b1);flex-shrink:0;align-items:center;}
+#ai-chat-input{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--white);font-family:var(--mono);font-size:13px;padding:7px 10px;outline:none;transition:border-color 0.15s;}
+#ai-chat-input:focus{border-color:var(--cyan2);}
+#ai-chat-input::placeholder{color:var(--t4);}
+#ai-chat-send{padding:7px 12px;background:linear-gradient(135deg,var(--cyan2),#006699);border:none;border-radius:4px;color:var(--white);font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+#ai-chat-send:hover{background:linear-gradient(135deg,var(--cyan),var(--cyan2));}
+#ai-chat-send:disabled{opacity:0.4;cursor:not-allowed;}
+#ai-chat-mic{padding:7px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;transition:all 0.15s;line-height:1;}
+#ai-chat-mic:hover{color:var(--red);border-color:var(--red2);}
+#ai-chat-mic.listening{background:rgba(255,51,85,0.15);border-color:var(--red);color:var(--red);animation:pulse 1s infinite;}
 </style>
 </head>
 <body>
@@ -1331,6 +1357,26 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       </div>
     </div>
   </div>
+
+  <!-- ── P4a: AI CHAT PANEL (floating) ── -->
+  <div id="ai-chat-panel">
+    <div id="ai-chat-panel-header">
+      <span id="ai-chat-panel-title">&#x1F4AC; AI CHAT &mdash; Full v4 Context</span>
+      <button onclick="toggleChatPanel()" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;line-height:1;padding:0">&#x2715;</button>
+    </div>
+    <div id="ai-chat-history">
+      <div class="chat-msg ai">
+        <div class="chat-bubble">Ask me anything about your current setup, signal, levels, or strategy. I have full live context of everything in v4. You can type or use the mic to speak.</div>
+        <div class="chat-time">Ready</div>
+      </div>
+    </div>
+    <div id="ai-chat-input-row">
+      <button id="ai-chat-mic" onclick="toggleVoiceInput()" title="Speak to AI">&#x1F3A4;</button>
+      <input id="ai-chat-input" type="text" placeholder="Type or tap mic to speak..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+      <button id="ai-chat-send" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+
 </div><!-- end #right -->
 
 <!-- VIZ PANEL -->
@@ -5779,6 +5825,84 @@ async function sendChatMessage() {
     const inp = document.getElementById('ai-chat-input');
     if (inp) inp.focus();
   }
+}
+
+
+// =============================================
+// P4a: VOICE INPUT (Speech Recognition)
+// Mic button in chat panel — speak to v4 AI
+// =============================================
+const voiceState = { active: false, recognition: null };
+
+function initVoiceInput() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { console.warn('[Voice] SpeechRecognition not supported'); return; }
+  voiceState.recognition = new SR();
+  voiceState.recognition.continuous    = false;
+  voiceState.recognition.interimResults = true;
+  voiceState.recognition.lang          = 'en-US';
+
+  voiceState.recognition.onstart = () => {
+    voiceState.active = true;
+    const mic = document.getElementById('ai-chat-mic');
+    if (mic) mic.classList.add('listening');
+    const input = document.getElementById('ai-chat-input');
+    if (input) { input.value = ''; input.placeholder = 'Listening...'; }
+  };
+
+  voiceState.recognition.onresult = (event) => {
+    const transcript = Array.from(event.results)
+      .map(r => r[0].transcript).join('');
+    const input = document.getElementById('ai-chat-input');
+    if (input) input.value = transcript;
+    // Auto-send on final result
+    if (event.results[event.results.length - 1].isFinal) {
+      stopVoiceInput();
+      setTimeout(sendChatMessage, 300);
+    }
+  };
+
+  voiceState.recognition.onerror = (e) => {
+    console.warn('[Voice] Error:', e.error);
+    stopVoiceInput();
+    if (e.error === 'not-allowed') {
+      showToast('Microphone access denied — check browser permissions', 'err');
+    }
+  };
+
+  voiceState.recognition.onend = () => {
+    stopVoiceInput();
+  };
+}
+
+function toggleVoiceInput() {
+  if (!voiceState.recognition) {
+    initVoiceInput();
+    if (!voiceState.recognition) {
+      showToast('Voice input not supported in this browser — use Chrome', 'err');
+      return;
+    }
+  }
+  if (voiceState.active) {
+    stopVoiceInput();
+  } else {
+    try {
+      voiceState.recognition.start();
+    } catch(e) {
+      console.warn('[Voice] Start error:', e);
+    }
+  }
+}
+
+function stopVoiceInput() {
+  voiceState.active = false;
+  const mic = document.getElementById('ai-chat-mic');
+  if (mic) mic.classList.remove('listening');
+  const input = document.getElementById('ai-chat-input');
+  if (input && input.placeholder === 'Listening...') {
+    input.placeholder = 'Type or tap mic to speak...';
+  }
+  try { if (voiceState.recognition) voiceState.recognition.stop(); } catch(e) {}
 }
 
 </script>
