@@ -4588,6 +4588,11 @@ async function logSignalToKV(sig, btnEl) {
     const se = document.getElementById('wp-stat-logged'); if(se) se.textContent=wpLoggedCount;
     if (btnEl) { btnEl.textContent='\u2705 Logged'; btnEl.classList.add('logged'); }
     showToast('Trade logged to cloud', 'ok');
+    try {
+      const bp={timestamp:new Date(sig.timestamp||Date.now()).toISOString(),bias:sig.bias||'',confidence:sig.confidence||0,entry:sig.entry||'',stop:sig.stop||'',target1:sig.target1||'',riskReward:sig.riskReward||'',whyOneLine:sig.whyOneLine||'',sessionContext:sig.sessionContext||'',weeklyBiasAligned:String(sig.weeklyBiasAligned||''),esAtSignal:sig.esAtSignal||'',result:'OPEN'};
+      await fetch(CLOUDFLARE_WORKER+'/brain-write',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet:'SIGNALS',row:bp}),signal:AbortSignal.timeout(5000)});
+      console.log('[Brain] Signal written');
+    } catch(bwe){console.warn('[Brain] brain-write failed:',bwe.message);}
   } catch(e) {
     if (btnEl) { btnEl.textContent='\uD83D\uDCCB Log Trade'; btnEl.disabled=false; }
     showToast('Log failed: '+e.message, 'err');
