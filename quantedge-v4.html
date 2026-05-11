@@ -3847,6 +3847,7 @@ async function generateSignal() {
     if (signalHistory.length > 10) signalHistory.pop();
 
     renderSignal(signal);
+    autoSpeakSignal(signal);
     updateSignalHistoryBar();
     updateVizFromSignal(signal);
 
@@ -3932,7 +3933,8 @@ function renderSignal(sig) {
     <div class="sig2-actions">
       <button class="sig2-btn log-btn" id="sig2-log-btn" onclick="logSignalToKV(currentSignal,this)">\uD83D\uDCCB Log Trade</button>
       <button class="sig2-btn" onclick="document.getElementById('sig2-detail').style.display=document.getElementById('sig2-detail').style.display==='none'?'block':'none';this.textContent=this.textContent==='\u25BC Explain More'?'\u25B2 Less':'\u25BC Explain More'">\u25BC Explain More</button>
-      <button class="sig2-btn" onclick="generateSignal()">\u27F3 Regenerate</button>
+      
+      <button class="sig2-btn" onclick="speakSignal(currentSignal)" title="Read signal aloud">&#x1F50A; Speak</button><button class="sig2-btn" onclick="generateSignal()">\u27F3 Regenerate</button>
       <button class="sig2-btn" onclick="showPresignalDash()">\u2190 Back</button>
     </div>
     <div class="sig2-detail" id="sig2-detail">
@@ -5617,11 +5619,165 @@ function initAll() {
   // VIX/DXY refresh every 2 minutes
   setInterval(fetchVIXandDXY, 120000);
   setTimeout(fetchVIXandDXY, 3000);
+  initTTS();
   console.log('[QuantEdge v4] All systems initialized — Full Dynamic AI active');
 }
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', initAll);
+
+// =============================================
+// P4b: TTS - Microsoft David via Web Speech API
+// =============================================
+const ttsState = { enabled: false, voice: null, speaking: false };
+
+function initTTS() {
+  if (!window.speechSynthesis) return;
+  const loadVoices = () => {
+    const voices = window.speechSynthesis.getVoices();
+    ttsState.voice =
+      voices.find(v => v.name.includes('David')) ||
+      voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
+      voices.find(v => v.lang.startsWith('en')) ||
+      voices[0] || null;
+    if (ttsState.voice) console.log('[TTS] Voice:', ttsState.voice.name);
+  };
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function toggleTTS() {
+  ttsState.enabled = !ttsState.enabled;
+  const btn = document.getElementById('btn-tts-toggle');
+  if (btn) {
+    btn.textContent = ttsState.enabled ? '\uD83D\uDD0A Voice' : '\uD83D\uDCC4 Text';
+    btn.classList.toggle('active', ttsState.enabled);
+  }
+  if (!ttsState.enabled && window.speechSynthesis) window.speechSynthesis.cancel();
+  showToast(ttsState.enabled ? '\uD83D\uDD0A Voice ON - David will read signals' : '\uD83D\uDCC4 Voice OFF', ttsState.enabled ? 'ok' : 'info');
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  if (ttsState.voice) utt.voice = ttsState.voice;
+  utt.rate = 0.92; utt.pitch = 1.0; utt.volume = 1.0;
+  utt.onend = () => { ttsState.speaking = false; };
+  utt.onerror = () => { ttsState.speaking = false; };
+  ttsState.speaking = true;
+  window.speechSynthesis.speak(utt);
+}
+
+function speakSignal(sig) {
+  if (!sig) return;
+  const parts = [
+    'Signal: ' + (sig.bias || 'neutral') + ' at ' + (sig.confidence || 0) + ' percent confidence.',
+    (sig.contracts || 2) + ' contracts.',
+    'Entry ' + (sig.entry || 'no entry') + '. Stop ' + (sig.stop || 'no stop') + '. Target ' + (sig.target1 || 'no target') + '. Risk reward ' + (sig.riskReward || 'unknown') + '.',
+    sig.whyOneLine ? 'Thesis: ' + sig.whyOneLine + '.' : '',
+    sig.invalidation ? 'Invalidation at ' + sig.invalidation + '.' : '',
+    (sig.weeklyBiasAligned === true || sig.weeklyBiasAligned === 'true') ? 'Weekly bias aligned.' :
+    (sig.weeklyBiasAligned === false || sig.weeklyBiasAligned === 'false') ? 'Warning: conflicts with weekly bias.' : ''
+  ].filter(Boolean).join(' ');
+  speakText(parts);
+}
+
+function autoSpeakSignal(sig) {
+  if (ttsState.enabled && sig) speakSignal(sig);
+}
+
+// =============================================
+// P4a: AI CHAT PANEL
+// =============================================
+const chatState = { history: [], maxHistory: 20, open: false };
+
+function toggleChatPanel() {
+  chatState.open = !chatState.open;
+  const panel = document.getElementById('ai-chat-panel');
+  const btn   = document.getElementById('btn-chat-toggle');
+  if (panel) panel.classList.toggle('open', chatState.open);
+  if (btn) {
+    btn.classList.toggle('active', chatState.open);
+    btn.textContent = chatState.open ? '\u2715 Chat' : '\uD83D\uDCAC Chat';
+  }
+  if (chatState.open) {
+    setTimeout(() => {
+      const i = document.getElementById('ai-chat-input');
+      if (i) i.focus();
+      scrollChatToBottom();
+    }, 50);
+  }
+}
+
+function scrollChatToBottom() {
+  const h = document.getElementById('ai-chat-history');
+  if (h) h.scrollTop = h.scrollHeight;
+}
+
+function addChatMessage(role, text, thinking) {
+  const history = document.getElementById('ai-chat-history');
+  if (!history) return null;
+  const ts  = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role + (thinking ? ' thinking' : '');
+  div.innerHTML = '<div class="chat-bubble">' + text.replace(/\n/g, '<br>') + '</div><div class="chat-time">' + ts + '</div>';
+  history.appendChild(div);
+  scrollChatToBottom();
+  return div;
+}
+
+function updateChatMessage(div, text) {
+  if (!div) return;
+  div.classList.remove('thinking');
+  const b = div.querySelector('.chat-bubble');
+  if (b) b.innerHTML = text.replace(/\n/g, '<br>');
+  scrollChatToBottom();
+}
+
+async function sendChatMessage() {
+  const input   = document.getElementById('ai-chat-input');
+  const sendBtn = document.getElementById('ai-chat-send');
+  const userMsg = input && input.value.trim();
+  if (!userMsg) return;
+  input.value = '';
+  if (sendBtn) sendBtn.disabled = true;
+  addChatMessage('user', userMsg);
+  chatState.history.push({ role: 'user', content: userMsg });
+  if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
+  const thinkingDiv = addChatMessage('ai', 'Thinking\u2026', true);
+  const ctx = typeof getCompleteAIContext === 'function' ? getCompleteAIContext().slice(0, 4000) : '';
+  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. Be concise and actionable. Max 4 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'anthropic',
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        system: systemPrompt,
+        messages: chatState.history.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw  = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    const text = (data && data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!text) throw new Error('Empty response');
+    updateChatMessage(thinkingDiv, text);
+    chatState.history.push({ role: 'assistant', content: text });
+    if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
+    if (ttsState.enabled) speakText(text);
+  } catch(e) {
+    updateChatMessage(thinkingDiv, '\u26A0 ' + e.message);
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    const inp = document.getElementById('ai-chat-input');
+    if (inp) inp.focus();
+  }
+}
+
 </script>
 </body>
 </html>
