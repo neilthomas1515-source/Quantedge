@@ -5837,17 +5837,26 @@ async function sendChatMessage() {
   if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
   const thinkingDiv = addChatMessage('ai', 'Thinking\u2026', true);
   const ctx = typeof getCompleteAIContext === 'function' ? getCompleteAIContext().slice(0, 4000) : '';
-  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. Be concise and actionable. Max 4 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
+  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
   try {
+    // Build message content with ALL images (same as generateSignal)
+    const chatContent = buildMessageContent(chatState.history[chatState.history.length-1].content);
+
+    // Build full history with images on latest message only
+    const chatMessages = [
+      ...chatState.history.slice(0,-1).map(m => ({ role: m.role, content: m.content })),
+      { role: 'user', content: chatContent }
+    ];
+
     const res = await fetch(CLOUDFLARE_WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 600,
+        max_tokens: 800,
         system: systemPrompt,
-        messages: chatState.history.map(m => ({ role: m.role, content: m.content }))
+        messages: chatMessages
       })
     });
     if (!res.ok) throw new Error('Worker ' + res.status);
