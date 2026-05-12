@@ -25,6 +25,47 @@ body{background:var(--bg);color:var(--t1);font-family:var(--mono);font-size:16px
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.6)}}
 @keyframes shimmer{0%,100%{opacity:0.7}50%{opacity:1}}
 
+
+/* ── X POST PANEL ── */
+#x-post-btn{position:fixed;bottom:80px;right:20px;width:48px;height:48px;
+background:var(--s1);border:1px solid var(--b1);border-radius:50%;
+display:flex;align-items:center;justify-content:center;cursor:pointer;
+z-index:9999;font-size:20px;color:var(--t1);transition:all 0.2s;
+box-shadow:0 2px 12px rgba(0,0,0,0.4);}
+#x-post-btn:hover{background:var(--cyan);color:#000;transform:scale(1.1);}
+#x-post-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);
+z-index:9998;display:none;align-items:center;justify-content:center;}
+#x-post-overlay.open{display:flex;}
+#x-post-panel{background:var(--bg);border:1px solid var(--b1);border-radius:12px;
+width:520px;max-width:95vw;padding:20px;z-index:9999;max-height:90vh;overflow-y:auto;}
+#x-post-panel h3{color:var(--cyan);font-size:16px;margin-bottom:16px;
+display:flex;align-items:center;gap:8px;}
+.x-post-type-btns{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.x-post-type-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--b1);
+background:var(--s1);color:var(--t2);cursor:pointer;font-size:12px;transition:all 0.2s;}
+.x-post-type-btn.active{background:var(--cyan);color:#000;border-color:var(--cyan);}
+.x-post-type-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+#x-post-textarea{width:100%;min-height:180px;background:var(--s2);
+border:1px solid var(--b1);border-radius:8px;padding:12px;color:var(--t1);
+font-family:var(--sans);font-size:14px;line-height:1.6;resize:vertical;
+margin-bottom:8px;}
+#x-post-textarea:focus{outline:none;border-color:var(--cyan);}
+#x-char-count{font-size:12px;color:var(--t3);text-align:right;margin-bottom:12px;}
+#x-char-count.over{color:var(--red);}
+.x-post-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+.x-btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;
+font-size:13px;font-weight:600;transition:all 0.2s;}
+.x-btn-generate{background:var(--s1);color:var(--cyan);border:1px solid var(--cyan);}
+.x-btn-generate:hover{background:var(--cyan);color:#000;}
+.x-btn-copy{background:var(--green);color:#000;}
+.x-btn-copy:hover{opacity:0.85;}
+.x-btn-close{background:var(--s1);color:var(--t2);border:1px solid var(--b1);}
+.x-btn-close:hover{border-color:var(--red);color:var(--red);}
+.x-trial-badge{background:var(--amber);color:#000;font-size:10px;font-weight:700;
+padding:2px 8px;border-radius:10px;margin-left:8px;}
+#x-copy-confirm{display:none;color:var(--green);font-size:12px;text-align:center;
+margin-top:8px;}
+
 /* TOPBAR */
 #topbar{height:54px;background:var(--s1);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:0;flex-shrink:0;}
 .logo{font-family:var(--sans);font-weight:900;font-size:22px;color:var(--cyan);letter-spacing:-1px;margin-right:8px;flex-shrink:0;}
@@ -5905,6 +5946,167 @@ function stopVoiceInput() {
   try { if (voiceState.recognition) voiceState.recognition.stop(); } catch(e) {}
 }
 
+
+// ── X POST PANEL ────────────────────────────────────────────
+let xPostType = 'bias';
+
+function openXPanel() {
+  document.getElementById('x-post-overlay').classList.add('open');
+}
+
+function closeXPanel() {
+  document.getElementById('x-post-overlay').classList.remove('open');
+}
+
+function closeXPanelOverlay(e) {
+  if (e.target.id === 'x-post-overlay') closeXPanel();
+}
+
+function setXPostType(type, btn) {
+  xPostType = type;
+  document.querySelectorAll('.x-post-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('x-post-textarea').value = '';
+  updateCharCount();
+}
+
+function updateCharCount() {
+  const txt = document.getElementById('x-post-textarea').value;
+  const count = txt.length;
+  const el = document.getElementById('x-char-count');
+  el.textContent = count + ' / 280';
+  el.className = count > 280 ? 'over' : '';
+}
+
+function generateXPost() {
+  const ta = document.getElementById('x-post-textarea');
+  const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Try to pull live data from v4 panels if available
+  const biasEl    = document.querySelector('#bias-text, #ai-bias, .bias-output, #overall-bias');
+  const biasText  = biasEl ? biasEl.innerText.trim().substring(0,80) : '';
+
+  if (xPostType === 'bias') {
+    ta.value = 
+`ES FUTURES BIAS — ${date}
+
+${biasText ? '🧠 ' + biasText : '🧠 [Paste your morning bias here]'}
+
+Key levels to watch:
+📍 Resistance: [level]
+📍 Support: [level]
+📍 GEX flip: [level]
+
+Setup: [Long/Short] on [condition]
+Target: [price] | Stop: [price]
+
+#ES_F #Futures #GEX #Trading`;
+
+  } else if (xPostType === 'gex') {
+    ta.value =
+`📊 ES GEX SNAPSHOT — ${date}
+
+Dealer positioning: [Long/Short gamma]
+Key GEX level: [price]
+Above = dealers SELL (resistance)
+Below = dealers BUY (support)
+
+Watch for flip at: [price]
+Bias above GEX: [Bullish/Bearish]
+
+Data via FlashAlpha 🎯
+#ES_F #GEX #OptionsFlow #Futures`;
+
+  } else if (xPostType === 'alert') {
+    ta.value =
+`⚡ LIVE TRADE ALERT — ${date}
+
+Instrument: ES Futures
+Direction: [LONG / SHORT]
+Entry: [price]
+Target 1: [price]
+Target 2: [price]  
+Stop: [price]
+
+Setup: [describe the setup in 1 sentence]
+Confidence: [High / Medium]
+
+Following along? 👇
+#ES_F #TradeAlert #Futures #LiveTrading`;
+
+  } else if (xPostType === 'recap') {
+    ta.value =
+`📈 ES SESSION RECAP — ${date}
+
+Result: [Win / Loss / Scratch]
+Entry: [price] → Exit: [price]
+P&L: [+/- points]
+
+What worked: [1 sentence]
+What I learned: [1 sentence]
+
+Tracking every trade publicly 🎯
+#ES_F #TradingJournal #Futures`;
+
+  } else {
+    ta.value = '';
+    ta.placeholder = 'Type your custom post here...';
+    ta.focus();
+  }
+
+  updateCharCount();
+  document.getElementById('x-copy-confirm').style.display = 'none';
+}
+
+function copyXPost() {
+  const ta = document.getElementById('x-post-textarea');
+  if (!ta.value.trim()) {
+    alert('Generate or write a post first.');
+    return;
+  }
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const confirm = document.getElementById('x-copy-confirm');
+    confirm.style.display = 'block';
+    setTimeout(() => confirm.style.display = 'none', 3000);
+  });
+}
+
 </script>
+
+<!-- ── X POST PANEL ── -->
+<button id="x-post-btn" title="Create X Post" onclick="openXPanel()">𝕏</button>
+
+<div id="x-post-overlay" onclick="closeXPanelOverlay(event)">
+  <div id="x-post-panel">
+    <h3>𝕏 Post Creator <span class="x-trial-badge">TRIAL MODE</span></h3>
+
+    <div class="x-post-type-btns">
+      <button class="x-post-type-btn active" onclick="setXPostType('bias',this)">📊 Morning Bias</button>
+      <button class="x-post-type-btn" onclick="setXPostType('gex',this)">🎯 GEX Levels</button>
+      <button class="x-post-type-btn" onclick="setXPostType('alert',this)">⚡ Trade Alert</button>
+      <button class="x-post-type-btn" onclick="setXPostType('recap',this)">📈 Session Recap</button>
+      <button class="x-post-type-btn" onclick="setXPostType('custom',this)">✏️ Custom</button>
+    </div>
+
+    <textarea id="x-post-textarea" 
+      placeholder="Click Generate to create a post from your current analysis data, or type your own..."
+      oninput="updateCharCount()"></textarea>
+    <div id="x-char-count">0 / 280</div>
+
+    <div class="x-post-actions">
+      <button class="x-btn x-btn-generate" onclick="generateXPost()">⚡ Generate</button>
+      <button class="x-btn x-btn-copy" onclick="copyXPost()">📋 Copy to Clipboard</button>
+      <button class="x-btn x-btn-close" onclick="closeXPanel()">✕ Close</button>
+    </div>
+    <div id="x-copy-confirm">✅ Copied! Paste into X when ready.</div>
+
+    <div style="margin-top:12px;padding:10px;background:var(--s2);border-radius:6px;
+      font-size:11px;color:var(--t3);border-left:3px solid var(--amber);">
+      ⚠️ Trial mode — review all posts carefully before publishing to X.
+      Edit freely before copying.
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
