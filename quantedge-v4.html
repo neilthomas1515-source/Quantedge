@@ -349,6 +349,32 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 #gex-drop .drop-hint strong{color:var(--t2);}
 #gex-drop .drop-kbd{font-size:9px;color:var(--t4);}
 #gex-file{display:none;}
+/* ── CHAT IMAGE PREVIEW ── */
+#chat-img-preview-strip{display:none;padding:4px 14px 0;flex-shrink:0;}
+#chat-img-preview-strip.has-image{display:flex;align-items:center;gap:8px;}
+#chat-img-thumb{width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--cyan2);}
+#chat-img-clear{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0 4px;line-height:1;}
+#ai-chat-camera{padding:7px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;transition:all 0.15s;line-height:1;}
+#ai-chat-camera:hover{color:var(--cyan);border-color:var(--cyan2);}
+#chat-img-file{display:none;}
+/* ── P4a: AI CHAT PANEL ── */
+#ai-chat-toggle{position:fixed;bottom:20px;right:20px;padding:9px 16px;background:linear-gradient(135deg,var(--cyan2),#006699);border:none;border-radius:6px;color:var(--white);font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;z-index:998;transition:all 0.15s;box-shadow:0 2px 12px rgba(0,212,255,0.3);}
+#ai-chat-toggle.panel-open{right:444px;}
+#ai-chat-panel{display:none;position:fixed;bottom:0;right:0;width:420px;height:540px;background:var(--s2);border-left:1px solid var(--cyan2);border-top:1px solid var(--cyan2);z-index:997;flex-direction:column;overflow:hidden;}
+#ai-chat-panel.open{display:flex;}
+#ai-chat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);background:var(--s3);flex-shrink:0;}
+#ai-chat-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.chat-bubble{padding:8px 12px;border-radius:6px;font-size:12px;line-height:1.6;max-width:88%;word-wrap:break-word;}
+.chat-bubble.user{background:rgba(0,212,255,0.1);border:1px solid var(--cyan2);align-self:flex-end;color:var(--t1);}
+.chat-bubble.assistant{background:var(--s3);border:1px solid var(--b2);align-self:flex-start;color:var(--t1);}
+#ai-chat-input-row{display:flex;align-items:flex-end;gap:6px;padding:8px 12px;border-top:1px solid var(--b1);background:var(--s3);flex-shrink:0;}
+#ai-chat-input{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--white);font-family:var(--mono);font-size:12px;padding:7px 10px;outline:none;resize:none;max-height:80px;min-height:36px;}
+#ai-chat-input:focus{border-color:var(--cyan2);}
+#ai-chat-send{padding:7px 12px;background:var(--cyan2);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;}
+#ai-chat-send:hover{background:var(--cyan);}
+#ai-chat-send:disabled{opacity:0.4;cursor:not-allowed;}
+#ai-chat-mic{padding:7px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;transition:all 0.15s;line-height:1;}
+#ai-chat-mic:hover{color:var(--cyan);border-color:var(--cyan2);}
 </style>
 </head>
 <body>
@@ -2887,6 +2913,8 @@ function buildPrompt() {
   return `You are an elite ES futures prop trader managing 2-5 contract positions. Analyze all provided data and output ONE high-probability trade signal.
 
 ${context}
+${window.tvAlertContext ? '\n=== TV ALERT CONTEXT ===\n' + window.tvAlertContext : ''}
+${window.brainContext ? '\n=== BRAIN INTELLIGENCE ===\n' + window.brainContext : ''}
 
 ${hasGEX   ? '[GEX chart image attached — analyze dealer positioning, flip levels, call/put walls]' : ''}
 ${hasOF    ? '[Order flow / Bookmap image attached — analyze tape, absorption, iceberg, volume]' : ''}
@@ -2957,9 +2985,7 @@ async function generateSignal() {
   if (psd) psd.style.display = 'none';
 
   try {
-    const brainCtx = await fetchBrainContext();
-    if (brainCtx) { window.brainContext = brainCtx; console.log('[Brain] loaded'); }
-
+    await fetchBrainContext();
     const prompt = buildPrompt();
     const content = buildMessageContent(prompt);
 
@@ -3087,8 +3113,7 @@ function updateSignalHistoryBar() {
       <span class="chip-bias">${s.bias}</span>
       <span class="chip-conf">${s.confidence}%</span>
       <span class="chip-time">${ts}</span>
-    </div>
-${window.brainContext ? '\n=== BRAIN INTELLIGENCE ===\n' + window.brainContext : ''}`;
+    </div>`;
   }).join('');
 }
 
@@ -3505,19 +3530,19 @@ async function checkSchwabStatus() {
 // ── BRAIN CONTEXT FETCH ──
 async function fetchBrainContext() {
   try {
-    const res = await fetch(CLOUDFLARE_WORKER + '/brain-read', {
+    const res = await fetch(CLOUDFLARE_WORKER + '/brain-read?sheet=SIGNALS&limit=5', {
       signal: AbortSignal.timeout(4000)
     });
-    if (!res.ok) return null;
+    if (!res.ok) return;
     const raw = await res.text();
     const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
-    if (s === -1) return null;
+    if (s === -1) return;
     const d = JSON.parse(raw.slice(s, e + 1));
-    if (!d || !d.ok) return null;
-    return d.brainContext || null;
+    if (!d || !d.ok) return;
+    window.brainContext = d.brainContext || null;
+    if (window.brainContext) console.log('[Brain] loaded');
   } catch(e) {
     console.warn('[Brain] skipped:', e.message);
-    return null;
   }
 }
 
@@ -3780,9 +3805,158 @@ function initAll() {
   console.log('[QuantEdge v4] All systems initialized');
 }
 
+// ── AI CHAT PANEL ──
+let chatImageData = null;
+
+function loadChatImageFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    chatImageData = e.target.result;
+    const thumb = document.getElementById('chat-img-thumb');
+    const strip = document.getElementById('chat-img-preview-strip');
+    if (thumb) thumb.src = chatImageData;
+    if (strip) strip.classList.add('has-image');
+    strip.style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearChatImage() {
+  chatImageData = null;
+  const strip = document.getElementById('chat-img-preview-strip');
+  const thumb = document.getElementById('chat-img-thumb');
+  const fileInput = document.getElementById('chat-img-file');
+  if (strip) { strip.classList.remove('has-image'); strip.style.display = 'none'; }
+  if (thumb) thumb.src = '';
+  if (fileInput) fileInput.value = '';
+}
+
+// Paste image into chat panel (change 7)
+document.addEventListener('paste', function(e) {
+  const panel = document.getElementById('ai-chat-panel');
+  if (!panel || !panel.classList.contains('open')) return;
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const file = items[i].getAsFile();
+      if (file) { loadChatImageFile(file); e.preventDefault(); return; }
+    }
+  }
+});
+
+const chatState = { history: [] };
+
+function toggleAIChat() {
+  const panel = document.getElementById('ai-chat-panel');
+  const toggle = document.getElementById('ai-chat-toggle');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (toggle) toggle.classList.toggle('panel-open', isOpen);
+  if (isOpen) {
+    const input = document.getElementById('ai-chat-input');
+    if (input) input.focus();
+  }
+}
+
+function clearChatHistory() {
+  chatState.history = [];
+  const msgs = document.getElementById('ai-chat-messages');
+  if (msgs) msgs.innerHTML = '<div class="chat-bubble assistant">Ask me anything about current market conditions or your setups.</div>';
+  clearChatImage();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('ai-chat-input');
+  const sendBtn = document.getElementById('ai-chat-send');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  sendBtn.disabled = true;
+
+  // Build user message with optional image (change 8)
+  const userContent = [];
+  if (chatImageData) {
+    const b64 = chatImageData.split(',')[1];
+    const mt = chatImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    userContent.push({ type: 'image', source: { type: 'base64', media_type: mt, data: b64 } });
+  }
+  userContent.push({ type: 'text', text });
+
+  chatState.history.push({ role: 'user', content: userContent });
+  appendChatBubble('user', chatImageData ? '[Image] ' + text : text);
+  clearChatImage();
+
+  const systemPrompt = `You are QuantEdge AI, an expert ES futures trading assistant. Answer concisely and precisely. Current market context:
+${window.brainContext ? '\n=== RECENT SIGNALS ===\n' + window.brainContext : ''}
+${window.tvAlertContext ? '\n=== TV ALERT ===\n' + window.tvAlertContext : ''}`;
+
+  const thinkingBubble = appendChatBubble('assistant', '…');
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'anthropic',
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        system: systemPrompt,
+        messages: chatState.history
+      })
+    });
+    const raw = await res.text();
+    const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+    const data = JSON.parse(raw.slice(s, e + 1));
+    const reply = data?.content?.[0]?.text || data?.error?.message || 'No response';
+    chatState.history.push({ role: 'assistant', content: reply });
+    thinkingBubble.textContent = reply;
+  } catch(err) {
+    thinkingBubble.textContent = 'Error: ' + err.message;
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+function appendChatBubble(role, text) {
+  const msgs = document.getElementById('ai-chat-messages');
+  if (!msgs) return null;
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
 // DOM ready
 document.addEventListener('DOMContentLoaded', initAll);
 </script>
+
+<button id="ai-chat-toggle" onclick="toggleAIChat()">💬 AI Chat</button>
+<div id="ai-chat-panel">
+  <div id="ai-chat-header">
+    <span style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--cyan)">🤖 QuantEdge AI</span>
+    <button onclick="clearChatHistory()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:10px">Clear</button>
+  </div>
+  <div id="ai-chat-messages"><div class="chat-bubble assistant">Ask me anything about current market conditions or your setups.</div></div>
+  <div id="chat-img-preview-strip">
+    <img id="chat-img-thumb" alt="chat image">
+    <span style="font-size:10px;color:var(--cyan2)" id="chat-img-label">Image ready</span>
+    <button id="chat-img-clear" onclick="clearChatImage()" title="Remove image">&#x2715;</button>
+  </div>
+  <input type="file" id="chat-img-file" accept="image/*" onchange="loadChatImageFile(this.files[0])">
+  <div id="ai-chat-input-row">
+    <button id="ai-chat-camera" onclick="document.getElementById('chat-img-file').click()" title="Attach image">📷</button>
+    <button id="ai-chat-mic" onclick="showToast('Voice input coming soon','info')" title="Voice input">🎤</button>
+    <textarea id="ai-chat-input" rows="2" placeholder="Ask about market conditions, setups, levels... (Ctrl+Enter to send)" onkeydown="if(event.ctrlKey&&event.key==='Enter'){event.preventDefault();sendChatMessage();}"></textarea>
+    <button id="ai-chat-send" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
 
 <script>
 async function loadMorningAnalysis() {
