@@ -554,6 +554,14 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .wp-uw-badge.none{background:rgba(255,255,255,0.04);color:var(--t4);border:1px solid var(--b2);}
 
 
+#chat-img-preview-strip{display:none;padding:4px 14px 0;flex-shrink:0;}
+#chat-img-preview-strip.has-image{display:flex;align-items:center;gap:8px;}
+#chat-img-thumb{width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--cyan2);}
+#chat-img-clear{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0 4px;}
+#ai-chat-camera{padding:7px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;transition:all 0.15s;}
+#ai-chat-camera:hover{color:var(--cyan);border-color:var(--cyan2);}
+#chat-img-file{display:none;}
+
 /* ── P4a: AI CHAT PANEL ── */
 #ai-chat-panel{display:none;position:fixed;bottom:44px;right:10px;width:420px;background:var(--s1);border:1px solid var(--cyan2);border-radius:8px;z-index:9995;flex-direction:column;box-shadow:0 4px 24px rgba(0,212,255,0.2);}
 #ai-chat-panel.open{display:flex;}
@@ -1411,7 +1419,14 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         <div class="chat-time">Ready</div>
       </div>
     </div>
+    <div id="chat-img-preview-strip">
+      <img id="chat-img-thumb" alt="chat image">
+      <span style="font-size:10px;color:var(--cyan2)" id="chat-img-label">Image ready</span>
+      <button id="chat-img-clear" onclick="clearChatImage()" title="Remove image">&#x2715;</button>
+    </div>
+    <input type="file" id="chat-img-file" accept="image/*" onchange="loadChatImageFile(this.files[0])">
     <div id="ai-chat-input-row">
+      <button id="ai-chat-camera" onclick="document.getElementById('chat-img-file').click()" title="Attach image">&#x1F4F7;</button>
       <button id="ai-chat-mic" onclick="toggleVoiceInput()" title="Speak to AI">&#x1F3A4;</button>
       <input id="ai-chat-input" type="text" placeholder="Type or tap mic to speak..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
       <button id="ai-chat-send" onclick="sendChatMessage()">Send</button>
@@ -3777,7 +3792,8 @@ ${window.uwWeeklyContext || 'No UW anchor set — drop UW screenshots and run We
 ${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntradayContext : ''}
 ${window.chartAutoFillContext ? '\n=== CHART LEVELS ===\n' + window.chartAutoFillContext : ''}
 ${window.uwHistContext ? '\n=== UW HISTORICAL PATTERN MATCH ===\n' + window.uwHistContext : ''}
-${window.tvAlertContext ? '\n=== TRADINGVIEW ALERT ===\n' + window.tvAlertContext : ''}`;
+${window.tvAlertContext ? '\n=== TRADINGVIEW ALERT ===\n' + window.tvAlertContext : ''}
+${window.brainContext ? '\n' + window.brainContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -3905,6 +3921,7 @@ async function generateSignal() {
   if (psd) psd.style.display = 'none';
 
   try {
+    await fetchBrainContext();
     const prompt = buildPrompt();
     const content = buildMessageContent(prompt);
 
@@ -5640,6 +5657,22 @@ OUTPUT JSON ONLY (no markdown, no backticks):
   }
 }
 
+async function fetchBrainContext() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/brain-read?sheet=SIGNALS&limit=5', { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return;
+    const raw = await res.text();
+    const d = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    if (!d || d.status === 'no_data' || !d.rows || !d.rows.length) return;
+    const rows = d.rows.slice(0, 5);
+    const lines = rows.map(r => {
+      const ts = r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '?';
+      return `${ts} ${r.bias||'?'} ${r.confidence||'?'}% Entry:${r.entry||'?'} Stop:${r.stop||'?'} T1:${r.target1||'?'} ${r.result||'OPEN'} ${r.whyOneLine||''}`;
+    });
+    window.brainContext = '=== RECENT SIGNAL HISTORY (Brain) ===\n' + lines.join('\n');
+  } catch(e) { window.brainContext = null; }
+}
+
 // ── MAIN INIT ──
 function initAll() {
   // Clock
@@ -5780,6 +5813,38 @@ function autoSpeakSignal(sig) {
 // =============================================
 // P4a: AI CHAT PANEL
 // =============================================
+let chatImageData = null;
+function loadChatImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    chatImageData = ev.target.result;
+    const strip = document.getElementById('chat-img-preview-strip');
+    const thumb = document.getElementById('chat-img-thumb');
+    if (strip) strip.classList.add('has-image');
+    if (thumb) thumb.src = chatImageData;
+    showToast('📸 Image attached to chat', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+function clearChatImage() {
+  chatImageData = null;
+  const strip = document.getElementById('chat-img-preview-strip');
+  const thumb = document.getElementById('chat-img-thumb');
+  const fi = document.getElementById('chat-img-file');
+  if (strip) strip.classList.remove('has-image');
+  if (thumb) thumb.src = '';
+  if (fi) fi.value = '';
+}
+document.addEventListener('paste', e => {
+  const panel = document.getElementById('ai-chat-panel');
+  if (!panel || !panel.classList.contains('open')) return;
+  const items = e.clipboardData?.items; if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) { loadChatImageFile(item.getAsFile()); break; }
+  }
+});
+
 const chatState = { history: [], maxHistory: 20, open: false };
 
 function toggleChatPanel() {
@@ -5840,7 +5905,20 @@ async function sendChatMessage() {
   const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
   try {
     // Build message content with ALL images (same as generateSignal)
-    const chatContent = buildMessageContent(chatState.history[chatState.history.length-1].content);
+    const lastUserText = chatState.history[chatState.history.length-1].content;
+    let chatContent;
+    if (chatImageData) {
+      const imgMt = chatImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      const imgB64 = chatImageData.split(',')[1];
+      chatContent = [
+        { type: 'image', source: { type: 'base64', media_type: imgMt, data: imgB64 } },
+        { type: 'text', text: '[User attached image above]' },
+        ...buildMessageContent(lastUserText)
+      ];
+      clearChatImage();
+    } else {
+      chatContent = buildMessageContent(lastUserText);
+    }
 
     // Build full history with images on latest message only
     const chatMessages = [
