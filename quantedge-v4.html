@@ -3939,7 +3939,7 @@ function updateRegimeBanner() {
   const delta     = (typeof RS !== 'undefined' && RS && RS.cumulativeDelta) || 0;
   const sig       = typeof currentSignal !== 'undefined' ? currentSignal : null;
 
-  let regime = 'Loading...', regimeCls = 'neut', strategy = '—', confluence = '—';
+  let regime = '—', regimeCls = 'neut', strategy = '—', confluence = '—';
 
   if (price && flip) {
     const aboveFlip = price > parseFloat(flip);
@@ -4353,7 +4353,7 @@ function drawVizCanvas() {
   // Determine price range
   const prices = allLevels.map(l => l.price).filter(Boolean).concat([price]);
   let minP = Math.min(...prices), maxP = Math.max(...prices);
-  const padding = Math.max((maxP - minP) * 0.2, 10);
+  const padding = Math.max((maxP - minP) * 0.4, 25);
   minP -= padding; maxP += padding;
   const range = maxP - minP;
 
@@ -4391,7 +4391,7 @@ function drawVizCanvas() {
       ctx.strokeStyle = color;
       ctx.lineWidth = lw || 1;
       if (dashed) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W - 90, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W - 120, y); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = color;
       ctx.font = '10px monospace';
@@ -4414,10 +4414,10 @@ function drawVizCanvas() {
       const yH = toY(orbH), yL = toY(orbL);
       ctx.save();
       ctx.fillStyle = 'rgba(245,158,11,0.08)';
-      ctx.fillRect(0, yH, W - 90, yL - yH);
+      ctx.fillRect(0, yH, W - 120, yL - yH);
       ctx.strokeStyle = '#f59e0b';
       ctx.setLineDash([4, 4]);
-      ctx.strokeRect(0, yH, W - 90, yL - yH);
+      ctx.strokeRect(0, yH, W - 120, yL - yH);
       ctx.setLineDash([]);
       ctx.fillStyle = '#f59e0b';
       ctx.font = '10px monospace';
@@ -4435,18 +4435,18 @@ function drawVizCanvas() {
       ctx.save();
       ctx.fillStyle   = isShort ? 'rgba(239,68,68,0.10)' : 'rgba(74,222,128,0.10)';
       ctx.strokeStyle = isShort ? 'rgba(239,68,68,0.4)'  : 'rgba(74,222,128,0.4)';
-      ctx.fillRect(0, yTop, W - 90, yBot - yTop);
-      ctx.strokeRect(0, yTop, W - 90, yBot - yTop);
+      ctx.fillRect(0, yTop, W - 120, yBot - yTop);
+      ctx.strokeRect(0, yTop, W - 120, yBot - yTop);
       ctx.fillStyle = isShort ? '#ef4444' : '#4ade80';
       ctx.font = '10px monospace';
       ctx.fillText('★ Entry Zone', 4, yE - 3);
       ctx.restore();
     }
     // Target Ladder (right 90px panel)
-    const tlX = W - 90;
+    const tlX = W - 120;
     ctx.save();
     ctx.fillStyle = 'rgba(11,21,32,0.85)';
-    ctx.fillRect(tlX, 0, 90, H);
+    ctx.fillRect(tlX, 0, 120, H);
     ctx.strokeStyle = '#1e2d3d';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(tlX, 0); ctx.lineTo(tlX, H); ctx.stroke();
@@ -4991,8 +4991,6 @@ function gexStackClear(e, stack, idx) {
   e.stopPropagation();
   gexStacks[stack][idx] = null;
   renderGexSlot(stack, idx);
-  const isWeekly = stack.startsWith('w');
-  extractGEXLevelsFromImage(gexStacks[stack][idx].dataUrl, isWeekly);
   showToast('Slot cleared', 'ok');
 }
 function wpGexStackClear(e, stack, idx) { gexStackClear(e, stack, idx); }
@@ -5033,6 +5031,8 @@ function loadGexStackFile(file) {
     const ts = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
     gexStacks[stack][idx] = { dataUrl: ev.target.result, timestamp: ts };
     renderGexSlot(stack, idx);
+    const isWeekly = stack.startsWith('w');
+    extractGEXLevelsFromImage(gexStacks[stack][idx].dataUrl, isWeekly);
     showToast(stack.toUpperCase() + ' Slot ' + (idx+1) + ' loaded at ' + ts, 'ok');
     activeGexSlot = null;
   };
@@ -6011,7 +6011,7 @@ function initAll() {
   setInterval(checkGEXProximity, 15000);
   setInterval(updateVWAPRegimeBadge, 10000);
   setInterval(updateRegimeBanner, 10000);
-  setTimeout(updateRegimeBanner, 4000);;
+  updateRegimeBanner(); setTimeout(updateRegimeBanner, 8000);
   // VIX/DXY refresh every 2 minutes
   setInterval(fetchVIXandDXY, 120000);
   setTimeout(fetchVIXandDXY, 3000);
