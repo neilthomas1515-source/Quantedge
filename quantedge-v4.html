@@ -155,6 +155,8 @@ margin-top:8px;}
 .viz-period.power{background:rgba(0,212,255,0.1);color:var(--cyan);}
 .viz-period.close{background:rgba(255,51,85,0.1);color:var(--red);}
 .viz-period.after{background:rgba(100,100,100,0.1);color:var(--t3);}
+#viz-panel.expanded{height:calc(100vh - 110px);}
+.layer-btn.on.l-gexmap{background:rgba(255,170,0,0.2);border-color:var(--amber2);color:var(--amber);}
 .gap-badge{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;}
 .gap-badge.up{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid var(--green2);}
 .gap-badge.dn{background:rgba(255,51,85,0.1);color:var(--red);border:1px solid var(--red2);}
@@ -1446,12 +1448,23 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
     <button class="layer-btn l-structure" id="lb-structure" onclick="toggleLayer('structure')">Week/Month</button>
     <button class="layer-btn l-sessions" id="lb-sessions" onclick="toggleLayer('sessions')">Asia/London</button>
     <button class="layer-btn l-fibs" id="lb-fibs" onclick="toggleLayer('fibs')">Fibs</button>
+<div class="viz-divider"></div>
+<button class="layer-btn on l-gexmap" id="lb-gexmap" onclick="toggleLayer('gexmap')">GEX Map</button>
     <div class="viz-divider"></div>
     <span style="font-size:9px;color:var(--t4)">Signal levels always visible</span>
     <div style="flex:1"></div>
-    <button class="viz-collapse-btn" id="viz-collapse-btn" onclick="toggleVizPanel()">▼ Hide</button>
+    <button class="viz-collapse-btn" id="viz-expand-btn" onclick="toggleVizExpand()" style="margin-right:4px">⛶ Expand</button>
+<button class="viz-collapse-btn" id="viz-collapse-btn" onclick="toggleVizPanel()">▼ Hide</button>
   </div>
-  <div id="viz-status">
+  <div id="viz-regime-banner" style="display:flex;align-items:center;gap:8px;padding:4px 12px;background:var(--s2);border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto;min-height:28px;">
+  <span id="vr-regime" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,255,136,0.1);color:var(--green);border:1px solid var(--green2)">Loading...</span>
+  <span id="vr-strategy" style="font-size:10px;color:var(--amber)">—</span>
+  <span id="vr-confluence" style="font-size:10px;color:var(--t3)">—</span>
+  <span style="flex:1"></span>
+  <span id="vr-orb-status" style="font-size:10px;color:var(--t3)">ORB: waiting</span>
+  <span id="vr-flip-distance" style="font-size:10px;color:var(--t3)">Flip: —</span>
+</div>
+<div id="viz-status">
     <div class="viz-ws-dot" id="viz-ws-dot"></div>
     <span class="viz-price-main" id="viz-price-main">—</span>
     <span class="viz-stat" id="viz-period-badge"></span>
@@ -1464,6 +1477,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
     <div class="viz-divider"></div>
     <span class="viz-stat">Cum Δ: <strong id="viz-delta" style="color:var(--t4)">—</strong></span>
     <span class="viz-stat">$TICK: <strong id="viz-tick" style="color:var(--t4)">—</strong></span>
+<div class="viz-divider"></div>
+<span class="viz-stat">Daily T1: <strong id="viz-daily-t1" style="color:var(--green)">—</strong></span>
+<span class="viz-stat">Wkly T1: <strong id="viz-weekly-t1" style="color:var(--cyan)">—</strong></span>
   </div>
   <div id="viz-canvas-wrap"><canvas id="viz-canvas"></canvas></div>
 </div>
@@ -1822,6 +1838,7 @@ async function pollRithmicBridge() {
       if(typeof updateSessionHL==='function')updateSessionHL(price);
       if(typeof checkDeltaDivergence==='function')checkDeltaDivergence();
       if(typeof updateVWAPRegimeBadge==='function')updateVWAPRegimeBadge();
+    if (typeof updateRegimeBanner === 'function') updateRegimeBanner();
       if(typeof fetchMTFData==='function')fetchMTFData();
       const vmEl=document.getElementById('viz-price-main');
       if(vmEl){vmEl.textContent=price.toFixed(2);vmEl.className='viz-price-main';}
@@ -3575,6 +3592,13 @@ function calcFibs() {
 
 // ── VIZ PANEL TOGGLE ──
 let vizCollapsed = false;
+function toggleVizExpand() {
+  const panel = document.getElementById('viz-panel');
+  const btn = document.getElementById('viz-expand-btn');
+  const expanded = panel.classList.toggle('expanded');
+  if (btn) btn.textContent = expanded ? '⛶ Contract' : '⛶ Expand';
+  setTimeout(drawVizCanvas, 50);
+}
 function toggleVizPanel() {
   vizCollapsed = !vizCollapsed;
   const panel = document.getElementById('viz-panel');
@@ -3908,6 +3932,162 @@ function buildMessageContent(prompt) {
 }
 
 // ── GENERATE SIGNAL ──
+function updateRegimeBanner() {
+  const price     = window.liveESPrice;
+  const flip      = window.gexFlipDaily;
+  const vix       = parseFloat((typeof priceData !== 'undefined' && priceData && priceData['VIX']) || 0) || 0;
+  const delta     = (typeof RS !== 'undefined' && RS && RS.cumulativeDelta) || 0;
+  const sig       = typeof currentSignal !== 'undefined' ? currentSignal : null;
+
+  let regime = 'Loading...', regimeCls = 'neut', strategy = '—', confluence = '—';
+
+  if (price && flip) {
+    const aboveFlip = price > parseFloat(flip);
+    const bullDelta = delta > 0;
+    const lowVix    = vix > 0 && vix < 20;
+    const highVix   = vix >= 20;
+
+    if (aboveFlip && bullDelta && lowVix) {
+      regime = 'Bullish Engine'; regimeCls = 'bull';
+      strategy = sig ? 'Best: ' + (sig.bias === 'LONG' ? 'GEX Pin + ORB Long' : ((sig.whyOneLine || '').slice(0, 30) || '—')) : 'GEX Pin';
+    } else if (!aboveFlip && !bullDelta) {
+      regime = 'Negative GEX'; regimeCls = 'bear';
+      strategy = 'Best: Fade Rallies';
+    } else if (aboveFlip && highVix) {
+      regime = 'High VIX Range'; regimeCls = 'neut';
+      strategy = 'Caution: Wide stops';
+    } else if (!aboveFlip && bullDelta) {
+      regime = 'Below Flip / Bull Delta'; regimeCls = 'neut';
+      strategy = 'Watch flip reclaim';
+    } else {
+      regime = aboveFlip ? 'Above Flip' : 'Below Flip';
+      regimeCls = aboveFlip ? 'bull' : 'bear';
+      strategy = '—';
+    }
+  }
+
+  if (sig) {
+    confluence = 'Conf: ' + (sig.confidence || 0) + '% | R:R ' + (sig.riskReward || '—');
+  }
+
+  let orbStatus = 'ORB: waiting';
+  if (typeof orbSt !== 'undefined' && orbSt && orbSt.orb15 && orbSt.orb15.done) {
+    const orbH = orbSt.orb15.h, orbL = orbSt.orb15.l;
+    if (price > orbH)      orbStatus = '▲ Above ORB 15M';
+    else if (price < orbL) orbStatus = '▼ Below ORB 15M';
+    else                   orbStatus = '→ Inside ORB 15M';
+  }
+
+  let flipDist = 'Flip: —';
+  if (price && flip) {
+    const dist = (price - parseFloat(flip)).toFixed(1);
+    flipDist = 'Flip: ' + (dist > 0 ? '+' : '') + dist + ' pts';
+  }
+
+  const colors = {
+    bull: { bg: 'rgba(0,255,136,0.1)',  color: 'var(--green)',  border: 'var(--green2)' },
+    bear: { bg: 'rgba(255,51,85,0.1)',  color: 'var(--red)',    border: 'var(--red2)'   },
+    neut: { bg: 'rgba(255,170,0,0.08)', color: 'var(--amber)',  border: 'var(--amber2)' }
+  };
+  const c = colors[regimeCls] || colors.neut;
+
+  const rEl = document.getElementById('vr-regime');
+  const sEl = document.getElementById('vr-strategy');
+  const cEl = document.getElementById('vr-confluence');
+  const oEl = document.getElementById('vr-orb-status');
+  const fEl = document.getElementById('vr-flip-distance');
+
+  if (rEl) { rEl.textContent = regime; rEl.style.background = c.bg; rEl.style.color = c.color; rEl.style.borderColor = c.border; }
+  if (sEl) sEl.textContent = strategy;
+  if (cEl) cEl.textContent = confluence;
+  if (oEl) oEl.textContent = orbStatus;
+  if (fEl) {
+    fEl.textContent = flipDist;
+    const distNum = parseFloat((flipDist.split(' ')[1] || '').replace('+', ''));
+    fEl.style.color = (!isNaN(distNum) && Math.abs(distNum) < 20) ? 'var(--amber)' : 'var(--t3)';
+  }
+
+  // Keep T1/W1 status strip in sync
+  const dt1 = document.getElementById('viz-daily-t1');
+  if (dt1) dt1.textContent = (sig && sig.target1) || '—';
+  const wt1 = document.getElementById('viz-weekly-t1');
+  if (wt1) {
+    if (window.gexCallWallWeekly)  wt1.textContent = window.gexCallWallWeekly;
+    else if (window.gexCallWall)   wt1.textContent = window.gexCallWall;
+    else                           wt1.textContent = '—';
+  }
+}
+
+async function extractGEXLevelsFromImage(imageDataUrl, isWeekly) {
+  if (!imageDataUrl) return;
+  const mt = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+  const b64 = imageDataUrl.split(',')[1];
+
+  const prompt = `You are reading a QTA (QuantTradingApp) GEX chart screenshot for ES/SPX futures.
+Extract these specific values. Return ONLY JSON, no markdown, no explanation.
+If a value is not clearly visible return null.
+All prices should be realistic ES futures prices (current market ~7400-7600 range).
+
+{
+  "callWall": number|null,
+  "putWall": number|null,
+  "absGexStrike": number|null,
+  "maxPain": number|null,
+  "gexFlip": number|null,
+  "netGex": string|null,
+  "spotPrice": number|null
+}`;
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'anthropic',
+        model: 'claude-opus-4-5',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    if (!res.ok) return;
+    const raw   = await res.text();
+    const json  = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    const text  = ((json && json.content) || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const start = text.indexOf('{'), end = text.lastIndexOf('}');
+    if (start === -1) return;
+    const levels = JSON.parse(text.slice(start, end + 1));
+
+    if (isWeekly) {
+      if (levels.callWall)     window.gexCallWallWeekly    = levels.callWall;
+      if (levels.gexFlip)      window.gexFlipWeekly        = levels.gexFlip;
+      if (levels.absGexStrike) window.gexAbsStrikeWeekly   = levels.absGexStrike;
+      if (typeof showToast === 'function')
+        showToast('📊 Weekly GEX levels extracted: Flip ' + (levels.gexFlip || '?') + ' | Call Wall ' + (levels.callWall || '?'), 'ok');
+    } else {
+      if (levels.callWall)     window.gexCallWall    = levels.callWall;
+      if (levels.putWall)      window.gexPutWall     = levels.putWall;
+      if (levels.absGexStrike) window.gexAbsStrike   = levels.absGexStrike;
+      if (levels.maxPain)      window.gexMaxPain     = levels.maxPain;
+      if (levels.gexFlip)      window.gexFlipDaily   = levels.gexFlip;
+      if (levels.netGex)       window.gexNetGexStr   = levels.netGex;
+      const vf = document.getElementById('viz-flip-val');
+      if (vf && levels.gexFlip) vf.textContent = levels.gexFlip;
+      if (typeof showToast === 'function')
+        showToast('📊 Daily GEX levels extracted: Flip ' + (levels.gexFlip || '?') + ' | Abs ' + (levels.absGexStrike || '?') + ' | Call Wall ' + (levels.callWall || '?'), 'ok');
+    }
+    drawVizCanvas();
+    updateRegimeBanner();
+  } catch (e) {
+    console.warn('[GEX Extract] Failed:', e.message);
+  }
+}
+
 async function generateSignal() {
   const btn = document.getElementById('btn-generate');
   if (btn.disabled) return;
@@ -3955,6 +4135,7 @@ async function generateSignal() {
 
     renderSignal(signal);
     autoSpeakSignal(signal);
+  updateRegimeBanner();
     updateSignalHistoryBar();
     updateVizFromSignal(signal);
 
@@ -4087,7 +4268,7 @@ function updateVizFromSignal(sig) {
 // ══════════════════════════════════════════════════
 
 // ── LAYER STATE ──
-const vizLayers = { session:true, vwap:true, volume:true, structure:false, sessions:false, fibs:false };
+const vizLayers = { session:true, vwap:true, volume:true, structure:false, sessions:false, fibs:false, gexmap:true };
 function toggleLayer(name) {
   vizLayers[name] = !vizLayers[name];
   const btn = document.getElementById('lb-' + name);
@@ -4201,6 +4382,94 @@ function drawVizCanvas() {
     ctx.fillText(`${lv.label} ${lv.price.toFixed(2)}`, W - 78, y + 3);
   });
 
+  // --- GEX Map Overlay ---
+  if (vizLayers.gexmap) {
+    const drawGEXLine = (price, color, label, dashed, lw) => {
+      if (price == null || isNaN(parseFloat(price))) return;
+      const y = priceToY(parseFloat(price));
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lw || 1;
+      if (dashed) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W - 90, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color;
+      ctx.font = '10px monospace';
+      ctx.fillText(label, 4, y - 3);
+      ctx.restore();
+    };
+    // Daily GEX levels
+    drawGEXLine(window.gexCallWall,          '#22c55e', 'Call Wall D', false, 1);
+    drawGEXLine(window.gexAbsStrike,         '#f59e0b', 'Abs GEX D',  false, 2);
+    drawGEXLine(window.gexMaxPain,           '#a855f7', 'Max Pain D', true,  1);
+    drawGEXLine(window.gexFlipDaily,         '#ef4444', 'GEX Flip D', false, 2);
+    drawGEXLine(window.gexPutWall,           '#f87171', 'Put Wall D', true,  1);
+    // Weekly GEX levels
+    drawGEXLine(window.gexCallWallWeekly,    '#06b6d4', 'Call Wall W', true, 1);
+    drawGEXLine(window.gexFlipWeekly,        '#f97316', 'GEX Flip W',  true, 2);
+    drawGEXLine(window.gexAbsStrikeWeekly,   '#eab308', 'Abs GEX W',   true, 1);
+    // ORB zones
+    if (typeof orbSt !== 'undefined' && orbSt && orbSt.orb15 && orbSt.orb15.done) {
+      const orbH = orbSt.orb15.h, orbL = orbSt.orb15.l;
+      const yH = priceToY(orbH), yL = priceToY(orbL);
+      ctx.save();
+      ctx.fillStyle = 'rgba(245,158,11,0.08)';
+      ctx.fillRect(0, yH, W - 90, yL - yH);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(0, yH, W - 90, yL - yH);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '10px monospace';
+      ctx.fillText('15M ORB', 4, yH - 3);
+      ctx.restore();
+    }
+    // Signal entry zone
+    if (typeof currentSignal !== 'undefined' && currentSignal &&
+        (currentSignal.confidence || 0) >= 65 && currentSignal.entry) {
+      const entryP = parseFloat(currentSignal.entry);
+      const yE   = priceToY(entryP);
+      const yTop = priceToY(entryP + 1.5);
+      const yBot = priceToY(entryP - 1.5);
+      const isShort = currentSignal.bias === 'SHORT';
+      ctx.save();
+      ctx.fillStyle   = isShort ? 'rgba(239,68,68,0.10)' : 'rgba(74,222,128,0.10)';
+      ctx.strokeStyle = isShort ? 'rgba(239,68,68,0.4)'  : 'rgba(74,222,128,0.4)';
+      ctx.fillRect(0, yTop, W - 90, yBot - yTop);
+      ctx.strokeRect(0, yTop, W - 90, yBot - yTop);
+      ctx.fillStyle = isShort ? '#ef4444' : '#4ade80';
+      ctx.font = '10px monospace';
+      ctx.fillText('★ Entry Zone', 4, yE - 3);
+      ctx.restore();
+    }
+    // Target Ladder (right 90px panel)
+    const tlX = W - 90;
+    ctx.save();
+    ctx.fillStyle = 'rgba(11,21,32,0.85)';
+    ctx.fillRect(tlX, 0, 90, H);
+    ctx.strokeStyle = '#1e2d3d';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(tlX, 0); ctx.lineTo(tlX, H); ctx.stroke();
+    ctx.fillStyle = '#475569';
+    ctx.font = '9px monospace';
+    ctx.fillText('TARGETS', tlX + 4, 14);
+    let tlY = 28;
+    const drawTR = (lbl, val, color) => {
+      if (!val) return;
+      ctx.fillStyle = color;
+      ctx.font = '9px monospace';
+      ctx.fillText(lbl + ': ' + val, tlX + 4, tlY);
+      tlY += 14;
+    };
+    const _cs = typeof currentSignal !== 'undefined' ? currentSignal : null;
+    drawTR('D T1', _cs && _cs.target1,        '#22c55e');
+    drawTR('D T2', _cs && _cs.target2,        '#00cc66');
+    drawTR('W T1', window.gexCallWall,        '#06b6d4');
+    drawTR('W T2', window.gexCallWallWeekly,  '#06b6d4');
+    drawTR('Stop', _cs && _cs.stop,           '#ef4444');
+    ctx.restore();
+  }
+  // --- End GEX Map Overlay ---
   // Current price line
   const cy = toY(price);
   ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
@@ -4722,6 +4991,8 @@ function gexStackClear(e, stack, idx) {
   e.stopPropagation();
   gexStacks[stack][idx] = null;
   renderGexSlot(stack, idx);
+  const isWeekly = stack.startsWith('w');
+  extractGEXLevelsFromImage(gexStacks[stack][idx].dataUrl, isWeekly);
   showToast('Slot cleared', 'ok');
 }
 function wpGexStackClear(e, stack, idx) { gexStackClear(e, stack, idx); }
@@ -5739,6 +6010,8 @@ function initAll() {
   setInterval(checkSessionTransition, 60000);
   setInterval(checkGEXProximity, 15000);
   setInterval(updateVWAPRegimeBadge, 10000);
+  setInterval(updateRegimeBanner, 10000);
+  setTimeout(updateRegimeBanner, 4000);;
   // VIX/DXY refresh every 2 minutes
   setInterval(fetchVIXandDXY, 120000);
   setTimeout(fetchVIXandDXY, 3000);
