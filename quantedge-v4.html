@@ -4386,7 +4386,7 @@ function drawVizCanvas() {
   if (vizLayers.gexmap) {
     const drawGEXLine = (price, color, label, dashed, lw) => {
       if (price == null || isNaN(parseFloat(price))) return;
-      const y = priceToY(parseFloat(price));
+      const y = toY(parseFloat(price));
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth = lw || 1;
@@ -4411,7 +4411,7 @@ function drawVizCanvas() {
     // ORB zones
     if (typeof orbSt !== 'undefined' && orbSt && orbSt.orb15 && orbSt.orb15.done) {
       const orbH = orbSt.orb15.h, orbL = orbSt.orb15.l;
-      const yH = priceToY(orbH), yL = priceToY(orbL);
+      const yH = toY(orbH), yL = toY(orbL);
       ctx.save();
       ctx.fillStyle = 'rgba(245,158,11,0.08)';
       ctx.fillRect(0, yH, W - 90, yL - yH);
@@ -4428,9 +4428,9 @@ function drawVizCanvas() {
     if (typeof currentSignal !== 'undefined' && currentSignal &&
         (currentSignal.confidence || 0) >= 65 && currentSignal.entry) {
       const entryP = parseFloat(currentSignal.entry);
-      const yE   = priceToY(entryP);
-      const yTop = priceToY(entryP + 1.5);
-      const yBot = priceToY(entryP - 1.5);
+      const yE   = toY(entryP);
+      const yTop = toY(entryP + 1.5);
+      const yBot = toY(entryP - 1.5);
       const isShort = currentSignal.bias === 'SHORT';
       ctx.save();
       ctx.fillStyle   = isShort ? 'rgba(239,68,68,0.10)' : 'rgba(74,222,128,0.10)';
