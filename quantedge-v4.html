@@ -4312,6 +4312,12 @@ function drawVizCanvas() {
     ctx.lineTo(W - 20, y);
     ctx.stroke();
   }
+  function sectionHeader(text, color) {
+    ctx.fillStyle = color;
+    ctx.font = 'bold 10px IBM Plex Mono';
+    ctx.fillText('▸ ' + text, 20, row + 10);
+    row += 28;
+  }
 
   // HEADER
   ctx.fillStyle = '#0f1923';
@@ -4320,104 +4326,102 @@ function drawVizCanvas() {
   label(new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) + ' EST', W - 100, 20, '#4e6e88');
 
   row = 55;
+  const sig = currentSignal;
+  const delta = RS?.cumulativeDelta || 0;
 
-  // ROW 1 — Current Price + Signal
+  // ROW 1 — LIVE PRICE, SIGNAL, CONFIDENCE, CUM DELTA
   label('LIVE PRICE', col1, row - 14, '#4e6e88');
   label('SIGNAL', col2, row - 14, '#4e6e88');
-  label('ENTRY', col3, row - 14, '#4e6e88');
-  label('STOP', col4, row - 14, '#4e6e88');
-
+  label('CONFIDENCE', col3, row - 14, '#4e6e88');
+  label('CUM DELTA', col4, row - 14, '#4e6e88');
   value(price ? price.toFixed(2) : '—', col1, row + 4, '#ffffff');
-  const sig = currentSignal;
   value(sig ? sig.bias : 'NO SIGNAL', col2, row + 4, sig ? (sig.bias === 'LONG' ? '#00ff88' : sig.bias === 'SHORT' ? '#ff3355' : '#ffaa00') : '#4e6e88');
-  value(sig ? (sig.entry || '—') : '—', col3, row + 4, '#ffffff');
-  value(sig ? (sig.stop || '—') : '—', col4, row + 4, '#ff3355');
-
+  value(sig ? (sig.confidence || 0) + '%' : '—', col3, row + 4, sig && sig.confidence >= 70 ? '#00ff88' : '#ffaa00');
+  value((delta >= 0 ? '+' : '') + delta.toLocaleString(), col4, row + 4, delta >= 0 ? '#00ff88' : '#ff3355');
   row += lineH + 16;
   divider(row - 8);
 
-  // ROW 2 — Daily Targets
-  label('DAILY T1', col1, row - 14, '#4e6e88');
-  label('DAILY T2', col2, row - 14, '#4e6e88');
-  label('WEEKLY T1', col3, row - 14, '#4e6e88');
-  label('WEEKLY T2', col4, row - 14, '#4e6e88');
+  // SECTION: SIGNAL LEVELS
+  sectionHeader('SIGNAL LEVELS', '#00d4ff');
 
-  value(sig ? (sig.target1 || '—') : '—', col1, row + 4, '#00ff88');
-  value(sig ? (sig.target2 || '—') : '—', col2, row + 4, '#00cc66');
-  value(window.gexCallWallWeekly ? window.gexCallWallWeekly.toString() : (window.gexCallWall ? window.gexCallWall.toString() : '—'), col3, row + 4, '#00d4ff');
-  value(window.gexAbsStrikeWeekly ? window.gexAbsStrikeWeekly.toString() : '—', col4, row + 4, '#0099cc');
-
+  // ROW 2 — ENTRY, STOP, DAILY T1, DAILY T2
+  label('ENTRY', col1, row - 14, '#4e6e88');
+  label('STOP', col2, row - 14, '#4e6e88');
+  label('DAILY T1', col3, row - 14, '#4e6e88');
+  label('DAILY T2', col4, row - 14, '#4e6e88');
+  value(sig ? (sig.entry || '—') : '—', col1, row + 4, '#ffffff');
+  value(sig ? (sig.stop || '—') : '—', col2, row + 4, '#ff3355');
+  value(sig ? (sig.target1 || '—') : '—', col3, row + 4, '#00ff88');
+  value(sig ? (sig.target2 || '—') : '—', col4, row + 4, '#00cc66');
   row += lineH + 16;
   divider(row - 8);
 
-  // ROW 3 — GEX Daily Levels
+  // SECTION: WEEKLY GEX
+  sectionHeader('WEEKLY GEX', '#a855f7');
+
+  // ROW 3 — WEEKLY T1, WEEKLY T2, WEEKLY CALL WALL, WEEKLY PUT WALL
+  label('WEEKLY T1', col1, row - 14, '#4e6e88');
+  label('WEEKLY T2', col2, row - 14, '#4e6e88');
+  label('CALL WALL W', col3, row - 14, '#4e6e88');
+  label('PUT WALL W', col4, row - 14, '#4e6e88');
+  value(window.gexCallWallWeekly ? window.gexCallWallWeekly.toString() : '—', col1, row + 4, '#06b6d4');
+  value(window.gexAbsStrikeWeekly ? window.gexAbsStrikeWeekly.toString() : '—', col2, row + 4, '#0099cc');
+  value(window.gexCallWallWeekly ? window.gexCallWallWeekly.toString() : '—', col3, row + 4, '#06b6d4');
+  value(window.gexPutWallWeekly ? window.gexPutWallWeekly.toString() : (window.gexPutWall ? window.gexPutWall.toString() : '—'), col4, row + 4, '#f87171');
+  row += lineH + 16;
+  divider(row - 8);
+
+  // ROW 4 — WEEKLY ABS GEX, WEEKLY GEX FLIP, WEEKLY MAX PAIN, GEX FLIP D
+  label('ABS GEX W', col1, row - 14, '#4e6e88');
+  label('GEX FLIP W', col2, row - 14, '#4e6e88');
+  label('MAX PAIN W', col3, row - 14, '#4e6e88');
+  label('GEX FLIP D', col4, row - 14, '#4e6e88');
+  value(window.gexAbsStrikeWeekly ? window.gexAbsStrikeWeekly.toString() : '—', col1, row + 4, '#eab308');
+  value(window.gexFlipWeekly ? window.gexFlipWeekly.toString() : '—', col2, row + 4, '#f97316');
+  value(window.gexMaxPainWeekly ? window.gexMaxPainWeekly.toString() : '—', col3, row + 4, '#a855f7');
+  value(window.gexFlipDaily ? window.gexFlipDaily.toString() : (document.getElementById('viz-flip-val') ? document.getElementById('viz-flip-val').textContent : '—'), col4, row + 4, '#ef4444');
+  row += lineH + 16;
+  divider(row - 8);
+
+  // SECTION: DAILY GEX
+  sectionHeader('DAILY GEX', '#f59e0b');
+
+  // ROW 5 — DAILY CALL WALL, DAILY ABS GEX, DAILY PUT WALL, DAILY MAX PAIN
   label('CALL WALL D', col1, row - 14, '#4e6e88');
   label('ABS GEX D', col2, row - 14, '#4e6e88');
-  label('GEX FLIP D', col3, row - 14, '#4e6e88');
-  label('MAX PAIN', col4, row - 14, '#4e6e88');
-
+  label('PUT WALL D', col3, row - 14, '#4e6e88');
+  label('MAX PAIN D', col4, row - 14, '#4e6e88');
   value(window.gexCallWall ? window.gexCallWall.toString() : '—', col1, row + 4, '#22c55e');
   value(window.gexAbsStrike ? window.gexAbsStrike.toString() : '—', col2, row + 4, '#f59e0b');
-  value(window.gexFlipDaily ? window.gexFlipDaily.toString() : (document.getElementById('viz-flip-val') ? document.getElementById('viz-flip-val').textContent : '—'), col3, row + 4, '#ef4444');
+  value(window.gexPutWall ? window.gexPutWall.toString() : '—', col3, row + 4, '#f87171');
   value(window.gexMaxPain ? window.gexMaxPain.toString() : '—', col4, row + 4, '#a855f7');
-
   row += lineH + 16;
   divider(row - 8);
 
-  // ROW 4 — GEX Weekly Levels
-  label('CALL WALL W', col1, row - 14, '#4e6e88');
-  label('GEX FLIP W', col2, row - 14, '#4e6e88');
-  label('ABS GEX W', col3, row - 14, '#4e6e88');
-  label('PUT WALL D', col4, row - 14, '#4e6e88');
+  // SECTION: SESSION LEVELS
+  sectionHeader('SESSION LEVELS', '#3b82f6');
 
-  value(window.gexCallWallWeekly ? window.gexCallWallWeekly.toString() : '—', col1, row + 4, '#06b6d4');
-  value(window.gexFlipWeekly ? window.gexFlipWeekly.toString() : '—', col2, row + 4, '#f97316');
-  value(window.gexAbsStrikeWeekly ? window.gexAbsStrikeWeekly.toString() : '—', col3, row + 4, '#eab308');
-  value(window.gexPutWall ? window.gexPutWall.toString() : '—', col4, row + 4, '#f87171');
-
-  row += lineH + 16;
-  divider(row - 8);
-
-  // ROW 5 — Session Levels
+  // ROW 6 — VWAP, POC, PDH, PDL
   label('VWAP', col1, row - 14, '#4e6e88');
   label('POC', col2, row - 14, '#4e6e88');
   label('PDH', col3, row - 14, '#4e6e88');
   label('PDL', col4, row - 14, '#4e6e88');
-
   value(vwapSt?.vwap ? vwapSt.vwap.toFixed(2) : (document.getElementById('vwap')?.value || '—'), col1, row + 4, '#00d4ff');
   value(vpSt?.poc ? vpSt.poc.toFixed(2) : (document.getElementById('poc')?.value || '—'), col2, row + 4, '#ffaa00');
   value(document.getElementById('lvl-pdh')?.textContent || '—', col3, row + 4, '#ff8844');
   value(document.getElementById('lvl-pdl')?.textContent || '—', col4, row + 4, '#ff8844');
-
   row += lineH + 16;
   divider(row - 8);
 
-  // ROW 6 — ORB Levels
+  // ROW 7 — ORB 15M HIGH, ORB 15M LOW, O/N HIGH, O/N LOW
   label('ORB 15M HIGH', col1, row - 14, '#4e6e88');
   label('ORB 15M LOW', col2, row - 14, '#4e6e88');
   label('O/N HIGH', col3, row - 14, '#4e6e88');
   label('O/N LOW', col4, row - 14, '#4e6e88');
-
   value(orbSt?.orb15?.h ? orbSt.orb15.h.toFixed(2) : '—', col1, row + 4, '#f59e0b');
   value(orbSt?.orb15?.l ? orbSt.orb15.l.toFixed(2) : '—', col2, row + 4, '#f59e0b');
   value(document.getElementById('on-hi')?.value || '—', col3, row + 4, '#668866');
   value(document.getElementById('on-lo')?.value || '—', col4, row + 4, '#668866');
-
-  row += lineH + 16;
-  divider(row - 8);
-
-  // ROW 7 — Internals
-  label('CUM DELTA', col1, row - 14, '#4e6e88');
-  label('TICK', col2, row - 14, '#4e6e88');
-  label('VIX', col3, row - 14, '#4e6e88');
-  label('CONFIDENCE', col4, row - 14, '#4e6e88');
-
-  const delta = RS?.cumulativeDelta || 0;
-  value((delta >= 0 ? '+' : '') + delta.toLocaleString(), col1, row + 4, delta >= 0 ? '#00ff88' : '#ff3355');
-  const tick = window.liveTICK || 0;
-  value((tick > 0 ? '+' : '') + Math.round(tick), col2, row + 4, tick > 500 ? '#00ff88' : tick < -500 ? '#ff3355' : '#8aaec8');
-  value(priceData['VIX'] ? parseFloat(priceData['VIX']).toFixed(2) : '—', col3, row + 4, parseFloat(priceData['VIX']) > 20 ? '#ff3355' : '#00ff88');
-  value(sig ? (sig.confidence || 0) + '%' : '—', col4, row + 4, sig && sig.confidence >= 70 ? '#00ff88' : '#ffaa00');
 
   // Redraw every 5s
   window._lastVizPrice = price;
