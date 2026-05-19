@@ -3817,7 +3817,8 @@ ${window.uwIntradayContext ? '\n=== UW INTRADAY UPDATE ===\n' + window.uwIntrada
 ${window.chartAutoFillContext ? '\n=== CHART LEVELS ===\n' + window.chartAutoFillContext : ''}
 ${window.uwHistContext ? '\n=== UW HISTORICAL PATTERN MATCH ===\n' + window.uwHistContext : ''}
 ${window.tvAlertContext ? '\n=== TRADINGVIEW ALERT ===\n' + window.tvAlertContext : ''}
-${window.brainContext ? '\n' + window.brainContext : ''}`;
+${window.brainContext ? '\n' + window.brainContext : ''}
+${window.sessionContext ? '\n' + window.sessionContext : ''}`;
 }
 
 // ── BUILD PROMPT ──
@@ -4102,6 +4103,7 @@ async function generateSignal() {
 
   try {
     await fetchBrainContext();
+    await fetchSessionContext();
     const prompt = buildPrompt();
     const content = buildMessageContent(prompt);
 
@@ -4134,6 +4136,15 @@ async function generateSignal() {
     if (signalHistory.length > 10) signalHistory.pop();
 
     renderSignal(signal);
+    postSessionUpdate('signal', {
+      bias: signal.bias,
+      confidence: signal.confidence,
+      entry: signal.entry,
+      stop: signal.stop,
+      target1: signal.target1,
+      reasoning: ((signal.reasoning || signal.whyOneLine || '') + '').slice(0, 200),
+      esPrice: window.liveESPrice
+    });
     autoSpeakSignal(signal);
   updateRegimeBanner();
     updateSignalHistoryBar();
@@ -5471,6 +5482,12 @@ async function uwSaveIntradayUpdate() {
     window.uwIntradayContext = 'UW Intraday Update (' + new Date(intradayPayload.savedAt).toLocaleTimeString() + '): ' + (intradayPayload.delta||'') + ' | Flows: ' + (intradayPayload.flowsRead||'').slice(0,200);
     document.getElementById('uw-save-intraday-btn')?.classList.remove('visible');
     showToast('⟳ Intraday update saved', 'ok');
+    postSessionUpdate('uw_delta', {
+      delta: intradayPayload.delta,
+      flowsRead: (intradayPayload.flowsRead || '').slice(0, 200),
+      anchorBias: intradayPayload.anchorBias,
+      savedAt: intradayPayload.savedAt
+    });
   } catch(e) { showToast('Intraday save failed: ' + e.message, 'err'); }
 }
 
@@ -5882,6 +5899,34 @@ async function fetchBrainContext() {
   } catch(e) { window.brainContext = null; }
 }
 
+async function fetchSessionContext() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/session-read', { signal: AbortSignal.timeout(3000) });
+    if (!res.ok) return;
+    const raw = await res.text();
+    const d = JSON.parse(raw);
+    if (!d || d.status === 'no_data' || !d.events || !d.events.length) return;
+    const recentEvents = d.events.slice(-20);
+    const lines = recentEvents.map(e => {
+      const data = e.data || {};
+      if (e.type === 'signal') return (e.time + ' SIGNAL: ' + (data.bias||'?') + ' ' + (data.confidence||'?') + '% Entry:' + (data.entry||'?') + ' Stop:' + (data.stop||'?') + ' — ' + (data.reasoning||'')).slice(0,120);
+      if (e.type === 'chat_obs') return (e.time + ' OBS: ' + (data.observation||data.note||'')).slice(0,100);
+      if (e.type === 'uw_delta') return (e.time + ' UW: ' + (data.delta||'')).slice(0,80);
+      if (e.type === 'init') return (e.time + ' SESSION START: ' + (data.gex||'') + ' VIX:' + (data.vix||'')).slice(0,100);
+      return (e.time + ' ' + e.type + ': ' + JSON.stringify(data)).slice(0,100);
+    });
+    window.sessionContext = "=== TODAY'S SESSION LOG ===\n" + lines.join('\n');
+  } catch(e) { window.sessionContext = null; }
+}
+
+function postSessionUpdate(type, data) {
+  fetch(CLOUDFLARE_WORKER + '/session-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, data })
+  }).catch(() => {});
+}
+
 // ── MAIN INIT ──
 function initAll() {
   // Clock
@@ -6113,7 +6158,9 @@ async function sendChatMessage() {
   if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
   const thinkingDiv = addChatMessage('ai', 'Thinking\u2026', true);
   const ctx = typeof getCompleteAIContext === 'function' ? getCompleteAIContext().slice(0, 4000) : '';
-  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
+  await fetchSessionContext().catch(() => {});
+  const sessionCtxStr = window.sessionContext ? '\n\nSESSION BRAIN:\n' + window.sessionContext : '';
+  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx + sessionCtxStr;
   try {
     // Build message content with ALL images (same as generateSignal)
     const lastUserText = chatState.history[chatState.history.length-1].content;
@@ -6157,6 +6204,32 @@ async function sendChatMessage() {
     chatState.history.push({ role: 'assistant', content: text });
     if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
     if (ttsState.enabled) speakText(text);
+    // Background: extract trade observations for session brain
+    (function() {
+      const capturedUser = userMsg.slice(0, 200);
+      const capturedText = text.slice(0, 300);
+      fetch(CLOUDFLARE_WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'anthropic',
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 150,
+          messages: [{ role: 'user', content: 'Extract any key trading observation from this exchange. Return JSON only: {"observation":"...","bias":"BULLISH|BEARISH|NEUTRAL|none","levels":[]}\n\nUser: ' + capturedUser + '\nAI: ' + capturedText }]
+        })
+      }).then(function(r) {
+        if (!r.ok) return;
+        return r.text();
+      }).then(function(raw) {
+        if (!raw) return;
+        var data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+        var extractText = (data && data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+        var tS = extractText.indexOf('{'), tE = extractText.lastIndexOf('}');
+        if (tS === -1) return;
+        var obs = JSON.parse(extractText.slice(tS, tE + 1));
+        postSessionUpdate('chat_obs', obs);
+      }).catch(function(){});
+    })();
   } catch(e) {
     updateChatMessage(thinkingDiv, '\u26A0 ' + e.message);
   } finally {
