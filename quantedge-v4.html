@@ -3924,7 +3924,7 @@ REQUIRED OUTPUT FORMAT (JSON only, no markdown, no backticks):
   "narrative": "max 3 sentences for expand view",
   "regimeWarning": "one line or null",
   "mlNote": "ML note or null",
-  "layerScore": 0
+  "layerScore": "INTEGER 0-5 ONLY — count confirmed confluence layers (max 5, never exceed 5): GEX confirms + HTF stack aligned + SMC setup present + volume/absorption confirms + liquidity swept"
 }`;
 }
 
@@ -4257,7 +4257,7 @@ function renderSignal(sig) {
   const htf = sig.htfStack || {};
   const hc = v => v==='BULL'?'var(--green)':v==='BEAR'?'var(--red)':'var(--t3)';
   const htfHtml = `<div class="sig2-htf">${['D','4H','1H','15M'].map(tf=>`<div class="sig2-htf-item" style="color:${hc(htf[tf])}">${tf}: ${htf[tf]||'?'}</div>`).join('')}</div>`;
-  const ls = sig.layerScore || 0;
+  const ls = Math.min(5, Math.max(0, sig.layerScore || 0));
   const lsColor = ls >= 4 ? 'var(--green)' : ls === 3 ? 'var(--amber)' : 'var(--red)';
   const lsPips = [1,2,3,4,5].map(n => `<div style="width:14px;height:6px;border-radius:2px;background:${n <= ls ? lsColor : 'var(--b2)'}"></div>`).join('');
 
