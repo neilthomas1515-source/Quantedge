@@ -609,6 +609,27 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .sess-prob-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 12px;border-radius:6px;border:1px dashed var(--b2);background:var(--s2);min-width:88px;}
 .sess-prob-empty-lbl{font-size:8px;color:var(--t4);letter-spacing:1px;text-transform:uppercase;}
 
+
+/* STRATEGY PANEL */
+#strategy-panel{background:var(--s2);border-top:1px solid var(--b1);padding:10px 14px;flex-shrink:0;}
+.sp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.sp-title{font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;}
+.sp-regime{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
+.sp-strategy{font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:8px;}
+.sp-layers{display:flex;flex-direction:column;gap:4px;margin-bottom:6px;}
+.sp-layer{display:flex;align-items:center;gap:7px;cursor:pointer;padding:3px 7px;border-radius:3px;border:1px solid var(--b1);background:var(--s3);user-select:none;transition:border-color 0.1s;}
+.sp-layer:hover{border-color:var(--b2);}
+.sp-layer.on{border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.04);}
+.sp-toggle{font-size:12px;min-width:14px;color:var(--t4);}
+.sp-layer.on .sp-toggle{color:var(--green);}
+.sp-layer-label{font-size:10px;color:var(--t2);}
+.sp-layer.on .sp-layer-label{color:var(--green);}
+.sp-count{font-size:9px;color:var(--t3);margin-bottom:8px;}
+.sp-log-row{display:flex;gap:6px;}
+.sp-log-btn{flex:1;padding:4px;border-radius:3px;font-family:var(--mono);font-size:11px;cursor:pointer;border:1px solid;font-weight:700;}
+.sp-log-btn-w{background:rgba(0,255,136,0.07);border-color:var(--green2);color:var(--green);}
+.sp-log-btn-l{background:rgba(255,51,85,0.07);border-color:var(--red2);color:var(--red);}
+.sp-log-btn:hover{opacity:0.8;}
 </style>
 </head>
 <body>
@@ -1455,6 +1476,19 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
     </div>
   </div>
 
+  <div id="strategy-panel">
+    <div class="sp-header">
+      <span class="sp-title">Today's Strategy</span>
+      <span id="sp-regime" class="sp-regime" style="background:rgba(0,212,255,0.1);color:var(--cyan)">&#8212;</span>
+    </div>
+    <div id="sp-name" class="sp-strategy">Loading&#8230;</div>
+    <div class="sp-layers" id="sp-layers"></div>
+    <div id="sp-count" class="sp-count">0 / 5 layers confirmed</div>
+    <div class="sp-log-row">
+      <button class="sp-log-btn sp-log-btn-w" onclick="logTradeResult('W')">&#10003; Log Win</button>
+      <button class="sp-log-btn sp-log-btn-l" onclick="logTradeResult('L')">&#10007; Log Loss</button>
+    </div>
+  </div>
 </div><!-- end #right -->
 
 <!-- VIZ PANEL -->
@@ -3889,7 +3923,8 @@ REQUIRED OUTPUT FORMAT (JSON only, no markdown, no backticks):
   "whyOneLine": "single sentence core thesis",
   "narrative": "max 3 sentences for expand view",
   "regimeWarning": "one line or null",
-  "mlNote": "ML note or null"
+  "mlNote": "ML note or null",
+  "layerScore": 0
 }`;
 }
 
@@ -4222,6 +4257,9 @@ function renderSignal(sig) {
   const htf = sig.htfStack || {};
   const hc = v => v==='BULL'?'var(--green)':v==='BEAR'?'var(--red)':'var(--t3)';
   const htfHtml = `<div class="sig2-htf">${['D','4H','1H','15M'].map(tf=>`<div class="sig2-htf-item" style="color:${hc(htf[tf])}">${tf}: ${htf[tf]||'?'}</div>`).join('')}</div>`;
+  const ls = sig.layerScore || 0;
+  const lsColor = ls >= 4 ? 'var(--green)' : ls === 3 ? 'var(--amber)' : 'var(--red)';
+  const lsPips = [1,2,3,4,5].map(n => `<div style="width:14px;height:6px;border-radius:2px;background:${n <= ls ? lsColor : 'var(--b2)'}"></div>`).join('');
 
   area.innerHTML = `
   <div class="sig2-box">
@@ -4252,6 +4290,7 @@ function renderSignal(sig) {
       <div class="sig2-meta-item"><div class="sig2-meta-label">At Price</div><div class="sig2-meta-val" style="color:var(--cyan)">${sig.esAtSignal?.toFixed(2)||'?'}</div></div>
     </div>
     ${htfHtml}
+    <div style="padding:6px 14px 4px;border-top:1px solid var(--b1)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;min-width:100px">Confluence Layers</span><div style="display:flex;gap:3px;align-items:center">${lsPips}</div><span style="font-size:11px;color:${lsColor};font-weight:700">${ls}/5</span></div></div>
     <div class="sig2-why"><div class="sig2-why-label">Why</div>${sig.whyOneLine||sig.narrative?.split('.')[0]||'\u2014'}</div>
     <div class="sig2-invalidation">\u26A0 Invalidation: <strong>${sig.invalidation||sig.keyLevelToWatch||'\u2014'}</strong></div>
     ${alignHtml}
@@ -5985,6 +6024,91 @@ function startSessProbPolling() {
 }
 
 // ── MAIN INIT ──
+
+// ── STRATEGY PANEL ──────────────────────────────────────────────────────────
+const SP_LAYERS = [
+  {id:'l0',  label:'L0 Market Structure'},
+  {id:'l1',  label:'L1 PO3 Bias'},
+  {id:'l2',  label:'L2 Liquidity Sweep'},
+  {id:'l25', label:'L2.5 PJ Confirmation'},
+  {id:'l3',  label:'L3 Katana FVG'}
+];
+const spState = {l0:false, l1:false, l2:false, l25:false, l3:false};
+let spData = {regime:'--', strategy:'--'};
+
+function renderSpChecklist() {
+  const el = document.getElementById('sp-layers');
+  const cnt = document.getElementById('sp-count');
+  if (!el) return;
+  const active = SP_LAYERS.filter(l => spState[l.id]).length;
+  el.innerHTML = SP_LAYERS.map(l =>
+    '<div class="sp-layer' + (spState[l.id] ? ' on' : '') + '" onclick="toggleSpLayer(\'' + l.id + '\')">' +
+    '<span class="sp-toggle">' + (spState[l.id] ? '&#10003;' : '&#10007;') + '</span>' +
+    '<span class="sp-layer-label">' + l.label + '</span></div>'
+  ).join('');
+  if (cnt) cnt.textContent = active + ' / 5 layers confirmed';
+}
+
+function toggleSpLayer(id) {
+  spState[id] = !spState[id];
+  renderSpChecklist();
+}
+
+function setStrategyPanel(regime, strategy) {
+  spData = {regime, strategy};
+  const nameEl = document.getElementById('sp-name');
+  const regEl  = document.getElementById('sp-regime');
+  if (nameEl) nameEl.textContent = strategy || '--';
+  if (regEl) {
+    regEl.textContent = regime || '--';
+    const map = {
+      TRENDING_BULL: 'rgba(0,255,136,0.1)|#00ff88',
+      TRENDING_BEAR: 'rgba(255,51,85,0.1)|#ff3355',
+      CHOPPY:        'rgba(255,170,0,0.1)|#ffaa00',
+      NEWS_DAY:      'rgba(255,120,0,0.1)|#ff7800'
+    };
+    const c = (map[regime] || 'rgba(0,212,255,0.1)|var(--cyan)').split('|');
+    regEl.style.background = c[0];
+    regEl.style.color = c[1];
+  }
+  renderSpChecklist();
+}
+
+async function fetchMorningContext() {
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/daily-context');
+    if (!res.ok) return;
+    const text = await res.text();
+    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+    if (s === -1) return;
+    const data = JSON.parse(text.slice(s, e + 1));
+    const auto = data && data.auto;
+    if (auto && (auto.regime || auto.recommendedStrategy)) {
+      setStrategyPanel(auto.regime || '--', auto.recommendedStrategy || '--');
+    }
+  } catch(err) {}
+}
+
+async function logTradeResult(result) {
+  const active = SP_LAYERS.filter(l => spState[l.id]).length;
+  const payload = {
+    date:          new Date().toISOString().split('T')[0],
+    strategy:      spData.strategy,
+    regime:        spData.regime,
+    layersAligned: active,
+    result:        result
+  };
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/signal-result', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    await res.text();
+    showToast((result === 'W' ? 'Win' : 'Loss') + ' logged -- ' + active + '/5 layers');
+  } catch(err) { showToast('Log failed: ' + err.message); }
+}
+
 function initAll() {
   // Clock
   updateClock();
@@ -6012,6 +6136,7 @@ function initAll() {
 
   // Pre-signal dash
   updatePresignalDash();
+  fetchMorningContext();
   setInterval(updatePresignalDash, 15000);
 
   // Viz canvas
