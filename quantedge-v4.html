@@ -2938,7 +2938,9 @@ REQUIRED OUTPUT FORMAT (JSON only, no markdown):
   "narrative": "3-5 sentence analysis covering: (1) what the GEX/dealer positioning says, (2) what live flow/delta/absorption say, (3) what SMC structure says, (4) the exact trade thesis, (5) what would invalidate this trade",
   "keyLevelToWatch": "single most important level",
   "regimeWarning": "any regime change risk or flip risk",
-  "mlNote": "ML confidence note if applicable"
+  "mlNote": "ML confidence note if applicable",
+  "whyOneLine": "one-sentence trade thesis combining bias, key level and catalyst",
+  "layerScore": 0
 }`;
 }
 
@@ -3045,6 +3047,9 @@ function renderSignal(sig) {
   const biasClass = isBull ? 'bull' : isBear ? 'bear' : 'neutral';
   const biasColor = isBull ? '#00ff88' : isBear ? '#ff4444' : '#ffaa00';
   const confClass = sig.confidence >= 70 ? 'high' : sig.confidence >= 50 ? 'mid' : 'low';
+  const ls = sig.layerScore || 0;
+  const lsColor = ls >= 4 ? 'var(--green)' : ls === 3 ? 'var(--amber)' : 'var(--red)';
+  const lsPips = [1,2,3,4,5].map(n => `<div style="width:14px;height:6px;border-radius:2px;background:${n <= ls ? lsColor : 'var(--b2)'}"></div>`).join('');
 
   area.innerHTML = `
     <div class="signal-grid">
@@ -3089,6 +3094,8 @@ function renderSignal(sig) {
     </div>
     ${sig.regimeWarning ? `<div style="background:rgba(255,170,0,0.06);border:1px solid var(--amber2);border-radius:5px;padding:10px 14px"><div style="font-size:9px;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">⚠ Regime Warning</div><div style="font-size:14px;color:var(--amber)">${sig.regimeWarning}</div></div>` : ''}
     ${sig.keyLevelToWatch ? `<div style="font-size:12px;color:var(--t2);padding:6px 0">📌 Key level to watch: <strong style="color:var(--cyan)">${sig.keyLevelToWatch}</strong></div>` : ''}
+    <div style="padding:6px 14px 4px;border-top:1px solid var(--b1)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;min-width:100px">Confluence Layers</span><div style="display:flex;gap:3px;align-items:center">${lsPips}</div><span style="font-size:11px;color:${lsColor};font-weight:700">${ls}/5</span></div></div>
+    ${sig.whyOneLine ? `<div style="padding:6px 14px;border-top:1px solid var(--b1);font-size:12px;color:var(--t1);font-style:italic">${sig.whyOneLine}</div>` : ''}
     <div style="text-align:center;padding:6px 0">
       <button onclick="generateSignal()" style="padding:5px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer">⟳ Regenerate</button>
       <button onclick="showPresignalDash()" style="padding:5px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer;margin-left:8px">← Dashboard</button>
