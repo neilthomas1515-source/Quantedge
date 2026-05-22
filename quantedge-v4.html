@@ -4923,7 +4923,6 @@ RESPONSE RULES — FOLLOW EXACTLY:
 8. invalidation: exact price that kills this trade. Always required.
 9. htfStack: keys D, 4H, 1H, 15M — values BULL BEAR or NEUT.
 10. gexConfirm: one line on what GEX says about this level.
-11. layerScore: integer 0-5 counting confirmed confluence layers (GEX level + HTF stack aligned + SMC setup present + volume/absorption confirms + liquidity swept).
 
 ${context}
 
@@ -4952,8 +4951,7 @@ REQUIRED OUTPUT FORMAT (JSON only, no markdown, no backticks):
   "whyOneLine": "single sentence core thesis",
   "narrative": "max 3 sentences for expand view",
   "regimeWarning": "one line or null",
-  "mlNote": "ML note or null",
-  "layerScore": 0-5
+  "mlNote": "ML note or null"
 }`;
 }
 
@@ -5286,10 +5284,6 @@ function renderSignal(sig) {
   const htf = sig.htfStack || {};
   const hc = v =&gt; v==='BULL'?'var(--green)':v==='BEAR'?'var(--red)':'var(--t3)';
   const htfHtml = `&lt;div class="sig2-htf"&gt;${['D','4H','1H','15M'].map(tf=&gt;`&lt;div class="sig2-htf-item" style="color:${hc(htf[tf])}"&gt;${tf}: ${htf[tf]||'?'}&lt;/div&gt;`).join('')}&lt;/div&gt;`;
-  const ls = sig.layerScore || 0;
-  const lsColor = ls &gt;= 4 ? 'var(--green)' : ls === 3 ? 'var(--amber)' : 'var(--red)';
-  const lsPips = [1,2,3,4,5].map(n =&gt; `&lt;div style="width:14px;height:6px;border-radius:2px;background:${n &lt;= ls ? lsColor : 'var(--b2)'}"&gt;&lt;/div&gt;`).join('');
-  const layerHtml = `&lt;div style="padding:6px 14px 4px;border-top:1px solid var(--b1)"&gt;&lt;div style="display:flex;align-items:center;gap:8px"&gt;&lt;span style="font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;min-width:100px"&gt;Confluence Layers&lt;/span&gt;&lt;div style="display:flex;gap:3px;align-items:center"&gt;${lsPips}&lt;/div&gt;&lt;span style="font-size:11px;color:${lsColor};font-weight:700"&gt;${ls}/5&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;`;
 
   area.innerHTML = `
   &lt;div class="sig2-box"&gt;
@@ -5320,7 +5314,6 @@ function renderSignal(sig) {
       &lt;div class="sig2-meta-item"&gt;&lt;div class="sig2-meta-label"&gt;At Price&lt;/div&gt;&lt;div class="sig2-meta-val" style="color:var(--cyan)"&gt;${sig.esAtSignal?.toFixed(2)||'?'}&lt;/div&gt;&lt;/div&gt;
     &lt;/div&gt;
     ${htfHtml}
-    ${layerHtml}
     &lt;div class="sig2-why"&gt;&lt;div class="sig2-why-label"&gt;Why&lt;/div&gt;${sig.whyOneLine||sig.narrative?.split('.')[0]||'\u2014'}&lt;/div&gt;
     &lt;div class="sig2-invalidation"&gt;\u26A0 Invalidation: &lt;strong&gt;${sig.invalidation||sig.keyLevelToWatch||'\u2014'}&lt;/strong&gt;&lt;/div&gt;
     ${alignHtml}
