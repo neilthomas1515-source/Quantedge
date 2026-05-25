@@ -444,6 +444,14 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .sig2-btn.log-btn{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);color:var(--green);}
 .sig2-btn.log-btn:hover{background:rgba(0,255,136,0.12);}
 .sig2-btn.log-btn.logged{background:rgba(0,255,136,0.15);color:var(--green2);cursor:default;}
+.sig2-contrarian{padding:10px 14px;border-top:1px solid var(--b1);background:rgba(255,68,68,0.04);}
+.sig2-contrarian-label{font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;font-weight:700;}
+.sig2-contrarian-body{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:6px;}
+.sig2-contrarian-meta{display:flex;align-items:center;gap:10px;}
+.sig2-contrarian-strength{font-size:10px;color:var(--t3);}
+.sig2-contrarian-risk{font-size:10px;color:var(--amber);}
+.sig2-contrarian-loading{font-size:11px;color:var(--t3);font-style:italic;}
+.sig2-conf-penalty{font-size:9px;color:var(--red);letter-spacing:0.5px;margin-top:2px;}
 .sig2-detail{display:none;padding:10px 14px;border-top:1px solid var(--b1);font-size:12px;color:var(--t2);line-height:1.6;}
 .sig2-htf{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--b1);}
 .sig2-htf-item{background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:4px 8px;font-size:11px;font-weight:700;}
@@ -4219,6 +4227,7 @@ async function generateSignal() {
     if (signalHistory.length > 10) signalHistory.pop();
 
     renderSignal(signal);
+    setTimeout(() => runContrarian(signal), 100);
     try { fetch(CLOUDFLARE_WORKER + '/session-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'signal', bias:signal.bias, entry:signal.entry, stop:signal.stop, target1:signal.target1, confidence:signal.confidence, whyOneLine:((signal.whyOneLine||signal.reasoning||'').slice(0,200))})}); } catch(_e2) {}
     autoSpeakSignal(signal);
   updateRegimeBanner();
@@ -4309,6 +4318,10 @@ function renderSignal(sig) {
     ${alignHtml}
     ${sig.regimeWarning?`<div style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--amber)">\u26A1 ${sig.regimeWarning}</div>`:''}
     <div class="sig2-age" id="sig2-age-display">—</div>
+    <div class="sig2-contrarian" id="sig2-contrarian-panel">
+      <div class="sig2-contrarian-label">⚔ Contrarian Check</div>
+      <div class="sig2-contrarian-loading" id="sig2-contrarian-body">Analyzing opposing case...</div>
+    </div>
     <div class="sig2-actions">
       <button class="sig2-btn log-btn" id="sig2-log-btn" onclick="logSignalToKV(currentSignal,this)">\uD83D\uDCCB Log Trade</button>
       <button class="sig2-btn" onclick="document.getElementById('sig2-detail').style.display=document.getElementById('sig2-detail').style.display==='none'?'block':'none';this.textContent=this.textContent==='\u25BC Explain More'?'\u25B2 Less':'\u25BC Explain More'">\u25BC Explain More</button>
@@ -4321,6 +4334,79 @@ function renderSignal(sig) {
       ${sig.mlNote?`<br><br><strong>ML Note:</strong> ${sig.mlNote}`:''}
     </div>
   </div>`;
+}
+
+async function runContrarian(signal) {
+  const panel = document.getElementById('sig2-contrarian-panel');
+  const bodyEl = document.getElementById('sig2-contrarian-body');
+  if (!panel || !bodyEl) return;
+
+  const contraBias = signal.bias === 'LONG' ? 'SHORT (BEAR)' : signal.bias === 'SHORT' ? 'LONG (BULL)' : 'NEUTRAL';
+  const ctx = (typeof getCompleteAIContext === 'function') ? getCompleteAIContext().slice(0, 1000) : '';
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'anthropic',
+        model: 'claude-opus-4-5',
+        max_tokens: 350,
+        messages: [{
+          role: 'user',
+          content: `You are a contrarian ES futures risk analyst. The primary signal just issued is ${signal.bias} at ${signal.entry} with ${signal.confidence}% confidence. Stop: ${signal.stop}. Thesis: ${signal.whyOneLine || ''}.
+
+Your job: argue the strongest possible OPPOSING case for ${contraBias}. Be specific — cite price levels, what the primary signal is missing, key risk to this trade.
+
+Market context: ${ctx}
+
+Respond in JSON only, no preamble:
+{"contraCase":"2-3 sentence opposing argument referencing specific levels","contraRisk":"exact price level that would confirm the opposing case","contraStrength":0}`
+        }]
+      })
+    });
+
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const raw = await res.text();
+    const data = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    const txt = (data?.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+    const s = txt.indexOf('{'), e = txt.lastIndexOf('}');
+    if (s === -1) throw new Error('No JSON');
+    const contra = JSON.parse(txt.slice(s, e + 1));
+
+    const strength = parseInt(contra.contraStrength) || 0;
+    const strengthColor = strength >= 70 ? 'var(--red)' : strength >= 50 ? 'var(--amber)' : 'var(--green)';
+    const strengthLabel = strength >= 70 ? 'STRONG' : strength >= 50 ? 'MODERATE' : 'WEAK';
+
+    // Update contrarian panel
+    panel.innerHTML = `
+      <div class="sig2-contrarian-label">⚔ Contrarian Check — <span style="color:${strengthColor}">${strengthLabel} (${strength}/100)</span></div>
+      <div class="sig2-contrarian-body">${contra.contraCase || '—'}</div>
+      <div class="sig2-contrarian-meta">
+        <span class="sig2-contrarian-risk">⚠ Confirm level: <strong>${contra.contraRisk || '—'}</strong></span>
+      </div>`;
+
+    // If contrarian is strong, visibly adjust confidence badge
+    if (strength >= 70 && signal.confidence > 60) {
+      const penalty = Math.min(10, Math.round((strength - 70) / 3));
+      const adjConf = Math.max(60, signal.confidence - penalty);
+      const confEl = document.querySelector('.sig2-conf-num');
+      const confLabelEl = document.querySelector('.sig2-conf-label');
+      if (confEl && adjConf !== signal.confidence) {
+        confEl.textContent = adjConf + '%';
+        const penaltyDiv = document.createElement('div');
+        penaltyDiv.className = 'sig2-conf-penalty';
+        penaltyDiv.textContent = `${signal.confidence}% → ${adjConf}% (contra)`;
+        if (confLabelEl && !document.querySelector('.sig2-conf-penalty')) {
+          confLabelEl.insertAdjacentElement('afterend', penaltyDiv);
+        }
+      }
+    }
+
+  } catch(err) {
+    if (panel) panel.innerHTML = '<div class="sig2-contrarian-label">⚔ Contrarian Check</div><div class="sig2-contrarian-loading">Unavailable</div>';
+    console.warn('[Contrarian]', err.message);
+  }
 }
 
 function showPresignalDash() {
