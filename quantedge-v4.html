@@ -1214,6 +1214,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="field"><label>VIX Trend</label><select id="vix-trend"><option value="">—</option><option value="rising">Rising ↑</option><option value="falling">Falling ↓</option><option value="flat">Flat →</option></select></div>
       <div class="field"><label>0DTE</label><select id="is-0dte"><option value="no">No</option><option value="yes">Yes</option></select></div>
     </div>
+    <div class="input-grid cols3" style="margin-top:4px">
+      <div class="field"><label>VIX Dir</label><select id="vix-dir"><option value="">—</option><option value="up">Up ↑</option><option value="down">Down ↓</option><option value="sideways">Sideways →</option><option value="spiking">Spiking ⚡</option><option value="collapsing">Collapsing ↓↓</option></select></div>
+    </div>
   </div>
 
   <!-- MACRO CONTEXT -->
@@ -3432,11 +3435,19 @@ function processTVAlert(d) {
   // Update TV alert display panel
   renderTVAlertPanel(d);
 
-  // Auto-fire signal for A+ and A++ alerts
+  // Auto-fire signal for A+ and A++ alerts — gated by POC proximity when POC is set
   if (rating === 'A++' || rating === 'A+') {
     window.autoConfluenceContext = window.tvAlertContext;
     window.autoConfluenceDirection = dir;
-    setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
+    const _poc = parseFloat(window.livePOC) || parseFloat(document.getElementById('poc')?.value) || 0;
+    const _alertPrice = parseFloat(d.price) || window.liveESPrice || 0;
+    const _pocDist = (_poc > 0 && _alertPrice > 0) ? Math.abs(_alertPrice - _poc) : 0;
+    const _pocBlock = _poc > 0 && _pocDist > 3.0;
+    if (_pocBlock) {
+      showToast(`⛔ POC gate: ${_pocDist.toFixed(2)}pts from POC ${_poc} — auto-fire skipped`, 'warn');
+    } else {
+      setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
+    }
   }
 }
 
@@ -3742,6 +3753,7 @@ function getCompleteAIContext() {
   const adspd   = document.getElementById('adspd')?.value   || '?';
   const nqBias  = document.getElementById('nq-bias')?.value  || '?';
   const vixTr   = document.getElementById('vix-trend')?.value|| '?';
+  const vixDir  = document.getElementById('vix-dir')?.value   || '?';
   const dte     = document.getElementById('is-0dte')?.value  || 'no';
   const vwap    = window.liveVWAP    || document.getElementById('vwap')?.value              || '?';
   const poc     = window.livePOC     || document.getElementById('poc')?.value               || '?';
@@ -3803,7 +3815,7 @@ ${window.lastAbsorption ? `ABSORPTION: ${window.lastAbsorption.type} @ ${window.
 ${icebergCtx !== 'none' ? `ICEBERG: ${icebergCtx}` : ''}
 
 === MARKET INTERNALS ===
-$TICK: ${tick} | TRIN: ${trin} | ADSPD: ${adspd} | NQ Bias: ${nqBias} | VIX Trend: ${vixTr}
+$TICK: ${tick} | TRIN: ${trin} | ADSPD: ${adspd} | NQ Bias: ${nqBias} | VIX Trend: ${vixTr} | VIX Dir: ${vixDir}
 NQ/ES Corr: ${document.getElementById('nq-es-correlation')?.textContent||'?'} | Ratio: ${document.getElementById('nq-es-ratio')?.textContent||'?'}
 
 === KEY LEVELS ===
