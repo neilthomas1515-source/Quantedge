@@ -4337,7 +4337,8 @@ function renderSignal(sig) {
 async function runContrarian(signal) {
   const panel = document.getElementById('sig2-contrarian-panel');
   const bodyEl = document.getElementById('sig2-contrarian-body');
-  if (!panel || !bodyEl) return;
+  const contraText = document.getElementById('sig2-contra-text');
+  if (!contraText) return;
 
   const contraBias = signal.bias === 'LONG' ? 'SHORT (BEAR)' : signal.bias === 'SHORT' ? 'LONG (BULL)' : 'NEUTRAL';
   const ctx = (typeof getCompleteAIContext === 'function') ? getCompleteAIContext().slice(0, 1000) : '';
