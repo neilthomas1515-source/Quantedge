@@ -1209,9 +1209,10 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
       <div class="field"><label>ADSPD</label><input type="number" id="adspd" placeholder="—"></div>
       <div class="field"><label>TICKQ (NQ)</label><input type="number" id="tickq" placeholder="—"></div>
     </div>
-    <div class="input-grid cols3" style="margin-top:6px">
+    <div class="input-grid" style="margin-top:6px;grid-template-columns:repeat(4,1fr)">
       <div class="field"><label>NQ Bias</label><select id="nq-bias"><option value="">—</option><option value="leading">Leading</option><option value="lagging">Lagging</option><option value="inline">In-line</option></select></div>
       <div class="field"><label>VIX Trend</label><select id="vix-trend"><option value="">—</option><option value="rising">Rising ↑</option><option value="falling">Falling ↓</option><option value="flat">Flat →</option></select></div>
+      <div class="field"><label>VIX Dir</label><select id="vix-dir"><option value="">—</option><option value="up">Up ↑</option><option value="down">Down ↓</option><option value="sideways">Sideways →</option><option value="spiking">Spiking ⚡</option><option value="collapsing">Collapsing ↓↓</option></select></div>
       <div class="field"><label>0DTE</label><select id="is-0dte"><option value="no">No</option><option value="yes">Yes</option></select></div>
     </div>
   </div>
@@ -3432,11 +3433,21 @@ function processTVAlert(d) {
   // Update TV alert display panel
   renderTVAlertPanel(d);
 
-  // Auto-fire signal for A+ and A++ alerts
+  // Auto-fire signal for A+ and A++ alerts — gated by Footprint POC proximity
   if (rating === 'A++' || rating === 'A+') {
     window.autoConfluenceContext = window.tvAlertContext;
     window.autoConfluenceDirection = dir;
-    setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
+    const _alertPrice = parseFloat(d.price) || window.liveESPrice || 0;
+    const _poc = parseFloat(window.livePOC) || parseFloat(document.getElementById('poc')?.value) || 0;
+    const _pocDist = _poc > 0 && _alertPrice > 0 ? Math.abs(_alertPrice - _poc) : 999;
+    const _pocGatePass = _pocDist <= 3.0; // within 3pts of POC = footprint POC confirmed
+    if (_pocGatePass) {
+      setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
+    } else {
+      const _pocMsg = _poc > 0 ? `POC gate: ES ${_alertPrice} is ${_pocDist.toFixed(2)}pts from POC ${_poc} — auto-fire skipped` : 'POC gate: no POC set — auto-fire skipped';
+      showToast(`⛔ ${_pocMsg}`, 'warn');
+      console.log('[POC Gate]', _pocMsg);
+    }
   }
 }
 
@@ -3742,6 +3753,7 @@ function getCompleteAIContext() {
   const adspd   = document.getElementById('adspd')?.value   || '?';
   const nqBias  = document.getElementById('nq-bias')?.value  || '?';
   const vixTr   = document.getElementById('vix-trend')?.value|| '?';
+  const vixDir  = document.getElementById('vix-dir')?.value   || '?';
   const dte     = document.getElementById('is-0dte')?.value  || 'no';
   const vwap    = window.liveVWAP    || document.getElementById('vwap')?.value              || '?';
   const poc     = window.livePOC     || document.getElementById('poc')?.value               || '?';
@@ -3803,7 +3815,7 @@ ${window.lastAbsorption ? `ABSORPTION: ${window.lastAbsorption.type} @ ${window.
 ${icebergCtx !== 'none' ? `ICEBERG: ${icebergCtx}` : ''}
 
 === MARKET INTERNALS ===
-$TICK: ${tick} | TRIN: ${trin} | ADSPD: ${adspd} | NQ Bias: ${nqBias} | VIX Trend: ${vixTr}
+$TICK: ${tick} | TRIN: ${trin} | ADSPD: ${adspd} | NQ Bias: ${nqBias} | VIX Trend: ${vixTr} | VIX Dir: ${vixDir}
 NQ/ES Corr: ${document.getElementById('nq-es-correlation')?.textContent||'?'} | Ratio: ${document.getElementById('nq-es-ratio')?.textContent||'?'}
 
 === KEY LEVELS ===
@@ -4195,6 +4207,45 @@ async function generateSignal() {
     const tStart=text.indexOf('{'),tEnd=text.lastIndexOf('}');
     if(tStart===-1)throw new Error('No JSON in signal response');
     const signal=JSON.parse(text.slice(tStart,tEnd+1));
+
+    // ── CONTRARIAN PASS ──
+    // Second AI call argues the opposing case before final scoring
+    try {
+      const contraBias = signal.bias === 'LONG' ? 'SHORT (BEAR)' : signal.bias === 'SHORT' ? 'LONG (BULL)' : 'NEUTRAL';
+      const contraRes = await fetch(`${CLOUDFLARE_WORKER}`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          type:'anthropic',
+          model:'claude-opus-4-5',
+          max_tokens:400,
+          messages:[{ role:'user', content: `You are a contrarian ES futures analyst. The primary signal is ${signal.bias} with ${signal.confidence}% confidence. Your job: argue the STRONGEST possible case for ${contraBias}. Use the same market data. Be specific — cite exact levels, risks, and what the bulls/bears are missing. Output JSON only:
+{"contraCase":"2-3 sentence opposing argument","contraRisk":"exact price level that invalidates primary signal","contraStrength":0-100}
+
+Market context (brief):
+${(buildPrompt()||'').slice(0,800)}` }]
+        })
+      });
+      if (contraRes.ok) {
+        const contraRaw = await contraRes.text();
+        const contraData = JSON.parse(contraRaw.slice(contraRaw.indexOf('{'), contraRaw.lastIndexOf('}')+1));
+        const contraText = (contraData?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('
+');
+        const cS = contraText.indexOf('{'), cE = contraText.lastIndexOf('}');
+        if (cS !== -1) {
+          const contraSignal = JSON.parse(contraText.slice(cS, cE+1));
+          signal.contrarian = contraSignal.contraCase || '';
+          signal.contraRisk = contraSignal.contraRisk || '';
+          signal.contraStrength = parseInt(contraSignal.contraStrength) || 0;
+          // If contrarian case is strong (>70), reduce confidence by up to 10pts
+          if (signal.contraStrength > 70 && signal.confidence > 60) {
+            const penalty = Math.round((signal.contraStrength - 70) / 3);
+            signal.confidence = Math.max(60, signal.confidence - penalty);
+            signal.narrative = (signal.narrative || '') + ` [Contrarian pressure −${penalty}% confidence: ${signal.contrarian}]`;
+          }
+        }
+      }
+    } catch(_ce) { console.warn('[Contrarian] pass failed:', _ce.message); }
 
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
