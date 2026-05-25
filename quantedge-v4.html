@@ -4346,6 +4346,7 @@ async function runContrarian(signal) {
   try {
     const res = await fetch(CLOUDFLARE_WORKER, {
       method: 'POST',
+      signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'anthropic',
