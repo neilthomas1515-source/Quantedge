@@ -2856,7 +2856,7 @@ async function fetchVIXandDXY() {
   } catch(e){ console.warn('[VIX] Yahoo failed:', e.message); }
   // DXY via Yahoo DX-Y.NYB through Worker
   try {
-    const r2 = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=DX-Y.NYB&range=1d&interval=1m');
+    const r2 = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=%5EDXY&range=1d&interval=1m');
     if (!r2.ok) throw new Error('Worker ' + r2.status);
     const txt2 = await r2.text();
     const d2 = JSON.parse(txt2.slice(txt2.indexOf('{'), txt2.lastIndexOf('}') + 1));
@@ -2877,7 +2877,8 @@ async function refreshPrices() {
     try {
       const r = await fetch(CLOUDFLARE_WORKER + '?source=yahoo&symbol=NQ%3DF&range=1d&interval=1m');
       if (!r.ok) throw new Error('Worker ' + r.status);
-      const d = await r.json();
+      const txt = await r.text();
+      const d = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1));
       const res = d?.chart?.result?.[0];
       const q = res?.indicators?.quote?.[0];
       const n = res?.timestamp?.length || 0;
