@@ -4227,7 +4227,7 @@ async function generateSignal() {
     if (signalHistory.length > 10) signalHistory.pop();
 
     renderSignal(signal);
-    setTimeout(() => runContrarian(signal), 100);
+    if (signal.bias !== 'NEUTRAL') setTimeout(() => runContrarian(signal), 100);
     try { fetch(CLOUDFLARE_WORKER + '/session-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'signal', bias:signal.bias, entry:signal.entry, stop:signal.stop, target1:signal.target1, confidence:signal.confidence, whyOneLine:((signal.whyOneLine||signal.reasoning||'').slice(0,200))})}); } catch(_e2) {}
     autoSpeakSignal(signal);
   updateRegimeBanner();
@@ -4318,7 +4318,7 @@ function renderSignal(sig) {
     ${alignHtml}
     ${sig.regimeWarning?`<div style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--amber)">\u26A1 ${sig.regimeWarning}</div>`:''}
     <div class="sig2-age" id="sig2-age-display">—</div>
-    <div class="sig2-contrarian" id="sig2-contrarian-panel">
+    <div class="sig2-contrarian" id="sig2-contrarian-panel" style="display:${sig.bias==='NEUTRAL'?'none':'block'}">
       <div class="sig2-contrarian-label">⚔ Contrarian Check</div>
       <div class="sig2-contrarian-loading" id="sig2-contrarian-body">Analyzing opposing case...</div>
     </div>
