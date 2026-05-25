@@ -4315,6 +4315,7 @@ function renderSignal(sig) {
     <div style="padding:6px 14px 4px;border-top:1px solid var(--b1)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;min-width:100px">Confluence Layers</span><div style="display:flex;gap:3px;align-items:center">${lsPips}</div><span style="font-size:11px;color:${lsColor};font-weight:700">${ls}/5</span></div></div>
     <div class="sig2-why"><div class="sig2-why-label">Why</div>${sig.whyOneLine||sig.narrative?.split('.')[0]||'\u2014'}</div>
     <div class="sig2-invalidation">\u26A0 Invalidation: <strong>${sig.invalidation||sig.keyLevelToWatch||'\u2014'}</strong></div>
+    ${sig.bias!=='NEUTRAL'?'<div id="sig2-contra-line" style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--t3);background:rgba(255,68,68,0.03)"><span style=\"color:var(--red);font-weight:700;letter-spacing:1px;font-size:9px;text-transform:uppercase\">⚔ CONTRA</span> <span id=\"sig2-contra-text\">analyzing...</span></div>':''}
     ${alignHtml}
     ${sig.regimeWarning?`<div style="padding:7px 14px;border-top:1px solid var(--b1);font-size:11px;color:var(--amber)">\u26A1 ${sig.regimeWarning}</div>`:''}
     <div class="sig2-age" id="sig2-age-display">—</div>
@@ -4376,6 +4377,9 @@ Respond in JSON only, no preamble:
     const strengthLabel = strength >= 70 ? 'STRONG' : strength >= 50 ? 'MODERATE' : 'WEAK';
 
     // Update contrarian body inside Explain More
+    // Write to always-visible contra line on card
+    const contraLine = document.getElementById('sig2-contra-text');
+    if (contraLine) contraLine.innerHTML = `<span style="color:${strengthColor};font-weight:700">${strengthLabel} ${strength}/100</span> — ${(contra.contraCase||'').slice(0,120)} <span style="color:var(--amber)">| confirm: ${contra.contraRisk||'—'}</span>`;
     const bodyEl2 = document.getElementById('sig2-contrarian-body');
     const metaEl  = document.getElementById('sig2-contrarian-meta');
     if (bodyEl2) bodyEl2.innerHTML = `<span style="color:var(--red);font-weight:700">${strengthLabel} (${strength}/100)</span> — ${contra.contraCase || '—'}`;
@@ -4405,6 +4409,8 @@ Respond in JSON only, no preamble:
     }
 
   } catch(err) {
+    const contraLineErr = document.getElementById('sig2-contra-text');
+    if (contraLineErr) contraLineErr.textContent = 'unavailable';
     if (panel) panel.innerHTML = '<div class="sig2-contrarian-label">⚔ Contrarian Check</div><div class="sig2-contrarian-loading">Unavailable</div>';
     console.warn('[Contrarian]', err.message);
   }
