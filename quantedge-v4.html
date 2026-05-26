@@ -4158,7 +4158,7 @@ All prices should be realistic ES futures prices (current market ~7400-7600 rang
       const vf = document.getElementById('viz-flip-val');
       if (vf && levels.gexFlip) vf.textContent = levels.gexFlip;
       if (typeof showToast === 'function')
-        showToast('📊 Daily GEX levels extracted: Flip ' + (levels.gexFlip || '?') + ' | Abs ' + (levels.absGexStrike || '?') + ' | Call Wall ' + (levels.callWall || '?'), 'ok');
+        showToast('📊 Daily GEX levels extracted: Flip ' + (levels.gexFlip || '?') + ' | Abs ' + (levels.absGexStrike || '?') + ' | Call Wall ' + (levels.callWall || '?') + (levels.zgl ? ' | ZGL ' + levels.zgl : ''), 'ok');
     }
     drawVizCanvas();
     updateRegimeBanner();
