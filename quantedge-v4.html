@@ -6619,82 +6619,73 @@ function updateCharCount() {
 
 function generateXPost() {
   const ta = document.getElementById('x-post-textarea');
-  const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-
-  // Try to pull live data from v4 panels if available
-  const biasEl    = document.querySelector('#bias-text, #ai-bias, .bias-output, #overall-bias');
-  const biasText  = biasEl ? biasEl.innerText.trim().substring(0,80) : '';
-
-  if (xPostType === 'bias') {
-    ta.value = 
-`ES FUTURES BIAS — ${date}
-
-${biasText ? '🧠 ' + biasText : '🧠 [Paste your morning bias here]'}
-
-Key levels to watch:
-📍 Resistance: [level]
-📍 Support: [level]
-📍 GEX flip: [level]
-
-Setup: [Long/Short] on [condition]
-Target: [price] | Stop: [price]
-
-#ES_F #Futures #GEX #Trading`;
-
-  } else if (xPostType === 'gex') {
-    ta.value =
-`📊 ES GEX SNAPSHOT — ${date}
-
-Dealer positioning: [Long/Short gamma]
-Key GEX level: [price]
-Above = dealers SELL (resistance)
-Below = dealers BUY (support)
-
-Watch for flip at: [price]
-Bias above GEX: [Bullish/Bearish]
-
-Data via FlashAlpha 🎯
-#ES_F #GEX #OptionsFlow #Futures`;
-
-  } else if (xPostType === 'alert') {
-    ta.value =
-`⚡ LIVE TRADE ALERT — ${date}
-
-Instrument: ES Futures
-Direction: [LONG / SHORT]
-Entry: [price]
-Target 1: [price]
-Target 2: [price]  
-Stop: [price]
-
-Setup: [describe the setup in 1 sentence]
-Confidence: [High / Medium]
-
-Following along? 👇
-#ES_F #TradeAlert #Futures #LiveTrading`;
-
-  } else if (xPostType === 'recap') {
-    ta.value =
-`📈 ES SESSION RECAP — ${date}
-
-Result: [Win / Loss / Scratch]
-Entry: [price] → Exit: [price]
-P&L: [+/- points]
-
-What worked: [1 sentence]
-What I learned: [1 sentence]
-
-Tracking every trade publicly 🎯
-#ES_F #TradingJournal #Futures`;
-
-  } else {
-    ta.value = '';
-    ta.placeholder = 'Type your custom post here...';
-    ta.focus();
-  }
-
-  updateCharCount();
+  ta.value = '';
+  ta.placeholder = 'Generating from your analysis...';
   document.getElementById('x-copy-confirm').style.display = 'none';
+
+  // Pull last 10 chat messages from DOM
+  const chatMsgs = Array.from(document.querySelectorAll('.chat-msg, .chat-bubble')).slice(-10);
+  const chatContext = chatMsgs.map(el => el.innerText.trim()).filter(t => t.length > 0).join('
+---
+');
+
+  // Fetch morning analysis from Worker
+  fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/morning-analysis')
+    .then(r => r.json())
+    .catch(() => ({}))
+    .then(morningData => {
+      const morningContext = morningData && morningData.content ? morningData.content : '';
+      const mode = document.querySelector('.x-mode-btn.active') ? document.querySelector('.x-mode-btn.active').dataset.mode : 'analysis';
+      const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+      const modeInstructions = mode === 'trade'
+        ? 'Draft a concise trade setup post. Include: direction (long/short), entry level, targets, stop. Factual and precise. No hype.'
+        : 'Draft a market analysis post covering the key bias, GEX levels, and what the market structure is showing. Educational and analytical.';
+
+      const prompt = `You are writing a post for @QuantEdgeAlpha on X. Date: ${date}.
+
+Mode: ${mode === 'trade' ? 'Trade Setup' : 'Market Analysis'}
+Instructions: ${modeInstructions}
+
+Rules:
+- Clean professional tone, sounds like a real experienced trader
+- No hashtag spam, maximum 2 relevant hashtags at the end if needed
+- No emojis
+- No hype phrases
+- Under 280 characters for a single post, or format as a thread (Post 1/, Post 2/, etc.) if more space needed
+- Use only real data from the context below, no placeholders
+
+AI Chat Context:
+${chatContext || 'No chat context available'}
+
+Morning Analysis:
+${morningContext || 'No morning analysis available'}
+
+Write the post now. Return only the post text, nothing else.`;
+
+      return fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          type: 'anthropic',
+          model: 'claude-opus-4-5',
+          max_tokens: 600,
+          messages: [{role: 'user', content: prompt}]
+        })
+      });
+    })
+    .then(r => r.text())
+    .then(raw => {
+      const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+      const text = (json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+      ta.value = text.trim();
+      ta.placeholder = '';
+      updateCharCount();
+    })
+    .catch(err => {
+      ta.value = '';
+      ta.placeholder = 'Error: ' + err.message;
+    });
 }
 
 function copyXPost() {
