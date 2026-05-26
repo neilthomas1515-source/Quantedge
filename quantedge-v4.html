@@ -4111,6 +4111,7 @@ All prices should be realistic ES futures prices (current market ~7400-7600 rang
   "absGexStrike": number|null,
   "maxPain": number|null,
   "gexFlip": number|null,
+    "zgl": number|null,
   "netGex": string|null,
   "spotPrice": number|null
 }`;
@@ -4152,6 +4153,7 @@ All prices should be realistic ES futures prices (current market ~7400-7600 rang
       if (levels.absGexStrike) window.gexAbsStrike   = levels.absGexStrike;
       if (levels.maxPain)      window.gexMaxPain     = levels.maxPain;
       if (levels.gexFlip)      window.gexFlipDaily   = levels.gexFlip;
+        if (levels.zgl)          window.gexZGL          = levels.zgl;
       if (levels.netGex)       window.gexNetGexStr   = levels.netGex;
       const vf = document.getElementById('viz-flip-val');
       if (vf && levels.gexFlip) vf.textContent = levels.gexFlip;
