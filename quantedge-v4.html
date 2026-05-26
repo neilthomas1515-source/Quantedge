@@ -6622,36 +6622,31 @@ function generateXPost() {
   ta.value = '';
   ta.placeholder = 'Generating from your analysis...';
   document.getElementById('x-copy-confirm').style.display = 'none';
-  var chatMsgs = Array.from(document.querySelectorAll('.chat-msg, .chat-bubble')).slice(-10);
-  var chatContext = chatMsgs.map(function(el){ return el.innerText.trim(); }).filter(function(t){ return t.length > 0; }).join(' | ');
-  fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev/morning-analysis')
-    .then(function(r){ return r.json(); })
-    .catch(function(){ return {}; })
-    .then(function(morningData) {
-      var morningContext = morningData && morningData.content ? morningData.content : '';
-      var modeBtn = document.querySelector('.x-mode-btn.active');
-      var mode = modeBtn ? modeBtn.getAttribute('data-mode') : 'analysis';
-      var date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      var modeInstructions = mode === 'trade' ? 'Draft a concise ES futures trade setup post. Always clearly label levels as ES levels. If SPX levels are referenced for context, explicitly note they are SPX levels and briefly explain the ES equivalent. Include direction, ES entry, ES targets, and stop.' : 'Draft a market analysis post focused on ES futures. Always clearly distinguish between ES levels and SPX levels if both are mentioned. Lead with ES. Never leave readers guessing which instrument a level belongs to.';
-      var prompt = 'You are writing posts for @QuantEdgeAlpha on X, an ES and MES futures trading account. Date: ' + date + '. The audience trades ES futures. Critical rule: always clearly label whether a price level is ES or SPX. Never mix them without labeling. ES and SPX are correlated but different instruments currently trading in the 7100-7200 range. If you mention both, always clarify which is which so followers are never confused about what to trade. Mode: ' + (mode === 'trade' ? 'Trade Setup' : 'Market Analysis') + '. Instructions: ' + modeInstructions + ' Rules: Clean professional tone. No hashtag spam, max 2 hashtags at end. No emojis. No hype. Under 280 chars or use thread format. Only use real data from context below, no placeholders. AI Chat Context: ' + (chatContext || 'None') + ' Morning Analysis: ' + (morningContext || 'None') + '. Write the post now. Return only the post text, nothing else.';
-      return fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ type: 'anthropic', model: 'claude-opus-4-5', max_tokens: 600, messages: [{role: 'user', content: prompt}] })
-      });
-    })
-    .then(function(r){ return r.text(); })
-    .then(function(raw) {
-      var parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-      var text = (parsed.content||[]).filter(function(b){ return b.type==='text'; }).map(function(b){ return b.text; }).join('');
-      ta.value = text.trim();
-      ta.placeholder = '';
-      updateCharCount();
-    })
-    .catch(function(err) {
-      ta.value = '';
-      ta.placeholder = 'Error: ' + err.message;
-    });
+  var chatContainer = document.getElementById('ai-chat-history');
+  var bubbles = chatContainer ? Array.from(chatContainer.querySelectorAll('.chat-bubble')).slice(-10) : [];
+  var chatContext = bubbles.map(function(el){ return el.innerHTML.replace(/<br[^>]*>/gi,' ').replace(/<[^>]+>/g,'').trim(); }).filter(function(t){ return t.length > 0; }).join(' | ');
+  var modeBtn = document.querySelector('.x-mode-btn.active');
+  var mode = modeBtn ? modeBtn.getAttribute('data-mode') : 'analysis';
+  var date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var modeInstructions = mode === 'trade' ? 'Draft a concise ES futures trade setup post. Include direction, ES entry, ES targets, stop. Factual and precise.' : 'Draft a market analysis post about ES futures covering bias, GEX levels, and market structure. Always label ES vs SPX levels clearly.';
+  var prompt = 'You are writing a post for @QuantEdgeAlpha on X, an ES and MES futures trading account. Date: ' + date + '. CRITICAL RULE: Use ONLY the exact price levels from the chat context below. Do not invent, estimate or use any other levels. Mode: ' + (mode === 'trade' ? 'Trade Setup' : 'Market Analysis') + '. Instructions: ' + modeInstructions + ' Rules: Clean professional tone. No hashtag spam, max 2 hashtags. No emojis. No hype. Under 280 chars or thread format. Chat Context: ' + (chatContext || 'EMPTY - no chat data, do not generate any price levels') + '. Write the post now, return only the post text.';
+  fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ type: 'anthropic', model: 'claude-opus-4-5', max_tokens: 600, messages: [{role: 'user', content: prompt}] })
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(raw) {
+    var parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    var text = (parsed.content||[]).filter(function(b){ return b.type==='text'; }).map(function(b){ return b.text; }).join('');
+    ta.value = text.trim();
+    ta.placeholder = '';
+    updateCharCount();
+  })
+  .catch(function(err) {
+    ta.value = '';
+    ta.placeholder = 'Error: ' + err.message;
+  });
 }
 
 function copyXPost() {
