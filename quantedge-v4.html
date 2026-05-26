@@ -6632,8 +6632,8 @@ function generateXPost() {
       var modeBtn = document.querySelector('.x-mode-btn.active');
       var mode = modeBtn ? modeBtn.getAttribute('data-mode') : 'analysis';
       var date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      var modeInstructions = mode === 'trade' ? 'Draft a concise trade setup post. Include direction long or short, entry level, targets, stop. Factual and precise. No hype.' : 'Draft a market analysis post covering the key bias, GEX levels, and what the market structure is showing. Educational and analytical.';
-      var prompt = 'You are writing a post for @QuantEdgeAlpha on X. Date: ' + date + '. Mode: ' + (mode === 'trade' ? 'Trade Setup' : 'Market Analysis') + '. Instructions: ' + modeInstructions + ' Rules: Clean professional tone, sounds like a real experienced trader. No hashtag spam, max 2 relevant hashtags at end if needed. No emojis. No hype phrases. Under 280 characters for a single post, or format as a thread with Post 1 of X etc if more space needed. Use only real data from the context below, no placeholders. AI Chat Context: ' + (chatContext || 'None') + ' Morning Analysis: ' + (morningContext || 'None') + '. Write the post now. Return only the post text, nothing else.';
+      var modeInstructions = mode === 'trade' ? 'Draft a concise ES futures trade setup post. Include direction long or short, ES futures entry level, ES futures targets, and stop. Factual and precise. No hype. This is ES futures not SPX.' : 'Draft a market analysis post about ES futures covering the key bias, GEX levels, and what the market structure is showing. Always reference ES futures price levels, not SPX. Educational and analytical.';
+      var prompt = 'You are writing a post for @QuantEdgeAlpha on X. The account focuses exclusively on ES and MES futures trading. Date: ' + date + '. IMPORTANT: Always use ES futures levels and terminology, never SPX levels. ES and SPX are currently trading in the 7100-7200 range. Mode: ' + (mode === 'trade' ? 'Trade Setup' : 'Market Analysis') + '. Instructions: ' + modeInstructions + ' Rules: Clean professional tone, sounds like a real experienced futures trader. No hashtag spam, max 2 relevant hashtags at end if needed, use ES_F or ESFutures. No emojis. No hype phrases. Under 280 characters for a single post, or format as a thread with Post 1 of X etc if more space needed. Use only real data from the context below, no placeholders. AI Chat Context: ' + (chatContext || 'None') + ' Morning Analysis: ' + (morningContext || 'None') + '. Write the post now. Return only the post text, nothing else.';
       return fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -6677,8 +6677,11 @@ function copyXPost() {
     <h3>𝕏 Post Creator <span class="x-trial-badge">TRIAL MODE</span></h3>
 
     <div class="x-post-type-btns">
-      <button class="x-post-type-btn x-mode-btn active" data-mode="analysis" onclick="this.parentElement.querySelectorAll('.x-mode-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">Market Analysis</button>
-      <button class="x-post-type-btn x-mode-btn" data-mode="trade" onclick="this.parentElement.querySelectorAll('.x-mode-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">Trade Setup</button>
+      <button class="x-post-type-btn active" onclick="setXPostType('bias',this)">📊 Morning Bias</button>
+      <button class="x-post-type-btn" onclick="setXPostType('gex',this)">🎯 GEX Levels</button>
+      <button class="x-post-type-btn" onclick="setXPostType('alert',this)">⚡ Trade Alert</button>
+      <button class="x-post-type-btn" onclick="setXPostType('recap',this)">📈 Session Recap</button>
+      <button class="x-post-type-btn" onclick="setXPostType('custom',this)">✏️ Custom</button>
     </div>
 
     <textarea id="x-post-textarea" 
