@@ -6494,6 +6494,9 @@ async function sendChatMessage() {
     updateChatMessage(thinkingDiv, text);
     chatState.history.push({ role: 'assistant', content: text });
     if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
+    // Log user message and AI response to chat-log for daily memory summarization
+    try { fetch(CLOUDFLARE_WORKER + '/chat-log', {method:'POST', headers:{'Content-Type':'application/json','X-Hermes-Token':'qe-hermes-2026'}, body:JSON.stringify({role:'user', content:userMsg})}); } catch(_cl1) {}
+    try { fetch(CLOUDFLARE_WORKER + '/chat-log', {method:'POST', headers:{'Content-Type':'application/json','X-Hermes-Token':'qe-hermes-2026'}, body:JSON.stringify({role:'assistant', content:text})}); } catch(_cl2) {}
     if (/\d{4}|\bbias\b|\blong\b|\bshort\b|\blevel\b|\bsupport\b|\bresistance\b|\btarget\b|\bstop\b|\bwatch\b/i.test(text)) {
       try { fetch(CLOUDFLARE_WORKER + '/session-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'chat_observation', note:text.slice(0,200)})}); } catch(_e3) {}
     }
@@ -6701,4 +6704,5 @@ function copyXPost() {
 
 </body>
 </html>
+
 
