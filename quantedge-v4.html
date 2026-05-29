@@ -1414,7 +1414,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
   <div id="gen-bar">
     <button id="btn-generate" onclick="generateSignal()">⚡ Generate Signal</button>
     <div class="gen-meta">Last: <strong><span id="last-gen-time">never</span></strong> &nbsp;·&nbsp; <span style="color:var(--t4)">Ctrl+Enter</span></div>
-    <div style="font-size:10px;color:var(--t3)">claude-opus-4-8</div>
+    <div style="font-size:10px;color:var(--t3)">claude-sonnet-4-6</div>
   </div>
   <div id="signal-history-bar">
     <div class="sig-hist-label">HISTORY</div>
@@ -3268,7 +3268,7 @@ Extract price levels visible. Return null for any not clearly visible.
 OUTPUT JSON ONLY: {"onHigh":number|null,"onLow":number|null,"asiaHigh":number|null,"asiaLow":number|null,"londonHigh":number|null,"londonLow":number|null,"keyLevels":[numbers],"bias":"BULLISH|BEARISH|NEUTRAL","biasConfidence":0-100,"biasSummary":"1-2 sentence read","watchFor":"key thing to monitor"}
 Rules: Realistic ES prices (~${es}). O/N=overnight range. Never fabricate.`;
   try {
-    const res = await fetch(CLOUDFLARE_WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ type:'anthropic', model:'claude-opus-4-8', max_tokens:600, messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:prompt}]}] }) });
+    const res = await fetch(CLOUDFLARE_WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:600, messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:prompt}]}] }) });
     if (!res.ok) throw new Error('Worker ' + res.status);
     const raw=await res.text(), json=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
     const text=(json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
@@ -3341,7 +3341,7 @@ async function uwHistAddEntries() {
   if(statusEl){statusEl.style.display='block';statusEl.textContent='AI parsing historical entries…';statusEl.style.color='var(--t2)';}
   const prompt=`Parse these historical UW/market data entries into a JSON array. Each entry: {"date":"YYYY-MM-DD","marketTide":"BULLISH|BEARISH|NEUTRAL|null","netImpact":"string|null","zerodte":"CALL-HEAVY|PUT-HEAVY|BALANCED|null","gammaFlip":"price|null","conditions":"1 sentence setup summary","outcome":"result string","outcomeDir":"BULLISH|BEARISH|NEUTRAL"}\nReturn ONLY a JSON array. No markdown.\n\nRaw input:\n${raw.slice(0,3000)}`;
   try {
-    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-opus-4-8',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
     if(!res.ok)throw new Error('Worker '+res.status);
     const r=await res.text(), j=JSON.parse(r.slice(r.indexOf('{'),r.lastIndexOf('}')+1));
     const t=(j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
@@ -3368,7 +3368,7 @@ async function uwHistMatchCurrent(currentConditions) {
   const summary=recent.map(e=>`${e.date}: ${e.conditions} → ${e.outcome}`).join('\n');
   const prompt=`Search historical trade database for pattern matches.\nCURRENT: ${currentConditions}\nHISTORY (${recent.length} records):\n${summary}\nOUTPUT JSON ONLY: {"matchFound":bool,"matchCount":number,"winRate":0-100,"avgOutcome":"string","bestMatch":"string","patternNote":"1 sentence","noPrecedent":bool}`;
   try {
-    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-opus-4-8',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch(CLOUDFLARE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:prompt}]})});
     if(!res.ok)return null;
     const r=await res.text(),j=JSON.parse(r.slice(r.indexOf('{'),r.lastIndexOf('}')+1));
     const t=(j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
@@ -3609,7 +3609,7 @@ Respond in JSON only:
   try {
     const res = await fetch(`${CLOUDFLARE_WORKER}`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-8', max_tokens:400, messages:[{role:'user',content:prompt}] })
+      body: JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:400, messages:[{role:'user',content:prompt}] })
     });
     const raw2 = await res.text();
     const data = JSON.parse(raw2.slice(raw2.indexOf('{'), raw2.lastIndexOf('}')+1));
@@ -4122,7 +4122,7 @@ All prices should be realistic ES futures prices (current market ~7400-7600 rang
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'anthropic',
-        model: 'claude-opus-4-8',
+        model: 'claude-sonnet-4-6',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -4205,7 +4205,7 @@ async function generateSignal() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'anthropic',
-        model:'claude-opus-4-8',
+        model:'claude-sonnet-4-6',
         max_tokens:1200,
         messages:[{ role:'user', content }]
       })
@@ -4352,7 +4352,7 @@ async function runContrarian(signal) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'anthropic',
-        model: 'claude-opus-4-8',
+        model: 'claude-sonnet-4-6',
         max_tokens: 350,
         messages: [{
           role: 'user',
@@ -5321,7 +5321,7 @@ Extract as bullet points — be specific with price levels. Never fabricate numb
   try {
     const res = await fetch(CLOUDFLARE_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-8', max_tokens:500,
+      body: JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:500,
         messages:[{role:'user', content:[
           {type:'image', source:{type:'base64', media_type:mt, data:b64}},
           {type:'text', text:prompts[zone]}
@@ -5478,7 +5478,7 @@ OUTPUT JSON ONLY (no markdown, no backticks, no preamble):
   try {
     const res = await fetch(CLOUDFLARE_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-8', max_tokens:1000,
+      body: JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:1000,
         messages:[{role:'user', content}]
       })
     });
@@ -6023,7 +6023,7 @@ OUTPUT JSON ONLY (no markdown, no backticks):
     const res = await fetch(CLOUDFLARE_WORKER, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'anthropic', model:'claude-opus-4-8', max_tokens:600, messages:[{role:'user',content:prompt}] })
+      body: JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:600, messages:[{role:'user',content:prompt}] })
     });
     if (!res.ok) throw new Error('Worker ' + res.status);
     const raw = await res.text();
@@ -6636,7 +6636,7 @@ function generateXPost() {
   fetch('https://hidden-snow-d9ff.neilthomas1515.workers.dev', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ type: 'anthropic', model: 'claude-opus-4-8', max_tokens: 600, messages: [{role: 'user', content: prompt}] })
+    body: JSON.stringify({ type: 'anthropic', model: 'claude-sonnet-4-6', max_tokens: 600, messages: [{role: 'user', content: prompt}] })
   })
   .then(function(r){ return r.text(); })
   .then(function(raw) {
