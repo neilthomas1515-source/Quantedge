@@ -3473,6 +3473,13 @@ function renderTVAlertPanel(d) {
   if (!panel) return;
   panel.style.display = 'block';
 
+  // Normalize Pine Script fields to expected card fields
+  if (!d.rating && d.grade)     d.rating   = d.grade;
+  if (!d.tp1    && d.target)    d.tp1      = d.target;
+  if (!d.tp2    && d.target2)   d.tp2      = d.target2;
+  if (!d.price  && d.entry)     d.price    = d.entry;
+  if (!d.tf     && d.timeframe) d.tf       = d.timeframe;
+
   // Colors
   const rc  = d.rating==='A++'?'var(--green)':d.rating==='A+'?'var(--amber)':'var(--cyan)';
   const dc  = (d.direction||'').toUpperCase()==='LONG'?'var(--green)':'var(--red)';
