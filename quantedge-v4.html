@@ -3289,6 +3289,7 @@ Rules: Realistic ES prices (~${es}). O/N=overnight range. Never fabricate.`;
     showToast(sumTxt,'ok');
     window.chartAutoFillContext=`Chart Levels: O/N ${p.onHigh||'?'}/${p.onLow||'?'} | Asia ${p.asiaHigh||'?'}/${p.asiaLow||'?'} | London ${p.londonHigh||'?'}/${p.londonLow||'?'} | Bias: ${p.bias||'?'} ${p.biasConfidence||0}%`;
     try { await fetch(CLOUDFLARE_WORKER+'/morning-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({onHigh:p.onHigh,onLow:p.onLow,asiaHigh:p.asiaHigh,asiaLow:p.asiaLow,londonHigh:p.londonHigh,londonLow:p.londonLow,keyLevels:p.keyLevels||[],bias:p.bias,biasConfidence:p.biasConfidence,biasSummary:p.biasSummary,watchFor:p.watchFor,savedAt:Date.now()})});} catch(kvErr){}
+  calcSessionProbFromAutoFill(p);
   } catch(e) { if(result){result.style.display='block';result.textContent='⚠ Failed: '+e.message;result.style.color='var(--red)';} showToast('Chart auto-fill failed: '+e.message,'err'); }
   finally { if(btn){btn.disabled=false;btn.textContent='📸 Read Chart → Auto-Fill Levels';} }
 }
@@ -6146,6 +6147,89 @@ function startSessProbPolling() {
   pollSessionProbability();
   sessProb.pollInterval = setInterval(pollSessionProbability, 10000);
   console.log('[SessProb] Polling every 10s');
+}
+
+
+// ======================================================
+// SESSION PROBABILITY ENGINE -- AUTO-FILL DRIVEN
+// Fires automatically after Chart Screenshot -> AI Auto-Fill
+// Uses Asia->PreLondon->OR session sequence research
+// NQ probability table (ES placeholder until ES backtest)
+// ES Asia avg threshold: 45 pts (tune after ES backtest)
+// ======================================================
+function calcSessionProbFromAutoFill(p) {
+  const asiaH = parseFloat(p.asiaHigh);
+  const asiaL = parseFloat(p.asiaLow);
+  const lonH  = parseFloat(p.londonHigh);
+  const lonL  = parseFloat(p.londonLow);
+
+  if (isNaN(asiaH) || isNaN(asiaL) || asiaH <= 0 || asiaL <= 0) return;
+
+  const ES_ASIA_AVG = 45; // pts -- update after ES backtest
+  const asiaRange   = asiaH - asiaL;
+  const asiaLarge   = asiaRange > ES_ASIA_AVG;
+
+  // Pre-London sweep direction
+  let plSweep = 'NONE';
+  if (!isNaN(lonH) && !isNaN(lonL) && lonH > 0 && lonL > 0) {
+    if (lonH > asiaH && lonL > asiaL)       plSweep = 'HIGH';
+    else if (lonL < asiaL && lonH < asiaH)  plSweep = 'LOW';
+    else if (lonH > asiaH && lonL < asiaL)  plSweep = 'BOTH';
+  }
+
+  // Probability table from NQ backtest research (719 days Jan 2022-Aug 2025)
+  // ES numbers are NQ placeholders -- replace after ES backtest
+  const table = {
+    'LARGE_HIGH':  { prob: 72, pen: 38.7, time: 5.5, dir: 'BEAR', label: 'PL Hi -> OR Lo likely' },
+    'LARGE_LOW':   { prob: 86, pen: 38.3, time: 2.0, dir: 'BULL', label: 'PL Lo -> OR Hi likely (fast)' },
+    'LARGE_BOTH':  { prob: 65, pen: 30.0, time: 6.0, dir: 'NEUT', label: 'Two-sided -- book faster' },
+    'LARGE_NONE':  { prob: 78, pen: 28.0, time: 8.0, dir: 'NEUT', label: 'London expansion likely' },
+    'SMALL_HIGH':  { prob: 82, pen: 29.5, time: 6.0, dir: 'BEAR', label: 'PL Hi -> OR Lo likely' },
+    'SMALL_LOW':   { prob: 77, pen: 24.8, time: 6.0, dir: 'BULL', label: 'PL Lo -> OR Hi likely' },
+    'SMALL_BOTH':  { prob: 60, pen: 20.0, time: 8.0, dir: 'NEUT', label: 'Mixed -- reduce size' },
+    'SMALL_NONE':  { prob: 68, pen: 18.0, time: 10.0, dir: 'NEUT', label: 'London expansion watch' },
+  };
+
+  const key = (asiaLarge ? 'LARGE' : 'SMALL') + '_' + plSweep;
+  const row = table[key] || table['SMALL_NONE'];
+
+  const direction = row.dir === 'BULL' ? 'BULL' : row.dir === 'BEAR' ? 'BEAR' : 'NEUTRAL';
+
+  const plSweepLabels = { HIGH:'PL swept Asia Hi', LOW:'PL swept Asia Lo', BOTH:'PL swept Both', NONE:'PL no sweep' };
+  const narrative = (asiaLarge ? 'Large Asia ' : 'Small Asia ') +
+                    asiaRange.toFixed(1) + 'pts - ' + (plSweepLabels[plSweep] || plSweep);
+
+  sessProb.data = {
+    direction:   direction,
+    probability: row.prob,
+    alertType:   'SESSION_SEQ',
+    narrative:   narrative,
+    firedAt:     Date.now(),
+    medianPen:   row.pen,
+    medianTime:  row.time,
+    label:       row.label,
+    asiaRange:   asiaRange.toFixed(1),
+    asiaLarge:   asiaLarge,
+    plSweep:     plSweep,
+    id:          'autofill_' + Date.now()
+  };
+
+  updateSessProbBadge();
+
+  const slot = document.getElementById('sess-prob-badge-slot');
+  if (slot) slot.innerHTML = buildSessProbFilled(sessProb.data);
+
+  window.sessionProbContext =
+    'Session Sequence: ' + narrative +
+    ' | Continuation prob: ' + row.prob + '% ' + direction +
+    ' | Median penetration: ' + row.pen + 'pts in ~' + row.time + 'min' +
+    ' | ' + row.label;
+
+  showToast(
+    'Session Prob: ' + direction + ' ' + row.prob + '% - ' +
+    row.pen + 'pt target - ~' + row.time + 'min - ' + row.label,
+    direction === 'BULL' ? 'ok' : direction === 'BEAR' ? 'warn' : 'info'
+  );
 }
 
 // ── MAIN INIT ──
