@@ -3410,7 +3410,9 @@ async function pollTVAlert() {
 
 function processTVAlert(d) {
   // d = standard webhook blueprint payload (see Pine Script below)
-  const { indicator, direction, rating, price, tf, entry, stop, be, tp1, tp2, checklist, pattern, timestamp } = d;
+  const { indicator, direction, rating, price, tf, entry, stop, be, checklist, pattern, timestamp } = d;
+  const tp1 = d.tp1 || d.target || null;
+  const tp2 = d.tp2 || d.target2 || null;
   const now = Date.now();
 
   // Store in history
