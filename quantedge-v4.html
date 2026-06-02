@@ -6398,7 +6398,7 @@ function initAll() {
 document.addEventListener('DOMContentLoaded', initAll);
 
 // =============================================
-// P4b: TTS - Microsoft David via Web Speech API
+// P4b: TTS - Microsoft Aria via Web Speech API
 // =============================================
 const ttsState = { enabled: false, voice: null, speaking: false };
 
@@ -6407,7 +6407,7 @@ function initTTS() {
   const loadVoices = () => {
     const voices = window.speechSynthesis.getVoices();
     ttsState.voice =
-      voices.find(v => v.name.includes('David')) ||
+      voices.find(v => v.name.includes('Aria')) || voices.find(v => v.name.includes('David')) ||
       voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
       voices.find(v => v.lang.startsWith('en')) ||
       voices[0] || null;
@@ -6425,7 +6425,7 @@ function toggleTTS() {
     btn.classList.toggle('active', ttsState.enabled);
   }
   if (!ttsState.enabled && window.speechSynthesis) window.speechSynthesis.cancel();
-  showToast(ttsState.enabled ? '\uD83D\uDD0A Voice ON - David will read signals' : '\uD83D\uDCC4 Voice OFF', ttsState.enabled ? 'ok' : 'info');
+  showToast(ttsState.enabled ? '\uD83D\uDD0A Voice ON - Aria will read signals' : '\uD83D\uDCC4 Voice OFF', ttsState.enabled ? 'ok' : 'info');
 }
 
 function speakText(text) {
