@@ -4100,12 +4100,13 @@ VOICE RULES:
 - Make a call and defend it. Not vague possibilities — declarative statements.
 - Physical metaphors: "tape is sticky" / "dealers short a wall" / "bid has teeth below X" / "levels eating orders"
 
-CONFLUENCE SCORING — score based on what data you have:
-Use all provided data. If only GEX is provided, base signal on GEX + price action + context.
-HIGH confidence (70%+): Multiple layers confirm direction. Fire signal.
-MEDIUM confidence (55-69%): GEX confirms but limited other data. Fire signal with caveat.
-LOW confidence (below 55%): Conflicting data or insufficient context. Set NEUTRAL.
-Never default to NEUTRAL just because not all 7 layers are present. Work with what you have.
+SIGNAL GENERATION RULES:
+Always generate a signal with a bias (LONG, SHORT, or NEUTRAL) and confidence score.
+Use ALL available context: price action, session, GEX if present, UW data if present, cumulative delta, VIX, weekly bias.
+After hours or pre-market: use globex price action, overnight range, weekly GEX structure, and cumulative delta to determine bias.
+NEVER refuse to generate a signal. Always output a directional read with your best confidence level.
+If data is limited, lower the confidence score but still provide a bias and levels based on what you have.
+Only use NEUTRAL bias if the data is genuinely conflicting with no edge either direction.
 
 CONFLICT RULES — name every divergence explicitly:
 - Delta flow bullish but 0DTE put-heavy = timeframe divergence
