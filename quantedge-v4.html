@@ -3130,7 +3130,6 @@ function setActiveZone(zone) { activeZone = zone; }
 
 // ── PASTE HANDLER ──
 document.addEventListener('paste', e => {
-  if (window.uwGreekActive) return; // Greek zone has priority
   const items = e.clipboardData?.items;
   if (!items) return;
   for (const item of items) {
@@ -5482,7 +5481,6 @@ function uwDropAreaClick(e, zone) {
 
 function uwInitPaste() {
   document.addEventListener('paste', e => {
-    if (window.uwGreekActive) return;
     const items = e.clipboardData?.items; if (!items) return;
     let imgFile = null;
     for (const item of items) { if (item.type.startsWith('image/')) { imgFile = item.getAsFile(); break; } }
@@ -7541,29 +7539,42 @@ async function generateWeeklyRecap() {
     <div class="sd-sect">
       <div class="sd-sect-hd" style="color:#a78bfa">④ UW Greeks — Vanna · Charm · Gamma Strike</div>
       <div class="sd-sect-body">
-        <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
 
-          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Vanna</div>
-          <div class="uw-greek-zone" id="sd-vanna-zone" onclick="sdGreekClick('vanna')"
+          <input type="file" id="greek-file-vanna" accept="image/*" style="display:none" onchange="sdGreekLoadFile(this.files[0],'vanna')">
+          <input type="file" id="greek-file-charm" accept="image/*" style="display:none" onchange="sdGreekLoadFile(this.files[0],'charm')">
+          <input type="file" id="greek-file-gamma" accept="image/*" style="display:none" onchange="sdGreekLoadFile(this.files[0],'gamma')">
+
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Vanna <span style="font-size:9px;color:var(--t4);font-weight:400">— Net Vanna, flip level, vol-shock regime</span></div>
+          <div class="uw-greek-zone" id="sd-vanna-zone"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'vanna')">
             <img id="sd-vanna-img" style="display:none;width:100%;border-radius:3px">
-            <div id="sd-vanna-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Net Vanna, flip level, vol-shock regime</span></div>
+            <div id="sd-vanna-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
+              <button class="btn-sm" onclick="document.getElementById('greek-file-vanna').click()">Browse</button>
+              <span style="font-size:10px;color:var(--t4)">or drop image here</span>
+            </div>
             <button class="uw-clear-btn" onclick="sdGreekClear(event,'vanna')">✕</button>
           </div>
 
-          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;margin-top:4px">Charm</div>
-          <div class="uw-greek-zone" id="sd-charm-zone" onclick="sdGreekClick('charm')"
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Charm <span style="font-size:9px;color:var(--t4);font-weight:400">— Buy/sell pressure, pin zone</span></div>
+          <div class="uw-greek-zone" id="sd-charm-zone"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'charm')">
             <img id="sd-charm-img" style="display:none;width:100%;border-radius:3px">
-            <div id="sd-charm-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Buy/sell pressure, pin zone</span></div>
+            <div id="sd-charm-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
+              <button class="btn-sm" onclick="document.getElementById('greek-file-charm').click()">Browse</button>
+              <span style="font-size:10px;color:var(--t4)">or drop image here</span>
+            </div>
             <button class="uw-clear-btn" onclick="sdGreekClear(event,'charm')">✕</button>
           </div>
 
-          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;margin-top:4px">Gamma by Strike</div>
-          <div class="uw-greek-zone" id="sd-gamma-zone" onclick="sdGreekClick('gamma')"
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Gamma by Strike <span style="font-size:9px;color:var(--t4);font-weight:400">— Call wall, put wall, magnets vs accelerators</span></div>
+          <div class="uw-greek-zone" id="sd-gamma-zone"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'gamma')">
             <img id="sd-gamma-img" style="display:none;width:100%;border-radius:3px">
-            <div id="sd-gamma-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Call wall, put wall, magnets vs accelerators</span></div>
+            <div id="sd-gamma-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
+              <button class="btn-sm" onclick="document.getElementById('greek-file-gamma').click()">Browse</button>
+              <span style="font-size:10px;color:var(--t4)">or drop image here</span>
+            </div>
             <button class="uw-clear-btn" onclick="sdGreekClear(event,'gamma')">✕</button>
           </div>
 
@@ -7633,8 +7644,8 @@ function sdGreekClear(e, type) {
   if (zone) zone.classList.remove('has-image');
 }
 
-function sdGreekLoadFile(file) {
-  var type = window.uwGreekActive;
+function sdGreekLoadFile(file, type) {
+  if (!type) type = window.uwGreekActive;
   if (!type) return;
   var reader = new FileReader();
   reader.onload = function(ev) {
