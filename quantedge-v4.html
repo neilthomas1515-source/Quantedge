@@ -4100,11 +4100,12 @@ VOICE RULES:
 - Make a call and defend it. Not vague possibilities — declarative statements.
 - Physical metaphors: "tape is sticky" / "dealers short a wall" / "bid has teeth below X" / "levels eating orders"
 
-CONFLUENCE SCORING — score 0-7:
-+1 each layer confirmed: GEX strike map / Vanna regime / Charm signal / 0DTE flow / Breadth / Bond risk above 40 / Structure (BOS or CHoCH)
-5-7: Full size signal.
-3-4: Reduced size, name the conflicts.
-0-2: NEUTRAL. No trade. This is a valid and valuable output.
+CONFLUENCE SCORING — score based on what data you have:
+Use all provided data. If only GEX is provided, base signal on GEX + price action + context.
+HIGH confidence (70%+): Multiple layers confirm direction. Fire signal.
+MEDIUM confidence (55-69%): GEX confirms but limited other data. Fire signal with caveat.
+LOW confidence (below 55%): Conflicting data or insufficient context. Set NEUTRAL.
+Never default to NEUTRAL just because not all 7 layers are present. Work with what you have.
 
 CONFLICT RULES — name every divergence explicitly:
 - Delta flow bullish but 0DTE put-heavy = timeframe divergence
@@ -7560,27 +7561,19 @@ async function generateWeeklyRecap() {
         <input type="file" id="sd-uw-file-flows" accept="image/*" style="display:none" onchange="uwLoadFile('flows',this.files[0])">
         <input type="file" id="sd-uw-file-expo" accept="image/*" style="display:none" onchange="uwLoadFile('expo',this.files[0])">
         <div class="uw-grid">
-          <div class="uw-zone" id="sd-uw-zone-flows">
-            <div class="uw-zone-lbl" onclick="uwSetActiveZone('flows')">📊 Net Flows</div>
-            <div class="uw-zone-sub">Market Tide · 0DTE Flow</div>
-            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;padding:8px">
-              <img id="sd-uw-img-flows" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain">
-              <div id="sd-uw-hint-flows" style="display:flex;gap:6px;align-items:center">
-                <label style="cursor:pointer;display:inline-block;padding:3px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;font-size:11px;color:var(--t2);font-family:var(--mono)">Browse<input type="file" accept="image/*" style="display:none" onchange="uwLoadFile('flows',this.files[0])"></label>
-                <span style="font-size:9px;color:var(--t4)">or paste (Ctrl+V)</span>
-              </div>
-            </div>
+          <div class="uw-zone" id="sd-uw-zone-flows"
+            onclick="uwSetActiveZone('flows');this.style.borderColor='#f59e0b';showToast('Paste Net Flows screenshot (Ctrl+V)','info')">
+            <div class="uw-zone-lbl">📊 Net Flows</div>
+            <div class="uw-zone-sub">Market Tide · 0DTE Flow — Click then Ctrl+V</div>
+            <img id="sd-uw-img-flows" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain;margin-top:4px">
+            <div id="sd-uw-hint-flows" style="font-size:9px;color:var(--t4);padding:6px;text-align:center"><span style="color:#f59e0b;font-weight:700">Click</span> to activate, then Ctrl+V</div>
           </div>
-          <div class="uw-zone" id="sd-uw-zone-expo">
-            <div class="uw-zone-lbl" onclick="uwSetActiveZone('expo')">📡 Exposures</div>
-            <div class="uw-zone-sub">Periscope · Spot Gamma · Delta</div>
-            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;padding:8px">
-              <img id="sd-uw-img-expo" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain">
-              <div id="sd-uw-hint-expo" style="display:flex;gap:6px;align-items:center">
-                <label style="cursor:pointer;display:inline-block;padding:3px 10px;background:var(--s3);border:1px solid var(--b2);border-radius:3px;font-size:11px;color:var(--t2);font-family:var(--mono)">Browse<input type="file" accept="image/*" style="display:none" onchange="uwLoadFile('expo',this.files[0])"></label>
-                <span style="font-size:9px;color:var(--t4)">or paste (Ctrl+V)</span>
-              </div>
-            </div>
+          <div class="uw-zone" id="sd-uw-zone-expo"
+            onclick="uwSetActiveZone('expo');this.style.borderColor='#f59e0b';showToast('Paste Exposures screenshot (Ctrl+V)','info')">
+            <div class="uw-zone-lbl">📡 Exposures</div>
+            <div class="uw-zone-sub">Periscope · Spot Gamma · Delta — Click then Ctrl+V</div>
+            <img id="sd-uw-img-expo" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain;margin-top:4px">
+            <div id="sd-uw-hint-expo" style="font-size:9px;color:var(--t4);padding:6px;text-align:center"><span style="color:#f59e0b;font-weight:700">Click</span> to activate, then Ctrl+V</div>
           </div>
         </div>
       </div>
