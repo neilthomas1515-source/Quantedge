@@ -3289,6 +3289,8 @@ function handleOFFile(file) {
   const reader = new FileReader();
   reader.onload = ev => {
     ofImageData = ev.target.result;
+    var sdPrev = document.getElementById('sd-of-preview');
+    if (sdPrev) { sdPrev.src = ofImageData; sdPrev.style.display = 'block'; }
     const prev = document.getElementById('of-preview');
     if (prev) { prev.src = ofImageData; prev.style.display = 'block'; }
     addOFHistory(ofImageData);
@@ -5418,6 +5420,13 @@ let uwIntraday  = null;   // Latest intraday update
 
 // ── Image load helpers ──
 function uwSetImage(zone, dataUrl) {
+  // Also update drawer preview
+  var sdImg = document.getElementById('sd-uw-img-' + zone);
+  var sdHint = document.getElementById('sd-uw-hint-' + zone);
+  var sdZone = document.getElementById('sd-uw-zone-' + zone);
+  if (sdImg) { sdImg.src = dataUrl; sdImg.style.display = 'block'; }
+  if (sdHint) sdHint.style.display = 'none';
+  if (sdZone) sdZone.classList.add('has-image');
   uwImages[zone] = dataUrl;
   const dropEl = document.getElementById('uw-drop-' + zone);
   const imgEl  = document.getElementById('uw-img-' + zone);
@@ -7516,19 +7525,29 @@ async function generateWeeklyRecap() {
     <div class="sd-sect">
       <div class="sd-sect-hd" style="color:#f59e0b">③ Unusual Whales — Flows + Exposures</div>
       <div class="sd-sect-body">
+        <input type="file" id="sd-uw-file-flows" accept="image/*" style="display:none" onchange="uwLoadFile('flows',this.files[0])">
+        <input type="file" id="sd-uw-file-expo" accept="image/*" style="display:none" onchange="uwLoadFile('expo',this.files[0])">
         <div class="uw-grid">
           <div class="uw-zone" id="sd-uw-zone-flows">
             <div class="uw-zone-lbl" onclick="uwSetActiveZone('flows')">📊 Net Flows</div>
             <div class="uw-zone-sub">Market Tide · 0DTE Flow</div>
-            <div class="uw-drop-area" onclick="uwDropAreaClick(event,'flows')" ondragover="uwDragOver(event,'flows')" ondragleave="uwDragLeave(event,'flows')" ondrop="uwDrop(event,'flows')">
-              <div class="uw-drop-hint"><span>Click</span>, drop or paste</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;padding:8px">
+              <img id="sd-uw-img-flows" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain">
+              <div id="sd-uw-hint-flows" style="display:flex;gap:6px;align-items:center">
+                <button class="btn-sm" onclick="document.getElementById('sd-uw-file-flows').click()">Browse</button>
+                <span style="font-size:9px;color:var(--t4)">or paste (Ctrl+V)</span>
+              </div>
             </div>
           </div>
           <div class="uw-zone" id="sd-uw-zone-expo">
             <div class="uw-zone-lbl" onclick="uwSetActiveZone('expo')">📡 Exposures</div>
             <div class="uw-zone-sub">Periscope · Spot Gamma · Delta</div>
-            <div class="uw-drop-area" onclick="uwDropAreaClick(event,'expo')" ondragover="uwDragOver(event,'expo')" ondragleave="uwDragLeave(event,'expo')" ondrop="uwDrop(event,'expo')">
-              <div class="uw-drop-hint"><span>Click</span>, drop or paste</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;padding:8px">
+              <img id="sd-uw-img-expo" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain">
+              <div id="sd-uw-hint-expo" style="display:flex;gap:6px;align-items:center">
+                <button class="btn-sm" onclick="document.getElementById('sd-uw-file-expo').click()">Browse</button>
+                <span style="font-size:9px;color:var(--t4)">or paste (Ctrl+V)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -7578,6 +7597,21 @@ async function generateWeeklyRecap() {
             <button class="uw-clear-btn" onclick="sdGreekClear(event,'gamma')">✕</button>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ OPTIONS FLOW -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:var(--amber)">⑥ Options Flow / Bookmap</div>
+      <div class="sd-sect-body">
+        <input type="file" id="sd-of-file" accept="image/*" style="display:none" onchange="handleOFFile(this.files[0])">
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center;padding:4px">
+          <img id="sd-of-preview" style="display:none;width:100%;max-height:80px;border-radius:3px;object-fit:contain">
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-sm" onclick="document.getElementById('sd-of-file').click()">Browse</button>
+            <span style="font-size:9px;color:var(--t4)">Order flow · Bookmap · 0DTE</span>
+          </div>
         </div>
       </div>
     </div>
