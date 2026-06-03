@@ -6959,8 +6959,10 @@ function copyXPost() {
 const WORKER = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
 
 function openTGPanel() {
-  document.getElementById('tg-overlay').classList.add('open');
-  loadPendingSignal();
+  const overlay = document.getElementById('tg-overlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  try { loadPendingSignal(); } catch(e) { console.warn('loadPendingSignal failed:', e); }
 }
 function closeTGPanel() {
   document.getElementById('tg-overlay').classList.remove('open');
