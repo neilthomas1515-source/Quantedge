@@ -5482,6 +5482,7 @@ function uwDropAreaClick(e, zone) {
 
 function uwInitPaste() {
   document.addEventListener('paste', e => {
+    if (window.uwGreekActive) return;
     const items = e.clipboardData?.items; if (!items) return;
     let imgFile = null;
     for (const item of items) { if (item.type.startsWith('image/')) { imgFile = item.getAsFile(); break; } }
