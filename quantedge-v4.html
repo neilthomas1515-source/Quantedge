@@ -5395,6 +5395,36 @@ function initGexStackZones() {
 }
 
 function initGexStackPaste() {
+  // Greek zone paste handler — runs first, capture phase
+  document.addEventListener('paste', e => {
+    if (!window.uwGreekActive) return;
+    const items = e.clipboardData?.items; if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        const file = item.getAsFile();
+        const type = window.uwGreekActive;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          window.uwGreekImages = window.uwGreekImages || {};
+          window.uwGreekImages[type] = ev.target.result;
+          const img = document.getElementById('sd-' + type + '-img');
+          const hint = document.getElementById('sd-' + type + '-hint');
+          const zone = document.getElementById('sd-' + type + '-zone');
+          if (img) { img.src = ev.target.result; img.style.display = 'block'; }
+          if (hint) hint.style.display = 'none';
+          if (zone) zone.classList.add('has-image');
+          showToast(type.charAt(0).toUpperCase() + type.slice(1) + ' loaded ✓', 'ok');
+          window.uwGreekActive = null;
+        };
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  }, true);
+
+  // GEX slot paste handler
   document.addEventListener('paste', e => {
     if (!activeGexSlot) return;
     const items = e.clipboardData?.items; if (!items) return;
@@ -7564,6 +7594,7 @@ async function generateWeeklyRecap() {
 
           <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Vanna <span style="font-size:9px;color:var(--t4);font-weight:400">— Net Vanna, flip level, vol-shock regime</span></div>
           <div class="uw-greek-zone" id="sd-vanna-zone"
+            onclick="window.uwGreekActive='vanna';this.style.borderColor='#a78bfa';showToast('Paste vanna screenshot now (Ctrl+V)','info')"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'vanna')">
             <img id="sd-vanna-img" style="display:none;width:100%;border-radius:3px">
             <div id="sd-vanna-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
@@ -7575,6 +7606,7 @@ async function generateWeeklyRecap() {
 
           <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Charm <span style="font-size:9px;color:var(--t4);font-weight:400">— Buy/sell pressure, pin zone</span></div>
           <div class="uw-greek-zone" id="sd-charm-zone"
+            onclick="window.uwGreekActive='charm';this.style.borderColor='#a78bfa';showToast('Paste charm screenshot now (Ctrl+V)','info')"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'charm')">
             <img id="sd-charm-img" style="display:none;width:100%;border-radius:3px">
             <div id="sd-charm-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
@@ -7586,6 +7618,7 @@ async function generateWeeklyRecap() {
 
           <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase">Gamma by Strike <span style="font-size:9px;color:var(--t4);font-weight:400">— Call wall, put wall, magnets vs accelerators</span></div>
           <div class="uw-greek-zone" id="sd-gamma-zone"
+            onclick="window.uwGreekActive='gamma';this.style.borderColor='#a78bfa';showToast('Paste gamma screenshot now (Ctrl+V)','info')"
             ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'gamma')">
             <img id="sd-gamma-img" style="display:none;width:100%;border-radius:3px">
             <div id="sd-gamma-hint" style="display:flex;gap:6px;align-items:center;justify-content:center">
@@ -7695,24 +7728,7 @@ function sdGreekLoadFile(file, type) {
   reader.readAsDataURL(file);
 }
 
-// Greek paste handler — must fire first and block all other handlers
-document.addEventListener('paste', function(e) {
-  if (!window.uwGreekActive) return;
-  var items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (var i = 0; i < items.length; i++) {
-    if (items[i].type.startsWith('image/')) {
-      var file = items[i].getAsFile();
-      if (file) {
-        sdGreekLoadFile(file);
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        break;
-      }
-    }
-  }
-}, true);
+// Greek paste handled in initGexStackPaste
 
 
 </script>
