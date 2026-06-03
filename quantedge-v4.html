@@ -782,6 +782,24 @@ font-family:monospace;line-height:1.5;}
 }
 .sd-sect-body { padding: 8px 10px; }
 
+
+.uw-greek-zone {
+  border: 1px dashed rgba(167,139,250,0.4);
+  border-radius: 5px;
+  padding: 8px;
+  background: rgba(167,139,250,0.02);
+  cursor: pointer;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s;
+}
+.uw-greek-zone:hover { border-color: #a78bfa; background: rgba(167,139,250,0.06); }
+.uw-greek-zone.has-image { border-style: solid; border-color: #a78bfa; }
+
 </style>
 </head>
 <body>
@@ -4177,6 +4195,16 @@ function buildMessageContent(prompt) {
     content.push({ type:'image', source:{ type:'base64', media_type:mtw, data:b64w } });
     content.push({ type:'text', text:'[Above image: WEEKLY GEX chart — weekly dealer positioning context]' });
   }
+  // UW Greek images
+  var greekLabels = { vanna: 'UW VANNA — net vanna, flip level, vol-shock regime (procyclical or countercyclical)', charm: 'UW CHARM — buy or sell pressure into close, pin zone location', gamma: 'UW GAMMA BY STRIKE — call wall, put wall, magnets vs accelerators at each strike' };
+  ['vanna','charm','gamma'].forEach(function(type) {
+    var img = uwGreekImages && uwGreekImages[type];
+    if (!img) return;
+    var b64 = img.split(',')[1];
+    var mt = img.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+    content.push({ type:'image', source:{ type:'base64', media_type:mt, data:b64 } });
+    content.push({ type:'text', text:'[Above: ' + greekLabels[type] + ']' });
+  });
   // Main prompt text
   content.push({ type:'text', text:prompt });
   return content;
@@ -7507,9 +7535,33 @@ async function generateWeeklyRecap() {
     <div class="sd-sect">
       <div class="sd-sect-hd" style="color:#a78bfa">④ UW Greeks — Vanna · Charm · Gamma Strike</div>
       <div class="sd-sect-body">
-        <div style="font-size:10px;color:var(--t4);margin-bottom:6px">Paste into indicator slots below. Label each one.</div>
-        <div id="sd-snap-grid"></div>
-        <button class="btn-sm" style="margin-top:6px;width:100%" onclick="clearAllSnaps()">Clear All</button>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Vanna</div>
+          <div class="uw-greek-zone" id="sd-vanna-zone" onclick="sdGreekClick('vanna')"
+            ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'vanna')">
+            <img id="sd-vanna-img" style="display:none;width:100%;border-radius:3px">
+            <div id="sd-vanna-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Net Vanna, flip level, vol-shock regime</span></div>
+            <button class="uw-clear-btn" onclick="sdGreekClear(event,'vanna')">✕</button>
+          </div>
+
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;margin-top:4px">Charm</div>
+          <div class="uw-greek-zone" id="sd-charm-zone" onclick="sdGreekClick('charm')"
+            ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'charm')">
+            <img id="sd-charm-img" style="display:none;width:100%;border-radius:3px">
+            <div id="sd-charm-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Buy/sell pressure, pin zone</span></div>
+            <button class="uw-clear-btn" onclick="sdGreekClear(event,'charm')">✕</button>
+          </div>
+
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;margin-top:4px">Gamma by Strike</div>
+          <div class="uw-greek-zone" id="sd-gamma-zone" onclick="sdGreekClick('gamma')"
+            ondragover="event.preventDefault()" ondrop="sdGreekDrop(event,'gamma')">
+            <img id="sd-gamma-img" style="display:none;width:100%;border-radius:3px">
+            <div id="sd-gamma-hint" class="uw-drop-hint"><span>Click</span>, drop or Ctrl+V<br><span style="font-size:9px;color:var(--t4)">Call wall, put wall, magnets vs accelerators</span></div>
+            <button class="uw-clear-btn" onclick="sdGreekClear(event,'gamma')">✕</button>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -7551,6 +7603,67 @@ document.addEventListener('keydown', function(e) {
   }
 });
 </script>
+
+
+// ── UW GREEK ZONES ──
+var uwGreekImages = { vanna: null, charm: null, gamma: null };
+var uwGreekActive = null;
+
+function sdGreekClick(type) {
+  uwGreekActive = type;
+  showToast('Paste ' + type.charAt(0).toUpperCase() + type.slice(1) + ' screenshot now (Ctrl+V)', 'info');
+}
+
+function sdGreekDrop(e, type) {
+  e.preventDefault();
+  var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    uwGreekActive = type;
+    sdGreekLoadFile(file);
+  }
+}
+
+function sdGreekClear(e, type) {
+  e.stopPropagation();
+  uwGreekImages[type] = null;
+  var img = document.getElementById('sd-' + type + '-img');
+  var hint = document.getElementById('sd-' + type + '-hint');
+  var zone = document.getElementById('sd-' + type + '-zone');
+  if (img) { img.src=''; img.style.display='none'; }
+  if (hint) hint.style.display='';
+  if (zone) zone.classList.remove('has-image');
+}
+
+function sdGreekLoadFile(file) {
+  var type = uwGreekActive;
+  if (!type) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    uwGreekImages[type] = ev.target.result;
+    var img = document.getElementById('sd-' + type + '-img');
+    var hint = document.getElementById('sd-' + type + '-hint');
+    var zone = document.getElementById('sd-' + type + '-zone');
+    if (img) { img.src = ev.target.result; img.style.display = 'block'; }
+    if (hint) hint.style.display = 'none';
+    if (zone) zone.classList.add('has-image');
+    showToast(type.charAt(0).toUpperCase() + type.slice(1) + ' loaded', 'ok');
+    uwGreekActive = null;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Hook into global paste handler for greek zones
+document.addEventListener('paste', function(e) {
+  if (!uwGreekActive) return;
+  var items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.startsWith('image/')) {
+      var file = items[i].getAsFile();
+      if (file) { sdGreekLoadFile(file); e.stopPropagation(); break; }
+    }
+  }
+});
 
 </body>
 </html>
