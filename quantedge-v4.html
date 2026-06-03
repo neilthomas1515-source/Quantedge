@@ -4142,6 +4142,7 @@ OUTPUT FORMAT — JSON only, no markdown, no backticks, no preamble:
 }
 
 // ── BUILD MESSAGE CONTENT (with images) ──
+if (typeof uwGreekImages === 'undefined') { var uwGreekImages = { vanna: null, charm: null, gamma: null }; }
 function buildMessageContent(prompt) {
   const content = [];
 
@@ -7581,19 +7582,7 @@ async function generateWeeklyRecap() {
 <script>
 function toggleSnapDrawer() {
   var drawer = document.getElementById('snap-drawer');
-  var isOpen = drawer.classList.toggle('open');
-  // Hide left panel snapshot sections when drawer open
-  var sectIds = ['snap-sect-gex','uw-sect','snap-sect-indicator'];
-  sectIds.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = isOpen ? 'none' : '';
-  });
-  // Sync snap grid into drawer
-  if (isOpen) {
-    var grid = document.getElementById('snap-grid');
-    var sdGrid = document.getElementById('sd-snap-grid');
-    if (grid && sdGrid) sdGrid.innerHTML = grid.innerHTML;
-  }
+  drawer.classList.toggle('open');
 }
 // Close on ESC
 document.addEventListener('keydown', function(e) {
