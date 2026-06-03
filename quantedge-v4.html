@@ -691,6 +691,117 @@ border-radius:6px;border-left:3px solid var(--amber);margin-top:10px;}
 border-radius:6px;padding:10px;color:var(--t1);font-size:13px;resize:vertical;
 font-family:monospace;line-height:1.5;}
 .tg-label{font-size:12px;color:var(--t3);margin-bottom:6px;margin-top:12px;}
+
+/* ═══════════════════════════════════════════
+   SNAPSHOT DRAWER
+═══════════════════════════════════════════ */
+#snap-drawer-toggle {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10000;
+  background: linear-gradient(180deg, #0ea5e9, #0369a1);
+  color: #fff;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  padding: 14px 8px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: -2px 0 12px rgba(0,0,0,0.4);
+  transition: background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+#snap-drawer-toggle:hover { background: linear-gradient(180deg,#38bdf8,#0ea5e9); }
+#snap-drawer-toggle .drawer-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ff4444; flex-shrink: 0;
+  transition: background 0.3s;
+  writing-mode: horizontal-tb;
+}
+#snap-drawer-toggle .drawer-dot.has-data { background: #00ff88; }
+#snap-drawer-toggle .drawer-count {
+  font-size: 9px; color: rgba(255,255,255,0.7);
+  writing-mode: horizontal-tb; letter-spacing: 0;
+}
+
+#snap-drawer {
+  position: fixed;
+  top: 0; right: -480px;
+  width: 460px;
+  height: 100vh;
+  background: var(--s1);
+  border-left: 1px solid var(--b2);
+  z-index: 9999;
+  overflow-y: auto;
+  transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+}
+#snap-drawer.open { right: 0; }
+
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--s2);
+  border-bottom: 1px solid var(--b2);
+  position: sticky; top: 0; z-index: 10;
+  flex-shrink: 0;
+}
+.drawer-title {
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  color: var(--cyan); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.drawer-subtitle {
+  font-size: 10px; color: var(--t3); margin-top: 2px;
+}
+.drawer-close {
+  background: none; border: 1px solid var(--b2); border-radius: 4px;
+  color: var(--t3); cursor: pointer; padding: 4px 10px; font-size: 12px;
+  font-family: var(--mono);
+}
+.drawer-close:hover { color: var(--red); border-color: var(--red2); }
+
+.drawer-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+.drawer-sect {
+  border: 1px solid var(--b2); border-radius: 6px; overflow: hidden;
+}
+.drawer-sect-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--s2);
+  border-bottom: 1px solid var(--b1);
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.drawer-sect-body { padding: 10px 12px; }
+
+.drawer-status-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.drawer-status-pill {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  border: 1px solid var(--b2); color: var(--t3); background: var(--s2);
+  font-family: var(--mono);
+}
+.drawer-status-pill.filled { border-color: var(--cyan2); color: var(--cyan); background: rgba(0,212,255,0.06); }
+.drawer-status-pill.filled.amber { border-color: rgba(245,158,11,0.5); color: #f59e0b; background: rgba(245,158,11,0.06); }
+.drawer-status-pill.filled.green { border-color: var(--green2); color: var(--green); background: rgba(0,255,136,0.06); }
+
+.drawer-hint {
+  font-size: 10px; color: var(--t4); margin-bottom: 8px; line-height: 1.5;
+}
 </style>
 </head>
 <body>
@@ -7324,6 +7435,251 @@ async function generateWeeklyRecap() {
   }
 }
 
+</script>
+
+
+<!-- ═══════════════════════════════════════════
+     SNAPSHOT DRAWER — All paste zones in one place
+     Zero JS changes — elements are MOVED here visually
+     via DOM relocation on DOMContentLoaded
+═══════════════════════════════════════════ -->
+
+<!-- Toggle button — fixed right edge -->
+<button id="snap-drawer-toggle" onclick="toggleSnapDrawer()" title="Open snapshot panel">
+  <span class="drawer-dot" id="drawer-dot"></span>
+  <span>📸 Snapshots</span>
+  <span class="drawer-count" id="drawer-count">0 loaded</span>
+</button>
+
+<!-- The drawer itself -->
+<div id="snap-drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-title">📸 Morning Data Inputs</div>
+      <div class="drawer-subtitle">Paste all screenshots here · AI reads everything simultaneously</div>
+    </div>
+    <button class="drawer-close" onclick="toggleSnapDrawer()">✕ Close</button>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Status row — lights up as you fill each zone -->
+    <div class="drawer-status-row" id="drawer-status-row">
+      <span class="drawer-status-pill" id="dpill-gex">GEX Daily</span>
+      <span class="drawer-status-pill" id="dpill-uw-flows">UW Flows</span>
+      <span class="drawer-status-pill" id="dpill-uw-expo">UW Exposures</span>
+      <span class="drawer-status-pill" id="dpill-chart">Chart</span>
+      <span class="drawer-status-pill" id="dpill-snaps">Indicators</span>
+    </div>
+
+    <!-- ① GEX DAILY CHARTS (moved from left panel) -->
+    <div class="drawer-sect">
+      <div class="drawer-sect-hd" style="color:var(--cyan)">
+        <span>① QTA — GEX Daily Charts</span>
+        <span style="font-size:9px;color:var(--t4);font-weight:400">SPX/ES + SPY · 3 slots each</span>
+      </div>
+      <div class="drawer-sect-body" id="drawer-gex-slot">
+        <!-- GEX daily section moved here by JS -->
+        <div style="font-size:11px;color:var(--t4);text-align:center;padding:8px">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ② UNUSUAL WHALES — Net Flows + Exposures -->
+    <div class="drawer-sect">
+      <div class="drawer-sect-hd" style="color:#f59e0b">
+        <span>② Unusual Whales — Flows + Exposures</span>
+        <span style="font-size:9px;color:var(--t4);font-weight:400">paste or drop</span>
+      </div>
+      <div class="drawer-sect-body" id="drawer-uw-slot">
+        <div style="font-size:11px;color:var(--t4);text-align:center;padding:8px">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ③ UW — Vanna + Charm + Gamma Strike -->
+    <div class="drawer-sect">
+      <div class="drawer-sect-hd" style="color:#a78bfa">
+        <span>③ UW — Vanna · Charm · Gamma Strike</span>
+        <span style="font-size:9px;color:var(--t4);font-weight:400">indicator snapshots</span>
+      </div>
+      <div class="drawer-sect-body" id="drawer-greek-slot">
+        <div class="drawer-hint">Paste Vanna, Charm, and Gamma by Strike screenshots into the indicator slots below. Label them so the AI knows which is which.</div>
+        <!-- Indicator snap grid moved here by JS -->
+        <div id="drawer-snap-grid-container">
+          <div style="font-size:11px;color:var(--t4);text-align:center;padding:8px">Loading...</div>
+        </div>
+        <div style="margin-top:6px">
+          <button class="btn-sm" style="width:100%" onclick="clearAllSnaps()">Clear All Indicator Slots</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ CHART SCREENSHOT (TradingView auto-fill) -->
+    <div class="drawer-sect">
+      <div class="drawer-sect-hd" style="color:var(--green)">
+        <span>④ TradingView Chart Screenshot</span>
+        <span style="font-size:9px;color:var(--t4);font-weight:400">auto-fills levels</span>
+      </div>
+      <div class="drawer-sect-body" id="drawer-chart-slot">
+        <div style="font-size:11px;color:var(--t4);text-align:center;padding:8px">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ⑤ OPTIONS FLOW SCREENSHOT -->
+    <div class="drawer-sect">
+      <div class="drawer-sect-hd" style="color:var(--amber)">
+        <span>⑤ Options Flow Screenshot</span>
+        <span style="font-size:9px;color:var(--t4);font-weight:400">0DTE · unusual activity</span>
+      </div>
+      <div class="drawer-sect-body" id="drawer-of-slot">
+        <div style="font-size:11px;color:var(--t4);text-align:center;padding:8px">Loading...</div>
+      </div>
+    </div>
+
+  </div><!-- /drawer-body -->
+</div><!-- /snap-drawer -->
+
+<script>
+// ═══════════════════════════════════════════
+// SNAPSHOT DRAWER — purely cosmetic DOM moves
+// No existing functions are modified
+// ═══════════════════════════════════════════
+
+function toggleSnapDrawer() {
+  const drawer = document.getElementById('snap-drawer');
+  drawer.classList.toggle('open');
+}
+
+// Close on ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('snap-drawer').classList.remove('open');
+  }
+});
+
+// Click outside to close
+document.getElementById('snap-drawer').addEventListener('click', e => e.stopPropagation());
+document.addEventListener('click', e => {
+  const drawer = document.getElementById('snap-drawer');
+  const toggle = document.getElementById('snap-drawer-toggle');
+  if (drawer.classList.contains('open') && !drawer.contains(e.target) && !toggle.contains(e.target)) {
+    drawer.classList.remove('open');
+  }
+});
+
+// Move existing snapshot DOM nodes into drawer slots
+// This runs after everything is rendered
+function initSnapDrawer() {
+  // ① Move GEX daily chart section content
+  const gexSect = document.querySelector('#daily-spx-wrap');
+  const dailySpyWrap = document.querySelector('#daily-spy-wrap');
+  const gexQuota = document.querySelector('.gex-quota');
+  const gexHist = document.querySelector('.gex-hist-wrap') || document.querySelector('[id*="gex-hist"]')?.closest('div');
+  const drawerGex = document.getElementById('drawer-gex-slot');
+  if (drawerGex) {
+    drawerGex.innerHTML = '';
+    // Clone the entire GEX chart sect content
+    const gexSectEl = document.querySelector('.sect:has(#daily-spx-wrap)') ||
+      (gexSect ? gexSect.closest('.sect') : null);
+    if (gexSectEl) {
+      // Move the inner content (not the sect wrapper)
+      const children = Array.from(gexSectEl.children).filter(c => !c.classList.contains('sect-hd'));
+      children.forEach(c => drawerGex.appendChild(c));
+      // Hide the original sect
+      gexSectEl.style.display = 'none';
+    }
+  }
+
+  // ② Move UW flows + exposures grid
+  const uwSect = document.getElementById('uw-sect');
+  const drawerUW = document.getElementById('drawer-uw-slot');
+  if (uwSect && drawerUW) {
+    drawerUW.innerHTML = '';
+    const uwChildren = Array.from(uwSect.children).filter(c => !c.classList.contains('sect-hd'));
+    uwChildren.forEach(c => drawerUW.appendChild(c));
+    uwSect.style.display = 'none';
+  }
+
+  // ③ Move indicator snap grid
+  const snapGrid = document.getElementById('snap-grid');
+  const drawerSnapGrid = document.getElementById('drawer-snap-grid-container');
+  if (snapGrid && drawerSnapGrid) {
+    drawerSnapGrid.innerHTML = '';
+    drawerSnapGrid.appendChild(snapGrid);
+    // Also hide the original indicator snapshot sect
+    const snapSect = snapGrid.closest('.sect');
+    if (snapSect) snapSect.style.display = 'none';
+  }
+
+  // ④ Move chart screenshot zone
+  const chartZone = document.getElementById('chart-snap-zone');
+  const chartAutofillBtn = document.getElementById('btn-chart-autofill');
+  const chartFile = document.getElementById('chart-snap-file');
+  const chartResult = document.getElementById('chart-autofill-result');
+  const drawerChart = document.getElementById('drawer-chart-slot');
+  if (chartZone && drawerChart) {
+    drawerChart.innerHTML = '';
+    [chartZone, chartFile, chartAutofillBtn, chartResult].forEach(el => {
+      if (el) drawerChart.appendChild(el);
+    });
+  }
+
+  // ⑤ Move options flow zone
+  const ofZone = document.getElementById('of-file-input');
+  const ofPreview = document.getElementById('of-preview');
+  const drawerOF = document.getElementById('drawer-of-slot');
+  if (drawerOF) {
+    drawerOF.innerHTML = '';
+    // Find the options flow section
+    const ofSect = document.querySelector('.sect:has(#of-file-input)') ||
+      (ofZone ? ofZone.closest('.sect') : null);
+    if (ofSect) {
+      const ofChildren = Array.from(ofSect.children).filter(c => !c.classList.contains('sect-hd'));
+      ofChildren.forEach(c => drawerOF.appendChild(c));
+      ofSect.style.display = 'none';
+    }
+  }
+
+  // Update status pills
+  updateDrawerStatus();
+}
+
+function updateDrawerStatus() {
+  // Check which zones have data loaded
+  const checks = [
+    { pill: 'dpill-gex', test: () => document.querySelectorAll('.gex-stack-slot.has-image').length > 0, color: '' },
+    { pill: 'dpill-uw-flows', test: () => document.getElementById('uw-zone-flows')?.classList.contains('has-image'), color: 'amber' },
+    { pill: 'dpill-uw-expo', test: () => document.getElementById('uw-zone-expo')?.classList.contains('has-image'), color: 'amber' },
+    { pill: 'dpill-chart', test: () => document.getElementById('chart-snap-preview')?.style.display !== 'none', color: 'green' },
+    { pill: 'dpill-snaps', test: () => document.querySelectorAll('.snap-slot').length > 0, color: '' },
+  ];
+  let count = 0;
+  checks.forEach(c => {
+    const el = document.getElementById(c.pill);
+    if (!el) return;
+    const filled = c.test();
+    if (filled) {
+      el.className = 'drawer-status-pill filled' + (c.color ? ' ' + c.color : '');
+      count++;
+    } else {
+      el.className = 'drawer-status-pill';
+    }
+  });
+  // Update toggle button count + dot
+  const countEl = document.getElementById('drawer-count');
+  if (countEl) countEl.textContent = count + ' loaded';
+  const dot = document.getElementById('drawer-dot');
+  if (dot) dot.className = 'drawer-dot' + (count > 0 ? ' has-data' : '');
+}
+
+// Run after DOM + existing scripts are ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initSnapDrawer, 300));
+} else {
+  setTimeout(initSnapDrawer, 300);
+}
+
+// Re-check status every 3 seconds to catch paste events
+setInterval(updateDrawerStatus, 3000);
 </script>
 
 </body>
