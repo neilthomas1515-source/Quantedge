@@ -4286,7 +4286,9 @@ async function generateSignal() {
     const text = (data?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
     const tStart=text.indexOf('{'),tEnd=text.lastIndexOf('}');
     if(tStart===-1)throw new Error('No JSON in signal response');
-    const signal=JSON.parse(text.slice(tStart,tEnd+1));
+    let signalRaw = text.slice(tStart,tEnd+1);
+    signalRaw = signalRaw.replace(/–/g,'-').replace(/—/g,'-').replace(/‘/g,"'").replace(/’/g,"'").replace(/“/g,'"').replace(/”/g,'"');
+    const signal=JSON.parse(signalRaw);
 
     signal.timestamp = Date.now();
     signal.esAtSignal = window.liveESPrice;
