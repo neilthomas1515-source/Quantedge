@@ -3643,8 +3643,9 @@ function renderTVAlertPanel(d) {
 async function generateMorningBias() {
   const btn = document.getElementById('btn-bias');
   if (btn) btn.disabled = true;
-  const events = document.getElementById('morning-events')?.value || '';
-  const news   = document.getElementById('news-headlines')?.value || '';
+  const sanitize = s => (s||'').replace(/[–—]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[^ -]/g,' ');
+  const events = sanitize(document.getElementById('morning-events')?.value || '');
+  const news   = sanitize(document.getElementById('news-headlines')?.value || '');
   const es     = window.liveESPrice || document.getElementById('es-manual-price')?.value || '?';
   const vix    = priceData['VIX'] || document.getElementById('px-vix')?.textContent || '?';
   const onHi   = document.getElementById('on-hi')?.value  || '?';
