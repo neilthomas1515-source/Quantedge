@@ -7542,29 +7542,33 @@ async function generateWeeklyRecap() {
 // ═══════════════════════════════════════════
 // SNAPSHOT DRAWER — purely cosmetic DOM moves
 // No existing functions are modified
+// All DOM access deferred until window load
 // ═══════════════════════════════════════════
 
 function toggleSnapDrawer() {
   const drawer = document.getElementById('snap-drawer');
-  drawer.classList.toggle('open');
+  if (drawer) drawer.classList.toggle('open');
 }
 
-// Close on ESC
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.getElementById('snap-drawer').classList.remove('open');
-  }
-});
-
-// Click outside to close
-document.getElementById('snap-drawer').addEventListener('click', e => e.stopPropagation());
-document.addEventListener('click', e => {
+window.addEventListener('load', function() {
   const drawer = document.getElementById('snap-drawer');
   const toggle = document.getElementById('snap-drawer-toggle');
-  if (drawer.classList.contains('open') && !drawer.contains(e.target) && !toggle.contains(e.target)) {
-    drawer.classList.remove('open');
-  }
-});
+  if (!drawer) return;
+
+  // Close on ESC
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') drawer.classList.remove('open');
+  });
+
+  // Click outside to close
+  drawer.addEventListener('click', function(e) { e.stopPropagation(); });
+  document.addEventListener('click', function(e) {
+    if (drawer.classList.contains('open') &&
+        !drawer.contains(e.target) &&
+        toggle && !toggle.contains(e.target)) {
+      drawer.classList.remove('open');
+    }
+  });
 
 // Move existing snapshot DOM nodes into drawer slots
 // This runs after everything is rendered
@@ -7671,15 +7675,13 @@ function updateDrawerStatus() {
   if (dot) dot.className = 'drawer-dot' + (count > 0 ? ' has-data' : '');
 }
 
-// Run after DOM + existing scripts are ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(initSnapDrawer, 300));
-} else {
-  setTimeout(initSnapDrawer, 300);
-}
+  // Run initSnapDrawer after a short delay to let initAll complete first
+  setTimeout(initSnapDrawer, 500);
 
-// Re-check status every 3 seconds to catch paste events
-setInterval(updateDrawerStatus, 3000);
+  // Re-check status every 3 seconds to catch paste events
+  setInterval(updateDrawerStatus, 3000);
+
+}); // end window.addEventListener('load')
 </script>
 
 </body>
