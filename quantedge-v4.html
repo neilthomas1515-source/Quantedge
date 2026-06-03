@@ -6992,34 +6992,34 @@ async function loadPendingSignal() {
 
     let msg = '';
     if (grade === 'A') {
-      msg = '⚡ QUANTEDGE — GRADE A\n' +
-        '━━━━━━━━━━━━━━━━━━━━━\n' +
-        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
-        '━━━━━━━━━━━━━━━━━━━━━\n' +
-        'Entry:  ' + entry + '\n' +
-        'Stop:   ' + stop + '  (−' + risk.toFixed(1) + ' pts)\n' +
-        '━━━━━━━━━━━━━━━━━━━━━\n' +
+      msg = 'QUANTEDGE - GRADE A\n' +
+        '---------------------\n' +
+        dir + ' ' + ticker + ' | ' + tf + 'M\n' +
+        '---------------------\n' +
+        'Entry: ' + entry + '\n' +
+        'Stop:  ' + stop + ' (-' + risk.toFixed(1) + ' pts)\n' +
+        '---------------------\n' +
         buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
-        '━━━━━━━━━━━━━━━━━━━━━\n' +
-        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+        '---------------------\n' +
+        timeNow + ' PT | ' + dateNow;
     } else if (grade === 'B') {
-      msg = '📶 QUANTEDGE — GRADE B\n' +
-        '─────────────────────\n' +
-        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
-        '─────────────────────\n' +
-        'Entry:  ' + entry + '\n' +
-        'Stop:   ' + stop + '  (−' + risk.toFixed(1) + ' pts)\n' +
+      msg = 'QUANTEDGE - GRADE B\n' +
+        '---------------------\n' +
+        dir + ' ' + ticker + ' | ' + tf + 'M\n' +
+        '---------------------\n' +
+        'Entry: ' + entry + '\n' +
+        'Stop:  ' + stop + ' (-' + risk.toFixed(1) + ' pts)\n' +
         buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
-        '─────────────────────\n' +
-        'Mixed confluence — trade with caution\n' +
-        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+        '---------------------\n' +
+        'Mixed confluence - trade with caution\n' +
+        timeNow + ' PT | ' + dateNow;
     } else {
-      msg = '📋 QUANTEDGE — GRADE C\n' +
-        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
-        'Entry: ' + entry + '  Stop: ' + stop + '\n' +
+      msg = 'QUANTEDGE - GRADE C\n' +
+        dir + ' ' + ticker + ' | ' + tf + 'M\n' +
+        'Entry: ' + entry + ' | Stop: ' + stop + '\n' +
         buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
-        'Low confluence — informational only\n' +
-        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+        'Low confluence - informational only\n' +
+        timeNow + ' PT | ' + dateNow;
     }
 
     preview.textContent = msg;
