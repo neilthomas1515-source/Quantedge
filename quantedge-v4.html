@@ -7600,7 +7600,12 @@ var uwGreekActive = null;
 
 function sdGreekClick(type) {
   uwGreekActive = type;
-  showToast('Paste ' + type.charAt(0).toUpperCase() + type.slice(1) + ' screenshot now (Ctrl+V)', 'info');
+  // Visual feedback on the active zone
+  ['vanna','charm','gamma'].forEach(function(t) {
+    var z = document.getElementById('sd-' + t + '-zone');
+    if (z) z.style.borderColor = t === type ? '#a78bfa' : '';
+  });
+  showToast('📋 ' + type.charAt(0).toUpperCase() + type.slice(1) + ' active — paste now (Ctrl+V)', 'info');
 }
 
 function sdGreekDrop(e, type) {
@@ -7641,7 +7646,7 @@ function sdGreekLoadFile(file) {
   reader.readAsDataURL(file);
 }
 
-// Hook into global paste handler for greek zones
+// Greek paste handler — must fire first and block all other handlers
 document.addEventListener('paste', function(e) {
   if (!uwGreekActive) return;
   var items = e.clipboardData && e.clipboardData.items;
@@ -7649,10 +7654,16 @@ document.addEventListener('paste', function(e) {
   for (var i = 0; i < items.length; i++) {
     if (items[i].type.startsWith('image/')) {
       var file = items[i].getAsFile();
-      if (file) { sdGreekLoadFile(file); e.stopPropagation(); break; }
+      if (file) {
+        sdGreekLoadFile(file);
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        break;
+      }
     }
   }
-});
+}, true);
 
 </body>
 </html>
