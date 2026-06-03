@@ -3398,6 +3398,10 @@ function loadChartSnapFile(file) {
   const reader = new FileReader();
   reader.onload = ev => {
     chartSnapImage = ev.target.result;
+    const sdPrev = document.getElementById('sd-chart-preview');
+    const sdHint = document.getElementById('sd-chart-hint');
+    if (sdPrev) { sdPrev.src = chartSnapImage; sdPrev.style.display = 'block'; }
+    if (sdHint) sdHint.style.display = 'none';
     const preview=document.getElementById('chart-snap-preview'), status=document.getElementById('chart-snap-status'), clearBtn=document.getElementById('chart-snap-clear'), fillBtn=document.getElementById('btn-chart-autofill');
     if (preview) { preview.src=chartSnapImage; preview.style.display='block'; }
     if (status)  { status.textContent='✓ Ready'; status.style.color='var(--green)'; }
@@ -7652,8 +7656,11 @@ async function generateWeeklyRecap() {
     <div class="sd-sect">
       <div class="sd-sect-hd" style="color:var(--green)">⑤ TradingView Chart Screenshot</div>
       <div class="sd-sect-body">
-        <div id="sd-chart-snap-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--t3)" onclick="chartSnapClick()">
-          📸 Click, drop or Ctrl+V — auto-fills session levels
+        <div id="sd-chart-snap-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--t3)"
+          onclick="chartSnapActive=true;this.style.borderColor='var(--green)';showToast('Paste chart screenshot now (Ctrl+V)','info')"
+          ondragover="event.preventDefault()" ondrop="event.preventDefault();handleChartSnapDrop(event)">
+          <img id="sd-chart-preview" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:3px;margin-bottom:6px">
+          <div id="sd-chart-hint">📸 Click to activate, then Ctrl+V — auto-fills session levels</div>
         </div>
       </div>
     </div>
