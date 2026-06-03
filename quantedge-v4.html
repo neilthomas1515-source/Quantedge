@@ -6991,7 +6991,7 @@ async function loadPendingSignal() {
     const grade = d.grade || d.pineGrade || 'C';
     const dir = (d.direction || '?').toUpperCase();
     const ticker = d.ticker || 'ES';
-    const tf = d.tf || d.timeframe || '?';
+    const tf = (d.tf || d.timeframe || '?').toString().replace(/M$/i, '');
     const entry = parseFloat(d.entry || d.price || 0).toFixed(2);
     const stop = parseFloat(d.stop || 0).toFixed(2);
     const tp1 = parseFloat(d.target || d.target1 || d.tp1 || 0);
