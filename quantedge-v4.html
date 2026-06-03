@@ -690,6 +690,98 @@ border-radius:6px;border-left:3px solid var(--amber);margin-top:10px;}
 border-radius:6px;padding:10px;color:var(--t1);font-size:13px;resize:vertical;
 font-family:monospace;line-height:1.5;}
 .tg-label{font-size:12px;color:var(--t3);margin-bottom:6px;margin-top:12px;}
+
+/* ══════════════════════════════
+   SNAPSHOT DRAWER
+══════════════════════════════ */
+#snap-drawer-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10000;
+  background: linear-gradient(180deg,#0ea5e9,#0369a1);
+  color: #fff;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  padding: 16px 7px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: -2px 0 12px rgba(0,0,0,0.5);
+}
+#snap-drawer-btn:hover { background: linear-gradient(180deg,#38bdf8,#0ea5e9); }
+
+#snap-drawer {
+  position: fixed;
+  top: 0;
+  right: -480px;
+  width: 460px;
+  height: 100vh;
+  background: var(--s1);
+  border-left: 1px solid var(--b2);
+  z-index: 9999;
+  overflow-y: auto;
+  transition: right 0.25s ease;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.6);
+}
+#snap-drawer.open { right: 0; }
+
+.sd-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--s2);
+  border-bottom: 1px solid var(--b2);
+}
+.sd-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.sd-close {
+  background: none;
+  border: 1px solid var(--b2);
+  border-radius: 4px;
+  color: var(--t3);
+  cursor: pointer;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+.sd-close:hover { color: var(--red); border-color: var(--red2); }
+.sd-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.sd-sect {
+  border: 1px solid var(--b2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sd-sect-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  background: var(--s2);
+  border-bottom: 1px solid var(--b1);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.sd-sect-body { padding: 8px 10px; }
+
 </style>
 </head>
 <body>
@@ -1395,7 +1487,7 @@ font-family:monospace;line-height:1.5;}
   </div>
 
   <!-- INDICATOR SNAPSHOTS -->
-  <div class="sect">
+  <div class="sect" id="snap-sect-indicator">
     <div class="sect-hd white">Indicator Snapshots <div class="hd-line"></div></div>
     <div class="snap-note">Paste any indicator screenshot. AI reads all slots simultaneously.</div>
     <div id="snap-grid" class="snap-grid"></div>
@@ -3642,8 +3734,9 @@ function renderTVAlertPanel(d) {
 async function generateMorningBias() {
   const btn = document.getElementById('btn-bias');
   if (btn) btn.disabled = true;
-  const events = document.getElementById('morning-events')?.value || '';
-  const news   = document.getElementById('news-headlines')?.value || '';
+  const sanitize = s => (s||'').replace(/[\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[^\x00-\x7F]/g,' ');
+  const events = sanitize(document.getElementById('morning-events')?.value || '');
+  const news   = sanitize(document.getElementById('news-headlines')?.value || '');
   const es     = window.liveESPrice || document.getElementById('es-manual-price')?.value || '?';
   const vix    = priceData['VIX'] || document.getElementById('px-vix')?.textContent || '?';
   const onHi   = document.getElementById('on-hi')?.value  || '?';
@@ -7319,6 +7412,128 @@ async function generateWeeklyRecap() {
 }
 
 </script>
+
+<!-- SNAPSHOT DRAWER BUTTON -->
+<button id="snap-drawer-btn" onclick="toggleSnapDrawer()">📸 Snapshots</button>
+
+<!-- SNAPSHOT DRAWER -->
+<div id="snap-drawer">
+  <div class="sd-header">
+    <div class="sd-title">📸 Morning Snapshots</div>
+    <button class="sd-close" onclick="toggleSnapDrawer()">✕ Close</button>
+  </div>
+  <div class="sd-body">
+
+    <!-- ① GEX DAILY -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:var(--cyan)">① QTA GEX — Daily</div>
+      <div class="sd-sect-body">
+        <div class="gex-stack-hd"><span>SPX / ES (Daily)</span><span style="color:var(--t4)">3 slots · newest last</span></div>
+        <div class="gex-stack-wrap">
+          <div class="gex-stack-slot" onclick="gexStackClick('dspx',0)"><div class="gex-stack-label">SPX Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="gex-stack-slot" onclick="gexStackClick('dspx',1)"><div class="gex-stack-label">SPX Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="gex-stack-slot" onclick="gexStackClick('dspx',2)"><div class="gex-stack-label">SPX Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+        </div>
+        <div class="gex-stack-hd" style="margin-top:8px"><span>SPY (Daily)</span><span style="color:var(--t4)">3 slots · newest last</span></div>
+        <div class="gex-stack-wrap">
+          <div class="gex-stack-slot" onclick="gexStackClick('dspy',0)"><div class="gex-stack-label">SPY Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="gex-stack-slot" onclick="gexStackClick('dspy',1)"><div class="gex-stack-label">SPY Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="gex-stack-slot" onclick="gexStackClick('dspy',2)"><div class="gex-stack-label">SPY Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② GEX WEEKLY -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:#a78bfa">② QTA GEX — Weekly</div>
+      <div class="sd-sect-body">
+        <div class="gex-stack-hd"><span>SPX / ES Weekly</span></div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspx',0)"><div class="gex-stack-label">SPX Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspx',1)"><div class="gex-stack-label">SPX Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspx',2)"><div class="gex-stack-label">SPX Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+        </div>
+        <div class="gex-stack-hd"><span>SPY Weekly</span></div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspy',0)"><div class="gex-stack-label">SPY Slot 1 — Oldest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspy',1)"><div class="gex-stack-label">SPY Slot 2</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+          <div class="wp-gex-stack-slot" onclick="wpGexStackClick('wspy',2)"><div class="gex-stack-label">SPY Slot 3 — Newest</div><div style="font-size:9px;color:var(--t4)">Click, drop or Ctrl+V</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ UW NET FLOWS + EXPOSURES -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:#f59e0b">③ Unusual Whales — Flows + Exposures</div>
+      <div class="sd-sect-body">
+        <div class="uw-grid">
+          <div class="uw-zone" id="sd-uw-zone-flows">
+            <div class="uw-zone-lbl" onclick="uwSetActiveZone('flows')">📊 Net Flows</div>
+            <div class="uw-zone-sub">Market Tide · 0DTE Flow</div>
+            <div class="uw-drop-area" onclick="uwDropAreaClick(event,'flows')" ondragover="uwDragOver(event,'flows')" ondragleave="uwDragLeave(event,'flows')" ondrop="uwDrop(event,'flows')">
+              <div class="uw-drop-hint"><span>Click</span>, drop or paste</div>
+            </div>
+          </div>
+          <div class="uw-zone" id="sd-uw-zone-expo">
+            <div class="uw-zone-lbl" onclick="uwSetActiveZone('expo')">📡 Exposures</div>
+            <div class="uw-zone-sub">Periscope · Spot Gamma · Delta</div>
+            <div class="uw-drop-area" onclick="uwDropAreaClick(event,'expo')" ondragover="uwDragOver(event,'expo')" ondragleave="uwDragLeave(event,'expo')" ondrop="uwDrop(event,'expo')">
+              <div class="uw-drop-hint"><span>Click</span>, drop or paste</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ UW GREEKS -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:#a78bfa">④ UW Greeks — Vanna · Charm · Gamma Strike</div>
+      <div class="sd-sect-body">
+        <div style="font-size:10px;color:var(--t4);margin-bottom:6px">Paste into indicator slots below. Label each one.</div>
+        <div id="sd-snap-grid"></div>
+        <button class="btn-sm" style="margin-top:6px;width:100%" onclick="clearAllSnaps()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- ⑤ CHART SCREENSHOT -->
+    <div class="sd-sect">
+      <div class="sd-sect-hd" style="color:var(--green)">⑤ TradingView Chart Screenshot</div>
+      <div class="sd-sect-body">
+        <div id="sd-chart-snap-zone" style="border:2px dashed var(--b2);border-radius:5px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--t3)" onclick="chartSnapClick()">
+          📸 Click, drop or Ctrl+V — auto-fills session levels
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleSnapDrawer() {
+  var drawer = document.getElementById('snap-drawer');
+  var isOpen = drawer.classList.toggle('open');
+  // Hide left panel snapshot sections when drawer open
+  var sectIds = ['snap-sect-gex','uw-sect','snap-sect-indicator'];
+  sectIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = isOpen ? 'none' : '';
+  });
+  // Sync snap grid into drawer
+  if (isOpen) {
+    var grid = document.getElementById('snap-grid');
+    var sdGrid = document.getElementById('sd-snap-grid');
+    if (grid && sdGrid) sdGrid.innerHTML = grid.innerHTML;
+  }
+}
+// Close on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var drawer = document.getElementById('snap-drawer');
+    if (drawer && drawer.classList.contains('open')) toggleSnapDrawer();
+  }
+});
+</script>
+
 </body>
 </html>
 
