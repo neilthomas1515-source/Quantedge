@@ -638,6 +638,59 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 .sp-log-btn-w{background:rgba(0,255,136,0.07);border-color:var(--green2);color:var(--green);}
 .sp-log-btn-l{background:rgba(255,51,85,0.07);border-color:var(--red2);color:var(--red);}
 .sp-log-btn:hover{opacity:0.8;}
+
+/* ── TELEGRAM SIGNAL SENDER PANEL ── */
+#tg-send-btn{position:fixed;bottom:136px;right:20px;width:48px;height:48px;
+background:var(--s1);border:1px solid var(--b1);border-radius:50%;
+display:flex;align-items:center;justify-content:center;cursor:pointer;
+z-index:9999;font-size:22px;color:var(--t1);transition:all 0.2s;
+box-shadow:0 2px 12px rgba(0,0,0,0.4);}
+#tg-send-btn:hover{background:#229ED9;color:#fff;transform:scale(1.1);}
+#tg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);
+z-index:9998;display:none;align-items:center;justify-content:center;}
+#tg-overlay.open{display:flex;}
+#tg-panel{background:var(--bg);border:1px solid #229ED9;border-radius:12px;
+width:560px;max-width:96vw;padding:20px;z-index:9999;max-height:92vh;overflow-y:auto;}
+#tg-panel h3{color:#229ED9;font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.tg-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.tg-tab{padding:7px 14px;border-radius:20px;border:1px solid var(--b1);
+background:var(--s2);color:var(--t2);cursor:pointer;font-size:13px;transition:all 0.2s;}
+.tg-tab.active{background:#229ED9;color:#fff;border-color:#229ED9;}
+.tg-tab-content{display:none;}
+.tg-tab-content.active{display:block;}
+.tg-preview{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+padding:14px;font-family:monospace;font-size:13px;color:var(--t1);
+white-space:pre-wrap;line-height:1.6;margin-bottom:14px;min-height:80px;}
+.tg-preview.grade-a{border-left:3px solid var(--green);}
+.tg-preview.grade-b{border-left:3px solid var(--amber);}
+.tg-preview.grade-c{border-left:3px solid #888;}
+.tg-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.tg-btn{padding:9px 18px;border-radius:6px;border:none;cursor:pointer;
+font-size:14px;font-weight:600;transition:all 0.2s;}
+.tg-btn-approve{background:#22c55e;color:#000;}
+.tg-btn-approve:hover{background:#16a34a;}
+.tg-btn-reject{background:var(--s3);color:var(--t2);border:1px solid var(--b1);}
+.tg-btn-reject:hover{background:var(--red);color:#fff;}
+.tg-btn-send{background:#229ED9;color:#fff;}
+.tg-btn-send:hover{background:#1a7fb5;}
+.tg-btn-gen{background:var(--s3);color:var(--cyan);border:1px solid var(--cyan2);}
+.tg-btn-gen:hover{background:var(--cyan);color:#000;}
+.tg-btn-close{background:var(--s3);color:var(--t2);border:1px solid var(--b1);}
+.tg-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;
+font-size:13px;color:var(--t2);}
+.tg-toggle{width:36px;height:20px;background:var(--s3);border-radius:10px;
+position:relative;cursor:pointer;border:1px solid var(--b1);transition:background 0.2s;}
+.tg-toggle.on{background:#229ED9;}
+.tg-toggle::after{content:'';position:absolute;width:14px;height:14px;
+background:#fff;border-radius:50%;top:2px;left:2px;transition:left 0.2s;}
+.tg-toggle.on::after{left:18px;}
+.tg-note{font-size:12px;color:var(--t3);padding:8px 10px;background:var(--s2);
+border-radius:6px;border-left:3px solid var(--amber);margin-top:10px;}
+.tg-status{font-size:13px;color:var(--green);margin-top:8px;display:none;}
+.tg-textarea{width:100%;min-height:120px;background:var(--s2);border:1px solid var(--b1);
+border-radius:6px;padding:10px;color:var(--t1);font-size:13px;resize:vertical;
+font-family:monospace;line-height:1.5;}
+.tg-label{font-size:12px;color:var(--t3);margin-bottom:6px;margin-top:12px;}
 </style>
 </head>
 <body>
@@ -6800,6 +6853,400 @@ function copyXPost() {
     </div>
   </div>
 </div>
+
+
+<!-- ── TELEGRAM SIGNAL SENDER ── -->
+<button id="tg-send-btn" title="Telegram Signal Sender" onclick="openTGPanel()">📡</button>
+
+<div id="tg-overlay" onclick="closeTGOverlay(event)">
+  <div id="tg-panel">
+    <h3>📡 Signal Sender <span style="font-size:12px;color:var(--t3);font-weight:400;">→ QuantEdge Signals</span></h3>
+
+    <div class="tg-tabs">
+      <button class="tg-tab active" onclick="switchTGTab('signals',this)">⚡ Signals</button>
+      <button class="tg-tab" onclick="switchTGTab('morning',this)">🌅 Morning Brief</button>
+      <button class="tg-tab" onclick="switchTGTab('afternoon',this)">🌆 Afternoon/Overnight</button>
+      <button class="tg-tab" onclick="switchTGTab('weekly',this)">📋 Weekly Recap</button>
+    </div>
+
+    <!-- SIGNALS TAB -->
+    <div id="tg-tab-signals" class="tg-tab-content active">
+      <div class="tg-label">PENDING SIGNAL PREVIEW</div>
+      <div id="tg-signal-preview" class="tg-preview">Loading last signal...</div>
+      <div class="tg-label">AI REASONING</div>
+      <div id="tg-signal-reasoning" class="tg-preview" style="min-height:40px;font-size:12px;color:var(--t2);"></div>
+      <div class="tg-toggle-row">
+        <div class="tg-toggle" id="tg-x-toggle" onclick="this.classList.toggle('on')"></div>
+        <span>Also post teaser to 𝕏 @QuantEdgeAlpha</span>
+      </div>
+      <div class="tg-actions">
+        <button class="tg-btn tg-btn-approve" onclick="approveSignal()">✅ Approve & Send</button>
+        <button class="tg-btn tg-btn-reject" onclick="rejectSignal()">❌ Reject</button>
+        <button class="tg-btn tg-btn-gen" onclick="loadPendingSignal()">🔄 Refresh</button>
+        <button class="tg-btn tg-btn-close" onclick="closeTGPanel()">✕ Close</button>
+      </div>
+      <div id="tg-signal-status" class="tg-status">✅ Signal sent to Telegram!</div>
+      <div class="tg-note">⚠️ Grade C signals are held for manual review. A/B grades auto-send from Pine alerts unless you disable in Worker.</div>
+    </div>
+
+    <!-- MORNING BRIEF TAB -->
+    <div id="tg-tab-morning" class="tg-tab-content">
+      <div class="tg-label">MORNING BRIEF PREVIEW</div>
+      <div id="tg-morning-preview" class="tg-preview">Click Generate to build morning brief...</div>
+      <div class="tg-label">ADD A NOTE (optional)</div>
+      <textarea id="tg-morning-note" class="tg-textarea" placeholder="Add your personal take for today... e.g. 'Watching the GEX flip closely at open — will update if we get confirmation'"></textarea>
+      <div class="tg-actions" style="margin-top:12px;">
+        <button class="tg-btn tg-btn-gen" onclick="generateMorningBrief()">⚡ Generate</button>
+        <button class="tg-btn tg-btn-send" onclick="sendTGMessage('morning')">📡 Send to Channel</button>
+        <button class="tg-btn tg-btn-close" onclick="closeTGPanel()">✕ Close</button>
+      </div>
+      <div id="tg-morning-status" class="tg-status">✅ Morning brief sent!</div>
+    </div>
+
+    <!-- AFTERNOON TAB -->
+    <div id="tg-tab-afternoon" class="tg-tab-content">
+      <div class="tg-label">AFTERNOON / OVERNIGHT BRIEF PREVIEW</div>
+      <div id="tg-afternoon-preview" class="tg-preview">Click Generate to build afternoon recap...</div>
+      <div class="tg-label">ADD A NOTE (optional)</div>
+      <textarea id="tg-afternoon-note" class="tg-textarea" placeholder="How did the session go? What are you watching overnight?"></textarea>
+      <div class="tg-actions" style="margin-top:12px;">
+        <button class="tg-btn tg-btn-gen" onclick="generateAfternoonBrief()">⚡ Generate</button>
+        <button class="tg-btn tg-btn-send" onclick="sendTGMessage('afternoon')">📡 Send to Channel</button>
+        <button class="tg-btn tg-btn-close" onclick="closeTGPanel()">✕ Close</button>
+      </div>
+      <div id="tg-afternoon-status" class="tg-status">✅ Afternoon brief sent!</div>
+    </div>
+
+    <!-- WEEKLY RECAP TAB -->
+    <div id="tg-tab-weekly" class="tg-tab-content">
+      <div class="tg-label">WEEKLY RECAP & GAME PLAN PREVIEW</div>
+      <div id="tg-weekly-preview" class="tg-preview">Click Generate to build weekly recap...</div>
+      <div class="tg-label">KEY LEVELS FOR NEXT WEEK</div>
+      <textarea id="tg-weekly-levels" class="tg-textarea" style="min-height:70px;" placeholder="e.g. GEX Flip: 5850 | Call Wall: 5900 | Put Wall: 5800 | Key S/R: 5875, 5825"></textarea>
+      <div class="tg-label">WHAT WE'RE WATCHING</div>
+      <textarea id="tg-weekly-watching" class="tg-textarea" style="min-height:70px;" placeholder="e.g. Looking for AMN sweep setups on 15M if we hold above the GEX flip. FOMC Wednesday — no trades in the 30 min window."></textarea>
+      <div class="tg-actions" style="margin-top:12px;">
+        <button class="tg-btn tg-btn-gen" onclick="generateWeeklyRecap()">⚡ Generate</button>
+        <button class="tg-btn tg-btn-send" onclick="sendTGMessage('weekly')">📡 Send to Channel</button>
+        <button class="tg-btn tg-btn-close" onclick="closeTGPanel()">✕ Close</button>
+      </div>
+      <div id="tg-weekly-status" class="tg-status">✅ Weekly recap sent!</div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+// ── TELEGRAM SIGNAL SENDER ──
+const WORKER = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
+
+function openTGPanel() {
+  document.getElementById('tg-overlay').classList.add('open');
+  loadPendingSignal();
+}
+function closeTGPanel() {
+  document.getElementById('tg-overlay').classList.remove('open');
+}
+function closeTGOverlay(e) {
+  if (e.target.id === 'tg-overlay') closeTGPanel();
+}
+function switchTGTab(tab, btn) {
+  document.querySelectorAll('.tg-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tg-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tg-tab-' + tab).classList.add('active');
+}
+
+// Load last pending signal from Worker KV
+async function loadPendingSignal() {
+  const preview = document.getElementById('tg-signal-preview');
+  const reasoning = document.getElementById('tg-signal-reasoning');
+  preview.textContent = 'Loading...';
+  try {
+    const res = await fetch(WORKER + '/tv-alert');
+    const d = await res.json();
+    if (d.status === 'no_data') { preview.textContent = 'No pending signals.'; return; }
+    
+    const grade = d.grade || d.pineGrade || 'C';
+    const dir = (d.direction || '?').toUpperCase();
+    const ticker = d.ticker || 'ES';
+    const tf = d.tf || d.timeframe || '?';
+    const entry = parseFloat(d.entry || d.price || 0).toFixed(2);
+    const stop = parseFloat(d.stop || 0).toFixed(2);
+    const tp1 = parseFloat(d.target || d.target1 || d.tp1 || 0);
+    const tp2 = parseFloat(d.target2 || d.tp2 || 0);
+    const tp3 = parseFloat(d.target3 || d.tp3 || 0);
+    const risk = Math.abs(parseFloat(entry) - parseFloat(stop));
+    const ageMin = Math.round((Date.now() - (d.receivedAt || Date.now())) / 60000);
+    
+    const buildTP = (label, tpN) => {
+      if (!tpN) return '';
+      const pts = Math.abs(tpN - parseFloat(entry)).toFixed(1);
+      const rr = risk > 0 ? (Math.abs(tpN - parseFloat(entry)) / risk).toFixed(1) : '?';
+      return label + ': ' + tpN.toFixed(2) + '  (+' + pts + ' pts  R/R 1:' + rr + ')\n';
+    };
+
+    const timeNow = new Date(d.receivedAt || Date.now()).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date(d.receivedAt || Date.now()).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
+
+    let msg = '';
+    if (grade === 'A') {
+      msg = '⚡ QUANTEDGE — GRADE A\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n' +
+        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n' +
+        'Entry:  ' + entry + '\n' +
+        'Stop:   ' + stop + '  (−' + risk.toFixed(1) + ' pts)\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n' +
+        buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
+        '━━━━━━━━━━━━━━━━━━━━━\n' +
+        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+    } else if (grade === 'B') {
+      msg = '📶 QUANTEDGE — GRADE B\n' +
+        '─────────────────────\n' +
+        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
+        '─────────────────────\n' +
+        'Entry:  ' + entry + '\n' +
+        'Stop:   ' + stop + '  (−' + risk.toFixed(1) + ' pts)\n' +
+        buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
+        '─────────────────────\n' +
+        'Mixed confluence — trade with caution\n' +
+        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+    } else {
+      msg = '📋 QUANTEDGE — GRADE C\n' +
+        dir + ' ' + ticker + '  ·  ' + tf + ' Min\n' +
+        'Entry: ' + entry + '  Stop: ' + stop + '\n' +
+        buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
+        'Low confluence — informational only\n' +
+        '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+    }
+
+    preview.textContent = msg;
+    preview.className = 'tg-preview grade-' + grade.toLowerCase();
+    reasoning.textContent = d.aiReasoning || 'No AI reasoning available';
+    preview.dataset.signalAge = ageMin;
+    preview.dataset.grade = grade;
+
+    // Age warning
+    if (ageMin > 15) {
+      reasoning.textContent = '⚠️ Signal is ' + ageMin + ' min old — verify still valid\n\n' + (d.aiReasoning || '');
+    }
+  } catch(e) {
+    preview.textContent = 'Error loading signal: ' + e.message;
+  }
+}
+
+// Approve & Send signal
+async function approveSignal() {
+  const status = document.getElementById('tg-signal-status');
+  const preview = document.getElementById('tg-signal-preview');
+  const msg = preview.textContent;
+  if (!msg || msg === 'No pending signals.' || msg === 'Loading...') return;
+  
+  try {
+    const res = await fetch(WORKER + '/send-signal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ msg, approved: true })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      status.textContent = '✅ Signal sent to Telegram channel!';
+      status.style.display = 'block';
+      setTimeout(() => status.style.display = 'none', 4000);
+      
+      // Post X teaser if toggle is on
+      if (document.getElementById('tg-x-toggle').classList.contains('on')) {
+        postXTeaser();
+      }
+    } else {
+      status.textContent = '❌ Error: ' + (d.error || 'Unknown');
+      status.style.color = 'var(--red)';
+      status.style.display = 'block';
+    }
+  } catch(e) {
+    status.textContent = '❌ ' + e.message;
+    status.style.display = 'block';
+  }
+}
+
+function rejectSignal() {
+  document.getElementById('tg-signal-preview').textContent = 'Signal rejected.';
+  document.getElementById('tg-signal-reasoning').textContent = '';
+}
+
+// Post X teaser
+async function postXTeaser() {
+  try {
+    const preview = document.getElementById('tg-signal-preview');
+    const lines = preview.textContent.split('\n');
+    const gradeLine = lines[0] || '';
+    const dirLine = lines[2] || '';
+    const entryLine = lines.find(l => l.startsWith('Entry')) || '';
+    const tp1Line = lines.find(l => l.startsWith('TP1')) || '';
+    const teaser = gradeLine + '\n' + dirLine + '\n' + entryLine + '\n' + tp1Line + '\n\nFull signal + analysis → https://whop.com/quantedge-231a/quantedge-signals';
+    // Copy to clipboard for manual X post (trial mode)
+    await navigator.clipboard.writeText(teaser);
+    alert('X teaser copied to clipboard! Paste into @QuantEdgeAlpha');
+  } catch(e) { console.warn('X teaser failed:', e); }
+}
+
+// Generate morning brief
+async function generateMorningBrief() {
+  const preview = document.getElementById('tg-morning-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const [maRes, dcRes] = await Promise.all([
+      fetch(WORKER + '/morning-analysis'),
+      fetch(WORKER + '/daily-context')
+    ]);
+    const ma = await maRes.json();
+    const dc = await dcRes.json();
+    const auto = dc.auto || {};
+    const note = document.getElementById('tg-morning-note').value;
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+
+    let msg = '🌅 QUANTEDGE — MORNING BRIEF\n' +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+      dateNow + '  ·  ' + timeNow + ' PT\n\n' +
+      '📊 REGIME: ' + (auto.regime || ma.regime || '—') + '\n' +
+      '📈 GEX: ' + (auto.gex || '—') + '\n' +
+      '😰 VIX: ' + (auto.vixDir || '—') + '\n' +
+      '📅 ECON: ' + (auto.econCal || '—') + '\n\n' +
+      '🎯 STRATEGY: ' + (auto.recommendedStrategy || '—') + '\n\n';
+    
+    if (ma.asiaHigh && ma.asiaLow) {
+      msg += '🌏 ASIA: ' + parseFloat(ma.asiaLow).toFixed(2) + ' — ' + parseFloat(ma.asiaHigh).toFixed(2) + '\n';
+    }
+    if (ma.londonHigh && ma.londonLow) {
+      msg += '🇬🇧 LONDON: ' + parseFloat(ma.londonLow).toFixed(2) + ' — ' + parseFloat(ma.londonHigh).toFixed(2) + '\n';
+    }
+    
+    if (note) msg += '\n💬 ' + note + '\n';
+    msg += '\n━━━━━━━━━━━━━━━━━━━━━━━━━\nQuantEdge Signals';
+
+    preview.textContent = msg;
+    document.getElementById('tg-morning-preview').dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Generate afternoon brief
+async function generateAfternoonBrief() {
+  const preview = document.getElementById('tg-afternoon-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const res = await fetch(WORKER + '/afternoon-analysis');
+    const aa = await res.json();
+    const note = document.getElementById('tg-afternoon-note').value;
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+
+    let msg = '🌆 QUANTEDGE — AFTERNOON BRIEF\n' +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+      dateNow + '  ·  ' + timeNow + ' PT\n\n';
+
+    if (aa && aa.status !== 'no_data') {
+      msg += '📊 SESSION SUMMARY:\n' + (aa.summary || JSON.stringify(aa).slice(0,200)) + '\n\n';
+    }
+    if (note) msg += '💬 ' + note + '\n\n';
+    msg += '🌙 OVERNIGHT WATCH:\nKey levels remain in play. Monitor globex for any significant moves off session levels.\n\n';
+    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━\nQuantEdge Signals';
+
+    preview.textContent = msg;
+    preview.dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Generate weekly recap
+async function generateWeeklyRecap() {
+  const preview = document.getElementById('tg-weekly-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const [wpRes, tlRes] = await Promise.all([
+      fetch(WORKER + '/weekly-playbook'),
+      fetch(WORKER + '/trade-log')
+    ]);
+    const wp = await wpRes.json();
+    const tl = await tlRes.json();
+    const levels = document.getElementById('tg-weekly-levels').value;
+    const watching = document.getElementById('tg-weekly-watching').value;
+    
+    const dateNow = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
+    const nextWeek = new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+
+    // Count this week's signals from trade log
+    const weekAgo = Date.now() - 7*24*60*60*1000;
+    const weekSignals = Array.isArray(tl) ? tl.filter(t => t.savedAt > weekAgo) : [];
+    const wins = weekSignals.filter(t => t.result === 'WIN').length;
+    const losses = weekSignals.filter(t => t.result === 'LOSS').length;
+    const total = weekSignals.length;
+
+    let msg = '📋 QUANTEDGE — WEEKLY RECAP\n' +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+      'Week of ' + dateNow + '\n\n';
+
+    if (total > 0) {
+      msg += '📊 THIS WEEK:\n' +
+        'Signals: ' + total + '  |  W: ' + wins + '  L: ' + losses + '\n\n';
+    }
+
+    if (levels) msg += '🎯 KEY LEVELS — Week of ' + nextWeek + ':\n' + levels + '\n\n';
+    if (watching) msg += '👀 WHAT WE\'RE WATCHING:\n' + watching + '\n\n';
+
+    if (wp && wp.status !== 'no_data') {
+      const wpContent = typeof wp === 'string' ? wp : (wp.content || JSON.stringify(wp).slice(0,300));
+      msg += '📅 MACRO EVENTS NEXT WEEK:\n' + wpContent.slice(0,400) + '\n\n';
+    }
+
+    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+      'Join free for 30 days → whop.com/quantedge-231a/quantedge-signals\n' +
+      'QuantEdge Signals';
+
+    preview.textContent = msg;
+    preview.dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Send any tab message to Telegram
+async function sendTGMessage(tab) {
+  const previewEl = document.getElementById('tg-' + tab + '-preview');
+  const statusEl = document.getElementById('tg-' + tab + '-status');
+  const msg = previewEl.dataset.msg || previewEl.textContent;
+  if (!msg || msg.includes('Click Generate') || msg.includes('Error')) {
+    alert('Please generate the message first.');
+    return;
+  }
+  try {
+    const res = await fetch(WORKER + '/send-signal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ msg, approved: true })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      statusEl.textContent = '✅ Sent to Telegram channel!';
+      statusEl.style.color = 'var(--green)';
+      statusEl.style.display = 'block';
+      setTimeout(() => statusEl.style.display = 'none', 4000);
+    } else {
+      statusEl.textContent = '❌ ' + (d.error || 'Failed');
+      statusEl.style.color = 'var(--red)';
+      statusEl.style.display = 'block';
+    }
+  } catch(e) {
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.style.display = 'block';
+  }
+}
+</script>
 
 </body>
 </html>
