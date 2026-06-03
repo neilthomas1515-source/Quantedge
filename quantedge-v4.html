@@ -6788,7 +6788,28 @@ async function sendChatMessage() {
   if (chatState.history.length > chatState.maxHistory) chatState.history.shift();
   const thinkingDiv = addChatMessage('ai', 'Thinking\u2026', true);
   const ctx = typeof getCompleteAIContext === 'function' ? getCompleteAIContext().slice(0, 4000) : '';
-  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\nCURRENT v4 CONTEXT:\n' + ctx;
+  // Fetch live calibrated basis from Worker KV
+  let basisLine = 'PRICE CONVERSION: ES = SPX - 14.61 (default — calibration not yet loaded)';
+  try {
+    const basisRes = await fetch(CLOUDFLARE_WORKER.replace('//', '//').split('?')[0] + '/basis-read');
+    if (basisRes.ok) {
+      const basisTxt = await basisRes.text();
+      const basisData = JSON.parse(basisTxt);
+      if (basisData && basisData.avg_basis !== undefined) {
+        const basis = basisData.avg_basis;
+        const samples = basisData.history ? basisData.history.length : 0;
+        const lastEs = basisData.history && basisData.history[0] ? basisData.history[0].es : '?';
+        const lastSpx = basisData.history && basisData.history[0] ? basisData.history[0].spx : '?';
+        const lastSpy = basisData.history && basisData.history[0] ? basisData.history[0].spy_raw : '?';
+        basisLine = 'CALIBRATED PRICE BASIS (' + samples + ' live samples — use these for ALL conversions, no exceptions):\n' +
+          '  ES = SPX + (' + basis + ')  [basis is currently NEGATIVE meaning ES trades BELOW SPX]\n' +
+          '  SPX = ES - (' + basis + ')\n' +
+          '  Latest live prices: ES=' + lastEs + '  SPX=' + lastSpx + '  SPY=' + lastSpy + '\n' +
+          '  NEVER use SPY x 10 = ES — this is wrong. Always use the calibrated basis above.';
+      }
+    }
+  } catch(e) { /* keep default */ }
+  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\n' + basisLine + '\n\nCURRENT v4 CONTEXT:\n' + ctx;
   try {
     // Build message content with ALL images (same as generateSignal)
     const lastUserText = chatState.history[chatState.history.length-1].content;
