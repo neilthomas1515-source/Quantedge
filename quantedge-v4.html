@@ -1720,6 +1720,9 @@ font-family:monospace;line-height:1.5;}
 const FINNHUB_KEY = 'd75vbhpr01qm4b7sbd8gd75vbhpr01qm4b7sbd90';
 const CLOUDFLARE_WORKER = 'https://hidden-snow-d9ff.neilthomas1515.workers.dev';
 
+// Greek zone paste priority — declared here so ALL paste handlers can see it
+window.window.uwGreekActive = null;
+
 // ══════════════════════════════════════════════════
 // RITHMIC CONFIG — CREDENTIALS LIVE
 // ══════════════════════════════════════════════════
@@ -3127,7 +3130,7 @@ function setActiveZone(zone) { activeZone = zone; }
 
 // ── PASTE HANDLER ──
 document.addEventListener('paste', e => {
-  if (uwGreekActive) return; // Greek zone has priority
+  if (window.uwGreekActive) return; // Greek zone has priority
   const items = e.clipboardData?.items;
   if (!items) return;
   for (const item of items) {
@@ -7597,10 +7600,10 @@ document.addEventListener('keydown', function(e) {
 
 // ── UW GREEK ZONES ──
 var uwGreekImages = { vanna: null, charm: null, gamma: null };
-var uwGreekActive = null;
+var window.uwGreekActive = null;
 
 function sdGreekClick(type) {
-  uwGreekActive = type;
+  window.uwGreekActive = type;
   // Visual feedback on the active zone
   ['vanna','charm','gamma'].forEach(function(t) {
     var z = document.getElementById('sd-' + t + '-zone');
@@ -7613,7 +7616,7 @@ function sdGreekDrop(e, type) {
   e.preventDefault();
   var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) {
-    uwGreekActive = type;
+    window.uwGreekActive = type;
     sdGreekLoadFile(file);
   }
 }
@@ -7630,7 +7633,7 @@ function sdGreekClear(e, type) {
 }
 
 function sdGreekLoadFile(file) {
-  var type = uwGreekActive;
+  var type = window.uwGreekActive;
   if (!type) return;
   var reader = new FileReader();
   reader.onload = function(ev) {
@@ -7642,14 +7645,14 @@ function sdGreekLoadFile(file) {
     if (hint) hint.style.display = 'none';
     if (zone) zone.classList.add('has-image');
     showToast(type.charAt(0).toUpperCase() + type.slice(1) + ' loaded', 'ok');
-    uwGreekActive = null;
+    window.uwGreekActive = null;
   };
   reader.readAsDataURL(file);
 }
 
 // Greek paste handler — must fire first and block all other handlers
 document.addEventListener('paste', function(e) {
-  if (!uwGreekActive) return;
+  if (!window.uwGreekActive) return;
   var items = e.clipboardData && e.clipboardData.items;
   if (!items) return;
   for (var i = 0; i < items.length; i++) {
