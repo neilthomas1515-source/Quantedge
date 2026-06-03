@@ -5498,9 +5498,7 @@ function uwInitPaste() {
       e.stopImmediatePropagation(); e.preventDefault();
       uwLoadFile(uwActiveZone, imgFile); uwActiveZone = null; return;
     }
-    // Default: first empty zone
-    const zone = !uwImages.flows ? 'flows' : !uwImages.expo ? 'expo' : null;
-    if (zone) { e.stopImmediatePropagation(); e.preventDefault(); uwLoadFile(zone, imgFile); }
+    // No default fallback — click a zone first to activate it
   }, true);
 }
 
