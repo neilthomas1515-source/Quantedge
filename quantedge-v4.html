@@ -7065,7 +7065,7 @@ async function generateTradeExplanation(d, grade, dir, ticker, tf, entry, stop, 
     const dc = await dcRes.json();
     const auto = dc.auto || {};
     
-    const prompt = 'You are Neil, a professional ES futures trader. Write a 2-3 sentence trade explanation in first person, plain language, no markdown, no emojis. Signal: ' + grade + ' ' + dir + ' ' + ticker + ' ' + tf + 'M. Entry: ' + entry + '. Stop: ' + stop + '. TP1: ' + tp1 + '. Setup: ' + (d.setup || 'alert') + '. Regime: ' + (auto.regime || 'unknown') + '. GEX: ' + (auto.gex || 'unknown') + '. Write now:';
+    const prompt = 'You are a professional ES futures trader writing a brief trade explanation for subscribers. Write 2-3 sentences in first person, plain language. No markdown, no emojis, no source names (no TradingView, no FlashAlpha, no indicator names). Just explain the trade: direction, why you are taking it based on market conditions, key level or reason for the entry, and what needs to hold. Signal: ' + grade + ' ' + dir + ' ' + ticker + ' ' + tf + 'M. Entry: ' + entry + '. Stop: ' + stop + '. TP1: ' + tp1 + '. Regime: ' + (auto.regime || 'unknown') + '. GEX context: ' + (auto.gex || 'unknown') + '. Write now:';
 
     const res = await fetch(WORKER, {
       method: 'POST',
