@@ -7175,7 +7175,159 @@ async function approveSignal() {
     console.error('approveSignal error:', e);
   }
 }
+function rejectSignal() {
+  document.getElementById('tg-signal-preview').textContent = 'Signal rejected.';
+  document.getElementById('tg-signal-explanation').value = '';
+  clearChart();
+}
 
+// Post X teaser
+async function postXTeaser() {
+  try {
+    const preview = document.getElementById('tg-signal-preview');
+    const lines = preview.textContent.split('\n');
+    const gradeLine = lines[0] || '';
+    const dirLine = lines[2] || '';
+    const entryLine = lines.find(l => l.startsWith('Entry')) || '';
+    const tp1Line = lines.find(l => l.startsWith('TP1')) || '';
+    const teaser = gradeLine + '\n' + dirLine + '\n' + entryLine + '\n' + tp1Line + '\n\nFull signal + analysis → https://whop.com/quantedge-231a/quantedge-signals';
+    await navigator.clipboard.writeText(teaser);
+    alert('X teaser copied to clipboard! Paste into @QuantEdgeAlpha');
+  } catch(e) { console.warn('X teaser failed:', e); }
+}
+
+// Send any tab message to Telegram
+async function sendTGMessage(tab) {
+  const previewEl = document.getElementById('tg-' + tab + '-preview');
+  const statusEl = document.getElementById('tg-' + tab + '-status');
+  const msg = previewEl.dataset.msg || previewEl.textContent;
+  if (!msg || msg.includes('Click Generate') || msg.includes('Error')) {
+    alert('Please generate the message first.');
+    return;
+  }
+  try {
+    const res = await fetch(WORKER + '/send-signal', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ msg, approved: true })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      statusEl.textContent = '✅ Sent to Telegram channel!';
+      statusEl.style.color = 'var(--green)';
+      statusEl.style.display = 'block';
+      setTimeout(() => statusEl.style.display = 'none', 4000);
+    } else {
+      statusEl.textContent = '❌ ' + (d.error || 'Failed');
+      statusEl.style.color = 'var(--red)';
+      statusEl.style.display = 'block';
+    }
+  } catch(e) {
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.style.display = 'block';
+  }
+}
+
+// Generate morning brief
+async function generateMorningBrief() {
+  const preview = document.getElementById('tg-morning-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const [maRes, dcRes] = await Promise.all([
+      fetch(WORKER + '/morning-analysis'),
+      fetch(WORKER + '/daily-context')
+    ]);
+    const ma = await maRes.json();
+    const dc = await dcRes.json();
+    const auto = dc.auto || {};
+    const note = document.getElementById('tg-morning-note').value;
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+
+    let msg = 'QUANTEDGE - MORNING BRIEF\n' +
+      '-------------------------\n' +
+      dateNow + ' | ' + timeNow + ' PT\n\n' +
+      'REGIME: ' + (auto.regime || ma.regime || '--') + '\n' +
+      'GEX: ' + (auto.gex || '--') + '\n' +
+      'VIX: ' + (auto.vixDir || '--') + '\n' +
+      'ECON: ' + (auto.econCal || '--') + '\n\n' +
+      'STRATEGY: ' + (auto.recommendedStrategy || '--') + '\n';
+
+    if (ma.asiaHigh && ma.asiaLow) msg += '\nASIA: ' + parseFloat(ma.asiaLow).toFixed(2) + ' - ' + parseFloat(ma.asiaHigh).toFixed(2);
+    if (ma.londonHigh && ma.londonLow) msg += '\nLONDON: ' + parseFloat(ma.londonLow).toFixed(2) + ' - ' + parseFloat(ma.londonHigh).toFixed(2);
+    if (note) msg += '\n\n' + note;
+    msg += '\n\n-------------------------\nQuantEdge Signals';
+
+    preview.textContent = msg;
+    preview.dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Generate afternoon brief
+async function generateAfternoonBrief() {
+  const preview = document.getElementById('tg-afternoon-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const res = await fetch(WORKER + '/afternoon-analysis');
+    const aa = await res.json();
+    const note = document.getElementById('tg-afternoon-note').value;
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+
+    let msg = 'QUANTEDGE - AFTERNOON BRIEF\n' +
+      '-------------------------\n' +
+      dateNow + ' | ' + timeNow + ' PT\n\n';
+    if (aa && aa.status !== 'no_data') msg += 'SESSION SUMMARY:\n' + (aa.summary || '--') + '\n\n';
+    if (note) msg += note + '\n\n';
+    msg += 'OVERNIGHT WATCH:\nKey levels remain in play. Monitor globex for significant moves.\n\n-------------------------\nQuantEdge Signals';
+
+    preview.textContent = msg;
+    preview.dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
+
+// Generate weekly recap
+async function generateWeeklyRecap() {
+  const preview = document.getElementById('tg-weekly-preview');
+  preview.textContent = 'Generating...';
+  try {
+    const [wpRes, tlRes] = await Promise.all([
+      fetch(WORKER + '/weekly-playbook'),
+      fetch(WORKER + '/trade-log')
+    ]);
+    const wp = await wpRes.json();
+    const tl = await tlRes.json();
+    const levels = document.getElementById('tg-weekly-levels').value;
+    const watching = document.getElementById('tg-weekly-watching').value;
+    const dateNow = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
+    const weekAgo = Date.now() - 7*24*60*60*1000;
+    const weekSignals = Array.isArray(tl) ? tl.filter(t => t.savedAt > weekAgo) : [];
+    const wins = weekSignals.filter(t => t.result === 'WIN').length;
+    const losses = weekSignals.filter(t => t.result === 'LOSS').length;
+    const total = weekSignals.length;
+
+    let msg = 'QUANTEDGE - WEEKLY RECAP\n' +
+      '-------------------------\n' +
+      'Week of ' + dateNow + '\n\n';
+    if (total > 0) msg += 'THIS WEEK: ' + total + ' signals | W: ' + wins + ' L: ' + losses + '\n\n';
+    if (levels) msg += 'KEY LEVELS NEXT WEEK:\n' + levels + '\n\n';
+    if (watching) msg += "WHAT WE'RE WATCHING:\n" + watching + '\n\n';
+    if (wp && wp.status !== 'no_data') {
+      const wpContent = typeof wp === 'string' ? wp : (wp.content || '');
+      if (wpContent) msg += 'MACRO EVENTS:\n' + wpContent.slice(0,300) + '\n\n';
+    }
+    msg += '-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
+
+    preview.textContent = msg;
+    preview.dataset.msg = msg;
+  } catch(e) {
+    preview.textContent = 'Error: ' + e.message;
+  }
+}
 
 </script>
 
