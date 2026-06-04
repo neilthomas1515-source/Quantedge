@@ -7254,9 +7254,13 @@ function closeTGOverlay(e) {
 }
 function switchTGTab(tab, btn) {
   document.querySelectorAll('.tg-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tg-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tg-tab-content').forEach(c => {
+    c.classList.remove('active');
+    c.style.display = 'none';
+  });
   btn.classList.add('active');
-  document.getElementById('tg-tab-' + tab).classList.add('active');
+  const el = document.getElementById('tg-tab-' + tab);
+  if (el) { el.classList.add('active'); el.style.display = 'block'; }
 }
 
 // Load last pending signal from Worker KV
