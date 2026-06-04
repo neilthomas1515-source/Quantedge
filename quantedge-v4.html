@@ -7429,36 +7429,18 @@ async function generateMorningBrief() {
   const preview = document.getElementById('tg-morning-preview');
   preview.textContent = 'Generating...';
   try {
-    const [maRes, dcRes] = await Promise.all([
-      fetch(WORKER + '/morning-analysis'),
-      fetch(WORKER + '/daily-context')
-    ]);
-    const ma = await maRes.json();
-    const dc = await dcRes.json();
-    const auto = dc.auto || {};
     const note = document.getElementById('tg-morning-note').value;
     const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
     const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
-
-    let msg = 'QUANTEDGE - MORNING BRIEF\n' +
-      '-------------------------\n' +
-      dateNow + ' | ' + timeNow + ' PT\n\n' +
-      'REGIME: ' + (auto.regime || ma.regime || '--') + '\n' +
-      'GEX: ' + (auto.gex || '--') + '\n' +
-      'VIX: ' + (auto.vixDir || '--') + '\n' +
-      'ECON: ' + (auto.econCal || '--') + '\n\n' +
-      'STRATEGY: ' + (auto.recommendedStrategy || '--') + '\n';
-
-    if (ma.asiaHigh && ma.asiaLow) msg += '\nASIA: ' + parseFloat(ma.asiaLow).toFixed(2) + ' - ' + parseFloat(ma.asiaHigh).toFixed(2);
-    if (ma.londonHigh && ma.londonLow) msg += '\nLONDON: ' + parseFloat(ma.londonLow).toFixed(2) + ' - ' + parseFloat(ma.londonHigh).toFixed(2);
-    if (note) msg += '\n\n' + note;
-    msg += '\n\n-------------------------\nQuantEdge Signals';
-
-    preview.textContent = msg;
-    preview.dataset.msg = msg;
-  } catch(e) {
-    preview.textContent = 'Error: ' + e.message;
-  }
+    const ctx = getCompleteAIContext();
+    const p = 'You are QuantEdge. Write the morning pre-market brief for ES futures traders. Direct, specific, declarative. Short sentences. No hedge words.\n\nCONTEXT:\n' + ctx + (note ? '\n\nTRADER NOTES: ' + note : '') + '\n\nFORMAT - plain text only:\nQUANTEDGE - MORNING BRIEF\n-------------------------\n' + dateNow + ' | ' + timeNow + ' PT\n\n[2-3 sentences on overnight action and what it means for the open]\n\nREGIME: [GEX positive/negative + dealer behavior]\n\nKEY LEVELS:\n[3-5 exact ES prices as magnets or accelerators]\n\nMORNING BIAS: [one sentence - long above X short below Y or no edge]\n\nWATCH AT THE OPEN:\n1. [specific binary trigger and outcome]\n2. [specific binary trigger and outcome]\n3. [specific binary trigger and outcome]\n\nVERDICT: [one sentence, no hedge]\n\n-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
+    const r2 = await fetch(CLOUDFLARE_WORKER, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:p}]})});
+    const raw2 = await r2.text();
+    const j2 = JSON.parse(raw2.slice(raw2.indexOf('{'),raw2.lastIndexOf('}')+1));
+    const msg = (j2?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || 'Error generating brief';
+    preview.textContent = msg; preview.dataset.msg = msg;
+  } catch(e) { document.getElementById('tg-morning-preview').textContent = 'Error: ' + e.message; }
 }
 
 // Generate afternoon brief
@@ -7466,32 +7448,18 @@ async function generateAfternoonBrief() {
   const preview = document.getElementById('tg-afternoon-preview');
   preview.textContent = 'Generating...';
   try {
-    const res = await fetch(WORKER + '/afternoon-analysis');
-    const aa = await res.json();
     const note = document.getElementById('tg-afternoon-note').value;
     const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
     const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
-
-    let msg = 'QUANTEDGE - AFTERNOON BRIEF\n' +
-      '-------------------------\n' +
-      dateNow + ' | ' + timeNow + ' PT\n\n';
-    if (aa && aa.status !== 'no_data') msg += 'SESSION SUMMARY:\n' + (aa.summary || '--') + '\n\n';
-    if (note) msg += note + '\n\n';
-    // AI-powered brief
     const ctx = getCompleteAIContext();
-    const aiP = 'You are QuantEdge. Write the afternoon/overnight Telegram brief. Direct, specific, declarative. No generic filler. No \'key levels remain in play.\' Give exact prices.\n\nCONTEXT:\n' + ctx + (note ? '\nTRADER NOTES: ' + note : '') + '\n\nFORMAT - plain text only:\nQUANTEDGE - AFTERNOON BRIEF\n-------------------------\n' + dateNow + ' | ' + timeNow + ' PT\n\n[2-3 sentences what session told us with specific prices]\n\nREGIME: [GEX + dealer behavior]\n\nLEVELS INTO OVERNIGHT:\n[3-5 exact prices as magnets or accelerators]\n\nOVERNIGHT WATCH:\n1. [if X then Y, if not then Z]\n2. [if X then Y, if not then Z]\n3. [if X then Y, if not then Z]\n\nVERDICT: [one sentence no hedge]\n\n-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
-    try {
-      const r2 = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:aiP}]})});
-      const rt = await r2.text(); const si=rt.indexOf('{'); const ei=rt.lastIndexOf('}');
-      const rd = JSON.parse(rt.substring(si,ei+1));
-      msg = rd.content&&rd.content[0] ? rd.content[0].text : msg+'\nQuantEdge Signals';
-    } catch(e2) { msg += 'OVERNIGHT WATCH:\nSee context for levels.\n\n-------------------------\nQuantEdge Signals'; }
-
-    preview.textContent = msg;
-    preview.dataset.msg = msg;
-  } catch(e) {
-    preview.textContent = 'Error: ' + e.message;
-  }
+    const p = 'You are QuantEdge. Write the afternoon/overnight Telegram brief for ES futures traders. Direct, specific, declarative. Short sentences. No hedge words. No generic statements.\n\nCONTEXT:\n' + ctx + (note ? '\n\nTRADER NOTES: ' + note : '') + '\n\nFORMAT - plain text only:\nQUANTEDGE - AFTERNOON BRIEF\n-------------------------\n' + dateNow + ' | ' + timeNow + ' PT\n\n[2-3 sentences on what the session told us with specific ES prices]\n\nREGIME: [GEX positive/negative + dealer behavior consequence]\n\nLEVELS INTO OVERNIGHT:\n[3-5 exact ES prices as magnets or accelerators]\n\nOVERNIGHT WATCH:\n1. [if X then Y, if not then Z]\n2. [if X then Y, if not then Z]\n3. [if X then Y, if not then Z]\n\nVERDICT: [one sentence, no hedge]\n\n-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
+    const r2 = await fetch(CLOUDFLARE_WORKER, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:p}]})});
+    const raw2 = await r2.text();
+    const j2 = JSON.parse(raw2.slice(raw2.indexOf('{'),raw2.lastIndexOf('}')+1));
+    const msg = (j2?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || 'Error generating brief';
+    preview.textContent = msg; preview.dataset.msg = msg;
+  } catch(e) { document.getElementById('tg-afternoon-preview').textContent = 'Error: ' + e.message; }
 }
 
 // Generate weekly recap
@@ -7499,38 +7467,27 @@ async function generateWeeklyRecap() {
   const preview = document.getElementById('tg-weekly-preview');
   preview.textContent = 'Generating...';
   try {
-    const [wpRes, tlRes] = await Promise.all([
-      fetch(WORKER + '/weekly-playbook'),
-      fetch(WORKER + '/trade-log')
-    ]);
-    const wp = await wpRes.json();
-    const tl = await tlRes.json();
     const levels = document.getElementById('tg-weekly-levels').value;
     const watching = document.getElementById('tg-weekly-watching').value;
     const dateNow = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
-    const weekAgo = Date.now() - 7*24*60*60*1000;
-    const weekSignals = Array.isArray(tl) ? tl.filter(t => t.savedAt > weekAgo) : [];
-    const wins = weekSignals.filter(t => t.result === 'WIN').length;
-    const losses = weekSignals.filter(t => t.result === 'LOSS').length;
-    const total = weekSignals.length;
-
-    let msg = 'QUANTEDGE - WEEKLY RECAP\n' +
-      '-------------------------\n' +
-      'Week of ' + dateNow + '\n\n';
-    if (total > 0) msg += 'THIS WEEK: ' + total + ' signals | W: ' + wins + ' L: ' + losses + '\n\n';
-    if (levels) msg += 'KEY LEVELS NEXT WEEK:\n' + levels + '\n\n';
-    if (watching) msg += "WHAT WE'RE WATCHING:\n" + watching + '\n\n';
-    if (wp && wp.status !== 'no_data') {
-      const wpContent = typeof wp === 'string' ? wp : (wp.content || '');
-      if (wpContent) msg += 'MACRO EVENTS:\n' + wpContent.slice(0,300) + '\n\n';
-    }
-    msg += '-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
-
-    preview.textContent = msg;
-    preview.dataset.msg = msg;
-  } catch(e) {
-    preview.textContent = 'Error: ' + e.message;
-  }
+    const ctx = getCompleteAIContext();
+    let wl = 'No signals logged.';
+    try {
+      const tlR = await fetch(CLOUDFLARE_WORKER + '/trade-log');
+      const tl = await tlR.json();
+      const wa = Date.now()-7*24*60*60*1000;
+      const ws = Array.isArray(tl)?tl.filter(t=>t.savedAt>wa):[];
+      const w=ws.filter(t=>t.result==='WIN').length, l=ws.filter(t=>t.result==='LOSS').length;
+      if(ws.length>0) wl=ws.length+' signals: '+w+'W / '+l+'L';
+    } catch(e2){}
+    const p = 'You are QuantEdge. Write the weekly recap Telegram post for ES futures traders. Direct, specific, declarative. Own any misses directly.\n\nCONTEXT:\n' + ctx + '\n\nTRACK RECORD: ' + wl + (levels?'\n\nKEY LEVELS NEXT WEEK:\n'+levels:'') + (watching?'\n\nWATCHING:\n'+watching:'') + '\n\nFORMAT - plain text only:\nQUANTEDGE - WEEKLY RECAP\n-------------------------\nWeek of ' + dateNow + '\n\n[2-3 sentences on what the week told us with specific prices]\n\nTRACK RECORD: [wins/losses, own any bad calls directly]\n\nWHAT WORKED: [one sentence]\n\nWHAT DID NOT: [one sentence, honest]\n\nNEXT WEEK:\n[3-5 key ES levels as magnets or accelerators with trigger conditions]\n\nVERDICT: [one sentence on regime going into next week]\n\n-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
+    const r2 = await fetch(CLOUDFLARE_WORKER, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:p}]})});
+    const raw2 = await r2.text();
+    const j2 = JSON.parse(raw2.slice(raw2.indexOf('{'),raw2.lastIndexOf('}')+1));
+    const msg = (j2?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || 'Error generating recap';
+    preview.textContent = msg; preview.dataset.msg = msg;
+  } catch(e) { document.getElementById('tg-weekly-preview').textContent = 'Error: ' + e.message; }
 }
 
 </script>
