@@ -7477,7 +7477,15 @@ async function generateAfternoonBrief() {
       dateNow + ' | ' + timeNow + ' PT\n\n';
     if (aa && aa.status !== 'no_data') msg += 'SESSION SUMMARY:\n' + (aa.summary || '--') + '\n\n';
     if (note) msg += note + '\n\n';
-    msg += 'OVERNIGHT WATCH:\nKey levels remain in play. Monitor globex for significant moves.\n\n-------------------------\nQuantEdge Signals';
+    // AI-powered brief
+    const ctx = getCompleteAIContext();
+    const aiP = 'You are QuantEdge. Write the afternoon/overnight Telegram brief. Direct, specific, declarative. No generic filler. No \'key levels remain in play.\' Give exact prices.\n\nCONTEXT:\n' + ctx + (note ? '\nTRADER NOTES: ' + note : '') + '\n\nFORMAT - plain text only:\nQUANTEDGE - AFTERNOON BRIEF\n-------------------------\n' + dateNow + ' | ' + timeNow + ' PT\n\n[2-3 sentences what session told us with specific prices]\n\nREGIME: [GEX + dealer behavior]\n\nLEVELS INTO OVERNIGHT:\n[3-5 exact prices as magnets or accelerators]\n\nOVERNIGHT WATCH:\n1. [if X then Y, if not then Z]\n2. [if X then Y, if not then Z]\n3. [if X then Y, if not then Z]\n\nVERDICT: [one sentence no hedge]\n\n-------------------------\nJoin free 30 days: whop.com/quantedge-231a/quantedge-signals\nQuantEdge Signals';
+    try {
+      const r2 = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:aiP}]})});
+      const rt = await r2.text(); const si=rt.indexOf('{'); const ei=rt.lastIndexOf('}');
+      const rd = JSON.parse(rt.substring(si,ei+1));
+      msg = rd.content&&rd.content[0] ? rd.content[0].text : msg+'\nQuantEdge Signals';
+    } catch(e2) { msg += 'OVERNIGHT WATCH:\nSee context for levels.\n\n-------------------------\nQuantEdge Signals'; }
 
     preview.textContent = msg;
     preview.dataset.msg = msg;
