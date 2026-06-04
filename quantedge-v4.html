@@ -7506,6 +7506,64 @@ async function generateGamePlan() {
   } catch(e) { ta.value = 'Error: ' + e.message; }
 }
 
+
+// ── GP CHART ZONES ──
+var gpChartImages = {plan: null, alert: null};
+var gpChartActive = null;
+
+function gpChartClick(type) {
+  gpChartActive = type;
+  var zone = type === 'plan' ? document.getElementById('gp-chart-zone') : document.getElementById('gp-chart-alert-zone');
+  if (zone) zone.style.borderColor = 'var(--cyan)';
+  showToast('Paste chart now (Ctrl+V)', 'info');
+}
+function gpChartDrop(e, type) {
+  e.preventDefault();
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) { gpChartActive = type; gpLoadChart(f); }
+}
+function gpChartClear(e, type) {
+  e.stopPropagation();
+  gpChartImages[type] = null;
+  var img = document.getElementById(type === 'plan' ? 'gp-chart-plan-img' : 'gp-chart-alert-img');
+  var hint = document.getElementById(type === 'plan' ? 'gp-chart-plan-hint' : 'gp-chart-alert-hint');
+  var clr = document.getElementById(type === 'plan' ? 'gp-chart-plan-clear' : 'gp-chart-alert-clear');
+  var zone = document.getElementById(type === 'plan' ? 'gp-chart-zone' : 'gp-chart-alert-zone');
+  if (img) { img.src = ''; img.style.display = 'none'; }
+  if (hint) hint.style.display = '';
+  if (clr) clr.style.display = 'none';
+  if (zone) zone.style.borderColor = '';
+}
+function gpLoadChart(file) {
+  var type = gpChartActive;
+  if (!type) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    gpChartImages[type] = ev.target.result;
+    var img = document.getElementById(type === 'plan' ? 'gp-chart-plan-img' : 'gp-chart-alert-img');
+    var hint = document.getElementById(type === 'plan' ? 'gp-chart-plan-hint' : 'gp-chart-alert-hint');
+    var clr = document.getElementById(type === 'plan' ? 'gp-chart-plan-clear' : 'gp-chart-alert-clear');
+    if (img) { img.src = ev.target.result; img.style.display = 'block'; }
+    if (hint) hint.style.display = 'none';
+    if (clr) clr.style.display = 'block';
+    showToast('Chart loaded for ' + type + ' post', 'ok');
+    gpChartActive = null;
+  };
+  reader.readAsDataURL(file);
+}
+document.addEventListener('paste', function(e) {
+  if (!gpChartActive) return;
+  if (window.uwGreekActive) return;
+  var items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.startsWith('image/')) {
+      e.stopImmediatePropagation(); e.preventDefault();
+      gpLoadChart(items[i].getAsFile()); break;
+    }
+  }
+}, true);
+
 async function sendGamePlan() {
   const text = document.getElementById('tg-gameplan-text').value.trim();
   if (!text) { showToast('Write your game plan first', 'warn'); return; }
