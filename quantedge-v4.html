@@ -7470,36 +7470,39 @@ function rejectSignal() {
 }
 
 async function generateGamePlan() {
-  const ta = document.getElementById('tg-gameplan-text');
-  ta.value = 'Generating game plan...';
+  var ta = document.getElementById('tg-gameplan-text');
+  ta.value = 'Generating...';
   try {
-    const ctx = getCompleteAIContext();
-    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
-    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
-    const p = 'You are QuantEdge. Write a pre-market game plan for ES futures traders in the exact format and voice shown below. Direct, specific, declarative. Real prices. No hedge words.\n\n' +
-      'CONTEXT:\n' + ctx + '\n\n' +
-      'FORMAT - plain text only, use these exact emoji headers:\n' +
-      '⚡ QuantEdge — MORNING GAME PLAN\n' +
-      dateNow + ' | Pre-Market ' + timeNow + ' PT\n\n' +
-      '🎯 BIAS: [BULL/BEAR/NEUTRAL] — [one sentence thesis]\n' +
-      '━━━━━━━━━━━━━━━━━━━━━\n\n' +
-      '✅ WHY WE ARE [BULL/BEAR]:\n' +
-      '[3-5 bullet points with specific prices and data. Each bullet = one confirmed layer.]\n\n' +
-      '⚠️ THE RISK:\n' +
-      '[2-3 bullets on what could invalidate the bias. Specific prices.]\n\n' +
-      '📍 KEY LEVELS TO WATCH\n\n' +
-      '🔴 RESISTANCE:\n[3-4 exact ES prices with one-line explanation each]\n\n' +
-      '🟢 SUPPORT:\n[3-4 exact ES prices with one-line explanation each]\n\n' +
-      '🎯 THE PLAN:\n' +
-      '[2-3 sentences. Exact entry zone. Exact confirmation signal. DO NOT CHASE THE OPEN if applicable.]\n\n' +
-      '🔔 Trade alert incoming if setup triggers. Stand by.';
-    const r = await fetch(CLOUDFLARE_WORKER, {method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:p}]})});
-    const raw = await r.text();
-    const j = JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
-    const txt = (j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || 'Error generating';
-    ta.value = txt;
-    showToast('Game plan generated — edit before sending', 'ok');
+    var ctx = getCompleteAIContext();
+    var timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    var dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+    var p = 'You are QuantEdge. Generate a pre-market game plan AND trade setup for ES futures. Respond ONLY with valid JSON in this exact format: {"plan":"the game plan text","trade":{"direction":"LONG","entry":0,"stop":0,"tp1":0,"tp2":0,"tp3":0,"reasoning":"one sentence"}}\n\nFor the plan use plain text with this structure:\n\u26a1 QuantEdge \u2014 MORNING GAME PLAN\n' + dateNow + ' | Pre-Market ' + timeNow + ' PT\n\n\ud83c\udfaf BIAS: [BULL/BEAR/NEUTRAL] \u2014 [one sentence]\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n\u2705 WHY:\n[3-5 bullets with exact ES prices]\n\n\u26a0\ufe0f THE RISK:\n[2-3 bullets with exact levels]\n\n\ud83d\udccd KEY LEVELS:\n[3-5 exact ES prices as magnets or accelerators]\n\n\ud83c\udfaf THE PLAN:\n[exact entry zone, what confirms the trade, do not chase]\n\n\ud83d\udd14 Trade alert incoming if setup triggers. Stand by.\n\nFor the trade object use exact ES prices from context. If no clear setup set entry to 0.\n\nCONTEXT:\n' + ctx;
+    var r = await fetch(CLOUDFLARE_WORKER, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type:'anthropic', model:'claude-sonnet-4-6', max_tokens:1500, messages:[{role:'user', content:p}]})
+    });
+    var raw = await r.text();
+    var parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
+    var txt = (parsed && parsed.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    var si = txt.indexOf('{'); var ei = txt.lastIndexOf('}');
+    if (si >= 0 && ei > si) {
+      var resp = JSON.parse(txt.slice(si, ei+1));
+      if (resp.plan) ta.value = resp.plan;
+      if (resp.trade) {
+        var t = resp.trade;
+        if (t.direction) document.getElementById('gp-direction').value = t.direction;
+        if (t.entry > 0) document.getElementById('gp-entry').value = t.entry;
+        if (t.stop > 0) document.getElementById('gp-stop').value = t.stop;
+        if (t.tp1 > 0) document.getElementById('gp-tp1').value = t.tp1;
+        if (t.tp2 > 0) document.getElementById('gp-tp2').value = t.tp2;
+        if (t.tp3 > 0) document.getElementById('gp-tp3').value = t.tp3;
+        if (t.reasoning) document.getElementById('gp-reasoning').value = t.reasoning;
+      }
+    } else {
+      ta.value = txt;
+    }
+    showToast('Game plan generated', 'ok');
   } catch(e) { ta.value = 'Error: ' + e.message; }
 }
 
