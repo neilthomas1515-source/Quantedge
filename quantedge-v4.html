@@ -7595,22 +7595,17 @@ async function sendTradeAlert() {
 }
 
 async function markGPResult(result) {
-  const emoji = result === 'WIN' ? '✅' : result === 'LOSS' ? '❌' : '➖';
+  const emoji = result === 'WIN' ? '\u2705' : result === 'LOSS' ? '\u274c' : '\u2796';
   const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
   const dateNow = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
-  const resultMsg = emoji + ' *QUANTEDGE — TRADE RESULT*
-─────────────────────
-*Result:* ' + result + '
-─────────────────────
-_' + dateNow + '  ·  ' + timeNow + ' PT_';
+  const resultMsg = emoji + ' *QUANTEDGE \u2014 TRADE RESULT*\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n*Result:* ' + result + '\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n_' + dateNow + '  \u00b7  ' + timeNow + ' PT_';
   try {
-    await fetch(CLOUDFLARE_WORKER + '/send-signal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ msg: resultMsg, approved: true }) });
-    await fetch(CLOUDFLARE_WORKER + '/signal-result', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ result, timestamp: Date.now(), source: 'manual' }) });
-    document.getElementById('gp-result-row').style.display = 'none';
+    await fetch(CLOUDFLARE_WORKER + '/send-signal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({msg: resultMsg, approved: true}) });
+    await fetch(CLOUDFLARE_WORKER + '/signal-result', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({result, timestamp: Date.now(), source: 'manual'}) });
+    const el = document.getElementById('gp-result-row'); if (el) el.style.display = 'none';
     showToast(result + ' posted', 'ok');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
-
 async function markSignalResult(result) {
   try {
     const preview = document.getElementById('tg-signal-preview');
