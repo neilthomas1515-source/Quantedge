@@ -7191,7 +7191,8 @@ DO NOT CHASE THE OPEN.
       </div>
 
       <div class="tg-actions" style="margin-top:10px">
-        <button class="tg-btn tg-btn-gen" style="flex:1" onclick="sendGamePlan()">📋 Send Game Plan</button>
+        <button class="tg-btn tg-btn-gen" style="flex:1" onclick="generateGamePlan()">🤖 Generate</button>
+        <button class="tg-btn" style="flex:1;background:var(--s3);color:var(--t2)" onclick="sendGamePlan()">📋 Send Game Plan</button>
         <button class="tg-btn tg-btn-approve" style="flex:1" onclick="sendTradeAlert()">⚡ Send Trade Alert</button>
       </div>
       <div id="gp-status" class="tg-status" style="display:none">✅ Sent!</div>
@@ -7471,6 +7472,40 @@ function rejectSignal() {
   document.getElementById('tg-signal-preview').textContent = 'Signal rejected.';
   document.getElementById('tg-signal-explanation').value = '';
   clearChart();
+}
+
+async function generateGamePlan() {
+  const ta = document.getElementById('tg-gameplan-text');
+  ta.value = 'Generating game plan...';
+  try {
+    const ctx = getCompleteAIContext();
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+    const p = 'You are QuantEdge. Write a pre-market game plan for ES futures traders in the exact format and voice shown below. Direct, specific, declarative. Real prices. No hedge words.\n\n' +
+      'CONTEXT:\n' + ctx + '\n\n' +
+      'FORMAT - plain text only, use these exact emoji headers:\n' +
+      '⚡ QuantEdge — MORNING GAME PLAN\n' +
+      dateNow + ' | Pre-Market ' + timeNow + ' PT\n\n' +
+      '🎯 BIAS: [BULL/BEAR/NEUTRAL] — [one sentence thesis]\n' +
+      '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+      '✅ WHY WE ARE [BULL/BEAR]:\n' +
+      '[3-5 bullet points with specific prices and data. Each bullet = one confirmed layer.]\n\n' +
+      '⚠️ THE RISK:\n' +
+      '[2-3 bullets on what could invalidate the bias. Specific prices.]\n\n' +
+      '📍 KEY LEVELS TO WATCH\n\n' +
+      '🔴 RESISTANCE:\n[3-4 exact ES prices with one-line explanation each]\n\n' +
+      '🟢 SUPPORT:\n[3-4 exact ES prices with one-line explanation each]\n\n' +
+      '🎯 THE PLAN:\n' +
+      '[2-3 sentences. Exact entry zone. Exact confirmation signal. DO NOT CHASE THE OPEN if applicable.]\n\n' +
+      '🔔 Trade alert incoming if setup triggers. Stand by.';
+    const r = await fetch(CLOUDFLARE_WORKER, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:p}]})});
+    const raw = await r.text();
+    const j = JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
+    const txt = (j?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || 'Error generating';
+    ta.value = txt;
+    showToast('Game plan generated — edit before sending', 'ok');
+  } catch(e) { ta.value = 'Error: ' + e.message; }
 }
 
 async function sendGamePlan() {
