@@ -7109,6 +7109,8 @@ function copyXPost() {
       </div>
       <div id="tg-signal-status" class="tg-status">✅ Signal sent to Telegram!</div>
       <div class="tg-note">⚠️ Grade C signals are held for manual review. A/B grades auto-send from Pine alerts unless you disable in Worker.</div>
+      <div id="tg-result-row" style="display:none;margin-top:10px;padding:10px;background:var(--s2);border:1px solid var(--b2);border-radius:6px;"><div style="font-size:11px;color:var(--t3);margin-bottom:8px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase">Mark Result — posts to Telegram</div><div style="display:flex;gap:6px;"><button class="tg-btn" style="background:#00c853;color:#000;font-weight:700;flex:1" onclick="markSignalResult('WIN')">✅ WIN</button><button class="tg-btn" style="background:#ff1744;color:#fff;font-weight:700;flex:1" onclick="markSignalResult('LOSS')">❌ LOSS</button><button class="tg-btn" style="background:var(--s3);color:var(--t2);flex:1" onclick="markSignalResult('SCRATCH')">➖ SCRATCH</button></div></div>
+      <div id="tg-result-status" class="tg-status" style="display:none">✅ Result posted!</div>
     </div>
 
     <!-- MORNING BRIEF TAB -->
@@ -7375,6 +7377,30 @@ function rejectSignal() {
   document.getElementById('tg-signal-preview').textContent = 'Signal rejected.';
   document.getElementById('tg-signal-explanation').value = '';
   clearChart();
+}
+
+async function markSignalResult(result) {
+  try {
+    const preview = document.getElementById('tg-signal-preview');
+    const grade = preview ? (preview.dataset.grade || '?') : '?';
+    const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    const dateNow = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+    const emoji = result === 'WIN' ? '✅' : result === 'LOSS' ? '❌' : '➖';
+    const resultMsg = emoji + ' *QUANTEDGE — TRADE RESULT*\n─────────────────────\n*Result:* ' + result + '\n─────────────────────\n_' + dateNow + '  ·  ' + timeNow + ' PT_';
+    await fetch(CLOUDFLARE_WORKER + '/send-signal', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({msg: resultMsg, approved: true})
+    });
+    await fetch(CLOUDFLARE_WORKER + '/signal-result', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({result, grade, timestamp: Date.now(), date: dateNow})
+    });
+    const s = document.getElementById('tg-result-status');
+    if (s) { s.textContent = emoji + ' ' + result + ' posted!'; s.style.display = 'block'; setTimeout(()=>{s.style.display='none';},4000); }
+    const r = document.getElementById('tg-result-row');
+    if (r) r.style.display = 'none';
+    showToast(result + ' posted to channel', 'ok');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
 // Post X teaser
