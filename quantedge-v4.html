@@ -7186,6 +7186,7 @@ function copyXPost() {
 
       <div class="tg-actions" style="margin-top:10px">
         <button class="tg-btn tg-btn-gen" style="flex:1" onclick="generateGamePlan()">🤖 Generate</button>
+        <button class="tg-btn" style="flex:1;background:#0a2744;color:var(--cyan);border:1px solid var(--cyan2)" onclick="pullFromAIChat()">&#x1F4AC; Use Chat</button>
         <button class="tg-btn" style="flex:1;background:var(--s3);color:var(--t2)" onclick="sendGamePlan()">📋 Send Game Plan</button>
         <button class="tg-btn tg-btn-approve" style="flex:1" onclick="sendTradeAlert()">⚡ Send Trade Alert</button>
       </div>
@@ -7487,20 +7488,22 @@ async function generateGamePlan() {
   ta.value = 'Generating...';
   try {
     var ctx = getCompleteAIContext();
-    var timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
-    var dateNow = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
-    var p = 'You are QuantEdge. Generate a pre-market game plan AND trade setup for ES futures. Respond ONLY with valid JSON in this exact format: {"plan":"the game plan text","trade":{"direction":"LONG","entry":0,"stop":0,"tp1":0,"tp2":0,"tp3":0,"reasoning":"one sentence"}}\n\nFor the plan use plain text with this structure:\n\u26a1 QuantEdge \u2014 MORNING GAME PLAN\n' + dateNow + ' | Pre-Market ' + timeNow + ' PT\n\n\ud83c\udfaf BIAS: [BULL/BEAR/NEUTRAL] \u2014 [one sentence]\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n\u2705 WHY:\n[3-5 bullets with exact ES prices]\n\n\u26a0\ufe0f THE RISK:\n[2-3 bullets with exact levels]\n\n\ud83d\udccd KEY LEVELS:\n[3-5 exact ES prices as magnets or accelerators]\n\n\ud83c\udfaf THE PLAN:\n[exact entry zone, what confirms the trade, do not chase]\n\n\ud83d\udd14 Trade alert incoming if setup triggers. Stand by.\n\nFor the trade object use exact ES prices from context. If no clear setup set entry to 0.\n\nCONTEXT:\n' + ctx;
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+    var dateStr = now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+    var session = (now.getHours() < 9) ? 'Pre-Market' : (now.getHours() < 16) ? 'Market Hours' : 'After Hours';
+    var intro = '\u26a1 QuantEdge - GAME PLAN\n' + dateStr + ' | ' + session + ' ' + timeStr + ' PT';
+    var p = 'You are a veteran ES futures day trader writing a quick game plan for your Telegram signal channel. Sound like a trader talking to other traders. Short sentences. Specific prices only. No jargon. No source names. No indicator names. No words like institutional or high-probability or A-plus rated.\n\nRULES:\n- Every level = exact ES price\n- Plain language only: dealers pinning here, buyers defending this level\n- The plan section: what you wait for, where you get in, where you are wrong, no chase\n- Zero references to any tool or system by name\n\nDATA:\n' + ctx + '\n\nReturn ONLY valid JSON no other text:\n{"plan":"full game plan text","trade":{"direction":"LONG or SHORT","entry":0,"stop":0,"tp1":0,"tp2":0,"tp3":0,"reasoning":"one plain sentence"}}\n\nPlan must start with:\n' + intro + '\n\nThen use these sections:\nBIAS: [BULL/BEAR/NEUTRAL] - [one plain sentence]\n\nWHY WE LIKE THIS:\n[3-4 bullets with exact prices in plain language]\n\nTHE RISK:\n[2 bullets with exact price that kills the trade]\n\nKEY LEVELS:\n[4-5 exact ES prices with brief plain explanation each]\n\nTHE PLAN:\n[2-3 sentences max. Wait for what. Confirm how. Enter where. Wrong below what.]\n\nTrade alert coming if setup triggers. Stand by.';
     var r = await fetch(CLOUDFLARE_WORKER, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({type:'anthropic', model:'claude-sonnet-4-6', max_tokens:1500, messages:[{role:'user', content:p}]})
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type:'anthropic',model:'claude-sonnet-4-6',max_tokens:1500,messages:[{role:'user',content:p}]})
     });
     var raw = await r.text();
-    var parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}')+1));
-    var txt = (parsed && parsed.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    var parsed = JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
+    var txt = (parsed&&parsed.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
     var si = txt.indexOf('{'); var ei = txt.lastIndexOf('}');
     if (si >= 0 && ei > si) {
-      var resp = JSON.parse(txt.slice(si, ei+1));
+      var resp = JSON.parse(txt.slice(si,ei+1));
       if (resp.plan) ta.value = resp.plan;
       if (resp.trade) {
         var t = resp.trade;
@@ -7512,11 +7515,28 @@ async function generateGamePlan() {
         if (t.tp3 > 0) document.getElementById('gp-tp3').value = t.tp3;
         if (t.reasoning) document.getElementById('gp-reasoning').value = t.reasoning;
       }
-    } else {
-      ta.value = txt;
-    }
-    showToast('Game plan generated', 'ok');
+    } else { ta.value = txt; }
+    showToast('Edit before sending', 'ok');
   } catch(e) { ta.value = 'Error: ' + e.message; }
+}
+
+function pullFromAIChat() {
+  var ta = document.getElementById('tg-gameplan-text');
+  if (typeof chatState === 'undefined' || !chatState.history || chatState.history.length === 0) {
+    showToast('Open AI Chat and discuss your setup first', 'warn'); return;
+  }
+  var lastAI = null;
+  for (var i = chatState.history.length - 1; i >= 0; i--) {
+    if (chatState.history[i].role === 'assistant') { lastAI = chatState.history[i].content; break; }
+  }
+  if (!lastAI) { showToast('No AI response in chat yet', 'warn'); return; }
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+  var dateStr = now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+  var header = '\u26a1 QuantEdge \u2014 GAME PLAN\n' + dateStr + ' | ' + timeStr + ' PT\n\n';
+  var footer = '\n\nTrade alert coming if setup triggers. Stand by.';
+  ta.value = header + lastAI + footer;
+  showToast('AI chat loaded - edit before sending', 'ok');
 }
 
 
