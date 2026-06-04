@@ -7113,6 +7113,99 @@ function copyXPost() {
       <div id="tg-result-status" class="tg-status" style="display:none">✅ Result posted!</div>
     </div>
 
+    <!-- GAME PLAN TAB -->
+    <div id="tg-tab-gameplan" class="tg-tab-content" style="display:none">
+      <div class="tg-label">GAME PLAN / SETUP</div>
+      <div style="font-size:11px;color:var(--t4);margin-bottom:8px">Write your pre-trade thesis. Send this first to set up subscribers. Then send the Trade Alert when the setup triggers.</div>
+      <textarea id="tg-gameplan-text" class="tg-preview" style="min-height:280px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.7;cursor:text;background:var(--s1);border:1px solid var(--b2);padding:10px;width:100%;box-sizing:border-box" placeholder="⚡ QuantEdge — MORNING GAME PLAN
+Thursday Jun 5 | Pre-Market 6:00 AM PT
+
+🎯 BIAS: BUY THE DIP — BULL LEAN
+━━━━━━━━━━━━━━━━━━━━━
+
+✅ WHY WE'RE BULLISH:
+...
+
+⚠️ THE RISK:
+...
+
+📍 KEY LEVELS:
+...
+
+🎯 THE PLAN:
+Wait for dip to [X], confirm rejection, then BUY.
+DO NOT CHASE THE OPEN.
+
+🔔 Trade alert incoming if setup triggers. Stand by."></textarea>
+
+      <div class="tg-label" style="margin-top:10px">TRADE ALERT (send when setup triggers)</div>
+      <div style="font-size:11px;color:var(--t4);margin-bottom:8px">Fill this in when the trade fires. Click Send Trade Alert to post immediately.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">DIRECTION</div>
+          <select id="gp-direction" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono)">
+            <option value="LONG">⬆ LONG</option>
+            <option value="SHORT">⬇ SHORT</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">ENTRY</div>
+          <input id="gp-entry" type="number" step="0.25" placeholder="7543.75" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono);box-sizing:border-box">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">STOP</div>
+          <input id="gp-stop" type="number" step="0.25" placeholder="7525.00" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono);box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">TP1</div>
+          <input id="gp-tp1" type="number" step="0.25" placeholder="7559.75" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono);box-sizing:border-box">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">TP2</div>
+          <input id="gp-tp2" type="number" step="0.25" placeholder="7566.00" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono);box-sizing:border-box">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">TP3</div>
+          <input id="gp-tp3" type="number" step="0.25" placeholder="7588.00" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono);box-sizing:border-box">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">GRADE</div>
+          <select id="gp-grade" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:13px;font-family:var(--mono)">
+            <option value="A">⚡ A</option>
+            <option value="B" selected>📶 B</option>
+            <option value="C">📋 C</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:3px;font-family:var(--mono)">REASONING (optional)</div>
+        <input id="gp-reasoning" type="text" placeholder="CHoCH confirmed at 7543, GEX magnet at 7560 pulling..." style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--t1);padding:5px;font-size:12px;font-family:var(--mono);box-sizing:border-box">
+      </div>
+
+      <div class="tg-toggle-row">
+        <div class="tg-toggle" id="gp-x-toggle" onclick="this.classList.toggle('on')"></div>
+        <span>Also post to 𝕏 @QuantEdgeAlpha</span>
+      </div>
+
+      <div class="tg-actions" style="margin-top:10px">
+        <button class="tg-btn tg-btn-gen" style="flex:1" onclick="sendGamePlan()">📋 Send Game Plan</button>
+        <button class="tg-btn tg-btn-approve" style="flex:1" onclick="sendTradeAlert()">⚡ Send Trade Alert</button>
+      </div>
+      <div id="gp-status" class="tg-status" style="display:none">✅ Sent!</div>
+
+      <!-- Result buttons appear after trade alert sent -->
+      <div id="gp-result-row" style="display:none;margin-top:10px;padding:10px;background:var(--s2);border:1px solid var(--b2);border-radius:6px;">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:8px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase">Mark Result</div>
+        <div style="display:flex;gap:6px;">
+          <button class="tg-btn" style="background:#00c853;color:#000;font-weight:700;flex:1" onclick="markGPResult('WIN')">✅ WIN</button>
+          <button class="tg-btn" style="background:#ff1744;color:#fff;font-weight:700;flex:1" onclick="markGPResult('LOSS')">❌ LOSS</button>
+          <button class="tg-btn" style="background:var(--s3);color:var(--t2);flex:1" onclick="markGPResult('SCRATCH')">➖ SCRATCH</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MORNING BRIEF TAB -->
     <div id="tg-tab-morning" class="tg-tab-content">
       <div class="tg-label">MORNING BRIEF PREVIEW</div>
@@ -7377,6 +7470,128 @@ function rejectSignal() {
   document.getElementById('tg-signal-preview').textContent = 'Signal rejected.';
   document.getElementById('tg-signal-explanation').value = '';
   clearChart();
+}
+
+async function sendGamePlan() {
+  const text = document.getElementById('tg-gameplan-text').value.trim();
+  if (!text) { showToast('Write your game plan first', 'warn'); return; }
+  const status = document.getElementById('gp-status');
+  status.textContent = '📡 Sending...'; status.style.display = 'block';
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/send-signal', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ msg: text, approved: true })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      status.textContent = '✅ Game Plan sent!'; status.style.color = 'var(--green)';
+      setTimeout(() => { status.style.display = 'none'; status.style.color = ''; }, 4000);
+      // Post to X if toggled
+      if (document.getElementById('gp-x-toggle').classList.contains('on')) {
+        const xText = text.slice(0, 280);
+        await fetch(CLOUDFLARE_WORKER + '/post-x', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: xText }) }).catch(()=>{});
+      }
+      showToast('Game Plan posted', 'ok');
+    } else {
+      status.textContent = '❌ ' + (d.error || 'Failed'); status.style.color = 'var(--red)';
+    }
+  } catch(e) { status.textContent = '❌ ' + e.message; status.style.color = 'var(--red)'; }
+}
+
+async function sendTradeAlert() {
+  const dir = document.getElementById('gp-direction').value;
+  const entry = parseFloat(document.getElementById('gp-entry').value);
+  const stop = parseFloat(document.getElementById('gp-stop').value);
+  const tp1 = parseFloat(document.getElementById('gp-tp1').value) || 0;
+  const tp2 = parseFloat(document.getElementById('gp-tp2').value) || 0;
+  const tp3 = parseFloat(document.getElementById('gp-tp3').value) || 0;
+  const grade = document.getElementById('gp-grade').value;
+  const reasoning = document.getElementById('gp-reasoning').value.trim();
+
+  if (!entry || !stop) { showToast('Enter entry and stop first', 'warn'); return; }
+
+  const risk = Math.abs(entry - stop);
+  const stopPts = risk.toFixed(1);
+  const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+  const dateNow = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
+  const gradeEmoji = grade === 'A' ? '⚡' : grade === 'B' ? '📶' : '📋';
+  const divider = grade === 'A' ? '━━━━━━━━━━━━━━━━━━━━━' : '─────────────────────';
+
+  const buildTP = (label, tp) => {
+    if (!tp) return '';
+    const pts = Math.abs(tp - entry).toFixed(1);
+    const rr = risk > 0 ? (Math.abs(tp - entry) / risk).toFixed(1) : '?';
+    const arrow = tp > entry ? '+' : '−';
+    return label + ':  ' + tp.toFixed(2) + '  (' + arrow + pts + ' pts  R/R 1:' + rr + ')
+';
+  };
+
+  let msg = gradeEmoji + ' *QUANTEDGE — GRADE ' + grade + '*
+' +
+    divider + '
+' +
+    '*' + dir + ' ES*  ·  Manual Setup
+' +
+    divider + '
+' +
+    'Entry:  `' + entry.toFixed(2) + '`
+' +
+    'Stop:   `' + stop.toFixed(2) + '`  (−' + stopPts + ' pts)
+' +
+    divider + '
+' +
+    buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
+    divider + '
+';
+  if (reasoning) msg += '_' + reasoning + '_
+';
+  msg += '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
+
+  const status = document.getElementById('gp-status');
+  status.textContent = '📡 Sending...'; status.style.display = 'block'; status.style.color = 'var(--cyan)';
+
+  try {
+    const res = await fetch(CLOUDFLARE_WORKER + '/send-signal', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ msg, approved: true })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      status.textContent = '✅ Trade Alert sent!'; status.style.color = 'var(--green)';
+      setTimeout(() => { status.style.display = 'none'; status.style.color = ''; }, 4000);
+      document.getElementById('gp-result-row').style.display = 'block';
+      // Log to trade log
+      await fetch(CLOUDFLARE_WORKER + '/trade-log', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ direction: dir, entry, stop, tp1, tp2, tp3, grade, reasoning, timestamp: Date.now(), source: 'manual' })
+      }).catch(()=>{});
+      // Post to X if toggled
+      if (document.getElementById('gp-x-toggle').classList.contains('on')) {
+        const xText = gradeEmoji + ' ES ' + dir + ' Signal — Grade ' + grade + '\nEntry: ' + entry.toFixed(2) + ' | Stop: ' + stop.toFixed(2) + (tp1 ? ' | TP1: ' + tp1.toFixed(2) : '') + '\nFull breakdown in the channel 👇\nwhop.com/quantedge-231a/quantedge-signals';
+        await fetch(CLOUDFLARE_WORKER + '/post-x', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: xText }) }).catch(()=>{});
+      }
+      showToast('Trade Alert posted', 'ok');
+    } else {
+      status.textContent = '❌ ' + (d.error || 'Failed'); status.style.color = 'var(--red)';
+    }
+  } catch(e) { status.textContent = '❌ ' + e.message; status.style.color = 'var(--red)'; }
+}
+
+async function markGPResult(result) {
+  const emoji = result === 'WIN' ? '✅' : result === 'LOSS' ? '❌' : '➖';
+  const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
+  const dateNow = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
+  const resultMsg = emoji + ' *QUANTEDGE — TRADE RESULT*
+─────────────────────
+*Result:* ' + result + '
+─────────────────────
+_' + dateNow + '  ·  ' + timeNow + ' PT_';
+  try {
+    await fetch(CLOUDFLARE_WORKER + '/send-signal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ msg: resultMsg, approved: true }) });
+    await fetch(CLOUDFLARE_WORKER + '/signal-result', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ result, timestamp: Date.now(), source: 'manual' }) });
+    document.getElementById('gp-result-row').style.display = 'none';
+    showToast(result + ' posted', 'ok');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
 async function markSignalResult(result) {
