@@ -7524,74 +7524,52 @@ async function sendTradeAlert() {
   const tp3 = parseFloat(document.getElementById('gp-tp3').value) || 0;
   const grade = document.getElementById('gp-grade').value;
   const reasoning = document.getElementById('gp-reasoning').value.trim();
-
   if (!entry || !stop) { showToast('Enter entry and stop first', 'warn'); return; }
-
   const risk = Math.abs(entry - stop);
   const stopPts = risk.toFixed(1);
   const timeNow = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Los_Angeles'});
   const dateNow = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Los_Angeles'});
-  const gradeEmoji = grade === 'A' ? '⚡' : grade === 'B' ? '📶' : '📋';
-  const divider = grade === 'A' ? '━━━━━━━━━━━━━━━━━━━━━' : '─────────────────────';
-
-  const buildTP = (label, tp) => {
+  const gradeEmoji = grade === 'A' ? '\u26a1' : grade === 'B' ? '\ud83d\udcf6' : '\ud83d\udccb';
+  const divider = grade === 'A' ? '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501' : '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500';
+  const buildTP = function(label, tp) {
     if (!tp) return '';
     const pts = Math.abs(tp - entry).toFixed(1);
     const rr = risk > 0 ? (Math.abs(tp - entry) / risk).toFixed(1) : '?';
-    const arrow = tp > entry ? '+' : '−';
-    return label + ':  ' + tp.toFixed(2) + '  (' + arrow + pts + ' pts  R/R 1:' + rr + ')
-';
+    const arrow = tp > entry ? '+' : '-';
+    return label + ':  ' + tp.toFixed(2) + '  (' + arrow + pts + ' pts  R/R 1:' + rr + ')\n';
   };
-
-  let msg = gradeEmoji + ' *QUANTEDGE — GRADE ' + grade + '*
-' +
-    divider + '
-' +
-    '*' + dir + ' ES*  ·  Manual Setup
-' +
-    divider + '
-' +
-    'Entry:  `' + entry.toFixed(2) + '`
-' +
-    'Stop:   `' + stop.toFixed(2) + '`  (−' + stopPts + ' pts)
-' +
-    divider + '
-' +
-    buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3) +
-    divider + '
-';
-  if (reasoning) msg += '_' + reasoning + '_
-';
-  msg += '🕐 ' + timeNow + ' PT  ·  ' + dateNow;
-
+  const tpLines = buildTP('TP1', tp1) + buildTP('TP2', tp2) + buildTP('TP3', tp3);
+  let msg = gradeEmoji + ' *QUANTEDGE \u2014 GRADE ' + grade + '*\n' +
+    divider + '\n' +
+    '*' + dir + ' ES*  \u00b7  Manual Setup\n' +
+    divider + '\n' +
+    'Entry:  `' + entry.toFixed(2) + '`\n' +
+    'Stop:   `' + stop.toFixed(2) + '`  (-' + stopPts + ' pts)\n' +
+    divider + '\n' +
+    tpLines + divider + '\n';
+  if (reasoning) msg += '_' + reasoning + '_\n';
+  msg += '\ud83d\udd50 ' + timeNow + ' PT  \u00b7  ' + dateNow;
   const status = document.getElementById('gp-status');
-  status.textContent = '📡 Sending...'; status.style.display = 'block'; status.style.color = 'var(--cyan)';
-
+  status.textContent = 'Sending...'; status.style.display = 'block'; status.style.color = 'var(--cyan)';
   try {
     const res = await fetch(CLOUDFLARE_WORKER + '/send-signal', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ msg, approved: true })
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ msg: msg, approved: true })
     });
-    const d = await res.json();
-    if (d.ok) {
-      status.textContent = '✅ Trade Alert sent!'; status.style.color = 'var(--green)';
-      setTimeout(() => { status.style.display = 'none'; status.style.color = ''; }, 4000);
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = 'Trade Alert sent!'; status.style.color = 'var(--green)';
+      setTimeout(function() { status.style.display = 'none'; status.style.color = ''; }, 4000);
       document.getElementById('gp-result-row').style.display = 'block';
-      // Log to trade log
-      await fetch(CLOUDFLARE_WORKER + '/trade-log', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ direction: dir, entry, stop, tp1, tp2, tp3, grade, reasoning, timestamp: Date.now(), source: 'manual' })
-      }).catch(()=>{});
-      // Post to X if toggled
-      if (document.getElementById('gp-x-toggle').classList.contains('on')) {
-        const xText = gradeEmoji + ' ES ' + dir + ' Signal — Grade ' + grade + '\nEntry: ' + entry.toFixed(2) + ' | Stop: ' + stop.toFixed(2) + (tp1 ? ' | TP1: ' + tp1.toFixed(2) : '') + '\nFull breakdown in the channel 👇\nwhop.com/quantedge-231a/quantedge-signals';
-        await fetch(CLOUDFLARE_WORKER + '/post-x', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: xText }) }).catch(()=>{});
-      }
+      fetch(CLOUDFLARE_WORKER + '/trade-log', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ direction: dir, entry: entry, stop: stop, tp1: tp1, tp2: tp2, tp3: tp3, grade: grade, reasoning: reasoning, timestamp: Date.now(), source: 'manual' })
+      }).catch(function(){});
       showToast('Trade Alert posted', 'ok');
     } else {
-      status.textContent = '❌ ' + (d.error || 'Failed'); status.style.color = 'var(--red)';
+      status.textContent = 'Failed: ' + (data.error || 'unknown'); status.style.color = 'var(--red)';
     }
-  } catch(e) { status.textContent = '❌ ' + e.message; status.style.color = 'var(--red)'; }
+  } catch(e) { status.textContent = 'Error: ' + e.message; status.style.color = 'var(--red)'; }
 }
 
 async function markGPResult(result) {
