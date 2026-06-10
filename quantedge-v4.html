@@ -2310,7 +2310,7 @@ function checkConfluence(){
     playAlert([440,550,660,880]);
     window.autoConfluenceContext=`AUTO-CONFLUENCE (${active.length} signals): ${names.join(', ')} — Direction: ${dir}`;
     window.autoConfluenceDirection=dir;
-    setTimeout(()=>{const b=document.getElementById('btn-generate');if(b)b.click();},1500);
+    // auto-fire disabled — context set, use AI chat or manually hit Generate Signal
   }
 }
 function getConfluenceDir(signals){
@@ -2392,7 +2392,7 @@ function fireMasterSignal(score,dir,signals,mlAdj){
   if(window.latestNewsContext)ctx.push(`News: ${window.latestNewsContext}`);
   if(window.sweepContext)ctx.push(window.sweepContext);
   window.masterSignalContext=ctx.join('\n');window.autoConfluenceDirection=dir;
-  setTimeout(()=>{const b=document.getElementById('btn-generate');if(b)b.click();},500);
+  // auto-fire disabled — context set, use AI chat or manually hit Generate Signal
 }
 function updateMasterDisplay(score,dir,active){
   const threshold=masterSt.threshold;
@@ -2781,7 +2781,7 @@ function fireSweep(dir,level,price,size,vol,src){
   playAlert([261,329,392,523,659]);
   window.sweepContext=`LIQUIDITY SWEEP ${dir}${srcLbl}: Level ${level.toFixed(2)}, Entry ~${price.toFixed(2)}, Stop ${stop}, T1 ${tgt}. HIGH PROBABILITY.`;
   updateMasterScore('deltaDivergence',dir,2.0);updateMasterScore('chochDetected',dir,1.5);
-  setTimeout(()=>{const b=document.getElementById('btn-generate');if(b){window.autoConfluenceContext=window.sweepContext;window.autoConfluenceDirection=dir;b.click();}},300);
+  // auto-fire disabled — context set, use AI chat or manually hit Generate Signal
 }
 
 // ══════════════════════════════════════════════════
@@ -3635,7 +3635,7 @@ function processTVAlert(d) {
     if (_pocBlock) {
       showToast(`⛔ POC gate: ${_pocDist.toFixed(2)}pts from POC ${_poc} — auto-fire skipped`, 'warn');
     } else {
-      setTimeout(() => { const b=document.getElementById('btn-generate'); if(b)b.click(); }, 400);
+      // auto-fire disabled — context set, use AI chat or manually hit Generate Signal
     }
   }
 }
