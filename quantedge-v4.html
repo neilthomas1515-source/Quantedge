@@ -6809,7 +6809,17 @@ async function sendChatMessage() {
       }
     }
   } catch(e) { /* keep default */ }
-  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\n' + basisLine + '\n\nCURRENT v4 CONTEXT:\n' + ctx;
+  // Fetch Master Playbook from Brain KB
+  let masterPlaybookLine = '';
+  try {
+    const kbRes = await fetch(CLOUDFLARE_WORKER + '/brain-kb', { signal: AbortSignal.timeout(3000) });
+    if (kbRes.ok) {
+      const kbTxt = await kbRes.text();
+      const kbData = JSON.parse(kbTxt);
+      if (kbData && kbData.content) masterPlaybookLine = kbData.content.slice(0, 2000);
+    }
+  } catch(e) { /* silent fallback — chat works fine without it */ }
+  const systemPrompt = 'You are an elite ES futures trading AI inside QuantEdge v4. You can see all images attached including GEX charts, Unusual Whales screenshots, and order flow. Be concise and actionable. Answer specifically about what you see in the images and data. Max 4-6 sentences unless asked for more.\n\n' + basisLine + '\n\nCURRENT v4 CONTEXT:\n' + ctx + (masterPlaybookLine ? '\n\nMASTER PLAYBOOK (distilled from 30 days of YouTube strategies, session patterns, trade outcomes):\n' + masterPlaybookLine : '');
   try {
     // Build message content with ALL images (same as generateSignal)
     const lastUserText = chatState.history[chatState.history.length-1].content;
