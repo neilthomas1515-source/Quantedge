@@ -6849,7 +6849,7 @@ async function sendChatMessage() {
       body: JSON.stringify({
         type: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 800,
+        max_tokens: 800, /* SONNET TEMP */
         system: systemPrompt,
         messages: chatMessages
       })
