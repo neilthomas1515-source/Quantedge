@@ -6839,7 +6839,7 @@ async function sendChatMessage() {
 
     // Build full history with images on latest message only
     const chatMessages = [
-      ...chatState.history.slice(0,-1).slice(-10).map(m => ({ role: m.role, content: m.content })),
+      ...chatState.history.slice(0,-1).map(m => ({ role: m.role, content: m.content })),
       { role: 'user', content: chatContent }
     ];
 
