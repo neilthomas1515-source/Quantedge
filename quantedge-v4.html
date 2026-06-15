@@ -1576,7 +1576,7 @@ font-family:monospace;line-height:1.5;}
   <div id="gen-bar">
     <button id="btn-generate" onclick="generateSignal()">⚡ Generate Signal</button>
     <div class="gen-meta">Last: <strong><span id="last-gen-time">never</span></strong> &nbsp;·&nbsp; <span style="color:var(--t4)">Ctrl+Enter</span></div>
-    <div style="font-size:10px;color:var(--t3)">claude-opus-4-6 ✦</div>
+    <div style="font-size:10px;color:var(--t3)">claude-sonnet-4-6</div>
   </div>
   <div id="signal-history-bar">
     <div class="sig-hist-label">HISTORY</div>
@@ -3440,7 +3440,7 @@ OUTPUT JSON ONLY: {"onHigh":number|null,"onLow":number|null,"asiaHigh":number|nu
 Rules: Realistic ES prices (~${es}). O/N=overnight range. Never fabricate.`;
   try {
     const res = await fetch(CLOUDFLARE_WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ type:'anthropic', model:'claude-sonnet-4-6', max_tokens:600, messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:prompt}]}] }) });
-    if (!res.ok) { const errText = await res.text(); throw new Error('Worker ' + res.status + ': ' + errText.slice(0,200)); }
+    if (!res.ok) throw new Error('Worker ' + res.status);
     const raw=await res.text(), json=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
     const text=(json?.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
     const tS=text.indexOf('{'),tE=text.lastIndexOf('}'); if(tS===-1)throw new Error('No JSON');
