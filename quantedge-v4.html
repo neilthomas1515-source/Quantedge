@@ -4419,7 +4419,7 @@ async function generateSignal() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'anthropic',
-        model:'claude-sonnet-4-6',
+        model:'claude-fable-5',
         max_tokens:1200,
         messages:[{ role:'user', content }]
       })
@@ -6848,8 +6848,8 @@ async function sendChatMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'anthropic',
-        model: 'claude-sonnet-4-6',
-        max_tokens: 800, /* SONNET TEMP */
+        model: 'claude-fable-5',
+        max_tokens: 1500,
         system: systemPrompt,
         messages: chatMessages
       })
